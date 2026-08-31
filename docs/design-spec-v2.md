@@ -58,3 +58,7 @@ Photos in **color always** — no B&W-until-hover. Focus within groups via dim/s
 1. License or confirm final typeface (EB Garamond is the free stand-in for the tamakiyoshida-style serif; identify the exact commercial face later if desired).
 2. Real album names, covers (mostly horizontal — confirmed available), and photo metadata.
 3. About page copy and languages (EN / EN+ES).
+
+##Additional
+
+The carousel's open slide keeps the fixed height but adopts the cover photo's natural aspect ratio — landscape covers open wide, vertical covers open as a tall panel. Covers are never cropped; slide width animates between albums.
