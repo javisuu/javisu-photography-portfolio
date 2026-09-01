@@ -15,4 +15,19 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-eb-garamond), Georgia, "Times New Roman", serif;
+  overflow-x: clip;
+}
+
+/* Landing photos (src/motion/LandingComposition.tsx): width comes from the
+   --landing-photo-w custom property set per-photo. Below 900px they scale
+   up (photos read larger relative to the viewport and are allowed to
+   overlap/cluster) rather than keeping the airy desktop sizing. */
+.landing-photo {
+  width: var(--landing-photo-w);
+}
+
+@media (max-width: 899px) {
+  .landing-photo {
+    width: min(calc(var(--landing-photo-w) * 2.4), 85vw);
+  }
 }

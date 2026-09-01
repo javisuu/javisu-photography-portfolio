@@ -29,6 +29,8 @@ export type Photo = {
   capture: CaptureData;
   /** Featured in the landing scatter / carousel. */
   isFeatured?: boolean;
+  /** Stable descriptive key, set where a photo has been identified by content. */
+  id?: string;
 };
 
 // PLACEHOLDER albums — real location/year still needed
@@ -73,10 +75,12 @@ export const photos: Photo[] = [
     src: "/photos/america/01.avif",
     width: 2500,
     height: 1875,
-    title: "Untitled — 01",
+    title: "San Miguel Street",
     album: "america",
     order: 1,
     capture: { focalLength: "43mm", aperture: "f/5.6", iso: "ISO 100" },
+    isFeatured: true,
+    id: "san-miguel-street",
   },
   {
     src: "/photos/america/02.avif",
@@ -91,10 +95,12 @@ export const photos: Photo[] = [
     src: "/photos/america/03.avif",
     width: 2500,
     height: 1875,
-    title: "Untitled — 03",
+    title: "Bougainvillea",
     album: "america",
     order: 3,
     capture: { focalLength: "26mm", aperture: "f/5.6", iso: "ISO 320" },
+    isFeatured: true,
+    id: "bougainvillea",
   },
   {
     src: "/photos/america/04.avif",
@@ -109,20 +115,23 @@ export const photos: Photo[] = [
     src: "/photos/america/05.avif",
     width: 2500,
     height: 1875,
-    title: "Untitled — 05",
+    title: "Horses in the Dust",
     album: "america",
     order: 5,
     capture: { focalLength: "14mm", aperture: "f/5", iso: "ISO 100" },
     isFeatured: true,
+    id: "horses-dust",
   },
   {
     src: "/photos/america/06.avif",
     width: 2500,
     height: 2336,
-    title: "Untitled — 06",
+    title: "Cowboy Silhouette",
     album: "america",
     order: 6,
     capture: { focalLength: "28mm", aperture: "f/5.6", iso: "ISO 100" },
+    isFeatured: true,
+    id: "cowboy-silhouette",
   },
   {
     src: "/photos/america/07.avif",
@@ -146,47 +155,55 @@ export const photos: Photo[] = [
     src: "/photos/america/09.avif",
     width: 2500,
     height: 1875,
-    title: "Untitled — 09",
+    title: "San Blas Island",
     album: "america",
     order: 9,
     capture: { focalLength: "15mm", aperture: "f/5", iso: "ISO 100" },
+    isFeatured: true,
+    id: "san-blas-island",
   },
   {
     src: "/photos/norte/01.avif",
     width: 1875,
     height: 2500,
-    title: "Untitled — 01",
+    title: "Basque Cliffs",
     album: "norte",
     order: 1,
     capture: { focalLength: "27mm", aperture: "f/5.6", iso: "ISO 100" },
     isFeatured: true,
+    id: "basque-cliffs",
   },
   {
     src: "/photos/norte/02.avif",
     width: 1627,
     height: 2500,
-    title: "Untitled — 02",
+    title: "Sea Through the Trees",
     album: "norte",
     order: 2,
     capture: { focalLength: "37mm", aperture: "f/5.6", iso: "ISO 100" },
+    isFeatured: true,
+    id: "sea-through-trees",
   },
   {
     src: "/photos/norte/03.avif",
     width: 2500,
     height: 712,
-    title: "Untitled — 03",
+    title: "Waves",
     album: "norte",
     order: 3,
     capture: { focalLength: "10mm", aperture: "f/4.5", iso: "ISO 100" },
+    isFeatured: true,
+    id: "waves-panorama",
   },
   {
     src: "/photos/norte/04.avif",
     width: 2500,
     height: 1875,
-    title: "Untitled — 04",
+    title: "Man in the Sea",
     album: "norte",
     order: 4,
     capture: { focalLength: "86mm", aperture: "f/5.6", iso: "ISO 100" },
+    id: "man-in-sea",
   },
   {
     src: "/photos/norte/05.avif",
@@ -201,10 +218,12 @@ export const photos: Photo[] = [
     src: "/photos/norte/06.avif",
     width: 2500,
     height: 1875,
-    title: "Untitled — 06",
+    title: "Biarritz Palace",
     album: "norte",
     order: 6,
     capture: { focalLength: "22mm", aperture: "f/5", iso: "ISO 100" },
+    isFeatured: true,
+    id: "biarritz-palace",
   },
   {
     src: "/photos/norte/07.avif",
@@ -228,20 +247,23 @@ export const photos: Photo[] = [
     src: "/photos/ny/01.avif",
     width: 2048,
     height: 1536,
-    title: "Untitled — 01",
+    title: "New York Skyline",
     album: "ny",
     order: 1,
     capture: { focalLength: "24mm", aperture: "f/4.8", iso: "ISO 64" },
     isFeatured: true,
+    id: "ny-skyline",
   },
   {
     src: "/photos/ny/02.avif",
     width: 1448,
     height: 1930,
-    title: "Untitled — 02",
+    title: "New York Public Library",
     album: "ny",
     order: 2,
     capture: { focalLength: "16mm", aperture: "f/4.2", iso: "ISO 200" },
+    isFeatured: true,
+    id: "ny-library",
   },
   {
     src: "/photos/ny/03.avif",
@@ -310,10 +332,12 @@ export const photos: Photo[] = [
     src: "/photos/sol/03.avif",
     width: 1875,
     height: 2500,
-    title: "Untitled — 03",
+    title: "Red Sun, Boat",
     album: "sol",
     order: 3,
     capture: { focalLength: "105mm", aperture: "f/6.3", iso: "ISO 100" },
+    isFeatured: true,
+    id: "red-sun-boat",
   },
   {
     src: "/photos/sol/04.avif",
@@ -328,10 +352,12 @@ export const photos: Photo[] = [
     src: "/photos/sol/05.avif",
     width: 2500,
     height: 3333,
-    title: "Untitled — 05",
+    title: "Cristo Silhouette",
     album: "sol",
     order: 5,
     capture: { focalLength: "54mm", aperture: "f/5.6", iso: "ISO 100" },
+    isFeatured: true,
+    id: "cristo-silhouette",
   },
   {
     src: "/photos/sol/06.avif",
@@ -346,11 +372,12 @@ export const photos: Photo[] = [
     src: "/photos/sol/07.avif",
     width: 1875,
     height: 2500,
-    title: "Untitled — 07",
+    title: "Total Eclipse",
     album: "sol",
     order: 7,
     capture: { focalLength: "88mm", aperture: "f/5.6", iso: "ISO 800" },
     isFeatured: true,
+    id: "eclipse-totality",
   },
 ];
 
@@ -362,4 +389,35 @@ export function getPhotosByAlbum(slug: string): Photo[] {
   return photos
     .filter((photo) => photo.album === slug)
     .sort((a, b) => a.order - b.order);
+}
+
+export function getOrderedAlbums(): Album[] {
+  return [...albums].sort((a, b) => a.order - b.order);
+}
+
+export function getFeaturedPhotos(): Photo[] {
+  return photos.filter((photo) => photo.isFeatured);
+}
+
+/** Next album by order, wrapping around to the first. */
+export function getNextAlbum(slug: string): Album {
+  const ordered = getOrderedAlbums();
+  const index = ordered.findIndex((album) => album.slug === slug);
+  return ordered[(index + 1) % ordered.length];
+}
+
+/**
+ * `count` albums on each side of `slug`, wrapping circularly — used for the
+ * carousel's slivers. With fewer albums than `count * 2`, neighbors repeat.
+ */
+export function getCarouselNeighbors(slug: string, count: number) {
+  const ordered = getOrderedAlbums();
+  const index = ordered.findIndex((album) => album.slug === slug);
+  const left: Album[] = [];
+  const right: Album[] = [];
+  for (let i = 1; i <= count; i++) {
+    left.unshift(ordered[(index - i + ordered.length * count) % ordered.length]);
+    right.push(ordered[(index + i) % ordered.length]);
+  }
+  return { left, right };
 }

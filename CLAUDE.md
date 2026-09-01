@@ -17,14 +17,14 @@ SUQUIA — a personal photography portfolio for Javier Suquia. Awwwards-level am
 
 - All photo data lives in one typed file: `src/data/photos.ts` — album list + per-photo entries (src, width, height, title, capture data, album, order). Pages render from this file only; adding a photo must never require touching a component.
 - Originals go in `/photos-master/` (gitignored); a script (`scripts/prepare-images.mjs`) exports web versions (AVIF/WebP, ~2500px long edge) into `public/photos/`.
-- Pages: `/` (landing + carousel in one scroll), `/album/[slug]`, `/about`.
+- Pages: `/` (landing — tall scrolling composition, ~250–300vh, name fixed in viewport center throughout), `/albums` (carousel, opened only via the `ALBUMS` nav link — never reached by scrolling the landing), `/album/[slug]`, `/about`.
 - Animation code isolated in `src/motion/` — components stay declarative; every effect must respect `prefers-reduced-motion`.
 
 ## Build order (work in phases; static before animated)
 
 1. Scaffold + fonts + deploy pipeline (empty page live on Vercel first).
 2. Static pages matching the approved mockups (see design spec §Page structure): landing scatter + name, carousel (static composition), album page, about.
-3. Motion, in this order: Lenis smooth scroll → entrance reveals → image hover → tube-roll scroll (+ name inversion via `mix-blend-mode: difference`) → infinite circular carousel → jump-into transition (GSAP Flip) → rolling digits → prev/next photo arrows.
+3. Motion, in this order: Lenis smooth scroll (landing already has this, plus its fixed-name blend and per-photo parallax — see design spec §1) → entrance reveals → image hover → tube-roll scroll elsewhere on the site → infinite circular carousel → jump-into transition (GSAP Flip) → rolling digits → prev/next photo arrows.
 4. Polish: responsive pass (desktop perfect, mobile good), metadata/OG, Lighthouse (LCP < 2.5s, CLS ≈ 0, 60fps scroll on mid-range mobile).
 
 ## Hard rules (from the design spec — never violate)
