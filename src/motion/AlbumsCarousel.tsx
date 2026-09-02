@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import type { Album, Photo } from "@/data/photos";
 
@@ -227,6 +228,7 @@ function imageAnchorFor(travelDir: number, driftPx: number): ImageAnchor {
 }
 
 export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] }) {
+  const router = useRouter();
   // 1440 is a reasonable first-paint guess, corrected to the real window
   // size in the mount/resize effect below.
   const [viewportWidth, setViewportWidth] = useState(1440);
@@ -252,6 +254,13 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // see computeFrame and imageAnchorFor) for first paint. Commit-locked
   // (see travelDirRef below), not tied to the live velocity's sign.
   const [directionSnapshot, setDirectionSnapshot] = useState(1);
+  // Whether the pointer is over the currently-active (fully open) slide —
+  // the only slide that's ever a navigation target. Drives the info
+  // block's title-shift/rule hover cue below; reset on every commit since
+  // the active slide's own DOM node can be swapped out from under a
+  // still-hovering pointer (no mouseleave fires for an element that gets
+  // removed rather than actually left).
+  const [isActiveHovered, setIsActiveHovered] = useState(false);
 
   // Half of Wavg — the fixed offset from true viewport centre where the
   // active slide's anchored edge sits at rest (X_RIGHT = centre +
@@ -286,9 +295,22 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const dragCurrentXRef = useRef(0);
   const dragLastXRef = useRef(0);
   const dragDistanceRef = useRef(0);
+  // The href to navigate to if this press turns out to be a tap rather
+  // than a drag — captured at pointerdown from whatever was under the
+  // finger/cursor (null unless that was the active slide's overlay link).
+  // Navigation is fired imperatively from onPointerUp rather than relying
+  // on the anchor's native click: the wrapping div below calls
+  // setPointerCapture on pointerdown for the drag gesture, and per the
+  // Pointer Events spec a captured element's subsequent click retargets
+  // to the CAPTURING element, not whatever was actually under the
+  // pointer — so the anchor's own onClick never fires once capture is in
+  // effect. Verified directly (a raw document-level click listener showed
+  // the click's target was the wrapping div, not the anchor, even though
+  // elementFromPoint confirmed the anchor was visually right there).
+  const pendingNavHrefRef = useRef<string | null>(null);
   const viewportWidthRef = useRef(viewportWidth);
   const rootRef = useRef<HTMLDivElement | null>(null);
-  const frameRefs = useRef(new Map<number, HTMLAnchorElement>());
+  const frameRefs = useRef(new Map<number, HTMLDivElement>());
   const imageRefs = useRef(new Map<number, HTMLImageElement>());
   // Per-slide openness is genuine state (not a formula), so it has to
   // persist across frames keyed by absolute index — pruned to the visible
@@ -418,6 +440,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       if (activeIdxRef.current !== prevActiveIdx) {
         setActiveIdx(activeIdxRef.current);
         setDirectionSnapshot(travelDirRef.current);
+        setIsActiveHovered(false);
         // Both slides in this step's pair start a fresh fold/unfold right
         // now — the only moment either is allowed to change its frozen
         // image anchor (see imageAnchorDirRef and imageAnchorFor above).
@@ -566,6 +589,10 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     dragDistanceRef.current = 0;
     isDraggingRef.current = true;
     setIsDragging(true);
+    // Captured only for whatever this press turns out to be: a drag
+    // (see onPointerMove) or, if it stays under the tolerance, a tap on
+    // the active slide's overlay link (see pendingNavHrefRef above).
+    pendingNavHrefRef.current = (e.target as HTMLElement).closest("a")?.getAttribute("href") ?? null;
     e.currentTarget.setPointerCapture(e.pointerId);
   }
 
@@ -582,12 +609,18 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     // velocityRef.current already holds the last frame's drag-derived
     // value — releasing naturally continues that as momentum, no separate
     // "fling" calculation needed.
+    if (pendingNavHrefRef.current && dragDistanceRef.current <= CLICK_DRAG_TOLERANCE_PX) {
+      router.push(pendingNavHrefRef.current);
+    }
+    pendingNavHrefRef.current = null;
   }
 
-  // A drag that moved more than a few px shouldn't also fire the slot's
-  // link navigation — only a genuine click/tap should.
+  // The anchor's own click never actually fires a real navigation here —
+  // see pendingNavHrefRef's comment — so this only exists to stop the
+  // browser's default (a full page navigation) from racing the
+  // client-side router.push already issued in onPointerUp.
   function onSlotClick(e: React.MouseEvent) {
-    if (dragDistanceRef.current > CLICK_DRAG_TOLERANCE_PX) e.preventDefault();
+    if (e.button === 0) e.preventDefault();
   }
 
   const slideIndices = Array.from({ length: hi - lo + 1 }, (_, k) => lo + k);
@@ -595,7 +628,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   return (
     <div
       ref={rootRef}
-      className="flex h-full w-full flex-col items-center justify-center gap-10 overflow-hidden"
+      className="flex h-full w-full flex-col items-center justify-center gap-[15px] overflow-hidden pt-[74px]"
     >
       <div
         style={{ position: "relative", width: "100%", height: SLIDE_HEIGHT }}
@@ -615,14 +648,12 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           const initDrift = driftPxFor(absIndex, activeIdx, naturalWidth, init.width);
 
           return (
-            <Link
+            <div
               key={absIndex}
               ref={(el) => {
                 if (el) frameRefs.current.set(absIndex, el);
                 else frameRefs.current.delete(absIndex);
               }}
-              href={`/album/${album.slug}`}
-              onClick={onSlotClick}
               className="absolute isolate block select-none overflow-hidden"
               style={{
                 top: 0,
@@ -631,20 +662,19 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
                 height: SLIDE_HEIGHT,
                 maxWidth: "none",
                 transform: `translateX(${init.x}px)`,
-                cursor: isDragging ? "grabbing" : "grab",
+                cursor: isActive ? "pointer" : isDragging ? "grabbing" : "grab",
                 touchAction: "pan-y",
               }}
-              draggable={false}
             >
-              {/* The frame (this Link) is purely a clipping window: its
-                  WIDTH is the only thing that ever animates its own size,
-                  revealing more or less of the image below as its openness
-                  rises or falls — a curtain opening, not a zoom. The image
-                  itself never changes size (no scale/zoom transform
-                  anywhere in this file). Width, position, and drift are
-                  written directly by the physics loop every frame — no CSS
-                  transition on any of them, it would only fight the loop's
-                  own writes. */}
+              {/* The frame is purely a clipping window: its WIDTH is the
+                  only thing that ever animates its own size, revealing
+                  more or less of the image below as its openness rises or
+                  falls — a curtain opening, not a zoom. The image itself
+                  never changes size (no scale/zoom transform anywhere in
+                  this file). Width, position, and drift are written
+                  directly by the physics loop every frame — no CSS
+                  transition on any of them, it would only fight the
+                  loop's own writes. */}
               <Image
                 ref={(el) => {
                   if (el) imageRefs.current.set(absIndex, el);
@@ -676,13 +706,45 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
                 className="pointer-events-none absolute inset-0 bg-black"
                 style={{ opacity: veilAlpha, transition: VEIL_TRANSITION }}
               />
-            </Link>
+              {/* Navigation target: only the active, fully-open slide is
+                  ever a link — a folded sliver has no anchor at all, so
+                  clicking one does nothing (dragging it still works, via
+                  the pointer handlers on the strip's outer container,
+                  which this overlay doesn't intercept since it never
+                  calls stopPropagation). Placed last so it sits above the
+                  image/veil without needing an explicit z-index. */}
+              {isActive && (
+                <Link
+                  href={`/album/${album.slug}`}
+                  onClick={onSlotClick}
+                  onMouseEnter={() => setIsActiveHovered(true)}
+                  onMouseLeave={() => setIsActiveHovered(false)}
+                  className="absolute inset-0 block select-none"
+                  draggable={false}
+                />
+              )}
+            </div>
           );
         })}
       </div>
 
       <div className="w-full max-w-4xl px-8 text-[#666]">
-        <p className="font-serif text-[30px] text-[#111]">{activeAlbum.title}</p>
+        {/* The only hover cue anywhere on this page: hovering the open
+            (navigable) slide nudges the title right and grows a thin
+            rule under it — never the photo itself, which never
+            transforms. See .album-title/.album-rule in globals.css for
+            the prefers-reduced-motion override (rule still appears
+            instantly; the title never moves). */}
+        <p
+          className="album-title font-serif text-[30px] text-[#111]"
+          style={{ "--album-title-shift": isActiveHovered ? "4px" : "0px" } as React.CSSProperties}
+        >
+          {activeAlbum.title}
+        </p>
+        <span
+          className="album-rule mt-2 block h-px bg-[#666]"
+          style={{ "--album-rule-width": isActiveHovered ? "40px" : "0px" } as React.CSSProperties}
+        />
         <p className="text-[13px] uppercase tracking-[0.16em]">
           {activeAlbum.location} — {activeAlbum.year}
         </p>

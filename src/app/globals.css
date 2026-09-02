@@ -31,3 +31,26 @@ body {
     width: min(calc(var(--landing-photo-w) * 2.4), 85vw);
   }
 }
+
+/* /albums info-block hover cue (src/motion/AlbumsCarousel.tsx): hovering
+   the open slide nudges the title right and grows a rule under it — set
+   via the --album-title-shift/--album-rule-width custom properties
+   (inline, per render) rather than a :hover selector, since the hover
+   target (the slide) and these elements live in different subtrees. */
+.album-title {
+  transform: translateX(var(--album-title-shift, 0px));
+  transition: transform 300ms ease-out;
+}
+.album-rule {
+  width: var(--album-rule-width, 0px);
+  transition: width 300ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .album-title {
+    transform: none;
+    transition: none;
+  }
+  .album-rule {
+    transition: none;
+  }
+}
