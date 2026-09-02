@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
+import AlbumPhotoNav from "@/components/AlbumPhotoNav";
 import Footer from "@/components/Footer";
 import {
   albums,
@@ -15,7 +16,8 @@ export function generateStaticParams() {
   return albums.map((album) => ({ slug: album.slug }));
 }
 
-// Alternating placement per the design spec's vertical top-down flow.
+// Alternating placement per the design spec's vertical top-down flow:
+// centered / offset-left / offset-right, repeating every three photos.
 function placementClass(index: number) {
   switch (index % 3) {
     case 1:
@@ -29,7 +31,10 @@ function placementClass(index: number) {
 
 function PhotoRow({ photo, index }: { photo: Photo; index: number }) {
   return (
-    <div className={`flex flex-col gap-4 px-6 py-16 md:px-16 ${placementClass(index)}`}>
+    <div
+      data-photo-index={index}
+      className={`flex flex-col gap-4 px-6 py-16 md:px-16 ${placementClass(index)}`}
+    >
       <Image
         src={photo.src}
         alt={photo.title}
@@ -68,21 +73,20 @@ export default async function AlbumPage({
 
   return (
     <main className="relative">
-      {/* PLACEHOLDER — prev/next photo control is static for now; scroll
-          tracking + arrow navigation lands in Phase 3 (see CLAUDE.md). */}
-      <div className="fixed right-4 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-4 text-[#666] md:right-8 md:flex">
-        <svg width="14" height="9" viewBox="0 0 14 9" fill="none" aria-hidden>
-          <path d="M1 8L7 1L13 8" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
-        <span className="text-[14px] tabular-nums">
-          01 / {String(albumPhotos.length).padStart(2, "0")}
-        </span>
-        <svg width="14" height="9" viewBox="0 0 14 9" fill="none" aria-hidden>
-          <path d="M1 1L7 8L13 1" stroke="currentColor" strokeWidth="1.5" />
-        </svg>
+      <div className="absolute inset-x-0 top-0 z-20 p-6 md:p-10">
+        <Link
+          href="/"
+          className="text-[13px] uppercase tracking-[0.18em] text-[#666] hover:text-[#111]"
+        >
+          ← Suquia
+        </Link>
       </div>
 
-      {/* Title block — the carousel's jump-into transition IS the entrance in Phase 3 */}
+      <AlbumPhotoNav total={albumPhotos.length} />
+
+      {/* No hero — the carousel's jump-into transition is the entrance
+          (not built yet, see CLAUDE.md). The page opens directly on this
+          typographic title block. */}
       <div className="px-6 pb-16 pt-28 md:px-16 md:pt-40">
         <p className="text-[13px] uppercase tracking-[0.18em] text-[#666]">
           Album {String(album.order).padStart(2, "0")} — {albumPhotos.length} Photos
@@ -106,16 +110,17 @@ export default async function AlbumPage({
         href={`/album/${nextAlbum.slug}`}
         className="flex items-center gap-6 border-t border-[#eee] px-6 py-16 md:px-16"
       >
-        <div className="relative h-24 w-32 shrink-0 overflow-hidden">
-          <Image
-            src={nextCover.src}
-            alt={nextAlbum.title}
-            width={nextCover.width}
-            height={nextCover.height}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-            sizes="128px"
-          />
-        </div>
+        {/* Natural aspect ratio, fixed height only — no object-fit crop.
+            The hard rule ("no cropping, carousel slivers excepted")
+            applies here too; only the carousel gets to cheat this. */}
+        <Image
+          src={nextCover.src}
+          alt={nextAlbum.title}
+          width={nextCover.width}
+          height={nextCover.height}
+          className="h-24 w-auto shrink-0"
+          sizes="200px"
+        />
         <div>
           <p className="text-[12px] uppercase tracking-[0.18em] text-[#888]">
             Next Album
