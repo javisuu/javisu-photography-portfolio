@@ -22,10 +22,17 @@ SUQUIA — a personal photography portfolio for Javier Suquia. Awwwards-level am
 
 ## Build order (work in phases; static before animated)
 
-1. Scaffold + fonts + deploy pipeline (empty page live on Vercel first).
+1. Scaffold + fonts + deploy pipeline (empty page live on Vercel first). **DONE.**
 2. Static pages matching the approved mockups (see design spec §Page structure): landing scatter + name, carousel (static composition), album page, about.
-3. Motion, in this order: Lenis smooth scroll (landing already has this, plus its fixed-name blend and per-photo parallax — see design spec §1) → entrance reveals → image hover → tube-roll scroll elsewhere on the site → infinite circular carousel → jump-into transition (GSAP Flip) → rolling digits → prev/next photo arrows.
+   - Landing (`/`) — **DONE.**
+   - Album carousel (`/albums`) — **DONE**, structure and motion both (see below).
+   - Album page (`/album/[slug]`) — not started.
+   - About (`/about`) — not started.
+3. Motion, in this order: ~~Lenis smooth scroll (landing already has this, plus its fixed-name blend and per-photo parallax — see design spec §1)~~ **DONE** → ~~entrance reveals~~ **DONE** → ~~image hover~~ **DONE (landing)** → tube-roll scroll elsewhere on the site → ~~infinite circular carousel~~ **DONE — see design spec §2 for the actual anchoring/commit/rest-position model, which supersedes the original mockup description** → jump-into transition (GSAP Flip) → rolling digits → prev/next photo arrows.
+   - The carousel's own hover cue (title nudge + rule, on the open slide only) is also done — see design spec §2.
 4. Polish: responsive pass (desktop perfect, mobile good), metadata/OG, Lighthouse (LCP < 2.5s, CLS ≈ 0, 60fps scroll on mid-range mobile).
+
+Landing and the albums carousel are considered settled — don't revisit either without being explicitly asked to. Current focus: the album page, then the carousel→album jump transition, then rolling digits + the image hover rule, then About.
 
 ## Hard rules (from the design spec — never violate)
 
