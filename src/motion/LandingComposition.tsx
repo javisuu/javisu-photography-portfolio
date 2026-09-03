@@ -46,10 +46,8 @@ type Placement = {
   depth: number;
 };
 
-// Hand-authored layout — reference viewport 1440x900. All 14 verified
-// non-overlapping at rest at that reference, and the largest empty band
-// (union of every photo's Y-range, any lane) is 136px — both re-verified
-// programmatically after the changes below. Six photos are pinned
+// Hand-authored layout — reference viewport 1440x900. All 15 verified
+// non-overlapping at rest at that reference. Six photos are pinned
 // (depth: 0) because their margin to a neighbor is too thin to survive
 // any parallax drift at all:
 //   sea-through-trees / ny-library    — 14.4px X gap at rest
@@ -65,6 +63,9 @@ type Placement = {
 // "man-in-sea" was removed (replaced by "cowboy-silhouette", positioned
 // to close the 578px empty band that used to follow san-miguel-street —
 // not in man-in-sea's old slot, which wouldn't have helped that).
+// "america-untitled-08" fills the horizontal-center gap below ny-skyline
+// (x:39, own lane — 72px clear of ny-skyline's right edge and 72px clear
+// of cowboy-silhouette's left edge at the 1440px reference, own depth).
 const LANDING_LAYOUT: Record<string, Placement> = {
   "horses-dust": { x: 6, y: 8, w: 28, depth: 0.5 },
   "bougainvillea": { x: 74, y: 14, w: 22, depth: 0.45 },
@@ -79,6 +80,7 @@ const LANDING_LAYOUT: Record<string, Placement> = {
   "eclipse-totality": { x: 44, y: 168, w: 15, depth: 0 },
   "biarritz-palace": { x: 72, y: 184, w: 26, depth: 0.5 },
   "ny-skyline": { x: 4, y: 224, w: 30, depth: 0.6 },
+  "america-untitled-08": { x: 39, y: 264, w: 24, depth: 0.45 },
   "san-miguel-street": { x: 70, y: 236, w: 16, depth: 0.4 },
 };
 

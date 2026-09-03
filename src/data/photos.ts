@@ -150,6 +150,8 @@ export const photos: Photo[] = [
     album: "america",
     order: 8,
     capture: { focalLength: "32mm", aperture: "f/5.6", iso: "ISO 100" },
+    isFeatured: true,
+    id: "america-untitled-08",
   },
   {
     src: "/photos/america/09.avif",
