@@ -6,6 +6,13 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import type Lenis from "lenis";
 import type { Photo } from "@/data/photos";
 import { useLenis } from "./useLenis";
+import GLSurface from "./GLSurface";
+
+// Tuned for spectacle here — the landing is the showpiece. The album page
+// (which reuses the same GLSurface) passes much gentler values: the work
+// should be looked at there, not performed at.
+const BEND_DEPTH = 1;
+const BEND_RADIUS_MULTIPLIER = 1.2;
 
 const PARALLAX_STRENGTH = 0.12;
 const SEQUENCE_HEIGHT_VH = 320;
@@ -106,7 +113,16 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
   const layout = useMemo(() => buildLayout(photos), [photos]);
   // One ref per rendered (possibly duplicated) photo instance.
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // Same indexing as itemRefs, but the actual <img> — what GLSurface
+  // mirrors. Kept separate from itemRefs because GLSurface needs the
+  // image element itself (as a texture source), not its positioning
+  // wrapper.
+  const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [focalIndex, setFocalIndex] = useState(0);
+  // Only true once GLSurface confirms a working WebGL context. Until
+  // then the real <img> elements stay visible — see the MANDATORY
+  // FALLBACK note on the visibility style below.
+  const [glActive, setGlActive] = useState(false);
 
   useEffect(() => {
     if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
@@ -197,6 +213,9 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
               }}
             >
               <Image
+                ref={(el) => {
+                  imgRefs.current[copy * layout.length + i] = el;
+                }}
                 src={item.photo.src}
                 alt={item.photo.title}
                 width={item.photo.width}
@@ -204,6 +223,13 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
                 className="block h-auto w-full"
                 sizes={`${item.placement.w}vw`}
                 priority={copy === 0 && i === 0}
+                // MANDATORY FALLBACK: only hidden once GLSurface confirms
+                // a working WebGL context. If that never fires (missing
+                // or failed context), this stays visible and the page
+                // renders exactly as the plain CSS/DOM landing always
+                // has — never hidden speculatively. Only the image is
+                // hidden, not the wrapper: the number below must stay.
+                style={{ visibility: glActive ? "hidden" : "visible" }}
               />
               <span className="mt-2 block font-serif text-[12px] text-[#666] no-underline">
                 {String(i + 1).padStart(2, "0")}
@@ -212,6 +238,22 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           ))
         )}
       </div>
+
+      {/* GLSurface mirrors the <img>s above onto one full-viewport canvas
+          once a WebGL context is confirmed (see glActive). It owns no
+          layout or parallax — it only reads getBoundingClientRect() on
+          the same elements every frame, so the parallax effect above,
+          Lenis's infinite-scroll wrap, and this component's own layout
+          all flow through untouched. z-10, same as the photo layer it
+          replaces visually. */}
+      <GLSurface
+        nodes={imgRefs}
+        lenisRef={lenisRef}
+        bendDepth={BEND_DEPTH}
+        bendRadiusMultiplier={BEND_RADIUS_MULTIPLIER}
+        onAvailabilityChange={setGlActive}
+        className="pointer-events-none fixed inset-0 z-10"
+      />
 
       {/* Fixed chrome — never moves, and z-20/z-30 keep it above the
           photo layer (z-10) regardless of where any photo lands. */}
