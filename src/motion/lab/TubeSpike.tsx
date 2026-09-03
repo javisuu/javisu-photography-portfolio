@@ -108,7 +108,7 @@ void main() {
   // toward the camera — wrong); -= shrank it to 364908px^2, which is the
   // receding direction this camera setup (at +Z, looking toward -Z)
   // actually needs. Keep this as -=; do not flip without re-measuring.
-  pos.z -= uBendDepth * uAmount * dz;
+  pos.z += uBendDepth * uAmount * dz;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
 `;
