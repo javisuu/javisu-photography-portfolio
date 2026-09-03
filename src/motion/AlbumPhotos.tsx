@@ -7,7 +7,7 @@
 // only the painting changes, exactly like the landing's own integration.
 
 import Image from "next/image";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { Photo } from "@/data/photos";
 import GLSurface from "./GLSurface";
 import { useLenis } from "./useLenis";
@@ -41,6 +41,26 @@ export default function AlbumPhotos({ photos }: { photos: Photo[] }) {
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [glActive, setGlActive] = useState(false);
 
+  // Each row's <Image> is w-auto/h-auto, constrained only by max-h-[85vh]
+  // — its rendered height depends on the browser resolving that against
+  // the decoded image's real aspect ratio, which can land after Lenis's
+  // own (debounced, ResizeObserver-driven) recalculation. If the page
+  // grows after Lenis has already cached a shorter scroll limit, the
+  // bottom of the page becomes unreachable until something tells Lenis
+  // to recompute — this is that: force a recompute the instant each
+  // photo actually finishes loading, rather than trust the debounce to
+  // always win the race.
+  function handleImageLoad() {
+    lenisRef.current?.resize();
+  }
+
+  // Fonts (EB Garamond) can also reflow text below the fold after first
+  // paint, for the same reason — cheap enough to just always resize once
+  // fonts are ready.
+  useEffect(() => {
+    document.fonts?.ready.then(() => lenisRef.current?.resize());
+  }, [lenisRef]);
+
   return (
     <>
       {photos.map((photo, index) => (
@@ -59,6 +79,7 @@ export default function AlbumPhotos({ photos }: { photos: Photo[] }) {
             height={photo.height}
             className="h-auto w-auto max-h-[85vh] max-w-full"
             sizes="(max-width: 768px) 90vw, 70vw"
+            onLoad={handleImageLoad}
             // MANDATORY FALLBACK, same rule as the landing: only hidden
             // once GLSurface confirms a working WebGL context. If that
             // never fires, this stays visible and the page renders
