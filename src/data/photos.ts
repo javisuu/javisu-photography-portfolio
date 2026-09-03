@@ -52,20 +52,22 @@ export const albums: Album[] = [
     cover: "/photos/norte/01.avif",
   },
   {
-    slug: "ny",
-    title: "NY",
-    location: "TBD",
-    year: 2026,
-    order: 3,
-    cover: "/photos/ny/01.avif",
-  },
-  {
     slug: "sol",
     title: "Sol",
     location: "TBD",
     year: 2026,
-    order: 4,
+    order: 3,
     cover: "/photos/sol/07.avif",
+  },
+  {
+    slug: "ny",
+    title: "NY",
+    location: "TBD",
+    year: 2026,
+    // Last in the sequence — its "Next Album" footer block links back to
+    // the first (getNextAlbum wraps via modulo), closing the loop.
+    order: 4,
+    cover: "/photos/ny/01.avif",
   },
 ];
 

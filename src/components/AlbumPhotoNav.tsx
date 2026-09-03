@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Tracks which photo row is nearest the viewport's vertical center via
 // IntersectionObserver (rows are marked with data-photo-index by the album
@@ -11,27 +11,45 @@ import { useEffect, useState } from "react";
 // (that's the separate "tube-roll scroll elsewhere on the site" item).
 export default function AlbumPhotoNav({ total }: { total: number }) {
   const [current, setCurrent] = useState(0);
+  // Persists each row's latest known intersecting state across callback
+  // batches. A single IntersectionObserver callback only reports rows
+  // whose ratio just crossed a threshold, not every row currently
+  // intersecting — during a fast scroll several rows can cross a
+  // threshold in the same batch while an already-intersecting row (the
+  // one actually nearest center) reports nothing this time, so picking
+  // the closest from `entries` alone was occasionally picking the wrong
+  // row. Tracking full state here and recomputing "closest" over all of
+  // it, every batch, fixes that regardless of scroll speed.
+  const intersectingRef = useRef(new Map<Element, boolean>());
 
   useEffect(() => {
     const rows = Array.from(document.querySelectorAll<HTMLElement>("[data-photo-index]"));
     if (rows.length === 0) return;
 
+    const intersecting = intersectingRef.current;
+    intersecting.clear();
+
     const observer = new IntersectionObserver(
       (entries) => {
-        const visible = entries.filter((entry) => entry.isIntersecting);
-        if (visible.length === 0) return;
+        for (const entry of entries) {
+          intersecting.set(entry.target, entry.isIntersecting);
+        }
+
         const centerY = window.innerHeight / 2;
-        let closest = visible[0];
+        let closest: HTMLElement | null = null;
         let closestDistance = Infinity;
-        for (const entry of visible) {
-          const rect = entry.target.getBoundingClientRect();
+        for (const [target, isIntersecting] of intersecting) {
+          if (!isIntersecting) continue;
+          const rect = target.getBoundingClientRect();
           const distance = Math.abs(rect.top + rect.height / 2 - centerY);
           if (distance < closestDistance) {
             closestDistance = distance;
-            closest = entry;
+            closest = target as HTMLElement;
           }
         }
-        setCurrent(Number((closest.target as HTMLElement).dataset.photoIndex));
+        // If nothing is currently intersecting (every row scrolled past
+        // between checks), keep the last known value rather than glitch.
+        if (closest) setCurrent(Number(closest.dataset.photoIndex));
       },
       { threshold: [0, 0.25, 0.5, 0.75, 1] }
     );
