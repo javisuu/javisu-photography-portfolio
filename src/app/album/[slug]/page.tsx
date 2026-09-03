@@ -3,59 +3,17 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import AlbumPhotoNav from "@/components/AlbumPhotoNav";
 import Footer from "@/components/Footer";
+import AlbumPhotos from "@/motion/AlbumPhotos";
 import {
   albums,
   getAlbumBySlug,
   getNextAlbum,
   getPhotosByAlbum,
   photos,
-  type Photo,
 } from "@/data/photos";
 
 export function generateStaticParams() {
   return albums.map((album) => ({ slug: album.slug }));
-}
-
-// Alternating placement per the design spec's vertical top-down flow:
-// centered / offset-left / offset-right, repeating every three photos.
-function placementClass(index: number) {
-  switch (index % 3) {
-    case 1:
-      return "items-start";
-    case 2:
-      return "items-end";
-    default:
-      return "items-center";
-  }
-}
-
-function PhotoRow({ photo, index }: { photo: Photo; index: number }) {
-  return (
-    <div
-      data-photo-index={index}
-      className={`flex flex-col gap-4 px-6 py-16 md:px-16 ${placementClass(index)}`}
-    >
-      <Image
-        src={photo.src}
-        alt={photo.title}
-        width={photo.width}
-        height={photo.height}
-        className="h-auto w-auto max-h-[85vh] max-w-full"
-        sizes="(max-width: 768px) 90vw, 70vw"
-      />
-      <div className="flex flex-wrap items-baseline gap-4 text-[#666]">
-        <span className="text-[14px] tabular-nums">
-          {String(photo.order).padStart(2, "0")}
-        </span>
-        <span className="font-serif text-[20px] italic text-[#111]">
-          {photo.title}
-        </span>
-        <span className="text-[13px] uppercase tracking-[0.14em]">
-          {photo.capture.focalLength} — {photo.capture.aperture} — {photo.capture.iso}
-        </span>
-      </div>
-    </div>
-  );
 }
 
 export default async function AlbumPage({
@@ -102,9 +60,7 @@ export default async function AlbumPage({
         </p>
       </div>
 
-      {albumPhotos.map((photo, i) => (
-        <PhotoRow key={photo.src} photo={photo} index={i} />
-      ))}
+      <AlbumPhotos photos={albumPhotos} />
 
       <Link
         href={`/album/${nextAlbum.slug}`}

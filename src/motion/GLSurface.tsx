@@ -60,7 +60,7 @@ void main() {
   // which reads as flat there.
   float dz = uRadius - sqrt(max(uRadius * uRadius - y * y, 0.0));
   vec3 pos = position;
-  pos.z -= uBendDepth * uAmount * dz; // recedes away from the camera, never toward it
+  pos.z += uBendDepth * uAmount * dz;
   gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
 }
 `;
