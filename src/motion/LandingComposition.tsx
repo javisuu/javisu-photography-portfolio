@@ -258,27 +258,35 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       />
 
       {/* Fixed chrome — never moves, and z-20/z-30 keep it above the
-          photo layer (z-10) regardless of where any photo lands. */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between p-6 text-[13px] uppercase tracking-[0.18em] text-[#666] md:p-10">
+          photo layer (z-10) regardless of where any photo lands.
+          ATLAS deliberately sits apart from the ABOUT ME / ALBUMS group:
+          it's a view over the whole archive, not a section like the
+          other two, and the left/right split reads that way. "Photographs
+          — {year}" was removed from here — non-interactive text sitting
+          among interactive links invited clicks that went nowhere, and
+          the descriptor below the name now does that labeling job. */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between p-6 text-[13px] uppercase tracking-[0.22em] text-[#111111] md:p-10">
         <nav className="pointer-events-auto flex gap-6">
-          <Link href="/about" className="hover:text-[#111]">
+          <Link href="/about" className="hover:text-[#666]">
             About Me
           </Link>
-          <Link href="/albums" className="hover:text-[#111]">
+          <Link href="/albums" className="hover:text-[#666]">
             Albums
           </Link>
         </nav>
-        <span>Photographs — {new Date().getFullYear()}</span>
+        <Link href="/atlas" className="pointer-events-auto hover:text-[#666]">
+          Atlas
+        </Link>
       </div>
 
       {/* MENU was removed (it drove no overlay/state — just a label) so
           this is the site's only rotated edge label now. Deliberate
           asymmetry, not a leftover: don't add a matching label on the
-          left to "balance" it. Fixed + no ancestor transform of its own,
+          right to "balance" it. Fixed + no ancestor transform of its own,
           so it doesn't touch the wordmark's blend stacking context. */}
       <Link
         href="/credits"
-        className="fixed right-4 top-1/2 z-20 -translate-y-1/2 rotate-90 text-[12px] uppercase tracking-[0.2em] text-[#B0B0B0] hover:text-[#666] md:right-6"
+        className="fixed left-4 top-1/2 z-20 -translate-y-1/2 -rotate-90 text-[12px] uppercase tracking-[0.2em] text-[#B0B0B0] hover:text-[#666] md:left-6"
       >
         Credits
       </Link>
@@ -289,21 +297,36 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         </span>
       </div>
 
-      {/* Fixed wordmark — white + mix-blend-difference reads near-black on
-          the #FAFAFA background and inverts wherever a scrolling photo
+      {/* Fixed wordmark + descriptor, grouped so both center as one unit
+          without duplicating the fixed/flex treatment on each. Only the
+          h1 blends — mix-blend-difference is set on it alone, and the
+          descriptor is a separate sibling <p> (not text inside the h1)
+          precisely so it can never inherit that blend: it stays plain
+          #888888 against the page regardless of what's behind it. White
+          + mix-blend-difference reads near-black on the #FAFAFA
+          background at rest and inverts wherever a scrolling photo
           passes under it. No transform/opacity/filter/will-change/
-          perspective on this element or any ancestor — that creates a
-          stacking context and silently breaks the blend. Only the photos
-          animate, never this. Its band is roughly y:38-62vh, x:33-67% of
+          perspective on this wrapper or the h1 — that creates a stacking
+          context and silently breaks the blend. Only the photos animate,
+          never this. The h1's own band is roughly y:38-62vh, x:33-67% of
           the viewport — LANDING_LAYOUT keeps photos clear of it except
           "sea-through-trees" and "eclipse-totality", which are meant to
-          rise into / cross it. */}
-      <h1
-        className="pointer-events-none fixed inset-0 z-30 flex select-none items-center justify-center text-center font-medium leading-none text-white mix-blend-difference"
-        style={{ fontSize: "clamp(64px, 16vw, 158px)" }}
-      >
-        SUQUIA
-      </h1>
+          rise into / cross it. The descriptor needs no matching
+          LANDING_LAYOUT exclusion: z-30 already puts it above the photo
+          layer (z-10) at every scroll position, so nothing can visually
+          cover it regardless of horizontal position — that's a z-index
+          guarantee, not a blend one. */}
+      <div className="pointer-events-none fixed inset-0 z-30 flex select-none flex-col items-center justify-center text-center">
+        <h1
+          className="font-medium leading-none text-white mix-blend-difference"
+          style={{ fontSize: "clamp(64px, 16vw, 158px)" }}
+        >
+          SUQUIA
+        </h1>
+        <p className="mt-[30px] text-[13px] uppercase tracking-[0.34em] text-[#888888]">
+          Selected Photographs Through the Years
+        </p>
+      </div>
     </main>
   );
 }
