@@ -18,7 +18,7 @@ SUQUIA — a personal photography portfolio for Javier Suquia. Awwwards-level am
 
 - All photo data lives in one typed file: `src/data/photos.ts` — album list + per-photo entries (src, width, height, title, capture data, album, order). Pages render from this file only; adding a photo must never require touching a component.
 - Originals go in `/photos-master/` (gitignored); a script (`scripts/prepare-images.mjs`) exports web versions (AVIF/WebP, ~2500px long edge) into `public/photos/`.
-- Pages: `/` (landing — tall scrolling composition, ~250–300vh, name fixed in viewport center throughout), `/albums` (carousel, opened only via the `ALBUMS` nav link — never reached by scrolling the landing), `/album/[slug]`, `/about`.
+- Pages: `/` (landing — tall scrolling composition, ~250–300vh, name fixed in viewport center throughout), `/albums` (carousel, opened only via the `ALBUMS` nav link — never reached by scrolling the landing), `/album/[slug]`, `/about`, `/credits` (a colophon, not a second About — reached via the rotated edge label, not the header nav).
 - Animation code isolated in `src/motion/` — components stay declarative; every effect must respect `prefers-reduced-motion`.
 - **The tube/roll GL effect** (`src/motion/GLSurface.tsx`): a reusable renderer, not per-page code. It mirrors a caller-supplied set of `<img>` elements onto one full-viewport canvas, reading their live `getBoundingClientRect()` every frame — it owns none of the layout/scroll/parallax, only the painting, so it works with whatever the page already does. `bendDepth`/`bendRadiusMultiplier` are per-instance props: the landing uses spectacle-level values, the album page (`src/motion/AlbumPhotos.tsx`) uses much gentler ones (~10x weaker push at the same screen position — barely perceptible is the goal, not zero). The carousel does NOT use it — it has its own model (see design spec §2) and stays untouched. Mandatory pattern for any new instance: the mirrored `<img>` must only get `visibility: hidden` once `onAvailabilityChange` fires `true` — never speculatively, or a missing/failed WebGL context leaves a blank page. `prefers-reduced-motion` pins the bend to 0 but keeps GL active (flat, not disabled).
 
@@ -26,15 +26,16 @@ SUQUIA — a personal photography portfolio for Javier Suquia. Awwwards-level am
 
 1. Scaffold + fonts + deploy pipeline (empty page live on Vercel first). **DONE.**
 2. Static pages matching the approved mockups (see design spec §Page structure): landing scatter + name, carousel (static composition), album page, about.
-   - Landing (`/`) — **DONE.**
+   - Landing (`/`) — **DONE.** The rotated `MENU` edge label was removed (it drove no overlay/state); `CREDITS` is now the only rotated edge label and links to `/credits` — that asymmetry is deliberate, not a leftover.
    - Album carousel (`/albums`) — **DONE**, structure and motion both (see below).
-   - Album page (`/album/[slug]`) — **DONE** (title block, vertical alternating-placement flow, per-photo info, prev/next chevrons, NEXT ALBUM block, footer — all per design spec §3), photos now painted via GLSurface (gentle bend) same as the landing.
-   - About (`/about`) — not started.
+   - Album page (`/album/[slug]`) — **DONE** (title block, vertical alternating-placement flow, per-photo info, prev/next chevrons, NEXT ALBUM block, footer — all per design spec §3), photos now painted via GLSurface (gentle bend) same as the landing. Album order is circular (`getNextAlbum` wraps via modulo); NY is currently last, linking back to América.
+   - About (`/about`) — **DONE.** Bio is a marked `[PLACEHOLDER BIO]` — do not invent copy. Instagram handle is `[PLACEHOLDER]`. No contact form — email only, structured so a form could replace it later without a redesign.
+   - Credits (`/credits`) — **DONE.** A colophon, five lines only, no page heading — see design spec §4b. Not reachable from the header nav; reached via the landing's rotated `CREDITS` label.
 3. Motion, in this order: ~~Lenis smooth scroll (landing already has this, plus its fixed-name blend and per-photo parallax — see design spec §1)~~ **DONE** → ~~entrance reveals~~ **DONE** → ~~image hover~~ **DONE (landing)** → ~~tube-roll scroll elsewhere on the site~~ **DONE — landing (spectacle values) and every album page (barely-perceptible values) via the shared `GLSurface` component; the carousel deliberately excluded, it has its own model** → ~~infinite circular carousel~~ **DONE — see design spec §2 for the actual anchoring/commit/rest-position model, which supersedes the original mockup description** → jump-into transition (GSAP Flip) → rolling digits → prev/next photo arrows.
    - The carousel's own hover cue (title nudge + rule, on the open slide only) is also done — see design spec §2.
 4. Polish: responsive pass (desktop perfect, mobile good), metadata/OG, Lighthouse (LCP < 2.5s, CLS ≈ 0, 60fps scroll on mid-range mobile).
 
-Landing, the albums carousel, and the album page are considered settled — don't revisit any without being explicitly asked to. Current focus: the carousel→album jump transition, then rolling digits + the image hover rule, then About.
+Landing, the albums carousel, the album page, About, and Credits are considered settled — don't revisit any without being explicitly asked to. Current focus: the carousel→album jump transition, then rolling digits + the image hover rule.
 
 ## Hard rules (from the design spec — never violate)
 

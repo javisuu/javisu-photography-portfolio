@@ -271,12 +271,17 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         <span>Photographs — {new Date().getFullYear()}</span>
       </div>
 
-      <span className="fixed left-4 top-1/2 z-20 -translate-y-1/2 -rotate-90 text-[12px] uppercase tracking-[0.2em] text-[#B0B0B0] md:left-6">
-        Menu
-      </span>
-      <span className="fixed right-4 top-1/2 z-20 -translate-y-1/2 rotate-90 text-[12px] uppercase tracking-[0.2em] text-[#B0B0B0] md:right-6">
+      {/* MENU was removed (it drove no overlay/state — just a label) so
+          this is the site's only rotated edge label now. Deliberate
+          asymmetry, not a leftover: don't add a matching label on the
+          left to "balance" it. Fixed + no ancestor transform of its own,
+          so it doesn't touch the wordmark's blend stacking context. */}
+      <Link
+        href="/credits"
+        className="fixed right-4 top-1/2 z-20 -translate-y-1/2 rotate-90 text-[12px] uppercase tracking-[0.2em] text-[#B0B0B0] hover:text-[#666] md:right-6"
+      >
         Credits
-      </span>
+      </Link>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-8 z-20 flex justify-end px-6 text-[12px] uppercase tracking-[0.18em] text-[#888] md:px-10">
         <span className="tabular-nums">
