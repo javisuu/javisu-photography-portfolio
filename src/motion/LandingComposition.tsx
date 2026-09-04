@@ -297,36 +297,47 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         </span>
       </div>
 
-      {/* Fixed wordmark + descriptor, grouped so both center as one unit
-          without duplicating the fixed/flex treatment on each. Only the
-          h1 blends — mix-blend-difference is set on it alone, and the
-          descriptor is a separate sibling <p> (not text inside the h1)
-          precisely so it can never inherit that blend: it stays plain
-          #888888 against the page regardless of what's behind it. White
-          + mix-blend-difference reads near-black on the #FAFAFA
-          background at rest and inverts wherever a scrolling photo
+      {/* Fixed wordmark — white + mix-blend-difference reads near-black on
+          the #FAFAFA background and inverts wherever a scrolling photo
           passes under it. No transform/opacity/filter/will-change/
-          perspective on this wrapper or the h1 — that creates a stacking
-          context and silently breaks the blend. Only the photos animate,
-          never this. The h1's own band is roughly y:38-62vh, x:33-67% of
+          perspective on this element or any ancestor — that creates a
+          stacking context and silently breaks the blend. Only the photos
+          animate, never this. Its band is roughly y:38-62vh, x:33-67% of
           the viewport — LANDING_LAYOUT keeps photos clear of it except
           "sea-through-trees" and "eclipse-totality", which are meant to
-          rise into / cross it. The descriptor needs no matching
-          LANDING_LAYOUT exclusion: z-30 already puts it above the photo
-          layer (z-10) at every scroll position, so nothing can visually
-          cover it regardless of horizontal position — that's a z-index
-          guarantee, not a blend one. */}
-      <div className="pointer-events-none fixed inset-0 z-30 flex select-none flex-col items-center justify-center text-center">
-        <h1
-          className="font-medium leading-none text-white mix-blend-difference"
-          style={{ fontSize: "clamp(64px, 16vw, 158px)" }}
-        >
-          SUQUIA
-        </h1>
-        <p className="mt-[30px] text-[13px] uppercase tracking-[0.34em] text-[#888888]">
-          Selected Photographs Through the Years
-        </p>
-      </div>
+          rise into / cross it.
+          IMPORTANT: this element must stay the direct fixed/z-30 node —
+          do NOT wrap it in an intermediate positioned/z-indexed parent
+          "to group it with the descriptor below." That was tried and
+          broke the blend: the wrapper's own stacking context gave the h1
+          nothing to blend against within it, so it resolved against a
+          transparent backdrop and rendered plain white instead of
+          inverting. The descriptor is a fully independent sibling
+          instead — see its own comment below. */}
+      <h1
+        className="pointer-events-none fixed inset-0 z-30 flex select-none items-center justify-center text-center font-medium leading-none text-white mix-blend-difference"
+        style={{ fontSize: "clamp(64px, 16vw, 158px)" }}
+      >
+        SUQUIA
+      </h1>
+
+      {/* Descriptor — deliberately NOT nested with the h1 above (see its
+          comment for why): an independent fixed element, manually
+          centered, positioned ~30px below the name's baseline at this
+          component's reference viewport (1440x900, where the name sits
+          at its clamp() max of 158px). Plain #888888, no blend — sibling
+          of the h1, not a child of it, so it can't inherit
+          mix-blend-difference. z-30 (same layer as the name) still
+          guarantees it's never covered by a photo at any scroll
+          position — a z-index guarantee, not a blend one, so no
+          LANDING_LAYOUT exclusion is needed the way the name's blend
+          band needs one. */}
+      <p
+        className="pointer-events-none fixed left-1/2 z-30 -translate-x-1/2 select-none text-center text-[13px] uppercase tracking-[0.34em] text-[#888888]"
+        style={{ top: "calc(50% + 109px)" }}
+      >
+        Selected Photographs Through the Years
+      </p>
     </main>
   );
 }
