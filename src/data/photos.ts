@@ -60,13 +60,6 @@ export type Photo = {
   id?: string;
 };
 
-// Every photo starts with the same unfilled place — precision defaults to
-// the more conservative 'city' until Javi sets it per photo (flip to
-// 'exact' only once lat/lng are genuinely the real spot, not a centroid).
-function placeholderPlace(): Place {
-  return { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" };
-}
-
 // PLACEHOLDER albums — real location/year still needed
 export const albums: Album[] = [
   {
@@ -80,7 +73,7 @@ export const albums: Album[] = [
   {
     slug: "norte",
     title: "Norte",
-    location: "TBD",
+    location: "España & France",
     year: 2026,
     order: 2,
     cover: "/photos/norte/01.avif",
@@ -88,7 +81,7 @@ export const albums: Album[] = [
   {
     slug: "sol",
     title: "Sol",
-    location: "TBD",
+    location: "España",
     year: 2026,
     order: 3,
     cover: "/photos/sol/07.avif",
@@ -96,7 +89,7 @@ export const albums: Album[] = [
   {
     slug: "ny",
     title: "NY",
-    location: "TBD",
+    location: "New York City, USA",
     year: 2026,
     // Last in the sequence — its "Next Album" footer block links back to
     // the first (getNextAlbum wraps via modulo), closing the loop.
@@ -115,7 +108,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 1,
     capture: { focalLength: "43mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "san-miguel-street",
   },
@@ -127,7 +120,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 2,
     capture: { focalLength: "47mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/america/03.avif",
@@ -137,7 +130,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 3,
     capture: { focalLength: "26mm", aperture: "f/5.6", iso: "ISO 320" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "bougainvillea",
   },
@@ -149,7 +142,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 4,
     capture: { focalLength: "12mm", aperture: "f/4.5", iso: "ISO 400" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/america/05.avif",
@@ -159,7 +152,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 5,
     capture: { focalLength: "14mm", aperture: "f/5", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "horses-dust",
   },
@@ -171,7 +164,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 6,
     capture: { focalLength: "28mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "cowboy-silhouette",
   },
@@ -183,7 +176,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 7,
     capture: { focalLength: "22mm", aperture: "f/5", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/america/08.avif",
@@ -193,7 +186,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 8,
     capture: { focalLength: "32mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "america-untitled-08",
   },
@@ -205,7 +198,7 @@ export const photos: Photo[] = [
     album: "america",
     order: 9,
     capture: { focalLength: "15mm", aperture: "f/5", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "san-blas-island",
   },
@@ -217,7 +210,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 1,
     capture: { focalLength: "27mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "basque-cliffs",
   },
@@ -229,7 +222,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 2,
     capture: { focalLength: "37mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "sea-through-trees",
   },
@@ -241,7 +234,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 3,
     capture: { focalLength: "10mm", aperture: "f/4.5", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "waves-panorama",
   },
@@ -253,7 +246,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 4,
     capture: { focalLength: "86mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     id: "man-in-sea",
   },
   {
@@ -264,7 +257,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 5,
     capture: { focalLength: "128mm", aperture: "f/6.3", iso: "ISO 160" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/norte/06.avif",
@@ -274,7 +267,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 6,
     capture: { focalLength: "22mm", aperture: "f/5", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "biarritz-palace",
   },
@@ -286,7 +279,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 7,
     capture: { focalLength: "29mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/norte/08.avif",
@@ -296,7 +289,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 8,
     capture: { focalLength: "12mm", aperture: "f/4.5", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/ny/01.avif",
@@ -306,7 +299,7 @@ export const photos: Photo[] = [
     album: "ny",
     order: 1,
     capture: { focalLength: "24mm", aperture: "f/4.8", iso: "ISO 64" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "ny-skyline",
   },
@@ -318,7 +311,7 @@ export const photos: Photo[] = [
     album: "ny",
     order: 2,
     capture: { focalLength: "16mm", aperture: "f/4.2", iso: "ISO 200" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "ny-library",
   },
@@ -330,7 +323,7 @@ export const photos: Photo[] = [
     album: "ny",
     order: 3,
     capture: { focalLength: "24mm", aperture: "f/4.8", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/ny/04.avif",
@@ -340,7 +333,7 @@ export const photos: Photo[] = [
     album: "ny",
     order: 4,
     capture: { focalLength: "16mm", aperture: "f/4.2", iso: "ISO 64" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/ny/05.avif",
@@ -350,7 +343,7 @@ export const photos: Photo[] = [
     album: "ny",
     order: 5,
     capture: { focalLength: "11mm", aperture: "f/3.8", iso: "ISO 64" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/ny/06.avif",
@@ -360,7 +353,7 @@ export const photos: Photo[] = [
     album: "ny",
     order: 6,
     capture: { focalLength: "16mm", aperture: "f/4.2", iso: "ISO 200" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/ny/07.avif",
@@ -370,7 +363,7 @@ export const photos: Photo[] = [
     album: "ny",
     order: 7,
     capture: { focalLength: "28mm", aperture: "f/5.3", iso: "ISO 64" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/sol/01.avif",
@@ -380,7 +373,7 @@ export const photos: Photo[] = [
     album: "sol",
     order: 1,
     capture: { focalLength: "44mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/sol/02.avif",
@@ -390,7 +383,7 @@ export const photos: Photo[] = [
     album: "sol",
     order: 2,
     capture: { focalLength: "35mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/sol/03.avif",
@@ -400,7 +393,7 @@ export const photos: Photo[] = [
     album: "sol",
     order: 3,
     capture: { focalLength: "105mm", aperture: "f/6.3", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "red-sun-boat",
   },
@@ -412,7 +405,7 @@ export const photos: Photo[] = [
     album: "sol",
     order: 4,
     capture: { focalLength: "34mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/sol/05.avif",
@@ -422,7 +415,7 @@ export const photos: Photo[] = [
     album: "sol",
     order: 5,
     capture: { focalLength: "54mm", aperture: "f/5.6", iso: "ISO 100" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "cristo-silhouette",
   },
@@ -434,7 +427,7 @@ export const photos: Photo[] = [
     album: "sol",
     order: 6,
     capture: { focalLength: "94mm", aperture: "f/6.3", iso: "ISO 800" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
   },
   {
     src: "/photos/sol/07.avif",
@@ -444,7 +437,7 @@ export const photos: Photo[] = [
     album: "sol",
     order: 7,
     capture: { focalLength: "88mm", aperture: "f/5.6", iso: "ISO 800" },
-    place: placeholderPlace(),
+    place: { city: "PLACEHOLDER", country: "PLACEHOLDER", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "eclipse-totality",
   },
