@@ -36,7 +36,12 @@ Opened only via the `ALBUMS` nav link. **Infinite and circular** — the strip l
 Info bottom-left (album title serif ~30px + gray meta line), pagination bottom-right (`01 / 04`).
 
 ### 3. Album page
-**No hero.** The carousel's jump-into transition (center slide expands, GSAP Flip) IS the entrance; the page opens on a typographic title block: small `ALBUM 01 — 12 PHOTOS`, title serif ~110px, location/year line. Then a vertical top-down flow: photos at natural ratios, each ≤ one viewport height, alternating placement (centered / offset-left / offset-right), each with info alongside — number, italic title, capture data (focal length — aperture — ISO). Right-edge fixed control: SVG chevron up / `01 / 12` counter / chevron down for prev/next photo navigation. Ends with a NEXT ALBUM block (small cover + title) and a minimal footer (SUQUIA — INSTAGRAM — EMAIL — year).
+**No hero.** The carousel's jump-into transition (center slide expands, GSAP Flip) IS the entrance; the page opens on a typographic title block: small `ALBUM 01 — 12 PHOTOS`, title serif ~110px, location/year line. Then a vertical top-down flow: photos at natural ratios, each ≤ one viewport height, alternating placement (centered / offset-left / offset-right), each with info alongside. **Caption hierarchy — place outranks technical data:**
+```
+01   San Miguel Street   ·   San Miguel de Allende, México
+                              43MM — F/5.6 — ISO 100
+```
+Number (`#BBBBBB`), italic serif title (`#111111`), and place (`#666666`, "City, Country" — never coordinates, at any precision; that's an atlas-hover thing, not a caption thing) share one baseline row; capture data (focal length — aperture — ISO) drops to its own line below at 12px `#A8A8A8`, the footnote. Wraps gracefully at narrow widths. Right-edge fixed control: SVG chevron up / `01 / 12` counter / chevron down for prev/next photo navigation. Ends with a NEXT ALBUM block (small cover + title) and a minimal footer (SUQUIA — INSTAGRAM — EMAIL — year).
 
 ### 4. About and Credits — two separate pages, not one
 Split after the original single-page plan proved too cramped for both a personal bio and a colophon; each now has its own route.
@@ -59,6 +64,16 @@ Anti-motion: no cursor-parallax on layout (cursor may grow over interactive imag
 ## Photo treatment
 
 Photos in **color always** — no B&W-until-hover. Focus within groups via dim/scale of inactive items, never desaturation of the work.
+
+## Place data (per photo)
+
+Every photo carries a `place` (`src/data/photos.ts`, `Place` type): `city`, `country`, `lat`/`lng` (`number | null`), `precision` (`'exact' | 'city'`). Feeds both the album caption (above) and the atlas (§ below). Rules:
+
+- `lat`/`lng` are written by hand — never derived from EXIF, which these files almost certainly don't have.
+- `precision: 'exact'` means `lat`/`lng` are the real spot; `precision: 'city'` means Javi didn't want the exact spot published and `lat`/`lng` hold the **city centroid** instead, not a real location. The map code never branches on which — it just plots whatever's there.
+- `precision` governs *display* only: `'exact'` may be shown as precise degree/minute/second coordinates (atlas hover, never the caption); `'city'` must never be — that would claim a precision the data doesn't have.
+- `lat`/`lng` may be `null` for anything not yet filled in. Every consumer tolerates that: the atlas simply omits the photo (no placeholder mark), and the caption shows "City, Country" alone regardless — the caption never shows coordinates at all, at either precision.
+- Placeholder values (`city`/`country: "PLACEHOLDER"`, `lat`/`lng: null`, `precision: "city"`) ship on all 32 photos until Javi fills them in by hand, one pass.
 
 ## Hard constraints
 

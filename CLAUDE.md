@@ -16,7 +16,8 @@ SUQUIA — a personal photography portfolio for Javier Suquia. Awwwards-level am
 
 ## Architecture rules
 
-- All photo data lives in one typed file: `src/data/photos.ts` — album list + per-photo entries (src, width, height, title, capture data, album, order). Pages render from this file only; adding a photo must never require touching a component.
+- All photo data lives in one typed file: `src/data/photos.ts` — album list + per-photo entries (src, width, height, title, capture data, album, order, place). Pages render from this file only; adding a photo must never require touching a component.
+- **`place` (per photo)**: `city`, `country`, `lat`/`lng` (`number | null`, written by hand — never from EXIF), `precision` (`'exact' | 'city'`). `'city'` means Javi didn't want the exact spot published, so `lat`/`lng` hold the city centroid instead — the map code never branches on which, it just plots whatever's there. `precision` governs display only: `'exact'` may show as degree/minute/second coordinates (atlas hover only, never the album caption), `'city'` must never be shown that way. `lat`/`lng` may be `null` — every consumer tolerates that (atlas omits the photo, caption falls back to "City, Country" alone, which is what it always shows regardless of precision anyway). All 32 photos currently carry placeholder place values (`"PLACEHOLDER"`/`null`/`'city'`) pending Javi filling them in by hand, one pass — see design spec's "Place data" section.
 - Originals go in `/photos-master/` (gitignored); a script (`scripts/prepare-images.mjs`) exports web versions (AVIF/WebP, ~2500px long edge) into `public/photos/`.
 - Pages: `/` (landing — tall scrolling composition, ~250–300vh, name fixed in viewport center throughout), `/albums` (carousel, opened only via the `ALBUMS` nav link — never reached by scrolling the landing), `/album/[slug]`, `/about`, `/credits` (a colophon, not a second About — reached via the rotated edge label, not the header nav), `/atlas` (a map view over the whole archive — linked from the header's top-right; route not built yet, currently 404s on click, see build order).
 - Animation code isolated in `src/motion/` — components stay declarative; every effect must respect `prefers-reduced-motion`.
@@ -35,7 +36,7 @@ SUQUIA — a personal photography portfolio for Javier Suquia. Awwwards-level am
    - The carousel's own hover cue (title nudge + rule, on the open slide only) is also done — see design spec §2.
 4. Polish: responsive pass (desktop perfect, mobile good), metadata/OG, Lighthouse (LCP < 2.5s, CLS ≈ 0, 60fps scroll on mid-range mobile).
 
-Landing, the albums carousel, the album page, About, and Credits are considered settled — don't revisit any without being explicitly asked to. Current focus: mid-way through a 5-stage pass (nav cleanup + homepage descriptor **DONE** → per-photo place data + album caption hierarchy → About/Credits re-verification against a slightly revised spec → `/atlas` map page → docs/commit pass), reported and reviewed stage by stage. After that: the carousel→album jump transition, then rolling digits + the image hover rule.
+Landing, the albums carousel, the album page, About, and Credits are considered settled — don't revisit any without being explicitly asked to. Current focus: mid-way through a 5-stage pass (nav cleanup + homepage descriptor **DONE** → per-photo place data + album caption hierarchy **DONE** → About/Credits re-verification against a slightly revised spec → `/atlas` map page → docs/commit pass), reported and reviewed stage by stage. Javi is now filling in real `place` values by hand across all 32 photos. After that: the carousel→album jump transition, then rolling digits + the image hover rule.
 
 ## Hard rules (from the design spec — never violate)
 
