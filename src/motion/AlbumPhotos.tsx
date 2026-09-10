@@ -86,14 +86,28 @@ export default function AlbumPhotos({ photos }: { photos: Photo[] }) {
             // exactly as the plain CSS album page always has.
             style={{ visibility: glActive ? "hidden" : "visible" }}
           />
-          <div className="flex flex-wrap items-baseline gap-4 text-[#666]">
-            <span className="text-[14px] tabular-nums">
-              {String(photo.order).padStart(2, "0")}
-            </span>
-            <span className="font-serif text-[20px] italic text-[#111]">
-              {photo.title}
-            </span>
-            <span className="text-[13px] uppercase tracking-[0.14em]">
+          {/* Place outranks technical data: number/title/place share one
+              baseline row, capture data drops to its own line below as
+              the footnote. Caption always shows "City, Country" alone —
+              never degree/minute/second coordinates, exact or otherwise;
+              that level of precision is an atlas-hover thing only (see
+              Place's precision field), not a caption thing. */}
+          <div className="flex flex-col gap-1">
+            <div className="flex flex-wrap items-baseline gap-2">
+              <span className="text-[14px] tabular-nums text-[#BBBBBB]">
+                {String(photo.order).padStart(2, "0")}
+              </span>
+              <span className="font-serif text-[20px] italic text-[#111111]">
+                {photo.title}
+              </span>
+              <span className="text-[14px] text-[#666666]" aria-hidden>
+                ·
+              </span>
+              <span className="text-[14px] text-[#666666]">
+                {photo.place.city}, {photo.place.country}
+              </span>
+            </div>
+            <span className="text-[12px] uppercase tracking-[0.14em] text-[#A8A8A8]">
               {photo.capture.focalLength} — {photo.capture.aperture} — {photo.capture.iso}
             </span>
           </div>
