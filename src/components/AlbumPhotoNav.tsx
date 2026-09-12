@@ -64,6 +64,27 @@ export default function AlbumPhotoNav({ total }: { total: number }) {
     target?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "center" });
   }
 
+  // Deep-link support for the atlas: clicking a mark there navigates to
+  // /album/[slug]#photo-N, and this is what actually lands on that photo.
+  // Waits for the window 'load' event (same reasoning as the Lenis-resize
+  // fix elsewhere on this page: row heights depend on decoded images, so
+  // scrolling before they've all loaded can land on a position that then
+  // shifts under it). Runs once — a hash that's already been consumed
+  // shouldn't re-trigger a scroll on later re-renders.
+  useEffect(() => {
+    const match = window.location.hash.match(/^#photo-(\d+)$/);
+    if (!match) return;
+    const index = Number(match[1]);
+    if (document.readyState === "complete") {
+      goTo(index);
+      return;
+    }
+    const onLoad = () => goTo(index);
+    window.addEventListener("load", onLoad, { once: true });
+    return () => window.removeEventListener("load", onLoad);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
   return (
     <div className="fixed right-4 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-4 text-[#666] md:right-8 md:flex">
       <button type="button" aria-label="Previous photo" onClick={() => goTo(current - 1)} className="cursor-pointer hover:text-[#111]">
