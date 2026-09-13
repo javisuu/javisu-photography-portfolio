@@ -267,7 +267,7 @@ export const photos: Photo[] = [
     album: "norte",
     order: 6,
     capture: { focalLength: "22mm", aperture: "f/5", iso: "ISO 100" },
-    place: { city: "Biarritz", country: "España", lat: 43.485967583155464,lng: -1.5560944547012845, precision: "exact" },
+    place: { city: "Biarritz", country: "Francia", lat: 43.485967583155464,lng: -1.5560944547012845, precision: "exact" },
     isFeatured: true,
     id: "biarritz-palace",
   },
