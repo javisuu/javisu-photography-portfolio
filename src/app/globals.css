@@ -54,3 +54,20 @@ body {
     transition: none;
   }
 }
+
+/* Wordmark hover target (src/motion/DecipherWordmark.tsx): pointer-events
+   stays none by default — the <h1> it lives in is `fixed inset-0`,
+   spanning the full viewport, so an unconditional pointer-events grant
+   on this span would swallow clicks everywhere the name's invisible box
+   happens to cover, not just over the visible glyphs. Scoped to
+   hover-capable devices only: on touch, this never becomes a valid event
+   target at all, so a tap can never be silently absorbed by it (a JS-only
+   check would still leave the element sitting there intercepting taps). */
+.wordmark-hover-target {
+  pointer-events: none;
+}
+@media (hover: hover) {
+  .wordmark-hover-target {
+    pointer-events: auto;
+  }
+}

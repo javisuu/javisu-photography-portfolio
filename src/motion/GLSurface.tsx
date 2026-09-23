@@ -9,6 +9,15 @@
 //
 // The caller is responsible for hiding the mirrored elements, and MUST
 // only do so once onAvailabilityChange fires true — see that prop.
+//
+// A plane's visibility is NOT purely "whatever the DOM node's rect says"
+// — getBoundingClientRect() is a layout property, and CSS opacity is a
+// paint-time one, so a caller hiding a node via `opacity: 0` on its
+// PARENT (not the mirrored node itself) gets that respected too: each
+// frame reads `node.parentElement.style.opacity` as a per-plane alpha
+// multiplier (see uOpacity below). A caller that needs a mirrored node
+// invisible must set opacity on that node's own parent, inline — nothing
+// else in the ancestor chain is consulted.
 
 import { useEffect, useRef, useSyncExternalStore, type RefObject } from "react";
 import { Renderer, Camera, Transform, Plane, Program, Mesh, Texture } from "ogl";
@@ -69,15 +78,25 @@ const FRAGMENT = `#version 300 es
 precision highp float;
 
 uniform sampler2D tMap;
+uniform float uOpacity; // per-plane alpha multiplier — see uOpacity note below
 in vec2 vUv;
 out vec4 fragColor;
 
 void main() {
-  fragColor = texture(tMap, vUv);
+  vec4 texColor = texture(tMap, vUv);
+  fragColor = vec4(texColor.rgb, texColor.a * uOpacity);
 }
 `;
 
 type PlaneRef = { node: HTMLImageElement; mesh: Mesh };
+type PendingUpload = { texture: Texture; bitmap: ImageBitmap; index: number };
+
+// Uploading is the expensive part (a synchronous gl.texImage2D per
+// texture) — decoding is offloaded to createImageBitmap() so it never
+// touches the main thread, but the upload itself still has to. Pacing it
+// to a couple of textures per frame keeps any single frame from blocking
+// on all of them at once (see the persistent-scene rationale below).
+const UPLOADS_PER_FRAME = 2;
 
 export type GLSurfaceProps = {
   /** Elements this surface mirrors — read fresh via getBoundingClientRect()
@@ -99,12 +118,37 @@ export type GLSurfaceProps = {
    * bend amount. Anything faster saturates rather than growing further. */
   velocityNormalize?: number;
   className?: string;
+  /** Whether the paint loop should be actively rendering. Defaults to
+   * true. Setting this false PAUSES rendering (stops requesting frames)
+   * without tearing down the renderer, scene, meshes, or textures — the
+   * whole point is a caller that's been navigated away from (e.g. the
+   * landing, hidden via CSS rather than unmounted) can flip this back to
+   * true later and resume painting instantly, with nothing to rebuild or
+   * re-upload. Has no effect on the one-time decode/upload pipeline,
+   * which always runs to completion regardless — pausing only affects
+   * whether completed frames get painted. */
+  active?: boolean;
   /** Fires once availability is known: true once a WebGL2/WebGL context
    * was created and the render loop is running; false if context
    * creation or setup failed for any reason. The caller MUST NOT hide
    * its mirrored nodes until this fires true — with the nodes already
    * hidden, a missing/failed context leaves the page blank. */
   onAvailabilityChange?: (available: boolean) => void;
+  /** Fires once the first `readyNodeCount` nodes (default: all of them)
+   * have had their texture uploaded to the GPU at least once (or
+   * immediately, if there's nothing to wait for). Meant for callers that
+   * want to gate a reveal/entrance on "nothing will pop in blank after
+   * appearing." Defaulting to "all" is wrong for a caller mirroring any
+   * lazy-loaded (`loading="lazy"`, the next/image default) or off-screen
+   * node — that node's <img> may never even start fetching until the
+   * user scrolls near it, so waiting on it here would simply never
+   * resolve. Pass a smaller count to wait only on a leading, eagerly-
+   * loaded subset instead (see LandingComposition, which restricts this
+   * to its "above the fold at arrival" set). */
+  onTexturesReady?: () => void;
+  /** How many of `nodes` (from the front) must be texture-ready before
+   * `onTexturesReady` fires. Defaults to all of them. */
+  readyNodeCount?: number;
 };
 
 export default function GLSurface({
@@ -114,7 +158,10 @@ export default function GLSurface({
   bendRadiusMultiplier = 1.2,
   velocityNormalize = 40,
   className,
+  active = true,
   onAvailabilityChange,
+  onTexturesReady,
+  readyNodeCount,
 }: GLSurfaceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // prefers-reduced-motion pins the bend to 0 (flat) — it does NOT fall
@@ -124,6 +171,29 @@ export default function GLSurface({
     getReducedMotionSnapshot,
     getReducedMotionServerSnapshot
   );
+
+  // Read via refs inside the persistent effect below rather than taken as
+  // dependencies, so toggling `active` or the OS reduced-motion setting
+  // pauses/adjusts the existing loop instead of tearing down and
+  // rebuilding the whole scene (destroying every texture) just to change
+  // a flag mid-flight — exactly the rebuild this component exists to
+  // avoid.
+  const activeRef = useRef(active);
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+  const reducedMotionRef = useRef(reducedMotion);
+  useEffect(() => {
+    reducedMotionRef.current = reducedMotion;
+  }, [reducedMotion]);
+
+  // Lets the [active]-watching effect below restart a paint loop that
+  // paused itself (see `update`'s early return) without needing access
+  // to the closure that created it.
+  const resumeRef = useRef<(() => void) | null>(null);
+  useEffect(() => {
+    if (active) resumeRef.current?.();
+  }, [active]);
 
   useEffect(() => {
     const canvas = canvasRef.current;
@@ -166,15 +236,54 @@ export default function GLSurface({
       window.addEventListener("resize", resize);
       detachResize = () => window.removeEventListener("resize", resize);
 
+      // Decode off the main thread (createImageBitmap), then queue the
+      // result for a paced GPU upload in `update()` below — assigning
+      // `texture.image` only flags the upload for the *next* draw, it
+      // doesn't itself touch the GPU, so queuing is just deferring that
+      // assignment. Decoding all of them in parallel is fine (the
+      // browser's own image-decode pool handles that off-thread); it's
+      // the synchronous texImage2D calls that need spreading across
+      // frames.
+      const uploadQueue: PendingUpload[] = [];
+      // Only nodes within readyNodeCount count toward onTexturesReady —
+      // see that prop's doc: anything beyond it may be lazy-loaded and
+      // off-screen, and waiting on a node that hasn't even started
+      // fetching would simply never resolve.
+      const effectiveReadyNodeCount = readyNodeCount ?? nodes.current.length;
+      const criticalTotal = nodes.current
+        .slice(0, effectiveReadyNodeCount)
+        .filter((n) => n !== null).length;
+      let readyCount = 0;
+      let allTexturesReady = false;
+      function markReady(index: number) {
+        if (index >= effectiveReadyNodeCount) return;
+        readyCount += 1;
+        if (readyCount === criticalTotal && !allTexturesReady) {
+          allTexturesReady = true;
+          onTexturesReady?.();
+        }
+      }
+
       const planes: PlaneRef[] = nodes.current
         .map((node, i) => {
           if (!node) return null;
           const texture = new Texture(gl, { generateMipmaps: false });
-          const upload = () => {
-            texture.image = node;
-          };
-          if (node.complete) upload();
-          else node.addEventListener("load", upload, { once: true });
+          function decode() {
+            // imageOrientation: "flipY" — ogl's Texture always sets
+            // UNPACK_FLIP_Y_WEBGL true (correct for an <img> source, the
+            // previous texture.image value here). An ImageBitmap source
+            // doesn't get that same implicit flip from the browser, so
+            // without this every photo rendered upside down once
+            // decoding moved off the <img> path.
+            createImageBitmap(node!, { imageOrientation: "flipY" })
+              .then((bitmap) => uploadQueue.push({ texture, bitmap, index: i }))
+              .catch((err) => {
+                console.error("[GLSurface] createImageBitmap failed:", err);
+                markReady(i); // don't block the reveal forever on one bad image
+              });
+          }
+          if (node.complete) decode();
+          else node.addEventListener("load", decode, { once: true });
 
           const geometry = new Plane(gl, {
             width: 1,
@@ -204,6 +313,10 @@ export default function GLSurface({
               uAmount: { value: 0 },
               uBendDepth: { value: bendDepth },
               uRadius: { value: window.innerHeight * bendRadiusMultiplier },
+              // Read from the node's own parent each frame below — see
+              // that read site for why DOM opacity otherwise does
+              // nothing to what this canvas paints.
+              uOpacity: { value: 1 },
             },
           });
           const mesh = new Mesh(gl, { geometry, program });
@@ -216,12 +329,44 @@ export default function GLSurface({
         })
         .filter((p): p is PlaneRef => p !== null);
 
+      // Nothing to wait for — fire immediately rather than never.
+      if (criticalTotal === 0) {
+        allTexturesReady = true;
+        onTexturesReady?.();
+      }
+
       let smoothedVelocity = 0;
 
       function update() {
+        // Paused (caller navigated away, e.g. the landing hidden behind
+        // another route): stop scheduling frames entirely rather than
+        // spending an empty rAF 60x/sec on a canvas nobody sees. The
+        // renderer/scene/textures are untouched — [active] flipping back
+        // true just calls resumeRef.current() to restart this chain,
+        // nothing to rebuild.
+        if (!activeRef.current) {
+          raf = 0;
+          return;
+        }
+
+        // Paced texture uploads: assigning `texture.image` only flags the
+        // upload for the next draw below, it doesn't itself touch the
+        // GPU — so draining a couple of these before rendering spreads
+        // the actual gl.texImage2D calls (the expensive part) across
+        // frames instead of all firing in the same one.
+        for (let n = 0; n < UPLOADS_PER_FRAME && uploadQueue.length > 0; n++) {
+          const pending = uploadQueue.shift()!;
+          // ogl's TS types predate ImageBitmap support in its own
+          // Texture.image setter, but WebGL2's texImage2D (what
+          // Texture.update() calls under the hood) accepts it directly —
+          // this is a type-defs gap, not a runtime restriction.
+          pending.texture.image = pending.bitmap as unknown as HTMLImageElement;
+          markReady(pending.index);
+        }
+
         try {
           let amount: number;
-          if (reducedMotion) {
+          if (reducedMotionRef.current) {
             amount = 0; // flat, but still GL-rendered
           } else {
             const rawVelocity = lenisRef.current?.velocity ?? 0;
@@ -248,6 +393,19 @@ export default function GLSurface({
             );
             mesh.program.uniforms.uAmount.value = amount;
             mesh.program.uniforms.uRadius.value = radius;
+            // getBoundingClientRect() reflects a hidden (display: none)
+            // ancestor fine (rect just collapses), but NOT an opacity: 0
+            // one — opacity is a paint-time compositing property, not a
+            // layout one, so nothing about the rect changes and this
+            // canvas would otherwise paint the plane fully visible
+            // regardless of any DOM opacity the caller set to hide it.
+            // Read the node's own parent's inline opacity (the caller's
+            // documented hiding mechanism — see LandingComposition's
+            // entrance wrapper, which is exactly node.parentElement) and
+            // multiply it into the fragment shader's alpha instead.
+            const parentOpacity = node.parentElement?.style.opacity;
+            const opacity = parentOpacity ? parseFloat(parentOpacity) : 1;
+            mesh.program.uniforms.uOpacity.value = Number.isFinite(opacity) ? opacity : 1;
           }
 
           renderer.render({ scene, camera, sort: true });
@@ -258,6 +416,11 @@ export default function GLSurface({
         }
         raf = requestAnimationFrame(update);
       }
+      // Lets the [active]-watching effect restart this chain later
+      // without reaching into this closure any other way.
+      resumeRef.current = () => {
+        if (raf === 0) raf = requestAnimationFrame(update);
+      };
       raf = requestAnimationFrame(update);
 
       onAvailabilityChange?.(true);
@@ -267,10 +430,18 @@ export default function GLSurface({
     }
 
     return () => {
+      resumeRef.current = null;
       cancelAnimationFrame(raf);
       detachResize?.();
     };
-  }, [nodes, lenisRef, bendDepth, bendRadiusMultiplier, velocityNormalize, reducedMotion, onAvailabilityChange]);
+    // Deliberately NOT depending on `active`/`reducedMotion` (read via
+    // refs above instead) or `onTexturesReady` (read via closure, fires
+    // at most once per mount) — this effect exists once per mount and
+    // must never re-run just because one of those changed, or it would
+    // tear down and rebuild the whole scene (destroying every texture)
+    // to change what amounts to a flag.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [nodes, lenisRef, bendDepth, bendRadiusMultiplier, velocityNormalize, onAvailabilityChange, readyNodeCount]);
 
   return <canvas ref={canvasRef} className={className ?? "pointer-events-none fixed inset-0"} />;
 }

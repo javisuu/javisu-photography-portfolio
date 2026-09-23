@@ -2,11 +2,41 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { usePathname } from "next/navigation";
+import {
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  useSyncExternalStore,
+} from "react";
 import type Lenis from "lenis";
 import type { Photo } from "@/data/photos";
 import { useLenis } from "./useLenis";
 import GLSurface from "./GLSurface";
+import DecipherWordmark from "./DecipherWordmark";
+import ScrambleText from "./ScrambleText";
+
+// Rendered once from the root layout (not per-route from app/page.tsx) so
+// it survives navigating away and back — see the `active` plumbing below.
+// SSR renders this with `useLayoutEffect` in the tree, which would warn
+// about doing nothing server-side; resolve to a plain effect there.
+const useIsomorphicLayoutEffect =
+  typeof window !== "undefined" ? useLayoutEffect : useEffect;
+
+const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
+function subscribeReducedMotion(callback: () => void) {
+  const mql = window.matchMedia(REDUCED_MOTION_QUERY);
+  mql.addEventListener("change", callback);
+  return () => mql.removeEventListener("change", callback);
+}
+function getReducedMotionSnapshot() {
+  return window.matchMedia(REDUCED_MOTION_QUERY).matches;
+}
+function getReducedMotionServerSnapshot() {
+  return false;
+}
 
 // Tuned for spectacle here — the landing is the showpiece. The album page
 // (which reuses the same GLSurface) passes much gentler values: the work
@@ -36,6 +66,17 @@ const SEQUENCE_HEIGHT_VH = 320;
 // this container, not hand-picked — so the last screen before the wrap
 // already shows the opening composition.
 const COPIES = 2;
+
+// Entrance (arrival at the landing): every photo starts stacked at the
+// viewport centre and eases out to its layout position, staggered from
+// the centre of the composition outward. See the dedicated effect below
+// for the full mechanics. Total (last item's delay + its own duration)
+// lands around ~900ms.
+const ENTRANCE_DURATION_MS = 750;
+const ENTRANCE_STAGGER_MS = 10;
+function easeOutCubic(t: number) {
+  return 1 - Math.pow(1 - t, 3);
+}
 
 type Placement = {
   x: number; // left, % of viewport width
@@ -109,43 +150,274 @@ function buildLayout(photos: Photo[]): LayoutItem[] {
   });
 }
 
+// The entrance's starting offset (viewport-centre minus the item's own
+// centre), in CSS vw/vh units rather than measured pixels. This is what
+// lets the starting position exist in the very first rendered HTML (see
+// the JSX below) instead of only after a client effect runs: `x`/`y`/`w`/
+// `heightVh` are static layout data, known at render time on the server
+// too, so this needs no window/DOM access — the browser resolves the
+// vw/vh units itself at paint time, using whatever the real viewport
+// turns out to be. Valid exactly when scrollY is 0 (top.y-vh IS the
+// on-screen vh position only then), which the activation effect below
+// guarantees before this ever matters. Reused for the JS-driven tween
+// too (converted to pixels there, since that needs to interpolate
+// smoothly frame to frame) — one formula, two unit systems, so the two
+// can never drift apart from each other.
+function centerOffsetVwVh(item: LayoutItem): { dxVw: number; dyVh: number } {
+  const centerXVw = item.placement.x + item.placement.w / 2;
+  const centerYVh = item.placement.y + item.heightVh / 2;
+  return { dxVw: 50 - centerXVw, dyVh: 50 - centerYVh };
+}
+
+type EntranceItem = { delayMs: number; dx: number; dy: number };
+type EntranceState = { items: Map<number, EntranceItem>; startTime: number; maxDelayMs: number };
+
 export default function LandingComposition({ photos }: { photos: Photo[] }) {
-  const lenisRef = useLenis({ infinite: true });
+  // Rendered persistently from the root layout so its GL scene (and
+  // Lenis instance) never have to tear down and rebuild on navigation —
+  // `active` is the one thing that's actually route-dependent here.
+  // Everything else (the DOM composition, the WebGL context, every
+  // decoded/uploaded texture) stays exactly as it was the moment we
+  // last left `/`, ready to resume instantly.
+  const pathname = usePathname();
+  const active = pathname === "/";
+
+  const reducedMotion = useSyncExternalStore(
+    subscribeReducedMotion,
+    getReducedMotionSnapshot,
+    getReducedMotionServerSnapshot
+  );
+
+  // Lenis can't simply be "paused" while inactive — its own .stop()
+  // keeps calling preventDefault() on every wheel/touch event, which
+  // would freeze scrolling on whatever OTHER route is showing rather
+  // than release it back to native scroll or that page's own Lenis
+  // instance (album pages have one). So the instance itself is
+  // constructed/destroyed in step with `active` — see useLenis.
+  const lenisRef = useLenis({ infinite: true }, active);
+
+  // Reset to the top of the composition before Lenis (re)initializes on
+  // activation, so a fresh arrival always starts from the same, correct
+  // position for both the composition itself and the entrance animation's
+  // measurements below — a layout effect so it runs before useLenis's
+  // (passive) effect constructs the new instance around whatever scroll
+  // position it would otherwise have inherited.
+  useIsomorphicLayoutEffect(() => {
+    if (active) window.scrollTo(0, 0);
+  }, [active]);
 
   const layout = useMemo(() => buildLayout(photos), [photos]);
-  // One ref per rendered (possibly duplicated) photo instance.
+  // Two nested refs per rendered (possibly duplicated) photo instance —
+  // NOT one. `itemRefs` is the positioned (top/left/width) OUTER wrapper,
+  // written ONLY by the ongoing scroll-parallax loop, from frame one,
+  // forever. `entranceElRefs` is an INNER wrapper around the photo,
+  // written ONLY by the one-time arrival animation, which always targets
+  // exactly translate(0,0) and is then left alone. Two systems, two
+  // elements: each transform composes with the other automatically, so
+  // there's never a moment where one has to hand off to / overwrite the
+  // other — the entrance finishing at "0" always means "wherever the
+  // parallax loop currently has it," not a stale snapshot. (Previously
+  // both wrote the same element's transform, which meant the entrance's
+  // resting value and the parallax loop's real steady-state value could
+  // disagree — e.g. the entrance settling at 0 while parallax's own
+  // value for that item at scroll 0 was anywhere from +12px to -99px —
+  // producing a visible snap at handover. Splitting the two elements
+  // removes the handover entirely rather than trying to retune it.)
   const itemRefs = useRef<(HTMLDivElement | null)[]>([]);
-  // Same indexing as itemRefs, but the actual <img> — what GLSurface
-  // mirrors. Kept separate from itemRefs because GLSurface needs the
-  // image element itself (as a texture source), not its positioning
-  // wrapper.
+  const entranceElRefs = useRef<(HTMLDivElement | null)[]>([]);
+  // Same indexing again, but the actual <img> — what GLSurface mirrors.
+  // Kept separate because GLSurface needs the image element itself (as a
+  // texture source), not either positioning wrapper. Its rect naturally
+  // reflects both ancestor transforms composed together, so GLSurface
+  // itself needs no changes for any of this.
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [focalIndex, setFocalIndex] = useState(0);
-  // Only true once GLSurface confirms a working WebGL context. Until
-  // then the real <img> elements stay visible — see the MANDATORY
-  // FALLBACK note on the visibility style below.
-  const [glActive, setGlActive] = useState(false);
 
+  // glStatus: null = not yet known, true = WebGL confirmed working
+  // (mirrored <img>s get hidden per-instance below), false = confirmed
+  // unavailable (plain CSS/DOM fallback, unchanged from before this
+  // component existed). texturesReady flips once every mirrored photo
+  // has actually been uploaded to the GPU — see the reveal-gating note
+  // below for why the entrance can't start before then.
+  const [glStatus, setGlStatus] = useState<boolean | null>(null);
+  const [texturesReady, setTexturesReady] = useState(false);
+  // The moment it's safe to show photos at all: either GL confirmed it
+  // can't run (show the plain fallback immediately, nothing to wait on)
+  // or GL is running AND every texture it needs has actually uploaded.
+  // Gating on the latter — not just "GL is available" — is what stops a
+  // photo from appearing blank and filling in a moment later once
+  // uploads are paced across frames (see GLSurface).
+  const readyToReveal = glStatus === false || (glStatus === true && texturesReady);
+
+  const entranceRef = useRef<EntranceState | null>(null);
+
+  // Order is name first, then photos: the wordmark's own decipher IS the
+  // loading state (see DecipherWordmark), and only once its lock-in to
+  // SUQUIA lands do the photos leave the pile. `arriveKey` is bumped
+  // once per arrival (0 is the "not triggered yet" sentinel, same
+  // pattern as before); `nameLockedKey` is set, by DecipherWordmark's
+  // own onArrived callback, to the arriveKey THAT arrival's lock just
+  // answered. Comparing the two (nameReady) rather than tracking a
+  // separately-reset boolean sidesteps an ordering hazard: bumping
+  // arriveKey and resetting some "locked" boolean would need to happen
+  // in that exact order across effects for a return visit to correctly
+  // wait again, whereas a bumped arriveKey alone already makes the
+  // comparison false immediately, with nothing to reset.
+  const [arriveKey, setArriveKey] = useState(0);
+  const [nameLockedKey, setNameLockedKey] = useState(0);
+  const nameReady = arriveKey !== 0 && nameLockedKey === arriveKey;
+
+  // Fires once per arrival, independent of texture readiness — the
+  // wordmark starts scrambling immediately, not once photos are ready
+  // (it's what tells the visitor something is happening at all).
+  useIsomorphicLayoutEffect(() => {
+    if (!active) return;
+    setArriveKey((k) => k + 1);
+  }, [active]);
+
+  // The entrance itself: fires once photos are safe to reveal AND the
+  // name has locked, and again every time we arrive back at "/"
+  // (readyToReveal, once true, stays true forever — so on a return visit
+  // this only waits on nameReady). A layout effect so the reveal itself
+  // is atomic with starting the tween — but the STARTING state (hidden +
+  // displaced) doesn't wait for this at all; it's already true from the
+  // very first rendered frame, JSX-declared on the entrance wrapper
+  // below (see centerOffsetVwVh) — this effect only has to flip opacity
+  // to 1 and start animating the offset back down to 0 from whatever it
+  // already is.
+  useIsomorphicLayoutEffect(() => {
+    if (reducedMotion) return;
+    if (!active || !readyToReveal || !nameReady) return;
+    const copyZero = entranceElRefs.current.slice(0, layout.length);
+
+    // Same formula as the JSX-declared starting transform (see
+    // centerOffsetVwVh) converted to pixels — not a fresh DOM
+    // measurement, so this can never disagree with what's already
+    // painted, and never needs to clear+re-measure first.
+    const viewportWidth = window.innerWidth;
+    const viewportHeight = window.innerHeight;
+    const ranked = layout
+      .map((item, i) => {
+        if (!copyZero[i]) return null;
+        const { dxVw, dyVh } = centerOffsetVwVh(item);
+        const dx = (dxVw / 100) * viewportWidth;
+        const dy = (dyVh / 100) * viewportHeight;
+        return { index: i, dx, dy, dist: Math.hypot(dx, dy) };
+      })
+      .filter((r): r is { index: number; dx: number; dy: number; dist: number } => r !== null)
+      .sort((a, b) => a.dist - b.dist);
+
+    const items = new Map<number, EntranceItem>();
+    ranked.forEach((r, rank) => {
+      items.set(r.index, { delayMs: rank * ENTRANCE_STAGGER_MS, dx: r.dx, dy: r.dy });
+    });
+    entranceRef.current = {
+      items,
+      startTime: performance.now(),
+      maxDelayMs: (ranked.length - 1) * ENTRANCE_STAGGER_MS,
+    };
+
+    // Jump every item straight to its starting (centre) position and
+    // reveal them all at once, synchronously, before this frame paints —
+    // the staggered ease-out itself plays out over the following frames
+    // via the parallax/entrance loop below.
+    copyZero.forEach((el, i) => {
+      if (!el) return;
+      el.style.transition = "";
+      const item = items.get(i);
+      el.style.transform = item ? `translate(${item.dx}px, ${item.dy}px)` : "";
+      el.style.opacity = "1";
+    });
+  }, [active, readyToReveal, nameReady, reducedMotion, layout]);
+
+  // Reduced motion: no travel, and no name-first sequencing either —
+  // there's nothing animated to sequence against, so photos simply fade
+  // in the moment they're ready, same as always.
+  useIsomorphicLayoutEffect(() => {
+    if (!reducedMotion) return;
+    if (!active || !readyToReveal) return;
+    const copyZero = entranceElRefs.current.slice(0, layout.length);
+    entranceRef.current = null;
+    const REDUCED_FADE_MS = 400;
+    copyZero.forEach((el) => {
+      if (!el) return;
+      el.style.transition = `opacity ${REDUCED_FADE_MS}ms ease`;
+      el.style.transform = "";
+      el.style.opacity = "1";
+    });
+  }, [active, readyToReveal, reducedMotion, layout]);
+
+  // One rAF loop, two independent writers. The parallax half runs
+  // unconditionally, every frame, from the first one — it owns only
+  // `itemRefs` (the outer wrapper) and never even looks at entrance
+  // state. The entrance half runs only until it finishes and owns only
+  // `entranceElRefs` (the inner wrapper); once every item has reached
+  // its target it stops touching that element entirely, leaving its
+  // transform at the identity it already wrote. Paused entirely while
+  // inactive (hidden, unscrollable) or reduced-motion (handled as a
+  // plain CSS fade above instead, no transform ever).
   useEffect(() => {
-    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    if (reducedMotion) return;
+    if (!active) return;
 
     let frame: number;
     function update() {
       const viewportCenter = window.innerHeight / 2;
-      itemRefs.current.forEach((el, i) => {
+
+      // Parallax — outer wrapper, every frame, unconditionally. Pinned
+      // (depth: 0) items are the one exception: never touched, at all,
+      // by this loop — same rule as always.
+      itemRefs.current.forEach((el, flatIndex) => {
         if (!el) return;
-        const depth = layout[i % layout.length].placement.depth;
-        if (depth === 0) return; // pinned — never touch its transform
+        const depth = layout[flatIndex % layout.length].placement.depth;
+        if (depth === 0) return;
         const rect = el.getBoundingClientRect();
         const elementCenter = rect.top + rect.height / 2;
         const distance = viewportCenter - elementCenter;
         el.style.transform = `translateY(${distance * PARALLAX_STRENGTH * depth}px)`;
       });
+
+      // Entrance — inner wrapper, copy-0 only, only while still playing.
+      const entrance = entranceRef.current;
+      if (entrance) {
+        const now = performance.now();
+        const stillPlaying = now < entrance.startTime + entrance.maxDelayMs + ENTRANCE_DURATION_MS;
+        if (stillPlaying) {
+          for (let i = 0; i < layout.length; i++) {
+            const el = entranceElRefs.current[i];
+            const item = entrance.items.get(i);
+            if (!el || !item) continue;
+            const elapsed = now - entrance.startTime - item.delayMs;
+            let ex = 0;
+            let ey = 0;
+            if (elapsed <= 0) {
+              ex = item.dx;
+              ey = item.dy;
+            } else if (elapsed < ENTRANCE_DURATION_MS) {
+              const eased = easeOutCubic(elapsed / ENTRANCE_DURATION_MS);
+              ex = item.dx * (1 - eased);
+              ey = item.dy * (1 - eased);
+            }
+            el.style.transform = `translate(${ex}px, ${ey}px)`;
+          }
+        } else {
+          // Just finished — write the identity once more (covers the
+          // frame where `elapsed` first exceeds the duration, so no item
+          // is left mid-tween) and then stop touching this element
+          // until the next arrival.
+          for (let i = 0; i < layout.length; i++) {
+            const el = entranceElRefs.current[i];
+            if (el) el.style.transform = "translate(0px, 0px)";
+          }
+          entranceRef.current = null;
+        }
+      }
+
       frame = requestAnimationFrame(update);
     }
     frame = requestAnimationFrame(update);
     return () => cancelAnimationFrame(frame);
-  }, [layout]);
+  }, [active, reducedMotion, layout]);
 
   // Counter: which photo is closest to viewport-center right now, within
   // one SEQUENCE_HEIGHT_VH cycle (so it cycles 01..14..01.. with the loop).
@@ -178,7 +450,7 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
   }, [lenisRef, layout]);
 
   return (
-    <main>
+    <main style={{ display: active ? undefined : "none" }}>
       {/* Scrolling layer — real page scroll (smoothed by Lenis), hand-tuned
           composition the photos live in (see LANDING_LAYOUT). Rendered
           COPIES times back to back, but this element's own height is
@@ -201,7 +473,9 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         }}
       >
         {Array.from({ length: COPIES }).map((_, copy) =>
-          layout.map((item, i) => (
+          layout.map((item, i) => {
+            const startOffset = copy === 0 ? centerOffsetVwVh(item) : null;
+            return (
             <div
               key={`${item.photo.src}-${copy}`}
               ref={(el) => {
@@ -214,46 +488,91 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
                 ["--landing-photo-w" as string]: `${item.placement.w}vw`,
               }}
             >
-              <Image
+              {/* Entrance-owned wrapper, nested inside the parallax-owned
+                  one above — see the itemRefs/entranceElRefs comment.
+                  copy-0 instances render ALREADY hidden and displaced to
+                  centre (see centerOffsetVwVh) — a plain static style
+                  object, present in the very first HTML this component
+                  ever produces, server-rendered markup included: there
+                  is no client-only effect this waits on, so no frame,
+                  ever, can show a copy-0 photo at its final position
+                  before the entrance has run (previously true only
+                  after hydration + a layout effect — the gap between
+                  raw SSR paint and that effect running was exactly the
+                  flash this replaces). copy-1 (always off-screen at
+                  arrival) gets neither: it's never animated, so it
+                  renders at rest, visible, from the start. The reveal
+                  effect later overwrites both properties imperatively
+                  (opacity -> 1, transform animating back to identity) —
+                  it never fights this initial render because neither
+                  value here is state-derived, so React never re-asserts
+                  it on a later, unrelated re-render (e.g. focalIndex
+                  changing on scroll). */}
+              <div
                 ref={(el) => {
-                  imgRefs.current[copy * layout.length + i] = el;
+                  entranceElRefs.current[copy * layout.length + i] = el;
                 }}
-                src={item.photo.src}
-                alt={item.photo.title}
-                width={item.photo.width}
-                height={item.photo.height}
-                className="block h-auto w-full"
-                sizes={`${item.placement.w}vw`}
-                priority={copy === 0 && i === 0}
-                // MANDATORY FALLBACK: only hidden once GLSurface confirms
-                // a working WebGL context. If that never fires (missing
-                // or failed context), this stays visible and the page
-                // renders exactly as the plain CSS/DOM landing always
-                // has — never hidden speculatively. Only the image is
-                // hidden, not the wrapper: the number below must stay.
-                style={{ visibility: glActive ? "hidden" : "visible" }}
-              />
-              <span className="mt-2 block font-serif text-[12px] text-[#666] no-underline">
-                {String(i + 1).padStart(2, "0")}
-              </span>
+                style={
+                  startOffset
+                    ? { opacity: 0, transform: `translate(${startOffset.dxVw}vw, ${startOffset.dyVh}vh)` }
+                    : undefined
+                }
+              >
+                <Image
+                  ref={(el) => {
+                    imgRefs.current[copy * layout.length + i] = el;
+                  }}
+                  src={item.photo.src}
+                  alt={item.photo.title}
+                  width={item.photo.width}
+                  height={item.photo.height}
+                  className="block h-auto w-full"
+                  sizes={`${item.placement.w}vw`}
+                  // Every copy-0 photo needs to actually be loaded before
+                  // the entrance can start (see readyNodeCount on
+                  // GLSurface below) — next/image lazy-loads everything
+                  // but the first by default, which would leave anything
+                  // off-screen at arrival never even fetching until
+                  // scrolled near, deadlocking that wait forever. Copy-1
+                  // (the infinite-scroll duplicate, always off-screen at
+                  // arrival) stays lazy — nothing waits on it.
+                  priority={copy === 0}
+                  // MANDATORY FALLBACK: only hidden once GLSurface confirms
+                  // a working WebGL context. If that never fires (missing
+                  // or failed context), this stays visible and the page
+                  // renders exactly as the plain CSS/DOM landing always
+                  // has — never hidden speculatively. Only the image is
+                  // hidden, not the wrapper: the number below must stay.
+                  style={{ visibility: glStatus === true ? "hidden" : "visible" }}
+                />
+                <span className="mt-2 block font-serif text-[12px] text-[#666] no-underline">
+                  {String(i + 1).padStart(2, "0")}
+                </span>
+              </div>
             </div>
-          ))
+            );
+          })
         )}
       </div>
 
       {/* GLSurface mirrors the <img>s above onto one full-viewport canvas
-          once a WebGL context is confirmed (see glActive). It owns no
+          once a WebGL context is confirmed (see glStatus). It owns no
           layout or parallax — it only reads getBoundingClientRect() on
-          the same elements every frame, so the parallax effect above,
-          Lenis's infinite-scroll wrap, and this component's own layout
-          all flow through untouched. z-10, same as the photo layer it
-          replaces visually. */}
+          the same elements every frame, so the parallax/entrance effect
+          above, Lenis's infinite-scroll wrap, and this component's own
+          layout all flow through untouched. z-10, same as the photo
+          layer it replaces visually. `active` pauses its paint loop
+          (without tearing down the renderer/textures) whenever we're not
+          on "/" — see GLSurface's own comment for why that matters. */}
       <GLSurface
         nodes={imgRefs}
         lenisRef={lenisRef}
         bendDepth={BEND_DEPTH}
         bendRadiusMultiplier={BEND_RADIUS_MULTIPLIER}
-        onAvailabilityChange={setGlActive}
+        active={active}
+        onAvailabilityChange={setGlStatus}
+        onTexturesReady={() => setTexturesReady(true)}
+        readyNodeCount={layout.length}
         className="pointer-events-none fixed inset-0 z-10"
       />
 
@@ -268,14 +587,14 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between p-6 text-[13px] uppercase tracking-[0.22em] text-[#111111] md:p-10">
         <nav className="pointer-events-auto flex gap-6">
           <Link href="/about" className="hover:text-[#666]">
-            About Me
+            <ScrambleText text="About Me" />
           </Link>
           <Link href="/albums" className="hover:text-[#666]">
-            Albums
+            <ScrambleText text="Albums" />
           </Link>
         </nav>
         <Link href="/atlas" className="pointer-events-auto hover:text-[#666]">
-          Atlas
+          <ScrambleText text="Atlas" />
         </Link>
       </div>
 
@@ -288,7 +607,7 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         href="/credits"
         className="fixed left-4 top-1/2 z-20 -translate-y-1/2 -rotate-90 text-[12px] uppercase tracking-[0.2em] text-[#B0B0B0] hover:text-[#666] md:left-6"
       >
-        Credits
+        <ScrambleText text="Credits" />
       </Link>
 
       <div className="pointer-events-none fixed inset-x-0 bottom-8 z-20 flex justify-end px-6 text-[12px] uppercase tracking-[0.18em] text-[#888] md:px-10">
@@ -313,12 +632,44 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           nothing to blend against within it, so it resolved against a
           transparent backdrop and rendered plain white instead of
           inverting. The descriptor is a fully independent sibling
-          instead — see its own comment below. */}
+          instead — see its own comment below.
+          Its content is DecipherWordmark, not plain text — the same
+          language used twice: on arrival it's the page's own loading
+          indicator (scrambles, using only letters of Javi's own name,
+          until textures are ready, then locks to SUQUIA left to right —
+          see onArrived/nameReady above for why the photo entrance waits
+          on that lock rather than the other way around); on hover it
+          reads the full name in order, SUQUIA -> JAVIER -> SUAREZ ->
+          SUQUIA. Safe here specifically because it only ever adds
+          DESCENDANTS with their own width transition (each letter
+          column) — nothing between the h1 and the page root gains one,
+          which is the only thing that's ever actually broken this
+          blend. See that component's own note. font-kerning: none
+          applies to every state alike (the settled plain text included)
+          so the per-letter width-locking during a decipher run is
+          pixel-identical to how the plain word actually renders — with
+          kerning left on, adjacent-pair spacing (e.g. the "AV" in
+          JAVIER) would make the plain word's natural width slightly
+          narrower than the sum of its individually-measured letters,
+          breaking the "no visible shift at settle" requirement.
+          aria-label pins the accessible name to "Suquia" regardless of
+          which DOM DecipherWordmark currently renders (a settled
+          plain-text node most of the time, a mid-run per-letter
+          structure — itself aria-hidden — otherwise); relying on
+          computed-from-content would otherwise expose whatever noise a
+          decipher is passing through at that instant. */}
       <h1
         className="pointer-events-none fixed inset-0 z-30 flex select-none items-center justify-center text-center font-medium leading-none text-white mix-blend-difference"
-        style={{ fontSize: "clamp(64px, 16vw, 158px)" }}
+        style={{ fontSize: "clamp(64px, 16vw, 158px)", fontKerning: "none" }}
+        aria-label="Suquia"
       >
-        SUQUIA
+        <DecipherWordmark
+          arriveKey={arriveKey}
+          ready={readyToReveal}
+          onArrived={(key) => setNameLockedKey(key)}
+          active={active}
+          reducedMotion={reducedMotion}
+        />
       </h1>
 
       {/* Descriptor — deliberately NOT nested with the h1 above (see its
