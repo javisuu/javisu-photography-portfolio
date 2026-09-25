@@ -21,9 +21,26 @@ body {
 /* Landing photos (src/motion/LandingComposition.tsx): width comes from the
    --landing-photo-w custom property set per-photo. Below 900px they scale
    up (photos read larger relative to the viewport and are allowed to
-   overlap/cluster) rather than keeping the airy desktop sizing. */
+   overlap/cluster) rather than keeping the airy desktop sizing.
+   transition: none is explicit, not incidental, on both this (the
+   parallax-owned outer wrapper) and .landing-photo-entrance (the
+   entrance-owned inner wrapper nested inside it): every property either
+   of them animates (this one's transform, the inner's transform AND
+   opacity) is written imperatively, every frame, by LandingComposition's
+   own rAF loop — never by CSS. Without an explicit `none`, both compute
+   to the browser's default `transition: all 0s ease 0s`, which is inert
+   today but a live hazard: give either element a transition-duration
+   later (even unrelated to this component, e.g. a shared utility class)
+   and every one of those per-frame writes would kick off its own CSS
+   transition on top of the already-eased JS value — the scroll parallax
+   would tween instead of tracking the scroll position exactly, and the
+   entrance would double-ease against its own curve. */
 .landing-photo {
   width: var(--landing-photo-w);
+  transition: none;
+}
+.landing-photo-entrance {
+  transition: none;
 }
 
 @media (max-width: 899px) {
