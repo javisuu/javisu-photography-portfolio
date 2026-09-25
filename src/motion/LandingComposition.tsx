@@ -87,6 +87,49 @@ type Placement = {
   depth: number;
 };
 
+// A reference-viewport fallback used ONLY for the very first, SSR-safe
+// paint (see centerOffsetVwVh) — before any client effect has run, there
+// is no real window to measure. Every client-side computation passes the
+// ACTUAL live viewport instead, which is what makes the entrance's gather
+// point exact at any aspect ratio, not just this one. The SSR-only
+// approximation this falls back to is never actually visible: the
+// entrance wrapper it feeds renders at opacity: 0 until the reveal effect
+// below runs, and that effect always supplies live dimensions.
+const REFERENCE_VIEWPORT_W = 1440;
+const REFERENCE_VIEWPORT_H = 900;
+
+// Mirrors the responsive width rule in globals.css (.landing-photo and its
+// <900px media query): below that breakpoint, a photo's REAL on-screen
+// width is 2.4x its authored placement.w, capped at 85vw — not the
+// authored value itself. Both the entrance's gather point and the focal-
+// index counter need the real width (its center shifts right as the box
+// grows from a fixed left edge), and the two diverge below the
+// breakpoint, which is exactly what produced a systematically wrong pile
+// target at a 615-wide test viewport: every item was centered as if it
+// were still at its narrow desktop width, when it was actually rendering
+// up to 2.4x wider.
+const RESPONSIVE_WIDTH_BREAKPOINT_PX = 900;
+const RESPONSIVE_WIDTH_SCALE = 2.4;
+const RESPONSIVE_WIDTH_CAP_VW = 85;
+function actualWidthVw(placementW: number, viewportWidthPx: number): number {
+  if (viewportWidthPx >= RESPONSIVE_WIDTH_BREAKPOINT_PX) return placementW;
+  return Math.min(placementW * RESPONSIVE_WIDTH_SCALE, RESPONSIVE_WIDTH_CAP_VW);
+}
+
+// A photo's rendered height, in vh, at a given viewport — computed from
+// its own aspect ratio and its REAL CSS width (see actualWidthVw above),
+// never from a value baked at one reference aspect ratio. (A previous
+// version of this file baked heightVh once at build time using the
+// 1440x900 reference's own px-per-vw/vh conversion factors; that value
+// was wrong by the ratio of the real viewport's aspect ratio to 1440:900
+// — negligible near 16:10, but way off on a narrow/tall viewport, which
+// is exactly what also skewed the entrance's gather point there.)
+function itemHeightVh(item: LayoutItem, viewportW: number, viewportH: number): number {
+  const ratio = item.photo.width / item.photo.height;
+  const widthPx = (actualWidthVw(item.placement.w, viewportW) / 100) * viewportW;
+  return ((widthPx / ratio) / viewportH) * 100;
+}
+
 // Hand-authored layout — reference viewport 1440x900. All 15 verified
 // non-overlapping at rest at that reference. Six photos are pinned
 // (depth: 0) because their margin to a neighbor is too thin to survive
@@ -128,10 +171,6 @@ const LANDING_LAYOUT: Record<string, Placement> = {
 type LayoutItem = {
   photo: Photo;
   placement: Placement;
-  /** Rendered height, computed from the photo's real aspect ratio at its
-   * given vw width — needed to find which photo is "focal" for the
-   * counter, not for rendering (the <img> sizes itself via CSS). */
-  heightVh: number;
 };
 
 function buildLayout(photos: Photo[]): LayoutItem[] {
@@ -142,11 +181,7 @@ function buildLayout(photos: Photo[]): LayoutItem[] {
       w: 20,
       depth: 0.3,
     };
-    const ratio = photo.width / photo.height;
-    // width(vw) -> px at a 1440-wide reference -> height(px) -> back to vh
-    // at a 900-tall reference, matching the hand-tuned reference viewport.
-    const heightVh = ((placement.w * 14.4) / ratio / 9);
-    return { photo, placement, heightVh };
+    return { photo, placement };
   });
 }
 
@@ -163,10 +198,29 @@ function buildLayout(photos: Photo[]): LayoutItem[] {
 // too (converted to pixels there, since that needs to interpolate
 // smoothly frame to frame) — one formula, two unit systems, so the two
 // can never drift apart from each other.
-function centerOffsetVwVh(item: LayoutItem): { dxVw: number; dyVh: number } {
-  const centerXVw = item.placement.x + item.placement.w / 2;
-  const centerYVh = item.placement.y + item.heightVh / 2;
+function centerOffsetVwVh(
+  item: LayoutItem,
+  viewportW: number = REFERENCE_VIEWPORT_W,
+  viewportH: number = REFERENCE_VIEWPORT_H
+): { dxVw: number; dyVh: number } {
+  const heightVh = itemHeightVh(item, viewportW, viewportH);
+  const centerXVw = item.placement.x + actualWidthVw(item.placement.w, viewportW) / 2;
+  const centerYVh = item.placement.y + heightVh / 2;
   return { dxVw: 50 - centerXVw, dyVh: 50 - centerYVh };
+}
+
+// An item participates in the gather-and-release entrance only if its
+// FINAL rest position (before any entrance transform) lands within the
+// viewport, expanded by 15% of the viewport height on each side. Every
+// other photo is off-screen at arrival and simply renders at rest,
+// unanimated — see the reveal effect below. Computed from live viewport
+// dimensions, same as the gather point itself.
+const ENTRANCE_PARTICIPATION_EXPAND_VH = 15;
+function participatesInEntrance(item: LayoutItem, viewportW: number, viewportH: number): boolean {
+  const heightVh = itemHeightVh(item, viewportW, viewportH);
+  const top = item.placement.y;
+  const bottom = top + heightVh;
+  return bottom >= -ENTRANCE_PARTICIPATION_EXPAND_VH && top <= 100 + ENTRANCE_PARTICIPATION_EXPAND_VH;
 }
 
 type EntranceItem = { delayMs: number; dx: number; dy: number };
@@ -251,55 +305,64 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
 
   const entranceRef = useRef<EntranceState | null>(null);
 
-  // Order is name first, then photos: the wordmark's own decipher IS the
-  // loading state (see DecipherWordmark), and only once its lock-in to
-  // SUQUIA lands do the photos leave the pile. `arriveKey` is bumped
-  // once per arrival (0 is the "not triggered yet" sentinel, same
-  // pattern as before); `nameLockedKey` is set, by DecipherWordmark's
-  // own onArrived callback, to the arriveKey THAT arrival's lock just
-  // answered. Comparing the two (nameReady) rather than tracking a
-  // separately-reset boolean sidesteps an ordering hazard: bumping
-  // arriveKey and resetting some "locked" boolean would need to happen
-  // in that exact order across effects for a return visit to correctly
-  // wait again, whereas a bumped arriveKey alone already makes the
-  // comparison false immediately, with nothing to reset.
+  // `arriveKey` is bumped once per arrival (0 is the "not triggered yet"
+  // sentinel). Photos and the wordmark now trigger independently off the
+  // same underlying signals (readyToReveal / arriveKey) rather than one
+  // gating the other — see design-spec-v2.md's 2026-09-23 changelog
+  // entry: the wordmark's own decipher used to BE the loading state and
+  // photos wait on its lock; that's inverted now, the wordmark instead
+  // starts 600ms after the photo entrance begins (see
+  // ARRIVAL_WORDMARK_DELAY_MS in DecipherWordmark) so the two reveals
+  // read as deliberately staggered, not simultaneous.
   const [arriveKey, setArriveKey] = useState(0);
-  const [nameLockedKey, setNameLockedKey] = useState(0);
-  const nameReady = arriveKey !== 0 && nameLockedKey === arriveKey;
 
   // Fires once per arrival, independent of texture readiness — the
-  // wordmark starts scrambling immediately, not once photos are ready
-  // (it's what tells the visitor something is happening at all).
+  // wordmark's own trigger effect reacts to this too.
   useIsomorphicLayoutEffect(() => {
     if (!active) return;
     setArriveKey((k) => k + 1);
   }, [active]);
 
-  // The entrance itself: fires once photos are safe to reveal AND the
-  // name has locked, and again every time we arrive back at "/"
-  // (readyToReveal, once true, stays true forever — so on a return visit
-  // this only waits on nameReady). A layout effect so the reveal itself
-  // is atomic with starting the tween — but the STARTING state (hidden +
-  // displaced) doesn't wait for this at all; it's already true from the
-  // very first rendered frame, JSX-declared on the entrance wrapper
-  // below (see centerOffsetVwVh) — this effect only has to flip opacity
-  // to 1 and start animating the offset back down to 0 from whatever it
-  // already is.
+  // Guards against playing the entrance more than once for the same
+  // arrival: this effect's guard (active && readyToReveal) can be
+  // satisfied on more than one render for the same arriveKey — e.g. a
+  // return visit found this happening twice, ~700ms apart, with
+  // identical computed offsets each time (confirming it was the same
+  // effect body re-running, not a real second arrival). Comparing
+  // against the arriveKey this already played for makes a second
+  // pass-through a no-op regardless of what re-triggers it, without
+  // having to track down every possible re-trigger.
+  const entrancePlayedKeyRef = useRef(0);
+
+  // The entrance itself: fires once photos are safe to reveal, and again
+  // every time we arrive back at "/" (readyToReveal, once true, stays
+  // true forever — so on a return visit this fires as soon as arriveKey
+  // changes). A layout effect so the reveal itself is atomic with
+  // starting the tween — but the STARTING state (hidden + displaced)
+  // doesn't wait for this at all; it's already true from the very first
+  // rendered frame, JSX-declared on the entrance wrapper below (see
+  // centerOffsetVwVh) — this effect only has to start animating the
+  // offset back down to 0 (and opacity up to 1) from whatever it already
+  // is, for whichever items actually participate (see
+  // participatesInEntrance) — every other photo jumps straight to its
+  // rest position, unanimated.
   useIsomorphicLayoutEffect(() => {
     if (reducedMotion) return;
-    if (!active || !readyToReveal || !nameReady) return;
+    if (!active || !readyToReveal) return;
+    if (entrancePlayedKeyRef.current === arriveKey) return;
+    entrancePlayedKeyRef.current = arriveKey;
     const copyZero = entranceElRefs.current.slice(0, layout.length);
 
     // Same formula as the JSX-declared starting transform (see
-    // centerOffsetVwVh) converted to pixels — not a fresh DOM
-    // measurement, so this can never disagree with what's already
-    // painted, and never needs to clear+re-measure first.
+    // centerOffsetVwVh) converted to pixels, using the LIVE viewport —
+    // never cached from an earlier render or a wrapper's own width.
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
     const ranked = layout
       .map((item, i) => {
         if (!copyZero[i]) return null;
-        const { dxVw, dyVh } = centerOffsetVwVh(item);
+        if (!participatesInEntrance(item, viewportWidth, viewportHeight)) return null;
+        const { dxVw, dyVh } = centerOffsetVwVh(item, viewportWidth, viewportHeight);
         const dx = (dxVw / 100) * viewportWidth;
         const dy = (dyVh / 100) * viewportHeight;
         return { index: i, dx, dy, dist: Math.hypot(dx, dy) };
@@ -314,21 +377,52 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
     entranceRef.current = {
       items,
       startTime: performance.now(),
-      maxDelayMs: (ranked.length - 1) * ENTRANCE_STAGGER_MS,
+      maxDelayMs: ranked.length > 0 ? (ranked.length - 1) * ENTRANCE_STAGGER_MS : 0,
     };
 
-    // Jump every item straight to its starting (centre) position and
-    // reveal them all at once, synchronously, before this frame paints —
-    // the staggered ease-out itself plays out over the following frames
-    // via the parallax/entrance loop below.
+    // Jump every PARTICIPATING item straight to its starting (pile)
+    // position at opacity 0 — the staggered ease-out (transform AND
+    // opacity together, see the rAF loop below) plays out over the
+    // following frames. Every other item goes straight to rest, fully
+    // visible, untouched from here on: it was never near the viewport at
+    // arrival, so nothing about it should move or fade.
     copyZero.forEach((el, i) => {
       if (!el) return;
       el.style.transition = "";
       const item = items.get(i);
-      el.style.transform = item ? `translate(${item.dx}px, ${item.dy}px)` : "";
-      el.style.opacity = "1";
+      if (item) {
+        el.style.transform = `translate(${item.dx}px, ${item.dy}px)`;
+        el.style.opacity = "0";
+      } else {
+        el.style.transform = "";
+        el.style.opacity = "1";
+      }
     });
-  }, [active, readyToReveal, nameReady, reducedMotion, layout]);
+  }, [active, readyToReveal, reducedMotion, layout, arriveKey]);
+
+  // Keeps an in-flight entrance's targets correct if the viewport resizes
+  // mid-animation — recomputed from the live viewport, same formula as
+  // the kickoff above, so a resize never leaves stale pixel offsets
+  // converging on a stale gather point. Delays/start time are untouched;
+  // only where each item is travelling TO changes.
+  useEffect(() => {
+    if (reducedMotion) return;
+    function onResize() {
+      const entrance = entranceRef.current;
+      if (!entrance) return;
+      const viewportWidth = window.innerWidth;
+      const viewportHeight = window.innerHeight;
+      entrance.items.forEach((item, i) => {
+        const layoutItem = layout[i];
+        if (!layoutItem) return;
+        const { dxVw, dyVh } = centerOffsetVwVh(layoutItem, viewportWidth, viewportHeight);
+        item.dx = (dxVw / 100) * viewportWidth;
+        item.dy = (dyVh / 100) * viewportHeight;
+      });
+    }
+    window.addEventListener("resize", onResize);
+    return () => window.removeEventListener("resize", onResize);
+  }, [reducedMotion, layout]);
 
   // Reduced motion: no travel, and no name-first sequencing either —
   // there's nothing animated to sequence against, so photos simply fade
@@ -378,6 +472,12 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       });
 
       // Entrance — inner wrapper, copy-0 only, only while still playing.
+      // Opacity and transform are driven on the SAME timeline: opacity
+      // ramps 0 -> 1 over the first 40% of an item's own travel, never
+      // reaching 1 while the transform is still near its full start
+      // offset (a photo used to reach opacity 1 immediately, before it
+      // had moved at all, which read as "appearing at the pile before it
+      // moves").
       const entrance = entranceRef.current;
       if (entrance) {
         const now = performance.now();
@@ -390,15 +490,20 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
             const elapsed = now - entrance.startTime - item.delayMs;
             let ex = 0;
             let ey = 0;
+            let opacity = 1;
             if (elapsed <= 0) {
               ex = item.dx;
               ey = item.dy;
+              opacity = 0;
             } else if (elapsed < ENTRANCE_DURATION_MS) {
-              const eased = easeOutCubic(elapsed / ENTRANCE_DURATION_MS);
+              const t = elapsed / ENTRANCE_DURATION_MS;
+              const eased = easeOutCubic(t);
               ex = item.dx * (1 - eased);
               ey = item.dy * (1 - eased);
+              opacity = Math.min(1, t / 0.4);
             }
             el.style.transform = `translate(${ex}px, ${ey}px)`;
+            el.style.opacity = String(opacity);
           }
         } else {
           // Just finished — write the identity once more (covers the
@@ -407,7 +512,10 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           // until the next arrival.
           for (let i = 0; i < layout.length; i++) {
             const el = entranceElRefs.current[i];
-            if (el) el.style.transform = "translate(0px, 0px)";
+            if (el && entrance.items.has(i)) {
+              el.style.transform = "translate(0px, 0px)";
+              el.style.opacity = "1";
+            }
           }
           entranceRef.current = null;
         }
@@ -433,9 +541,10 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       let bestIndex = 0;
       let bestDistance = Infinity;
       layout.forEach((item, i) => {
+        const heightVh = itemHeightVh(item, window.innerWidth, window.innerHeight);
         const centerYPx =
           (item.placement.y / 100) * window.innerHeight +
-          ((item.heightVh / 100) * window.innerHeight) / 2;
+          ((heightVh / 100) * window.innerHeight) / 2;
         const distance = Math.abs(centerYPx - focalPageY);
         if (distance < bestDistance) {
           bestDistance = distance;
@@ -512,6 +621,7 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
                 ref={(el) => {
                   entranceElRefs.current[copy * layout.length + i] = el;
                 }}
+                className="landing-photo-entrance"
                 style={
                   startOffset
                     ? { opacity: 0, transform: `translate(${startOffset.dxVw}vw, ${startOffset.dyVh}vh)` }
@@ -633,16 +743,18 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           transparent backdrop and rendered plain white instead of
           inverting. The descriptor is a fully independent sibling
           instead — see its own comment below.
-          Its content is DecipherWordmark, not plain text — the same
-          language used twice: on arrival it's the page's own loading
-          indicator (scrambles, using only letters of Javi's own name,
-          until textures are ready, then locks to SUQUIA left to right —
-          see onArrived/nameReady above for why the photo entrance waits
-          on that lock rather than the other way around); on hover it
-          reads the full name in order, SUQUIA -> JAVIER -> SUAREZ ->
-          SUQUIA. Safe here specifically because it only ever adds
-          DESCENDANTS with their own width transition (each letter
-          column) — nothing between the h1 and the page root gains one,
+          Its content is DecipherWordmark, not plain text — two distinct
+          motions, never sharing a verb (see that component's own file
+          header): on arrival, rest decodes into JAVIER (the only place
+          any random glyph ever appears), then JAVIER->SUAREZ->SUQUIA
+          play as direct swaps — no randomness, same letters rearranging
+          — starting 600ms after the photo entrance begins rather than
+          gating it; on hover the same three words replay, swaps only,
+          never the decipher (decipher reads as "not resolved yet," which
+          hover has no business claiming). Safe here specifically because
+          it only ever adds DESCENDANTS with their own width transition
+          (each letter column) — nothing between the h1 and the page root
+          gains one,
           which is the only thing that's ever actually broken this
           blend. See that component's own note. font-kerning: none
           applies to every state alike (the settled plain text included)
@@ -666,7 +778,6 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         <DecipherWordmark
           arriveKey={arriveKey}
           ready={readyToReveal}
-          onArrived={(key) => setNameLockedKey(key)}
           active={active}
           reducedMotion={reducedMotion}
         />
