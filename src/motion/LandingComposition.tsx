@@ -317,9 +317,25 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
   const [arriveKey, setArriveKey] = useState(0);
 
   // Fires once per arrival, independent of texture readiness — the
-  // wordmark's own trigger effect reacts to this too.
+  // wordmark's own trigger effect reacts to this too. Latched via a ref
+  // (not just the `[active]` dep) because React Strict Mode's dev-only
+  // double-invoke of layout effects would otherwise bump arriveKey TWICE
+  // for the same activation (0 -> 1 -> 2), and since each bump is a
+  // genuinely different key, the wordmark's own re-trigger guard (which
+  // only catches a repeat of the SAME arriveKey) can't tell that apart
+  // from a real second arrival — confirmed live: it replayed the
+  // decipher/flap arrival sequence mid-hover, stomping
+  // arrivalActiveRef back to true and silently breaking the hover-leave
+  // transition. The ref resets when active goes false so a genuine
+  // return visit (leave "/" and come back) still bumps again.
+  const arriveBumpedForActiveRef = useRef(false);
   useIsomorphicLayoutEffect(() => {
-    if (!active) return;
+    if (!active) {
+      arriveBumpedForActiveRef.current = false;
+      return;
+    }
+    if (arriveBumpedForActiveRef.current) return;
+    arriveBumpedForActiveRef.current = true;
     setArriveKey((k) => k + 1);
   }, [active]);
 
@@ -743,20 +759,20 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           transparent backdrop and rendered plain white instead of
           inverting. The descriptor is a fully independent sibling
           instead — see its own comment below.
-          Its content is DecipherWordmark, not plain text — two distinct
-          motions, never sharing a verb (see that component's own file
-          header): on arrival, rest decodes into JAVIER (the only place
-          any random glyph ever appears), then JAVIER->SUAREZ->SUQUIA
-          play as direct swaps — no randomness, same letters rearranging
-          — starting 600ms after the photo entrance begins rather than
-          gating it; on hover the same three words replay, swaps only,
-          never the decipher (decipher reads as "not resolved yet," which
-          hover has no business claiming). Safe here specifically because
-          it only ever adds DESCENDANTS with their own width transition
-          (each letter column) — nothing between the h1 and the page root
-          gains one,
-          which is the only thing that's ever actually broken this
-          blend. See that component's own note. font-kerning: none
+          Its content is DecipherWordmark, not plain text: on arrival,
+          rest decodes into SUQUIA (the only place any random glyph ever
+          appears — see that component's own file header for why every
+          hover/tap letter-changing mechanism tried here was eventually
+          torn out), starting 600ms after the photo entrance begins
+          rather than gating it. Hovering no longer changes the
+          wordmark's own letters at all; it fades in a separate static
+          caption line (the full name, JAVIER SUAREZ SUQUIA) underneath
+          it instead. Safe here specifically because it only ever adds
+          DESCENDANTS (the decipher's own per-letter columns, the hover
+          caption) — nothing between the h1 and the page root gains a
+          transform/opacity/filter/etc, which is the only thing that's
+          ever actually broken this blend. See that component's own
+          note. font-kerning: none
           applies to every state alike (the settled plain text included)
           so the per-letter width-locking during a decipher run is
           pixel-identical to how the plain word actually renders — with
