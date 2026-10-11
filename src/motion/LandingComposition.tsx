@@ -67,15 +67,80 @@ const SEQUENCE_HEIGHT_VH = 320;
 // already shows the opening composition.
 const COPIES = 2;
 
-// Entrance (arrival at the landing): every photo starts stacked at the
-// viewport centre and eases out to its layout position, staggered from
-// the centre of the composition outward. See the dedicated effect below
-// for the full mechanics. Total (last item's delay + its own duration)
-// lands around ~900ms.
+// Entrance (arrival at the landing): a real two-phase loading state, not
+// one animation with a start keyframe — see the 2026-09-27 changelog
+// entry for why. PHASE A (accumulate): each participating photo, as its
+// own decode resolves, appears at the viewport centre — stacked on
+// whichever are already there, newest on top — with a small deterministic
+// per-photo offset/rotation so the pile reads as a pile, not one image.
+// Held for at least PILE_MIN_DWELL_MS even on a fully warm cache (so it's
+// never a flash), and for at most PILE_MAX_WAIT_MS (so the page is never
+// hostage to one slow file) — whichever comes first triggers PHASE B.
+// PHASE B (disperse): unchanged from before — each photo translates (and
+// un-rotates) from its pile position to its real layout position,
+// staggered outward from the viewport centre. Total (last item's delay +
+// its own duration) lands around ~900ms. Any photo not yet decoded when
+// phase B starts is a straggler: it takes no part in the cascade and
+// instead just fades in at its own final position, alone, whenever it
+// does become ready.
 const ENTRANCE_DURATION_MS = 750;
 const ENTRANCE_STAGGER_MS = 10;
+const PILE_FADE_IN_MS = 180;
+const PILE_MIN_DWELL_MS = 350;
+const PILE_MAX_WAIT_MS = 2500;
+const PILE_STRAGGLER_FADE_MS = 300;
+// Deliberately small — this is a pile of prints settling slightly
+// differently, not a scatter. No scaling ever, anywhere: every photo
+// sits in the pile at its own final rendered size (see
+// startPileEntrance — the pile offset is a translate only), which is
+// also what makes the dispersal pure translation, with nothing else to
+// go wrong.
+const PILE_JITTER_X_PX = 24;
+const PILE_JITTER_Y_PX = 16;
+const PILE_JITTER_ROTATE_DEG = 1.5;
 function easeOutCubic(t: number) {
   return 1 - Math.pow(1 - t, 3);
+}
+
+// A deterministic, index-derived value in [-1, 1) — same output for the
+// same (index, salt) pair every time, unlike Math.random(), so the pile
+// looks identical on every load. A classic GLSL-style sine hash, good
+// enough for "looks random" over a handful of small integer indices.
+function deterministicUnit(index: number, salt: number): number {
+  const s = Math.sin(index * 12.9898 + salt * 78.233) * 43758.5453;
+  return (s - Math.floor(s)) * 2 - 1;
+}
+function pileJitterFor(index: number): { jx: number; jy: number; jr: number } {
+  return {
+    jx: deterministicUnit(index, 1) * PILE_JITTER_X_PX,
+    jy: deterministicUnit(index, 2) * PILE_JITTER_Y_PX,
+    jr: deterministicUnit(index, 3) * PILE_JITTER_ROTATE_DEG,
+  };
+}
+
+// Per-photo decode readiness. Checked SYNCHRONOUSLY first — an image
+// already `.complete` from cache never fires a subsequent 'load' event,
+// so a trigger that only ever subscribes to that event silently skips
+// the entrance forever the moment anything is cached. This was a real,
+// confirmed bug (reload only — a fresh load rarely has anything cached
+// yet, which is exactly why it hid so well). `img.decode()` is the
+// primary path once we know it isn't already done: its promise resolves
+// once pixel data is actually ready to paint, the same guarantee
+// `.complete` gives for the cache case. A decode() rejection (rare — the
+// src changing mid-decode, some older-engine quirks) falls back to the
+// native load/error events; error counts as ready too, so one broken
+// file can never stall the page.
+function whenImageReady(img: HTMLImageElement): Promise<void> {
+  if (img.complete && img.naturalWidth > 0) return Promise.resolve();
+  const waitForEvents = () =>
+    new Promise<void>((resolve) => {
+      img.addEventListener("load", () => resolve(), { once: true });
+      img.addEventListener("error", () => resolve(), { once: true });
+    });
+  if (typeof img.decode === "function") {
+    return img.decode().catch(waitForEvents);
+  }
+  return waitForEvents();
 }
 
 type Placement = {
@@ -86,17 +151,6 @@ type Placement = {
    * used where the margin to a neighbor is too thin to survive any drift. */
   depth: number;
 };
-
-// A reference-viewport fallback used ONLY for the very first, SSR-safe
-// paint (see centerOffsetVwVh) — before any client effect has run, there
-// is no real window to measure. Every client-side computation passes the
-// ACTUAL live viewport instead, which is what makes the entrance's gather
-// point exact at any aspect ratio, not just this one. The SSR-only
-// approximation this falls back to is never actually visible: the
-// entrance wrapper it feeds renders at opacity: 0 until the reveal effect
-// below runs, and that effect always supplies live dimensions.
-const REFERENCE_VIEWPORT_W = 1440;
-const REFERENCE_VIEWPORT_H = 900;
 
 // Mirrors the responsive width rule in globals.css (.landing-photo and its
 // <900px media query): below that breakpoint, a photo's REAL on-screen
@@ -185,30 +239,6 @@ function buildLayout(photos: Photo[]): LayoutItem[] {
   });
 }
 
-// The entrance's starting offset (viewport-centre minus the item's own
-// centre), in CSS vw/vh units rather than measured pixels. This is what
-// lets the starting position exist in the very first rendered HTML (see
-// the JSX below) instead of only after a client effect runs: `x`/`y`/`w`/
-// `heightVh` are static layout data, known at render time on the server
-// too, so this needs no window/DOM access — the browser resolves the
-// vw/vh units itself at paint time, using whatever the real viewport
-// turns out to be. Valid exactly when scrollY is 0 (top.y-vh IS the
-// on-screen vh position only then), which the activation effect below
-// guarantees before this ever matters. Reused for the JS-driven tween
-// too (converted to pixels there, since that needs to interpolate
-// smoothly frame to frame) — one formula, two unit systems, so the two
-// can never drift apart from each other.
-function centerOffsetVwVh(
-  item: LayoutItem,
-  viewportW: number = REFERENCE_VIEWPORT_W,
-  viewportH: number = REFERENCE_VIEWPORT_H
-): { dxVw: number; dyVh: number } {
-  const heightVh = itemHeightVh(item, viewportW, viewportH);
-  const centerXVw = item.placement.x + actualWidthVw(item.placement.w, viewportW) / 2;
-  const centerYVh = item.placement.y + heightVh / 2;
-  return { dxVw: 50 - centerXVw, dyVh: 50 - centerYVh };
-}
-
 // An item participates in the gather-and-release entrance only if its
 // FINAL rest position (before any entrance transform) lands within the
 // viewport, expanded by 15% of the viewport height on each side. Every
@@ -223,8 +253,35 @@ function participatesInEntrance(item: LayoutItem, viewportW: number, viewportH: 
   return bottom >= -ENTRANCE_PARTICIPATION_EXPAND_VH && top <= 100 + ENTRANCE_PARTICIPATION_EXPAND_VH;
 }
 
-type EntranceItem = { delayMs: number; dx: number; dy: number };
-type EntranceState = { items: Map<number, EntranceItem>; startTime: number; maxDelayMs: number };
+// One entry per participating (copy-0) index. dx/dy/jr are the distance
+// (px) and rotation (deg) from that item's own natural position to the
+// pile — used BOTH as where it appears when it joins the pile (phase A)
+// and as what phase B eases back to 0. Kept live (mutated by the resize
+// handler) rather than snapshotted once, so an in-flight entrance never
+// converges on a stale target if the viewport changes mid-run.
+type PileParticipant = { dx: number; dy: number; jr: number };
+type PileEntranceState = {
+  participants: Map<number, PileParticipant>;
+  // performance.now() timestamp each index joined the pile (phase A's
+  // own fade-in start) — absent until that photo's decode resolves.
+  joinedAt: Map<number, number>;
+  startTime: number;
+  dispersing: boolean;
+  disperseStartTime: number;
+  // Rank-based stagger delay (ms), assigned once, only for items that
+  // had actually joined the pile by the moment dispersal started.
+  disperseDelays: Map<number, number>;
+  maxDisperseDelayMs: number;
+  // Indices still not ready when dispersal started — never join the
+  // pile at all, instead fade in alone at rest once ready (see
+  // stragglerFadeStart).
+  stragglers: Set<number>;
+  stragglerFadeStart: Map<number, number>;
+  // "Newest joins on top," in both the DOM (z-index, for the plain CSS
+  // fallback) and the GL surface (renderOrderRef, since WebGL has no
+  // concept of DOM z-index — see GLSurface's own doc for that prop).
+  joinCounter: number;
+};
 
 export default function LandingComposition({ photos }: { photos: Photo[] }) {
   // Rendered persistently from the root layout so its GL scene (and
@@ -290,30 +347,34 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
   // glStatus: null = not yet known, true = WebGL confirmed working
   // (mirrored <img>s get hidden per-instance below), false = confirmed
   // unavailable (plain CSS/DOM fallback, unchanged from before this
-  // component existed). texturesReady flips once every mirrored photo
-  // has actually been uploaded to the GPU — see the reveal-gating note
-  // below for why the entrance can't start before then.
+  // component existed). The entrance no longer waits on this at all —
+  // each photo's OWN decode readiness (see whenImageReady) is what gates
+  // its own reveal now, independent of which render path ends up
+  // painting it; see the 2026-09-27 changelog entry for why an aggregate
+  // "wait for every texture, then reveal everything at once" gate was
+  // replaced.
   const [glStatus, setGlStatus] = useState<boolean | null>(null);
-  const [texturesReady, setTexturesReady] = useState(false);
-  // The moment it's safe to show photos at all: either GL confirmed it
-  // can't run (show the plain fallback immediately, nothing to wait on)
-  // or GL is running AND every texture it needs has actually uploaded.
-  // Gating on the latter — not just "GL is available" — is what stops a
-  // photo from appearing blank and filling in a moment later once
-  // uploads are paced across frames (see GLSurface).
-  const readyToReveal = glStatus === false || (glStatus === true && texturesReady);
 
-  const entranceRef = useRef<EntranceState | null>(null);
+  const entranceRef = useRef<PileEntranceState | null>(null);
+  // Per-index paint-order override, read by GLSurface every frame (see
+  // that prop's own doc) — WebGL has no notion of DOM z-index, so
+  // "newest pile arrival paints on top" needs this in addition to the
+  // z-index written on the DOM wrapper below (which only matters for the
+  // no-GL fallback path). An animation-driving ref, like the others
+  // here, never routed through React state.
+  const renderOrderRef = useRef<number[]>([]);
 
   // `arriveKey` is bumped once per arrival (0 is the "not triggered yet"
-  // sentinel). Photos and the wordmark now trigger independently off the
-  // same underlying signals (readyToReveal / arriveKey) rather than one
-  // gating the other — see design-spec-v2.md's 2026-09-23 changelog
-  // entry: the wordmark's own decipher used to BE the loading state and
-  // photos wait on its lock; that's inverted now, the wordmark instead
-  // starts 600ms after the photo entrance begins (see
-  // ARRIVAL_WORDMARK_DELAY_MS in DecipherWordmark) so the two reveals
-  // read as deliberately staggered, not simultaneous.
+  // sentinel). Photos and the wordmark trigger independently off it —
+  // see design-spec-v2.md's 2026-09-23 changelog entry: the wordmark's
+  // own decipher used to BE the loading state and photos wait on its
+  // lock; that's inverted now, and as of 2026-09-27 the photo entrance
+  // itself no longer waits on any aggregate photo-readiness signal
+  // either (see startPileEntrance) — the wordmark instead just starts
+  // 600ms after activation (see ARRIVAL_WORDMARK_DELAY_MS in
+  // DecipherWordmark) so the two reveals read as deliberately staggered,
+  // not simultaneous, and neither is hostage to how long photos take to
+  // decode.
   const [arriveKey, setArriveKey] = useState(0);
 
   // Fires once per arrival, independent of texture readiness — the
@@ -339,123 +400,244 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
     setArriveKey((k) => k + 1);
   }, [active]);
 
-  // Guards against playing the entrance more than once for the same
-  // arrival: this effect's guard (active && readyToReveal) can be
-  // satisfied on more than one render for the same arriveKey — e.g. a
-  // return visit found this happening twice, ~700ms apart, with
-  // identical computed offsets each time (confirming it was the same
-  // effect body re-running, not a real second arrival). Comparing
-  // against the arriveKey this already played for makes a second
-  // pass-through a no-op regardless of what re-triggers it, without
-  // having to track down every possible re-trigger.
-  const entrancePlayedKeyRef = useRef(0);
+  // Guards against starting the entrance more than once for the same
+  // arrival — this effect's guard could be satisfied on more than one
+  // render for the same arriveKey (a return visit was once found doing
+  // exactly this, ~700ms apart, with identical computed offsets both
+  // times, confirming it was the same effect body re-running, not a real
+  // second arrival — see the 2026-09-26 arriveKey-double-bump fix for a
+  // different bug with the same symptom). Comparing against the
+  // arriveKey this already started for makes a second pass-through a
+  // no-op regardless of what re-triggers it.
+  const entranceStartedForKeyRef = useRef(0);
+  const activeRef = useRef(active);
+  useEffect(() => {
+    activeRef.current = active;
+  }, [active]);
+  const timeoutsRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+  useEffect(
+    () => () => {
+      timeoutsRef.current.forEach(clearTimeout);
+      timeoutsRef.current = [];
+    },
+    []
+  );
 
-  // The entrance itself: fires once photos are safe to reveal, and again
-  // every time we arrive back at "/" (readyToReveal, once true, stays
-  // true forever — so on a return visit this fires as soon as arriveKey
-  // changes). A layout effect so the reveal itself is atomic with
-  // starting the tween — but the STARTING state (hidden + displaced)
-  // doesn't wait for this at all; it's already true from the very first
-  // rendered frame, JSX-declared on the entrance wrapper below (see
-  // centerOffsetVwVh) — this effect only has to start animating the
-  // offset back down to 0 (and opacity up to 1) from whatever it already
-  // is, for whichever items actually participate (see
-  // participatesInEntrance) — every other photo jumps straight to its
-  // rest position, unanimated.
-  useIsomorphicLayoutEffect(() => {
-    if (reducedMotion) return;
-    if (!active || !readyToReveal) return;
-    if (entrancePlayedKeyRef.current === arriveKey) return;
-    entrancePlayedKeyRef.current = arriveKey;
+  function startPileEntrance() {
+    // Instrumentation: exactly one line per real entrance start. Two for
+    // one navigation is the regression to watch for.
+    console.log("[entrance] start", { arriveKey });
+
     const copyZero = entranceElRefs.current.slice(0, layout.length);
+    const outerZero = itemRefs.current.slice(0, layout.length);
+    const imgZero = imgRefs.current.slice(0, layout.length);
 
-    // Same formula as the JSX-declared starting transform (see
-    // centerOffsetVwVh) converted to pixels, using the LIVE viewport —
-    // never cached from an earlier render or a wrapper's own width.
+    // Participation AND each participant's pile offset are both measured
+    // from the REAL, already-laid-out DOM rect (getBoundingClientRect on
+    // the outer, parallax-owned wrapper) — never predicted from a
+    // viewport-math formula the way the old "start offset" was. That's
+    // what makes this immune to the reload-only "photos come from above"
+    // bug: the old formula could be evaluated against a layout that
+    // hadn't settled yet (fonts, image aspect ratios); a live rect
+    // simply can't be wrong, whenever it's read.
     const viewportWidth = window.innerWidth;
     const viewportHeight = window.innerHeight;
-    const ranked = layout
-      .map((item, i) => {
-        if (!copyZero[i]) return null;
-        if (!participatesInEntrance(item, viewportWidth, viewportHeight)) return null;
-        const { dxVw, dyVh } = centerOffsetVwVh(item, viewportWidth, viewportHeight);
-        const dx = (dxVw / 100) * viewportWidth;
-        const dy = (dyVh / 100) * viewportHeight;
-        return { index: i, dx, dy, dist: Math.hypot(dx, dy) };
-      })
-      .filter((r): r is { index: number; dx: number; dy: number; dist: number } => r !== null)
-      .sort((a, b) => a.dist - b.dist);
+    const centerX = viewportWidth / 2;
+    const centerY = viewportHeight / 2;
 
-    const items = new Map<number, EntranceItem>();
-    ranked.forEach((r, rank) => {
-      items.set(r.index, { delayMs: rank * ENTRANCE_STAGGER_MS, dx: r.dx, dy: r.dy });
-    });
-    entranceRef.current = {
-      items,
-      startTime: performance.now(),
-      maxDelayMs: ranked.length > 0 ? (ranked.length - 1) * ENTRANCE_STAGGER_MS : 0,
-    };
+    const participants = new Map<number, PileParticipant>();
+    for (let i = 0; i < layout.length; i++) {
+      const item = layout[i];
+      const outerEl = outerZero[i];
+      if (!outerEl || !copyZero[i]) continue;
+      if (!participatesInEntrance(item, viewportWidth, viewportHeight)) continue;
+      const rect = outerEl.getBoundingClientRect();
+      const { jx, jy, jr } = pileJitterFor(i);
+      participants.set(i, {
+        dx: centerX + jx - (rect.left + rect.width / 2),
+        dy: centerY + jy - (rect.top + rect.height / 2),
+        jr,
+      });
+    }
 
-    // Jump every PARTICIPATING item straight to its starting (pile)
-    // position at opacity 0 — the staggered ease-out (transform AND
-    // opacity together, see the rAF loop below) plays out over the
-    // following frames. Every other item goes straight to rest, fully
-    // visible, untouched from here on: it was never near the viewport at
-    // arrival, so nothing about it should move or fade.
-    copyZero.forEach((el, i) => {
-      if (!el) return;
-      el.style.transition = "";
-      const item = items.get(i);
-      if (item) {
-        el.style.transform = `translate(${item.dx}px, ${item.dy}px)`;
-        el.style.opacity = "0";
-      } else {
+    // Non-participants: never near the viewport at arrival, so they sit
+    // at their final position from the start — nothing to hide, nothing
+    // to animate, no transform ever written for them.
+    for (let i = 0; i < layout.length; i++) {
+      if (participants.has(i)) continue;
+      const el = copyZero[i];
+      if (el) {
         el.style.transform = "";
         el.style.opacity = "1";
       }
-    });
-  }, [active, readyToReveal, reducedMotion, layout, arriveKey]);
+    }
 
-  // Keeps an in-flight entrance's targets correct if the viewport resizes
-  // mid-animation — recomputed from the live viewport, same formula as
-  // the kickoff above, so a resize never leaves stale pixel offsets
-  // converging on a stale gather point. Delays/start time are untouched;
-  // only where each item is travelling TO changes.
+    if (participants.size === 0) {
+      entranceRef.current = null;
+      return;
+    }
+
+    const state: PileEntranceState = {
+      participants,
+      joinedAt: new Map(),
+      startTime: performance.now(),
+      dispersing: false,
+      disperseStartTime: 0,
+      disperseDelays: new Map(),
+      maxDisperseDelayMs: 0,
+      stragglers: new Set(),
+      stragglerFadeStart: new Map(),
+      joinCounter: 0,
+    };
+    entranceRef.current = state;
+
+    function disperseNow() {
+      if (state.dispersing) return;
+      state.dispersing = true;
+      state.disperseStartTime = performance.now();
+      // Staggered outward from the viewport centre, same as before —
+      // ranked by how far each item that actually made it into the pile
+      // has to travel back to rest. Anything not yet joined at this
+      // exact moment is a straggler (see below): it never joins the
+      // cascade at all.
+      const ranked = Array.from(state.participants.entries())
+        .filter(([i]) => state.joinedAt.has(i))
+        .map(([i, p]) => ({ index: i, dist: Math.hypot(p.dx, p.dy) }))
+        .sort((a, b) => a.dist - b.dist);
+      ranked.forEach((r, rank) => {
+        state.disperseDelays.set(r.index, rank * ENTRANCE_STAGGER_MS);
+      });
+      state.maxDisperseDelayMs = ranked.length > 0 ? (ranked.length - 1) * ENTRANCE_STAGGER_MS : 0;
+      state.participants.forEach((_, i) => {
+        if (!state.joinedAt.has(i)) state.stragglers.add(i);
+      });
+    }
+
+    function maybeScheduleDispersal() {
+      if (state.joinedAt.size < state.participants.size) return;
+      // Everyone's in. Guarantee at least PILE_MIN_DWELL_MS total time
+      // in the pile — measured from phase A's own start, not from
+      // whenever the last photo happened to join — so a fully warm
+      // cache still reads as a pile, never a flash.
+      const elapsed = performance.now() - state.startTime;
+      const remaining = Math.max(0, PILE_MIN_DWELL_MS - elapsed);
+      if (remaining === 0) {
+        disperseNow();
+      } else {
+        const t = setTimeout(() => {
+          if (activeRef.current && entranceRef.current === state) disperseNow();
+        }, remaining);
+        timeoutsRef.current.push(t);
+      }
+    }
+
+    participants.forEach((_, i) => {
+      const img = imgZero[i];
+      function join() {
+        if (!activeRef.current || entranceRef.current !== state) return; // superseded
+        if (state.dispersing) {
+          // Too late for the pile: fade in alone, at rest, whenever this
+          // straggler's own decode happens to resolve.
+          state.stragglerFadeStart.set(i, performance.now());
+          return;
+        }
+        state.joinCounter += 1;
+        // "Newest on top," in both the DOM (fallback CSS path) and the
+        // GL surface (WebGL has no notion of DOM z-index — see
+        // GLSurface's renderOrderRef doc).
+        const outerEl = outerZero[i];
+        if (outerEl) outerEl.style.zIndex = String(state.joinCounter);
+        renderOrderRef.current[i] = state.joinCounter;
+        state.joinedAt.set(i, performance.now());
+        maybeScheduleDispersal();
+      }
+      if (!img) {
+        join();
+        return;
+      }
+      whenImageReady(img).then(join);
+    });
+
+    const maxWaitTimer = setTimeout(() => {
+      if (activeRef.current && entranceRef.current === state) disperseNow();
+    }, PILE_MAX_WAIT_MS);
+    timeoutsRef.current.push(maxWaitTimer);
+  }
+
+  // The entrance itself: a real two-phase loading state (see the
+  // constants above) rather than one animation with a start keyframe.
+  // Kicks off at "arm time" — as soon as we know this is a real
+  // activation (active && a fresh arriveKey) — not gated on any
+  // aggregate photo-readiness signal the way it used to be; each
+  // participating photo's OWN decode (whenImageReady) is what reveals it
+  // into the pile now. A layout effect so the STARTING state (every
+  // participating photo at opacity 0 — see the JSX below, which no
+  // longer computes any position for it either, just that one flag) is
+  // what actually paints, with nothing about where photos will end up
+  // computed before this runs.
+  useIsomorphicLayoutEffect(() => {
+    if (reducedMotion) return;
+    if (!active) return;
+    if (entranceStartedForKeyRef.current === arriveKey) return;
+    entranceStartedForKeyRef.current = arriveKey;
+    startPileEntrance();
+  }, [active, reducedMotion, layout, arriveKey]);
+
+  // Keeps an in-flight entrance's pile offsets correct if the viewport
+  // resizes mid-run — re-measured from the live DOM rect, same as the
+  // kickoff above, so a resize never leaves a stale pixel target for
+  // either a still-piling photo or one already mid-dispersal.
   useEffect(() => {
     if (reducedMotion) return;
     function onResize() {
-      const entrance = entranceRef.current;
-      if (!entrance) return;
+      const state = entranceRef.current;
+      if (!state) return;
       const viewportWidth = window.innerWidth;
       const viewportHeight = window.innerHeight;
-      entrance.items.forEach((item, i) => {
-        const layoutItem = layout[i];
-        if (!layoutItem) return;
-        const { dxVw, dyVh } = centerOffsetVwVh(layoutItem, viewportWidth, viewportHeight);
-        item.dx = (dxVw / 100) * viewportWidth;
-        item.dy = (dyVh / 100) * viewportHeight;
+      const centerX = viewportWidth / 2;
+      const centerY = viewportHeight / 2;
+      state.participants.forEach((p, i) => {
+        const outerEl = itemRefs.current[i];
+        if (!outerEl) return;
+        const rect = outerEl.getBoundingClientRect();
+        const { jx, jy } = pileJitterFor(i);
+        p.dx = centerX + jx - (rect.left + rect.width / 2);
+        p.dy = centerY + jy - (rect.top + rect.height / 2);
       });
     }
     window.addEventListener("resize", onResize);
     return () => window.removeEventListener("resize", onResize);
-  }, [reducedMotion, layout]);
+  }, [reducedMotion]);
 
-  // Reduced motion: no travel, and no name-first sequencing either —
-  // there's nothing animated to sequence against, so photos simply fade
-  // in the moment they're ready, same as always.
+  // Reduced motion: no pile, no travel — each participating photo simply
+  // fades in, alone, the moment its own decode resolves (same
+  // whenImageReady signal phase A uses), at its one and only position.
   useIsomorphicLayoutEffect(() => {
     if (!reducedMotion) return;
-    if (!active || !readyToReveal) return;
-    const copyZero = entranceElRefs.current.slice(0, layout.length);
+    if (!active) return;
+    if (entranceStartedForKeyRef.current === arriveKey) return;
+    entranceStartedForKeyRef.current = arriveKey;
     entranceRef.current = null;
     const REDUCED_FADE_MS = 400;
-    copyZero.forEach((el) => {
-      if (!el) return;
-      el.style.transition = `opacity ${REDUCED_FADE_MS}ms ease`;
+    const copyZero = entranceElRefs.current.slice(0, layout.length);
+    const imgZero = imgRefs.current.slice(0, layout.length);
+    copyZero.forEach((maybeEl, i) => {
+      if (!maybeEl) return;
+      const el = maybeEl;
       el.style.transform = "";
-      el.style.opacity = "1";
+      const img = imgZero[i];
+      function reveal() {
+        if (!activeRef.current) return;
+        el.style.transition = `opacity ${REDUCED_FADE_MS}ms ease`;
+        el.style.opacity = "1";
+      }
+      if (!img) {
+        reveal();
+        return;
+      }
+      whenImageReady(img).then(reveal);
     });
-  }, [active, readyToReveal, reducedMotion, layout]);
+  }, [active, reducedMotion, layout, arriveKey]);
 
   // One rAF loop, two independent writers. The parallax half runs
   // unconditionally, every frame, from the first one — it owns only
@@ -487,53 +669,78 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         el.style.transform = `translateY(${distance * PARALLAX_STRENGTH * depth}px)`;
       });
 
-      // Entrance — inner wrapper, copy-0 only, only while still playing.
-      // Opacity and transform are driven on the SAME timeline: opacity
-      // ramps 0 -> 1 over the first 40% of an item's own travel, never
-      // reaching 1 while the transform is still near its full start
-      // offset (a photo used to reach opacity 1 immediately, before it
-      // had moved at all, which read as "appearing at the pile before it
-      // moves").
+      // Entrance — inner wrapper, copy-0 only. Two independent
+      // sub-phases share the same state object (see PileEntranceState):
+      // phase A (pile) writes a CONSTANT transform — the pile offset,
+      // set the instant each photo joins — while easing its OWN opacity
+      // 0 -> 1 over PILE_FADE_IN_MS; phase B (disperse) eases the
+      // transform back to 0, with opacity already at 1 and left alone
+      // (never re-ramped — every item that makes it into the cascade has
+      // already fully faded in well before PILE_MIN_DWELL_MS elapses, so
+      // re-ramping here would visibly dip it back down first). A
+      // straggler (not yet decoded when dispersal started) gets a third,
+      // fully independent treatment: a plain opacity fade at its one and
+      // only (rest) position, whenever its own decode eventually
+      // resolves — no transform, since it was never displaced to begin
+      // with.
       const entrance = entranceRef.current;
       if (entrance) {
         const now = performance.now();
-        const stillPlaying = now < entrance.startTime + entrance.maxDelayMs + ENTRANCE_DURATION_MS;
-        if (stillPlaying) {
-          for (let i = 0; i < layout.length; i++) {
+
+        if (!entrance.dispersing) {
+          entrance.participants.forEach((p, i) => {
+            if (entrance.stragglers.has(i)) return;
             const el = entranceElRefs.current[i];
-            const item = entrance.items.get(i);
-            if (!el || !item) continue;
-            const elapsed = now - entrance.startTime - item.delayMs;
-            let ex = 0;
-            let ey = 0;
-            let opacity = 1;
-            if (elapsed <= 0) {
-              ex = item.dx;
-              ey = item.dy;
-              opacity = 0;
-            } else if (elapsed < ENTRANCE_DURATION_MS) {
-              const t = elapsed / ENTRANCE_DURATION_MS;
-              const eased = easeOutCubic(t);
-              ex = item.dx * (1 - eased);
-              ey = item.dy * (1 - eased);
-              opacity = Math.min(1, t / 0.4);
-            }
-            el.style.transform = `translate(${ex}px, ${ey}px)`;
+            const joinedAt = entrance.joinedAt.get(i);
+            if (!el || joinedAt == null) return; // hasn't joined yet — stays invisible
+            const elapsed = now - joinedAt;
+            const opacity = elapsed >= PILE_FADE_IN_MS ? 1 : elapsed / PILE_FADE_IN_MS;
+            el.style.transform = `translate(${p.dx}px, ${p.dy}px) rotate(${p.jr}deg)`;
             el.style.opacity = String(opacity);
-          }
+          });
         } else {
-          // Just finished — write the identity once more (covers the
-          // frame where `elapsed` first exceeds the duration, so no item
-          // is left mid-tween) and then stop touching this element
-          // until the next arrival.
-          for (let i = 0; i < layout.length; i++) {
+          let allSettled = true;
+          entrance.participants.forEach((p, i) => {
+            if (entrance.stragglers.has(i)) return;
             const el = entranceElRefs.current[i];
-            if (el && entrance.items.has(i)) {
-              el.style.transform = "translate(0px, 0px)";
-              el.style.opacity = "1";
+            const delayMs = entrance.disperseDelays.get(i);
+            if (!el || delayMs == null) return;
+            const elapsed = now - entrance.disperseStartTime - delayMs;
+            let ex = p.dx;
+            let ey = p.dy;
+            let er = p.jr;
+            if (elapsed > 0) {
+              const t = Math.min(1, elapsed / ENTRANCE_DURATION_MS);
+              const eased = easeOutCubic(t);
+              ex = p.dx * (1 - eased);
+              ey = p.dy * (1 - eased);
+              er = p.jr * (1 - eased);
+              if (t < 1) allSettled = false;
+            } else {
+              allSettled = false;
             }
-          }
-          entranceRef.current = null;
+            el.style.transform = `translate(${ex}px, ${ey}px) rotate(${er}deg)`;
+            el.style.opacity = "1";
+          });
+          entrance.stragglers.forEach((i) => {
+            const el = entranceElRefs.current[i];
+            const fadeStart = entrance.stragglerFadeStart.get(i);
+            if (!el) return;
+            if (fadeStart == null) {
+              allSettled = false; // still decoding — keep the loop alive
+              return;
+            }
+            const elapsed = now - fadeStart;
+            const opacity = elapsed >= PILE_STRAGGLER_FADE_MS ? 1 : elapsed / PILE_STRAGGLER_FADE_MS;
+            el.style.opacity = String(opacity);
+            if (opacity < 1) allSettled = false;
+          });
+          // Only stop touching these elements once every non-straggler
+          // has finished its own disperse tween AND every straggler has
+          // finished its own fade (or there are none) — a straggler can
+          // in principle resolve well after dispersal, so this loop
+          // outlives a "fixed duration" check by design.
+          if (allSettled) entranceRef.current = null;
         }
       }
 
@@ -599,7 +806,6 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       >
         {Array.from({ length: COPIES }).map((_, copy) =>
           layout.map((item, i) => {
-            const startOffset = copy === 0 ? centerOffsetVwVh(item) : null;
             return (
             <div
               key={`${item.photo.src}-${copy}`}
@@ -615,34 +821,32 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
             >
               {/* Entrance-owned wrapper, nested inside the parallax-owned
                   one above — see the itemRefs/entranceElRefs comment.
-                  copy-0 instances render ALREADY hidden and displaced to
-                  centre (see centerOffsetVwVh) — a plain static style
-                  object, present in the very first HTML this component
-                  ever produces, server-rendered markup included: there
-                  is no client-only effect this waits on, so no frame,
-                  ever, can show a copy-0 photo at its final position
-                  before the entrance has run (previously true only
-                  after hydration + a layout effect — the gap between
-                  raw SSR paint and that effect running was exactly the
-                  flash this replaces). copy-1 (always off-screen at
-                  arrival) gets neither: it's never animated, so it
-                  renders at rest, visible, from the start. The reveal
-                  effect later overwrites both properties imperatively
-                  (opacity -> 1, transform animating back to identity) —
-                  it never fights this initial render because neither
-                  value here is state-derived, so React never re-asserts
-                  it on a later, unrelated re-render (e.g. focalIndex
-                  changing on scroll). */}
+                  copy-0 instances render ALREADY invisible — a plain
+                  static `opacity: 0`, present in the very first HTML
+                  this component ever produces, server-rendered markup
+                  included: there is no client-only effect this waits on,
+                  so no frame, ever, can show a copy-0 photo at its final
+                  position before the entrance has sorted it into
+                  "doesn't participate, reveal now" or "participates,
+                  wait for the pile" (see startPileEntrance). Deliberately
+                  NOT a computed starting position — the pile position
+                  isn't known until it's measured client-side from the
+                  real, already-laid-out DOM rect (see that function's own
+                  comment for why: a formula evaluated before layout has
+                  settled was a real, reload-only bug). copy-1 (always
+                  off-screen at arrival) gets neither: it's never
+                  animated, so it renders at rest, visible, from the
+                  start. Later effects/the rAF loop overwrite both
+                  properties imperatively — they never fight this initial
+                  render because neither value here is state-derived, so
+                  React never re-asserts it on a later, unrelated
+                  re-render (e.g. focalIndex changing on scroll). */}
               <div
                 ref={(el) => {
                   entranceElRefs.current[copy * layout.length + i] = el;
                 }}
                 className="landing-photo-entrance"
-                style={
-                  startOffset
-                    ? { opacity: 0, transform: `translate(${startOffset.dxVw}vw, ${startOffset.dyVh}vh)` }
-                    : undefined
-                }
+                style={copy === 0 ? { opacity: 0 } : undefined}
               >
                 <Image
                   ref={(el) => {
@@ -654,12 +858,13 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
                   height={item.photo.height}
                   className="block h-auto w-full"
                   sizes={`${item.placement.w}vw`}
-                  // Every copy-0 photo needs to actually be loaded before
-                  // the entrance can start (see readyNodeCount on
-                  // GLSurface below) — next/image lazy-loads everything
-                  // but the first by default, which would leave anything
+                  // Every copy-0 photo needs to actually be fetching from
+                  // the start for its own decode (see whenImageReady) to
+                  // ever resolve — next/image lazy-loads everything but
+                  // the first by default, which would leave anything
                   // off-screen at arrival never even fetching until
-                  // scrolled near, deadlocking that wait forever. Copy-1
+                  // scrolled near, deadlocking that wait forever (in
+                  // practice, becoming a permanent straggler). Copy-1
                   // (the infinite-scroll duplicate, always off-screen at
                   // arrival) stays lazy — nothing waits on it.
                   priority={copy === 0}
@@ -696,9 +901,8 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         bendDepth={BEND_DEPTH}
         bendRadiusMultiplier={BEND_RADIUS_MULTIPLIER}
         active={active}
+        renderOrderRef={renderOrderRef}
         onAvailabilityChange={setGlStatus}
-        onTexturesReady={() => setTexturesReady(true)}
-        readyNodeCount={layout.length}
         className="pointer-events-none fixed inset-0 z-10"
       />
 
@@ -793,7 +997,7 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       >
         <DecipherWordmark
           arriveKey={arriveKey}
-          ready={readyToReveal}
+          ready={active}
           active={active}
           reducedMotion={reducedMotion}
         />

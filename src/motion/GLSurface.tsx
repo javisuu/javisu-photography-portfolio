@@ -88,7 +88,7 @@ void main() {
 }
 `;
 
-type PlaneRef = { node: HTMLImageElement; mesh: Mesh };
+type PlaneRef = { node: HTMLImageElement; mesh: Mesh; index: number };
 type PendingUpload = { texture: Texture; bitmap: ImageBitmap; index: number };
 
 // Uploading is the expensive part (a synchronous gl.texImage2D per
@@ -128,6 +128,16 @@ export type GLSurfaceProps = {
    * which always runs to completion regardless — pausing only affects
    * whether completed frames get painted. */
   active?: boolean;
+  /** Per-node paint-order override, read fresh every frame (like uOpacity
+   * below) rather than fixed at mesh-creation time. WebGL has no concept
+   * of DOM z-index — `sort: true` paints transparent meshes in
+   * `renderOrder` order, which otherwise defaults to each node's fixed
+   * index in `nodes` for the lifetime of the scene. A caller that needs
+   * paint order to change dynamically (e.g. "most recently revealed
+   * plane goes on top," which DOM z-index alone can't achieve for a GL-
+   * painted surface) writes higher values into this ref as needed;
+   * indices with no entry keep the default (their own index). */
+  renderOrderRef?: RefObject<number[]>;
   /** Fires once availability is known: true once a WebGL2/WebGL context
    * was created and the render loop is running; false if context
    * creation or setup failed for any reason. The caller MUST NOT hide
@@ -159,6 +169,7 @@ export default function GLSurface({
   velocityNormalize = 40,
   className,
   active = true,
+  renderOrderRef,
   onAvailabilityChange,
   onTexturesReady,
   readyNodeCount,
@@ -323,9 +334,12 @@ export default function GLSurface({
           // Ascending, matching the order nodes were passed in — same
           // rule CSS uses for same-stacking-context absolutely-positioned
           // siblings with no z-index: later in DOM order paints on top.
+          // Re-asserted (and potentially overridden via renderOrderRef)
+          // every frame below, so this initial value only matters before
+          // the first frame paints.
           mesh.renderOrder = i;
           mesh.setParent(scene);
-          return { node, mesh };
+          return { node, mesh, index: i };
         })
         .filter((p): p is PlaneRef => p !== null);
 
@@ -381,9 +395,10 @@ export default function GLSurface({
           // wrap or any other DOM-driven motion automatically: there's no
           // special-case wrap logic here, the rect already reflects it.
           const radius = window.innerHeight * bendRadiusMultiplier;
-          for (const { node, mesh } of planes) {
+          for (const { node, mesh, index } of planes) {
             const rect = node.getBoundingClientRect();
             mesh.scale.set(rect.width, rect.height, 1);
+            mesh.renderOrder = renderOrderRef?.current?.[index] ?? index;
             // Camera space is centered on the viewport with +Y up; CSS
             // rects are top-left origin with +Y down — recenter and flip.
             mesh.position.set(
@@ -441,7 +456,7 @@ export default function GLSurface({
     // tear down and rebuild the whole scene (destroying every texture)
     // to change what amounts to a flag.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes, lenisRef, bendDepth, bendRadiusMultiplier, velocityNormalize, onAvailabilityChange, readyNodeCount]);
+  }, [nodes, lenisRef, renderOrderRef, bendDepth, bendRadiusMultiplier, velocityNormalize, onAvailabilityChange, readyNodeCount]);
 
   return <canvas ref={canvasRef} className={className ?? "pointer-events-none fixed inset-0"} />;
 }
