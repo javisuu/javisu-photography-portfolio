@@ -45,19 +45,21 @@ El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27)
 ## Proximos pasos
 
 1. Javi revisa la web en `localhost:3000` y decide si B2 sigue existiendo.
-2. Javi acepta o corrige la reformulacion de CA5 y CA6 de la spec 001 (`specs/001-diagnostico-corregir-medicion/spec.md`, "Resultado de la verificacion"). Despues, commit de la spec.
-3. Decidir que se hace con los 13 cambios sin commit que venian de `feat/landing-gl-surface` (entre otros, `GLSurface.tsx` y `LandingComposition.tsx`): revisarlos y hacer commit aparte.
-4. Arreglar B1 y pasar a exigir `npx eslint src --max-warnings=0` en el diagnostico.
-5. Etapa 3 de la pasada de 5: re-verificar `/about` y `/credits` contra el spec revisado.
-6. Etapa 5: pasada de documentacion y commit.
-7. Spec de la transicion carrusel→album (GSAP Flip).
-8. Opcional: spec de prueba negativa para el diagnostico (`--autotest`), que demuestre que los invariantes detectan un fallo provocado.
+2. Commit de los cambios previos de `feat/landing-gl-surface`: la entrada en dos fases del landing y lo que queda de la capa agentica (revisados el 2026-10-11).
+3. Arreglar B1 y pasar a exigir `npx eslint src --max-warnings=0` en el diagnostico.
+4. **Atlas: plan de que se hace con el y como.** Primero una spec que fije el objetivo del atlas, y despues decidir la implementacion.
+5. **Notas laterales en algunas fotos del album.** La referencia de estilo es `docs/referencias/2026-10-11_notas-laterales.png`; cuenta solo el estilo, no las fotos ni los textos. Muestra dos piezas: un parrafo largo en serif junto a una foto, con una raya y la firma "JAVIER SUQUIA" en versalitas gris, y una frase corta en cursiva gris precedida de una raya fina, al lado contrario de la foto. **El campo no existe todavia:** `Photo` (`src/data/photos.ts:47-60`) no tiene ningun campo de texto. Hay que crearlo (es una spec) y Javi tiene que escribir los textos.
+6. **Quitar la barra de scroll del navegador**, confirmado por Javi el 2026-10-11. `src/app/globals.css` no la oculta hoy. Hace falta una spec: hay que ocultarla sin perder el scroll con teclado ni con rueda, y comprobarlo en el landing (Lenis), en los albumes y en el atlas.
+7. **Mejorar efectos y navegabilidad.** Primero un inventario de lo que falla o falta. Cuenta lo pendiente de F3: transicion carrusel→album (GSAP Flip), digitos rodantes y flechas prev/next de foto.
+8. **Version movil y iPad.** Hoy el sitio esta orientado a escritorio. Primero se mide: anadir viewports de movil (390x844) y iPad (820x1180) al diagnostico, y despues una spec por pagina segun lo que salga.
+9. Etapa 3 de la pasada de 5: re-verificar `/about` y `/credits` contra el spec revisado.
+10. Opcional: spec de prueba negativa para el diagnostico (`--autotest`).
 
 ## Esperando a
 
 - Javi: biografia real de `/about` (hoy es `[PLACEHOLDER BIO]`, no inventar). Pedido el 2026-09-01
 - Javi: handle de Instagram para `/about` (hoy `[PLACEHOLDER]`). Pedido el 2026-09-01
-- Javi: textos `note` y `aside` de los albumes (Sol, America, New York, Norte). Pedido el 2026-09-20
+- Javi: textos de las notas laterales (parrafo largo y frase corta, ver el paso 5) y en que fotos van. Pedido el 2026-09-20. El campo para guardarlos no existe en `src/data/photos.ts`; lo crea la spec del paso 5
 - Javi: las `lat`/`lng` que siguen a `null` en `src/data/photos.ts`, cuyas fotos no aparecen en el atlas. Pedido el 2026-09-23
 
 ## Pendiente de verificar
