@@ -18,7 +18,7 @@ export default function AlbumsPage() {
   }));
 
   return (
-    <div className="relative h-screen w-full overflow-hidden">
+    <main className="relative h-screen w-full overflow-hidden">
       <div className="pointer-events-none absolute inset-x-0 top-0 z-20 p-6 md:p-10">
         <Link
           href="/"
@@ -29,6 +29,6 @@ export default function AlbumsPage() {
       </div>
 
       <AlbumsCarousel albums={albums} />
-    </div>
+    </main>
   );
 }

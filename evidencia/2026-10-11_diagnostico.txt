@@ -1,0 +1,216 @@
+DIAGNOSTICO 2026-10-11 · feat/landing-gl-surface · b741d04 · 14 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+C:\Users\jsuqu\Documents\aprendizaje_autonomo\javisu-photography-portfolio\src\motion\AlbumsCarousel.tsx
+  551:6  warning  React Hook useEffect has a missing dependency: 'anchorRestOffsetPx'. Either include it or remove the dependency array  react-hooks/exhaustive-deps
+
+✖ 1 problem (0 errors, 1 warning)
+
+=== next build ===
+ok
+
+=== next dev en :3100 ===
+ok
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA\nJAVIER SUAREZ SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "buffer": [
+      300,
+      150
+    ],
+    "css": [
+      300,
+      150
+    ],
+    "expected": [
+      1440,
+      3780
+    ]
+  }
+}
+  consola:
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+  FALLA sin errores de consola · 2 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  FALLA wordmark dice SUQUIA · dice: "SUQUIA\nJAVIER SUAREZ SUQUIA"
+  FALLA ninguna landing-photo invisible en reposo · 15 de 30 con opacity < 1
+
+=== ruta /albums ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 0,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIAJAVIER SUAREZ SUQUIASUQUIAJAVIERSU",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+  FALLA sin errores de consola · 3 errores
+  FALLA un solo <main> visible · visibles: 0 de 1
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIAJAVIER SUAREZ SUQUIASUQUIAJAVIERSU",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+  FALLA sin errores de consola · 2 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIAJAVIER SUAREZ SUQUIASUQUIAJAVIERSU",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "buffer": [
+      300,
+      150
+    ],
+    "css": [
+      300,
+      150
+    ],
+    "expected": [
+      1440,
+      9252
+    ]
+  }
+}
+  consola:
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+  FALLA sin errores de consola · 3 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /credits ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIAJAVIER SUAREZ SUQUIASUQUIAJAVIERSU",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+  FALLA sin errores de consola · 2 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIAJAVIER SUAREZ SUQUIASUQUIAJAVIERSU",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "buffer": [
+      300,
+      150
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola:
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+    [error] Failed to load resource: the server responded with a status of 403 (Forbidden)
+  FALLA sin errores de consola · 3 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  FALLA buffer del canvas = caja * dpr · buffer 300,150 vs esperado 1440,609
+
+=== RESUMEN ===
+tsc          ok
+lint         ✖ 1 problem (0 errors, 1 warning)
+build        ok
+consola      15 errores en 6 rutas
+invariantes  17 de 27
+
+FALLOS
+- / · sin errores de consola · 2 errores
+- / · wordmark dice SUQUIA · dice: "SUQUIA\nJAVIER SUAREZ SUQUIA"
+- / · ninguna landing-photo invisible en reposo · 15 de 30 con opacity < 1
+- /albums · sin errores de consola · 3 errores
+- /albums · un solo <main> visible · visibles: 0 de 1
+- /about · sin errores de consola · 2 errores
+- /album/america · sin errores de consola · 3 errores
+- /credits · sin errores de consola · 2 errores
+- /atlas · sin errores de consola · 3 errores
+- /atlas · buffer del canvas = caja * dpr · buffer 300,150 vs esperado 1440,609
+

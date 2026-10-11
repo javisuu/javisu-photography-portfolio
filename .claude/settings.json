@@ -1,0 +1,36 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(date:*)",
+      "Bash(git status:*)",
+      "Bash(git diff:*)",
+      "Bash(git log:*)",
+      "Bash(git branch:*)",
+      "Bash(npm run *)",
+      "Bash(npx tsc *)",
+      "Bash(npx eslint *)",
+      "Bash(npx next build)",
+      "Bash(node scripts/*)",
+      "Bash(command -v *)",
+      "Bash(tasklist)",
+      "Bash(netstat -ano)"
+    ],
+    "deny": [
+      "Bash(git push:*)",
+      "Bash(git reset --hard:*)",
+      "Bash(rm -rf:*)",
+      "Bash(vercel:*)",
+      "Bash(ssh:*)",
+      "Bash(scp:*)",
+      "Bash(rsync:*)",
+      "Edit(evidencia/**)",
+      "Write(evidencia/**)",
+      "Edit(photos-master/**)",
+      "Write(photos-master/**)",
+      "Edit(specs/_plantilla/**)",
+      "Read(**/.env)",
+      "Read(**/.env.*)",
+      "Read(~/.ssh/**)"
+    ]
+  }
+}
