@@ -11,7 +11,6 @@ export const metadata: Metadata = {
   },
 };
 
-const YEAR = new Date().getFullYear();
 const GITHUB_URL = "https://github.com/javisuu/javisu-photography-portfolio";
 
 // A footnote, not a page — five lines, no heading shouting "Credits".
@@ -28,7 +27,7 @@ export default function CreditsPage() {
       </div>
 
       <div className="mx-auto flex max-w-md flex-col gap-6 px-6 pb-24 pt-28 text-[14px] text-[#666] md:px-0 md:pt-40">
-        <p>Photography, design and development — Javier Suquia</p>
+        <p>Photography, design and development — Javier Suárez Suquía</p>
         <p>Typeface: EB Garamond</p>
         <p>Built with Next.js, WebGL (OGL), GSAP, Lenis</p>
         <a
@@ -40,8 +39,8 @@ export default function CreditsPage() {
           GitHub repository
         </a>
         <p className="text-[#888]">
-          All photographs © Javier Suquia, {YEAR}. Not to be reproduced without
-          permission.
+          All photographs © 2026 Javier Suárez Suquía. All rights reserved. Not
+          to be reproduced without permission.
         </p>
       </div>
     </main>

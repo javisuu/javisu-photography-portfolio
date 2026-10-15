@@ -1,6 +1,6 @@
 # Spec 002 · Proteger las fotografias: repo privado y espejo publico
 
-- **Estado:** Borrador
+- **Estado:** Aprobada (Javi, 2026-10-15)
 - **Fecha:** 2026-10-15
 - **Requiere decision de Javi:** Si. Hay acciones en GitHub que solo puede hacer el (cambiar la visibilidad, renombrar, crear el repo espejo, la deploy key), y quedan las preguntas abiertas 1 y 2. No toca ninguna de las cuatro zonas sensibles del sitio.
 
@@ -11,6 +11,7 @@
 - Prefiere un **historial nuevo y limpio** a reescribir el actual.
 - Enfoque elegido: este repo pasa a privado y sigue siendo la fuente de verdad, de donde despliega Vercel. Un **repo espejo publico** recibe el codigo con un historial sin fotos.
 - El copyright de los metadatos es de **2026, fijo**.
+- `docs/referencias/` (muestras de estilo con fotos suyas) **no va al repo publico**. Se queda en el privado.
 
 ## Problema
 
@@ -63,7 +64,7 @@ Nada. No cambia ninguna regla dura de `CLAUDE.md` ni el comportamiento visible.
 | CA1 | `git clone --no-local . /tmp/espejo && cd /tmp/espejo && git filter-repo --path public/photos --path docs/referencias --invert-paths && git log --all --name-only --pretty=format: \| grep -ciE '\.(avif\|webp\|jpe?g\|png\|tiff?)$'` | `1`: solo queda `public/atlas/land-mask.png` |
 | CA2 | El filtrado de CA1 ejecutado dos veces sobre el mismo commit de origen, y despues `git rev-parse HEAD` en cada resultado | El mismo hash las dos veces. Si el filtrado es determinista, el espejo se actualiza con un push normal, sin `--force` |
 | CA3 | `head -20 LICENSE` | Dos ambitos: el codigo con licencia MIT, y `public/photos/**` y las fotografias con "All rights reserved, © 2026 Javier Suquia" |
-| CA4 | `node -e "import('exifr').then(async m=>{const fs=require('fs');let ok=0,n=0;for(const d of fs.readdirSync('public/photos'))for(const f of fs.readdirSync('public/photos/'+d)){n++;const e=await m.default.parse('public/photos/'+d+'/'+f,true).catch(()=>null);if(e&&/Javier Suquia/.test(e.Artist||'')&&/Javier Suquia/.test(e.Copyright||''))ok++}console.log(ok+'/'+n)})"` | `31/31` |
+| CA4 | `node --input-type=module -e "import sharp from 'sharp';import fs from 'fs';let ok=0,n=0;for(const d of fs.readdirSync('public/photos'))for(const f of fs.readdirSync('public/photos/'+d)){n++;const m=await sharp('public/photos/'+d+'/'+f).metadata();if(X)ok++}console.log(ok+'/'+n)"` | `31/31`. EXIF con `Javier Suarez Suquia` (es ASCII y se translitera) y XMP con `Javier Suárez Suquía` (nombre corregido por Javi el 2026-10-15) |
 | CA5 | `curl -s http://localhost:3100/robots.txt` con `next dev` en marcha | `Disallow: /` para al menos `GPTBot`, `ClaudeBot`, `anthropic-ai`, `CCBot`, `Google-Extended`, `Bytespider` y `PerplexityBot`, y `*` permitido |
 | CA6 | `git diff --stat -- src/data/photos.ts` despues de regenerar las fotos | Sin cambios |
 | CA7 | `curl -s http://localhost:3100/ \| grep -o '<meta name="robots"[^>]*>'` | El contenido incluye `noai` y `noimageai` |
@@ -82,8 +83,8 @@ Nada. No cambia ninguna regla dura de `CLAUDE.md` ni el comportamiento visible.
 
 1. **Nombres de los repos.** *Aceptado por Javi el 2026-10-15.* Se propone que el privado pase a llamarse `javisu-photography-portfolio-private` y que el espejo herede `javisu-photography-portfolio`. Asi el enlace de `/credits` sigue valiendo sin tocar `/credits`, que esta dada por cerrada.
 2. **Ramas en el espejo.** *Aceptado por Javi el 2026-10-15.* Se propone que el espejo reciba **solo `main`**: las ramas `feat/*` no se publican. Hoy `main` (`9bf0416`) va muy por detras de esta rama (`f53fa35`). Antes de activar el espejo hay que fusionar el trabajo en `main`, o el espejo nacera desfasado.
-3. **SIN VERIFICAR que `sharp` escriba EXIF dentro de un AVIF.** `withExif` existe en sharp 0.33 o posterior, y aqui se usa `^0.35.4` (`package.json:28`). Se prueba en la primera tarea, sobre una sola foto y sin regenerar nada todavia. Si no funciona, la alternativa es XMP (`withXmp`).
-4. **SIN VERIFICAR que `git filter-repo` este instalado.** Es un paquete de Python (`pip install git-filter-repo`). En la Action se instala en el propio workflow, y en local lo instala Javi o se usa un `pipx run`.
+3. ~~SIN VERIFICAR que `sharp` escriba EXIF dentro de un AVIF.~~ **Verificado el 2026-10-15** con una prueba en el scratchpad sobre un original de `photos-master/SOL/`. `withExif` + `withXmp` en sharp 0.35.4 deja 210 bytes de EXIF y 240 de XMP, leidos de vuelta con `sharp().metadata()`, sin etiqueta de orientacion y con el mismo tamano en pixeles. Matiz: `exifr` no lee AVIF ("Unknown file format"), asi que CA4 se comprueba con `sharp().metadata()` y no con `exifr`.
+4. **`git filter-repo` no esta instalado** (`git: 'filter-repo' is not a git command`, 2026-10-15). Hay Python 3.12, asi que se instala con `pip install git-filter-repo`. En la Action se instala en el propio workflow.
 5. **Forks del repo actual.** Al pasar a privado, los forks publicos se independizan y siguen existiendo con las fotos. Javi lo comprueba en GitHub (Insights → Forks) antes de cambiar la visibilidad.
 
 ## Orden de ejecucion previsto (detalle en `plan.md`)

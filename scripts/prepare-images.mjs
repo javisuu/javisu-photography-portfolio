@@ -20,9 +20,34 @@ import exifr from "exifr";
 
 const ROOT = path.resolve(import.meta.dirname, "..");
 const MASTER_DIR = path.join(ROOT, "photos-master");
-const OUTPUT_DIR = path.join(ROOT, "public", "photos");
-const MANIFEST_PATH = path.join(ROOT, "scripts", "photos-manifest.json");
+// --out <dir> exports images AND manifest there instead, so a regeneration
+// can be checked against src/data/photos.ts before touching public/photos.
+const outArg = process.argv.indexOf("--out");
+const OUT_ROOT = outArg > -1 ? path.resolve(process.argv[outArg + 1]) : null;
+const OUTPUT_DIR = OUT_ROOT ?? path.join(ROOT, "public", "photos");
+const MANIFEST_PATH = OUT_ROOT
+  ? path.join(OUT_ROOT, "photos-manifest.json")
+  : path.join(ROOT, "scripts", "photos-manifest.json");
 const MAX_LONG_EDGE = 2500;
+
+// Authorship travels inside every exported file (see LICENSE): EXIF for
+// general viewers, XMP (Dublin Core + IPTC-style rights) for search
+// engines that surface creator/licence. Fixed year by Javi's decision.
+const ARTIST = "Javier Suárez Suquía";
+const COPYRIGHT = "© 2026 Javier Suárez Suquía. All rights reserved.";
+const XMP = `<x:xmpmeta xmlns:x="adobe:ns:meta/">
+<rdf:RDF xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#">
+<rdf:Description rdf:about=""
+ xmlns:dc="http://purl.org/dc/elements/1.1/"
+ xmlns:xmpRights="http://ns.adobe.com/xap/1.0/rights/"
+ xmlns:photoshop="http://ns.adobe.com/photoshop/1.0/">
+<dc:creator><rdf:Seq><rdf:li>${ARTIST}</rdf:li></rdf:Seq></dc:creator>
+<dc:rights><rdf:Alt><rdf:li xml:lang="x-default">${COPYRIGHT}</rdf:li></rdf:Alt></dc:rights>
+<xmpRights:Marked>True</xmpRights:Marked>
+<photoshop:Credit>${ARTIST}</photoshop:Credit>
+</rdf:Description>
+</rdf:RDF>
+</x:xmpmeta>`;
 const IMAGE_EXTENSIONS = new Set([".jpg", ".jpeg", ".png", ".tif", ".tiff"]);
 
 function slugify(name) {
@@ -109,6 +134,8 @@ async function processAlbum(albumDirName) {
     const outPath = path.join(outDir, outName);
     const outputInfo = await image
       .resize({ ...resizeOpts, withoutEnlargement: true })
+      .withExif({ IFD0: { Artist: ARTIST, Copyright: COPYRIGHT } })
+      .withXmp(XMP)
       .avif({ quality: 62 })
       .toFile(outPath);
 
@@ -149,7 +176,7 @@ async function main() {
 
   await writeFile(MANIFEST_PATH, JSON.stringify(albums, null, 2));
   console.log(
-    `\nDone. Exported images to public/photos/. Manifest written to ${path.relative(ROOT, MANIFEST_PATH)}.`
+    `\nDone. Exported images to ${path.relative(ROOT, OUTPUT_DIR) || OUTPUT_DIR}. Manifest written to ${path.relative(ROOT, MANIFEST_PATH)}.`
   );
   console.log(
     "src/data/photos.ts still needs real titles, and album location/year — update it from the manifest."

@@ -15,6 +15,10 @@ const ebGaramond = EB_Garamond({
 export const metadata: Metadata = {
   title: "SUQUIA — Javier Suquia Photography",
   description: "Photography portfolio of Javier Suquia.",
+  // Opt out of AI training/indexing for crawlers that honour these
+  // directives (see also app/robots.ts and LICENSE). Plain indexing by
+  // search engines stays allowed.
+  robots: "noai, noimageai",
   // Stops mobile Safari from auto-linking things that look like phone
   // numbers/dates (e.g. the "01", "02"... photo numbers) into blue,
   // underlined tel:/date links.

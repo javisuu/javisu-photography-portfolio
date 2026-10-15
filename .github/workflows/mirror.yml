@@ -1,0 +1,57 @@
+# Publishes the code to the public mirror, with every photograph removed
+# from the whole history (see LICENSE and specs/002-proteger-fotos/).
+# Runs only in the private repo: this file travels to the mirror too, and
+# must do nothing there.
+name: mirror
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+concurrency:
+  group: mirror
+  cancel-in-progress: false
+
+jobs:
+  mirror:
+    if: github.repository == 'javisuu/javisu-photography-portfolio-private'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: main
+          fetch-depth: 0
+
+      - name: Install git-filter-repo
+        run: pip install git-filter-repo
+
+      - name: Strip photographs from history
+        run: |
+          git filter-repo --force \
+            --refs main \
+            --path public/photos \
+            --path docs/referencias \
+            --invert-paths
+          # Fail loudly rather than publish anything that slipped through.
+          # Only main's history: the other refs the checkout fetched are left
+          # unfiltered by --refs main, and are never pushed.
+          if git log main --name-only --pretty=format: \
+              | grep -iE '\.(avif|webp|jpe?g|png|tiff?|heic|gif)$' \
+              | grep -v '^public/atlas/land-mask\.png$'; then
+            echo "::error::image files remain in the filtered history"
+            exit 1
+          fi
+
+      - name: Push to the public mirror (fast-forward only)
+        env:
+          MIRROR_DEPLOY_KEY: ${{ secrets.MIRROR_DEPLOY_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$MIRROR_DEPLOY_KEY" > ~/.ssh/mirror_key
+          chmod 600 ~/.ssh/mirror_key
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          export GIT_SSH_COMMAND="ssh -i ~/.ssh/mirror_key -o IdentitiesOnly=yes"
+          # No --force: filtering is deterministic, so each run only appends.
+          # A rejected push means the histories diverged — stop and look.
+          git push git@github.com:javisuu/javisu-photography-portfolio.git main:main
