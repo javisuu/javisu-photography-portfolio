@@ -1,6 +1,6 @@
 # Spec 002 · Proteger las fotografias: repo privado y espejo publico
 
-- **Estado:** Aprobada (Javi, 2026-10-15)
+- **Estado:** Implementada (2026-10-17). Aprobada por Javi el 2026-10-15
 - **Fecha:** 2026-10-15
 - **Requiere decision de Javi:** Si. Hay acciones en GitHub que solo puede hacer el (cambiar la visibilidad, renombrar, crear el repo espejo, la deploy key), y quedan las preguntas abiertas 1 y 2. No toca ninguna de las cuatro zonas sensibles del sitio.
 

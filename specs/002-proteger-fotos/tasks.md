@@ -42,12 +42,23 @@
 
 ## Parte GitHub
 
-- [ ] Javi sigue `guia-github.md`, bloques 0 a 5
-- [ ] CA9 a CA12
+- [x] Javi sigue `guia-github.md`, bloques 0 a 5 (2026-10-17)
+  - 0.1: 0 forks (API publica de GitHub, `forks_count: 0`).
+  - Cambio de orden respecto a la guia: el bloque 2 (renombrar y privatizar) se hizo **antes** del push de `main`, para que `docs/referencias/2026-10-11_notas-laterales.png` y los AVIF nuevos no llegaran a ser publicos. La Action del push fallo (sin espejo ni secret todavia), como se esperaba. La ejecucion manual posterior, la del bloque 5, publico el espejo.
+- [x] CA9 a CA12
+
+## Verificacion GitHub (CA9 a CA12, 2026-10-17)
+
+| CA | Resultado |
+|---|---|
+| CA9 | `main` privado en `50e3017`. Filtrado local (`python -m git_filter_repo --force --refs main --path public/photos --path docs/referencias --invert-paths` sobre un clon `--no-local`) → `235968fd…`. `git ls-remote` del espejo → `235968fd…`. Coinciden |
+| CA10 | Clon del espejo: `git log --all --name-only` da 1 imagen, `public/atlas/land-mask.png`. No existen `public/photos/` ni `docs/referencias/`. 32 commits |
+| CA11 | Javi abre produccion: la web carga con fotos. La entrada va a tirones hasta que termina de cargar todo: es un defecto aparte (ver `docs/ESTADO.md`), no un fallo de este criterio |
+| CA12 | `curl -L https://github.com/javisuu/javisu-photography-portfolio` sin sesion: 200, el repo publico. El privado `javisu-photography-portfolio-private` da 404 a un usuario anonimo |
 
 ## Cierre
 
 - [x] Evidencia de CA8 en `evidencia/2026-10-15_diagnostico_002.txt`
-- [ ] CA9 a CA12 ejecutados
-- [ ] `CLAUDE.md`: mencionar `LICENSE`, el espejo y el nuevo nombre del repo
-- [ ] Estado de `spec.md` → Implementada
+- [x] CA9 a CA12 ejecutados
+- [x] `CLAUDE.md`: mencionar `LICENSE`, el espejo y el nuevo nombre del repo
+- [x] Estado de `spec.md` → Implementada

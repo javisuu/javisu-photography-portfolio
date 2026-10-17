@@ -61,6 +61,12 @@ SUQUIA — a personal photography portfolio for Javier Suquia. Awwwards-level am
 - Font: **EB Garamond** via `next/font/google` (weights 400/500/600 + italic)
 - Images via `next/image` with static imports. No CMS, no database.
 
+## Repo, licence and the public mirror
+
+- This repo is **private**: `github.com/javisuu/javisu-photography-portfolio-private`. It is the source of truth, and Vercel deploys from it.
+- `github.com/javisuu/javisu-photography-portfolio` (the original name) is a **public mirror** with the code only. `.github/workflows/mirror.yml` runs on every push to `main` (and by hand): it strips `public/photos/` and `docs/referencias/` from the whole history with `git filter-repo` and pushes fast-forward only, through the `MIRROR_DEPLOY_KEY` deploy key. Never push to the mirror by hand, and never add `--force` to that workflow. Any new folder holding photographs must be added to its `--path` list before it is committed. See `specs/002-proteger-fotos/`.
+- `LICENSE`: MIT for the code, all rights reserved for the photographs (© 2026 Javier Suárez Suquía). The AVIFs carry that authorship in their EXIF/XMP, written by `scripts/prepare-images.mjs`. `src/app/robots.ts` and the `noai, noimageai` meta tag opt out of AI crawlers.
+
 ## Architecture rules
 
 - All photo data lives in one typed file: `src/data/photos.ts` — album list + per-photo entries (src, width, height, title, capture data, album, order, place). Pages render from this file only; adding a photo must never require touching a component.
