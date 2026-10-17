@@ -4,11 +4,11 @@
 
 **Ultima actualizacion:** 2026-10-15
 **Fase:** F3 · Motion (ver `docs/ROADMAP.md`). Landing, carrusel, pagina de album, About, Credits y Atlas estan dados por cerrados. Queda la pasada de 5 etapas a medias: la etapa 3 (re-verificar About y Credits) sigue sin hacer. Despues vienen la transicion carrusel→album, los digitos rodantes y la regla de hover sobre imagen.
-**Rama:** `feat/001-diagnostico-corregir-medicion` · ultimo commit `f53fa35` · `main` (`9bf0416`) va por detras; hay que fusionar antes de activar el espejo (spec 002)
+**Rama:** `feat/002-proteger-fotos` · ultimo commit `e3dad79` · `main` (`9bf0416`) va por detras; hay que fusionar antes de activar el espejo (spec 002, bloque 1 de `specs/002-proteger-fotos/guia-github.md`)
 
 ## Build
 
-**Verde.** tsc ok · lint 0 errores, 1 aviso · build ok · consola: 0 errores en 6 rutas · invariantes: 29 de 29. Evidencia: `evidencia/2026-10-15_diagnostico_cierre.txt` (y antes `evidencia/2026-10-15_diagnostico.txt` y `evidencia/2026-10-11_diagnostico_cierre.txt`, con el mismo resultado).
+**Verde.** tsc ok · lint 0 errores, 1 aviso · build ok · consola: 0 errores en 6 rutas · invariantes: 29 de 29. Evidencia: `evidencia/2026-10-15_diagnostico_cierre_002.txt`, medido sobre `e3dad79` (y antes `evidencia/2026-10-15_diagnostico_002.txt`, `evidencia/2026-10-15_diagnostico_cierre.txt` y `evidencia/2026-10-11_diagnostico_cierre.txt`, con el mismo resultado).
 
 El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27) estaba falseado por el propio harness. La spec `specs/001-diagnostico-corregir-medicion/` lo corrigio:
 - El harness pedia las paginas desde `127.0.0.1`, y `next dev` responde 403 a los chunks JS que se piden desde cualquier origen que no sea `localhost`. Asi el cliente no llegaba a hidratarse.
@@ -24,12 +24,13 @@ El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27)
 | E3 | Motion | En curso. Hecho: Lenis, blend del nombre, parallax por foto, entrada, hover de imagen en el landing, efecto tubo (landing y album via `GLSurface`), carrusel infinito, descifrado del wordmark y scramble de etiquetas. Falta: transicion carrusel→album (GSAP Flip), digitos rodantes y flechas prev/next de foto | `CLAUDE.md` build order §3 |
 | E4 | Pulido: responsive, metadatos/OG, Lighthouse | Pendiente | — |
 | E5 | Infraestructura agentica (comandos, subagentes, SDD, diagnostico) | Hecha y estrenada. Primer ciclo SDD completo (spec 001). El diagnostico mide bien: los fallos que reportaba eran del propio harness | `specs/001-diagnostico-corregir-medicion/`, `evidencia/2026-10-11_diagnostico_cierre.txt` |
+| E6 | Proteger las fotos (spec 002): licencia, autoria en los metadatos, exclusion de IA, repo privado y espejo publico sin fotos | Parte local hecha y verificada (CA1 a CA8). Falta la parte de GitHub, que hace Javi siguiendo la guia, y CA9 a CA12 | `specs/002-proteger-fotos/tasks.md`, commit `e3dad79`, `evidencia/2026-10-15_diagnostico_002.txt` |
 
 ## Defectos abiertos
 
 | # | Defecto | Bloquea | Estado | Evidencia |
 |---|---|---|---|---|
-| B1 | `react-hooks/exhaustive-deps`: falta la dependencia `anchorRestOffsetPx` en un `useEffect` | No | Abierto. Salida literal: `551:6  warning  React Hook useEffect has a missing dependency: 'anchorRestOffsetPx'. Either include it or remove the dependency array  react-hooks/exhaustive-deps` | `src/motion/AlbumsCarousel.tsx:551`, `evidencia/2026-10-15_diagnostico_cierre.txt:8` |
+| B1 | `react-hooks/exhaustive-deps`: falta la dependencia `anchorRestOffsetPx` en un `useEffect` | No | Abierto. Salida literal: `551:6  warning  React Hook useEffect has a missing dependency: 'anchorRestOffsetPx'. Either include it or remove the dependency array  react-hooks/exhaustive-deps` | `src/motion/AlbumsCarousel.tsx:551`, `evidencia/2026-10-15_diagnostico_cierre_002.txt:8` |
 | B2 | "Al recargar, las fotos del landing parecen salir de arriba" | Por decidir | SIN VERIFICAR. Se reporto el 2026-09-27, cuando el landing estaba roto. El diagnostico de hoy da `landingHidden: 0` en reposo, pero no mide la trayectoria de la entrada. Hay que mirarlo a ojo o con `/medir-dom /` durante la entrada | `evidencia/2026-10-11_diagnostico_cierre.txt` (solo el estado en reposo) |
 | B4 | INP 304 ms | No | SIN VERIFICAR. Se midio antes del landing persistente y no se sabe si con la pagina bien hidratada. Hay que volver a medirlo en F4 | `CLAUDE.md` (arquitectura del landing persistente) |
 | B5 | `/album/america`: aviso de Next de que `/photos/america/01.avif` es el LCP y no lleva `loading="eager"` | No | Intermitente. Salio el 2026-10-11 y no el 2026-10-15 (`evidencia/2026-10-15_diagnostico.txt` no lo recoge). Es un aviso, no un error. Se revisa en F4 (LCP) | `evidencia/2026-10-11_001-diagnostico-corregir-medicion.txt:130` |
@@ -40,11 +41,16 @@ El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27)
 
 ## Bloqueos
 
-- Ninguno tecnico. Algunos pasos dependen de material que tiene que escribir Javi (ver "Esperando a").
+- Ninguno tecnico. La spec 002 espera a que Javi haga los pasos de GitHub, que solo puede hacer el. Algunos pasos dependen de material que tiene que escribir Javi (ver "Esperando a").
 
 ## Proximos pasos
 
-1. **Spec 002, proteger las fotos** (`specs/002-proteger-fotos/spec.md`): repo privado y espejo publico sin fotos, licencia, copyright en los metadatos y exclusion de IA. Esta en borrador y la revisa Javi. Cuando la apruebe: el plan con la guia de pasos manuales en GitHub, luego la parte local y luego los pasos de Javi.
+1. **Spec 002, parte GitHub** (`specs/002-proteger-fotos/guia-github.md`). La parte local esta hecha en `e3dad79` (CA1 a CA8 en `specs/002-proteger-fotos/tasks.md`). En orden:
+   - Bloque 0 (Javi): revisar los forks (Insights → Forks) y lo que saldra a produccion con `npm run dev`. Al fusionar, todo el trabajo desde `9bf0416` llega a Vercel.
+   - Bloque 1 (Claude, con autorizacion expresa de Javi para el push): fusionar `feat/002-proteger-fotos` en `main` con fast-forward y hacer push de `main`.
+   - Bloques 2 a 4 (Javi): renombrar a `javisu-photography-portfolio-private` y pasarlo a privado (Claude actualiza el remoto local), crear el espejo publico vacio, y crear la deploy key y el secret `MIRROR_DEPLOY_KEY`.
+   - Bloque 5: lanzar la Action `mirror` y comprobar CA9 a CA12. Despues, cerrar `tasks.md`: `CLAUDE.md` (mencionar `LICENSE`, el espejo y el nombre nuevo del repo) y la spec a Implementada.
+   - Si Javi no tiene tiempo para GitHub: se sigue con el paso 3 en otra rama desde `e3dad79`, sin fusionar en `main`.
 2. Javi revisa la web (`npm run dev`, y abrir `http://localhost:3000`, no `127.0.0.1`) y decide si B2 sigue existiendo. El cambio que lo arregla ya esta en el commit `ab72272`.
 3. Arreglar B1 y pasar a exigir `npx eslint src --max-warnings=0` en el diagnostico.
 4. **Atlas: siguiente iteracion.** El plan acordado ya esta escrito: `docs/design-spec-v2.md` §5 (globo ortografico, marcas por foto, clusters, rotacion, zoom, hover y enlace al album) y `docs/atlas-data-sources.md`. Esta implementado (`src/motion/Atlas.tsx`). Si Javi hablo de planes posteriores en otra conversacion, no estan en el repo: hay que recogerlos en una spec antes de tocar nada.
@@ -62,7 +68,7 @@ El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27)
 - Javi: textos de las notas laterales (parrafo largo y frase corta, ver el paso 5) y en que fotos van. Pedido el 2026-09-20. El campo para guardarlos no existe en `src/data/photos.ts`; lo crea la spec del paso 5
 - Javi: las coordenadas de las 5 fotos que aun tienen `lat`/`lng: null` (Puerto Escondido x3 y San Blas x2, `src/data/photos.ts:155,167,179,189,201`). Las otras 26 de 31 ya las tienen. Pedido el 2026-09-23
 
-- Javi: revisar y aprobar la spec 002. Despues, los pasos manuales en GitHub de su guia. Pedido el 2026-10-15
+- Javi: los pasos manuales en GitHub de la spec 002 (`specs/002-proteger-fotos/guia-github.md`, bloques 0 a 5) y la autorizacion para el push de `main` del bloque 1. La spec la aprobo el 2026-10-15. Pedido el 2026-10-15
 
 ## Pendiente de verificar
 
@@ -79,3 +85,4 @@ El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27)
 | 2026-10-11 | Commits `35f93df` (infraestructura y spec 001), `ab72272` (entrada del landing en dos fases) y `314c281` (capa agentica). Tareas nuevas en Proximos pasos: atlas, notas laterales, barra de scroll, efectos y navegabilidad, movil e iPad | `git log`, `docs/referencias/2026-10-11_notas-laterales.png` |
 | 2026-10-15 | Diagnostico de cierre: verde, 29 de 29, 0 errores de consola, lint con 1 aviso (B1) | `evidencia/2026-10-15_diagnostico.txt` |
 | 2026-10-15 | Recuento de coordenadas: 26 de 31 fotos tienen `lat`/`lng` y faltan 5 (`src/data/photos.ts:155,167,179,189,201`). Spec 002 redactada: repo privado y espejo publico sin fotos, licencia, copyright 2026 en los metadatos y exclusion de IA. Encontrada otra imagen con fotos en el historial: `docs/referencias/2026-10-11_notas-laterales.png`. Diagnostico de cierre: verde, 29 de 29 | `specs/002-proteger-fotos/spec.md`, `evidencia/2026-10-15_diagnostico_cierre.txt` |
+| 2026-10-15 | Spec 002, parte local (commit `e3dad79`): `LICENSE` (MIT para el codigo, todos los derechos reservados para las fotos), `README.md` del espejo, autoria "Javier Suárez Suquía" en EXIF/XMP de los 31 AVIF (mismos pixeles, `photos.ts` sin cambios), `robots.ts` con 16 crawlers de IA excluidos, `noai, noimageai`, workflow `mirror.yml` y `/credits` con el nombre completo. CA1 a CA8 verificados. Diagnostico de cierre: verde, 29 de 29 | `specs/002-proteger-fotos/tasks.md`, `evidencia/2026-10-15_diagnostico_002.txt`, `evidencia/2026-10-15_diagnostico_cierre_002.txt` |
