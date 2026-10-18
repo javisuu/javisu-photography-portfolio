@@ -1,0 +1,12 @@
+## CA8 / T6
+$ git diff --stat main -- src/ ':!src/data/photos.ts'
+(fin)
+$ git diff -U0 main -- src/data/photos.ts | grep '^[-+] ' | sed -E 's/\.(avif|jpg)//' | sort | uniq -u   # vacio = solo cambia la extension
+warning: in the working copy of 'src/data/photos.ts', LF will be replaced by CRLF the next time Git touches it
+(fin)
+$ git diff -U0 main -- src/data/photos.ts | grep -c '^+ '
+warning: in the working copy of 'src/data/photos.ts', LF will be replaced by CRLF the next time Git touches it
+36
+$ git diff -U0 main -- src/data/photos.ts | grep '^[-+] ' | grep -cv 'src:\|cover:\|// path under'
+warning: in the working copy of 'src/data/photos.ts', LF will be replaced by CRLF the next time Git touches it
+0

@@ -1,6 +1,6 @@
 # Spec 007 · Que /_next/image sirva imagenes redimensionadas en Vercel
 
-- **Estado:** Aprobada el 2026-10-18 (umbrales de CA4 incluidos), con la enmienda 1 aprobada el mismo dia
+- **Estado:** Implementada el 2026-10-18. Aprobada ese mismo dia, con la enmienda 1. CA1 a CA9 verificados (ver `tasks.md`, T8)
 - **Fecha:** 2026-10-18
 - **Requiere decision de Javi:** No para la spec. No toca el wordmark, el blend, el ciclo de vida de `GLSurface` ni el scroll infinito. Javi si tiene que intervenir en dos puntos fuera del repo: el push que despliega el cambio y, si el arreglo esta en la configuracion del proyecto, el panel de Vercel (ver "Preguntas abiertas")
 

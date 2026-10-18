@@ -1,0 +1,214 @@
+DIAGNOSTICO 2026-10-18 · main · bc283b0 · 0 ficheros sin commit
+contra https://javisu-photography-portfolio.vercel.app
+
+=== tsc --noEmit ===
+omitido (--url)
+
+=== eslint ===
+omitido (--url)
+
+=== next build ===
+omitido (--url)
+
+=== servidor remoto ===
+ok · http 200
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x57d400aa7600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x57d400aa7600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x57d400aa7600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x57d400aa7600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · https://javisu-photography-portfolio.vercel.app/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 392 · participantes 7 · fase B 750 · rezagadas 0 · reposo 1500
+     frame del arranque 167 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 2 (181 ms) · [entrance] start x1
+     al monton: 500 500 500 500 500 500 500
+  2: inicio 406 · participantes 7 · fase B 782 · rezagadas 0 · reposo 1516
+     frame del arranque 167 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 2 (175 ms) · [entrance] start x1
+     al monton: 516 516 516 516 516 516 516
+  3: inicio 392 · participantes 7 · fase B 762 · rezagadas 0 · reposo 1512
+     frame del arranque 167 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 2 (187 ms) · [entrance] start x1
+     al monton: 495 495 495 495 495 495 495
+  fase B      mediana 762 · max 782
+  reposo      mediana 1512 · max 1516
+  frames >50 mediana 0 · max 0
+  frame max   mediana 33 · max 33
+  arranque    mediana 167 · max 167
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 6 rutas
+invariantes  29 de 29
+entrada      arranque 167 ms · fase B 762 ms · reposo 1512 ms · frames >50 ms: 0 (medianas de 3)
+

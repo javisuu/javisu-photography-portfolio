@@ -1,0 +1,47 @@
+# Spec 007 · T8 produccion · 2026-10-18T17:45:52+02:00 · main bc283b0 desplegado (/photos/america/01.jpg responde 200)
+
+## CA1 (w=640) y CA2 (w=256, w=1080) · Accept avif/webp
+$ curl -s -D - -o img -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=640&q=75"
+HTTP/1.1 200 OK
+Content-Length: 36912
+Content-Type: image/webp
+X-Vercel-Cache: MISS
+sharp: webp 640x480
+
+$ curl -s -D - -o img -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75"
+HTTP/1.1 200 OK
+Content-Length: 9950
+Content-Type: image/webp
+X-Vercel-Cache: HIT
+sharp: webp 256x192
+
+$ curl -s -D - -o img -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=1080&q=75"
+HTTP/1.1 200 OK
+Content-Length: 73906
+Content-Type: image/webp
+X-Vercel-Cache: MISS
+sharp: webp 1080x810
+
+## CA3 · Accept solo webp
+$ curl -s -D - -o img -H "Accept: image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=640&q=75"
+HTTP/1.1 200 OK
+Content-Length: 36912
+Content-Type: image/webp
+X-Vercel-Cache: HIT
+sharp: webp 640x480
+
+## Otras fotos (vertical y otro album)
+$ curl -s -D - -o img -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Fsol%2F02.jpg&w=828&q=75"
+HTTP/1.1 200 OK
+Content-Length: 48570
+Content-Type: image/webp
+X-Vercel-Cache: MISS
+sharp: webp 828x1104
+
+$ curl -s -D - -o img -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Fny%2F03.jpg&w=384&q=75"
+HTTP/1.1 200 OK
+Content-Length: 19220
+Content-Type: image/webp
+X-Vercel-Cache: MISS
+sharp: webp 384x288
+

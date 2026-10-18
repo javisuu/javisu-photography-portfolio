@@ -1,0 +1,93 @@
+
+=== servidor remoto ===
+ok · http 200
+
+=== perfil arranque / · repeticion 1 ===
+frame del arranque: sin trace 150 ms · con trace 217 ms (ventana del trace 106 ms)
+AVISO: el trace cambia el frame un 44 % (mas del 30 %): los ms del reparto valen como proporcion, no como cifra
+reparto (tiempo propio en el hilo principal):
+  ejecucion JS          72 ms   68 %
+  decodificacion        28 ms   27 %
+  estilo/layout          3 ms    3 %
+  GC                     2 ms    2 %
+  otros                  0 ms    0 %
+  pintado/GPU            0 ms    0 %
+  red/espera             0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 100 % del frame
+eventos con mas tiempo propio: FunctionCall 70 · Decode Image 28 · Layout 2 · V8.HandleInterrupts 2 · V8.GC_SCAVENGER_SCAVENGE_PARALLEL_PHASE 1
+top 10 por tiempo propio (muestras de CPU de V8):
+     36 ms  createImageBitmap (nativo) <- n 1958ujab6jjhm.js:47:1224  [paquete desconocido]
+     17 ms  setShaders 0vh-nnzi4w5df.js:0:39590  [paquete desconocido]
+      6 ms  (anonima) 0vh-nnzi4w5df.js:0:4006  [paquete desconocido]
+      5 ms  N turbopack-13i8la86i04t_.js:0:5962  [paquete desconocido]
+      5 ms  getExtension 0vh-nnzi4w5df.js:0:9567  [paquete desconocido]
+      3 ms  (anonima) 1958ujab6jjhm.js:47:8224  [paquete desconocido]
+      2 ms  ref 1958ujab6jjhm.js:47:8781  [paquete desconocido]
+      2 ms  (program) (nativo)
+      2 ms  (garbage collector) (nativo)
+      2 ms  id 3ulan8x9qw_35.js:0:109013  [paquete desconocido]
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\1a6d5d37-e28b-4b2e-832e-a79acb68256b\scratchpad\007\traces\perfil-1792338369155-1.json
+
+=== perfil arranque / · repeticion 2 ===
+frame del arranque: sin trace 200 ms · con trace 183 ms (ventana del trace 91 ms)
+reparto (tiempo propio en el hilo principal):
+  ejecucion JS          55 ms   61 %
+  decodificacion        30 ms   33 %
+  estilo/layout          4 ms    5 %
+  GC                     1 ms    1 %
+  otros                  0 ms    0 %
+  pintado/GPU            0 ms    0 %
+  red/espera             0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 100 % del frame
+eventos con mas tiempo propio: FunctionCall 53 · Decode Image 30 · Layout 3 · UpdateLayoutTree 2 · V8.HandleInterrupts 1
+top 10 por tiempo propio (muestras de CPU de V8):
+     39 ms  createImageBitmap (nativo) <- n 1958ujab6jjhm.js:47:1224  [paquete desconocido]
+     18 ms  setShaders 0vh-nnzi4w5df.js:0:39590  [paquete desconocido]
+      4 ms  (anonima) 0vh-nnzi4w5df.js:0:4006  [paquete desconocido]
+      4 ms  getExtension 0vh-nnzi4w5df.js:0:9567  [paquete desconocido]
+      4 ms  (anonima) 1958ujab6jjhm.js:47:8224  [paquete desconocido]
+      1 ms  iw 3ulan8x9qw_35.js:0:118450  [paquete desconocido]
+      1 ms  setSize 0vh-nnzi4w5df.js:0:7141  [paquete desconocido]
+      1 ms  (garbage collector) (nativo)
+      1 ms  console.log (nativo) <- (anonima) 1958ujab6jjhm.js:47:11096  [paquete desconocido]
+      1 ms  sr 3ulan8x9qw_35.js:0:148665  [paquete desconocido]
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\1a6d5d37-e28b-4b2e-832e-a79acb68256b\scratchpad\007\traces\perfil-1792338374434-2.json
+
+=== perfil arranque / · repeticion 3 ===
+frame del arranque: sin trace 150 ms · con trace 183 ms (ventana del trace 88 ms)
+reparto (tiempo propio en el hilo principal):
+  ejecucion JS          55 ms   62 %
+  decodificacion        28 ms   32 %
+  estilo/layout          4 ms    4 %
+  GC                     1 ms    1 %
+  otros                  0 ms    0 %
+  pintado/GPU            0 ms    0 %
+  red/espera             0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 100 % del frame
+eventos con mas tiempo propio: FunctionCall 53 · Decode Image 28 · Layout 2 · UpdateLayoutTree 2 · V8.HandleInterrupts 1
+top 10 por tiempo propio (muestras de CPU de V8):
+     36 ms  createImageBitmap (nativo) <- n 1958ujab6jjhm.js:47:1224  [paquete desconocido]
+     17 ms  setShaders 0vh-nnzi4w5df.js:0:39590  [paquete desconocido]
+      5 ms  (anonima) 0vh-nnzi4w5df.js:0:4006  [paquete desconocido]
+      5 ms  getExtension 0vh-nnzi4w5df.js:0:9567  [paquete desconocido]
+      3 ms  uu 3ulan8x9qw_35.js:0:134332  [paquete desconocido]
+      3 ms  (anonima) 1958ujab6jjhm.js:47:8224  [paquete desconocido]
+      1 ms  (garbage collector) (nativo)
+      1 ms  iw 3ulan8x9qw_35.js:0:118450  [paquete desconocido]
+      1 ms  (anonima) 1958ujab6jjhm.js:47:483  [paquete desconocido]
+      1 ms  aS 3ulan8x9qw_35.js:0:79188  [paquete desconocido]
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\1a6d5d37-e28b-4b2e-832e-a79acb68256b\scratchpad\007\traces\perfil-1792338379211-3.json
+
+=== medianas de 3 ===
+frame del arranque: sin trace 150 ms · con trace 183 ms
+  parse/compilacion      0 ms    0 %
+  ejecucion JS          55 ms   62 %
+  GC                     1 ms    1 %
+  estilo/layout          4 ms    4 %
+  pintado/GPU            0 ms    0 %
+  decodificacion        28 ms   32 %
+  otros                  0 ms    0 %
+  red/espera             0 ms    0 %

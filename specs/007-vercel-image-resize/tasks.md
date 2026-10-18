@@ -26,13 +26,19 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 - [x] **T7** · Documentacion
   - Fichero(s): `CLAUDE.md` (`:68`, `:74`)
   - Comprobacion: `grep -n "AVIF" CLAUDE.md` ya no presenta los AVIF como formato de origen
-- [ ] **T8** · Produccion, despues del push de Javi
+- [x] **T8** · Produccion, despues del push de Javi (`37ecf04..bc283b0`, 2026-10-18)
   - Fichero(s): ninguno
-  - Comprobacion: CA1 a CA5, en `evidencia/AAAA-MM-DD_007-produccion.txt`. Sin push, quedan SIN VERIFICAR
+  - Comprobacion: CA1 a CA5, en `evidencia/2026-10-18_007-produccion.txt`, `evidencia/2026-10-18_007-perfil-produccion.txt` y `evidencia/2026-10-18_diagnostico_produccion_007.txt`. Sin push, quedan SIN VERIFICAR
+  - Resultado:
+    - CA1: `america/01.jpg` a `w=640` sale como WebP de 640x480 y 36 912 bytes.
+    - CA2: a 256 sale de 256x192 (9 950 bytes) y a 1080 de 1080x810 (73 906 bytes).
+    - CA3: con `Accept: image/webp` llega `image/webp`. Tambien responden bien una foto vertical (`sol/02`, 828x1104) y otra de otro album (`ny/03`, 384x288).
+    - CA4: mediana de decodificacion 28 ms (≤ 50) y frame del arranque sin trace 150 ms (≤ 400). Antes eran 382 ms y 817 ms.
+    - CA5: 0 errores en 6 rutas y 29 de 29, con la entrada en 167 ms de mediana de 3. El harness repite solo la seccion `entrada /`; las invariantes y la consola se miden una vez, asi que "en cada repeticion" no se puede afirmar tal como esta escrito el CA
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
-- [ ] Criterios de aceptacion de la spec ejecutados (CA6 a CA9 en local; CA1 a CA5 despues del push)
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/` (`evidencia/2026-10-18_diagnostico_007-b.txt`; el rojo de la caché fría está en `evidencia/2026-10-18_diagnostico_007.txt`)
+- [x] Criterios de aceptacion de la spec ejecutados (CA6 a CA9 en local; CA1 a CA5 despues del push)
+- [x] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
+- [x] Estado de `spec.md` → Implementada
