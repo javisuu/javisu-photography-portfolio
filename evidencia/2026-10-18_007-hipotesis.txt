@@ -1,0 +1,43 @@
+# Spec 007 · hipotesis de la pregunta abierta 1 · 2026-10-18T17:22:58+02:00 · rama feat/007-vercel-image-resize · base f72ca09
+
+## H3: un PNG del mismo despliegue (public/atlas/land-mask.png, 2048x1024)
+$ curl -s -D - -o img -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fatlas%2Fland-mask.png&w=256&q=75"
+HTTP/1.1 200 OK
+Content-Length: 4364
+Content-Type: image/webp
+X-Matched-Path: /atlas/land-mask.png
+X-Vercel-Cache: HIT
+sharp: webp 256x128
+
+$ curl -s -D - -o img -H "Accept: image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fatlas%2Fland-mask.png&w=640&q=75"
+HTTP/1.1 200 OK
+Content-Length: 13190
+Content-Type: image/webp
+X-Matched-Path: /atlas/land-mask.png
+X-Vercel-Cache: MISS
+sharp: webp 640x320
+
+## Otros AVIF (descarta que sea un problema de una sola foto o de cache)
+$ curl -s -D - -o img -H "Accept: image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Fny%2F03.avif&w=384&q=75"
+HTTP/1.1 200 OK
+Content-Length: 214969
+Content-Type: image/avif
+X-Matched-Path: /photos/ny/03.avif
+X-Vercel-Cache: MISS
+sharp: heif 2048x1536
+
+$ curl -s -D - -o img -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Fsol%2F02.avif&w=828&q=75"
+HTTP/1.1 200 OK
+Content-Length: 199627
+Content-Type: image/avif
+X-Matched-Path: /photos/sol/02.avif
+X-Vercel-Cache: MISS
+sharp: heif 1875x2500
+
+## El optimizador valida los parametros (w fuera de deviceSizes/imageSizes)
+$ curl -s -o /dev/null -w '%{http_code}' "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=257&q=75"
+400
+
+## Configuracion images del build local (next 16.3.2)
+$ node -e "console.log(JSON.stringify(require('./.next/required-server-files.json').config.images.formats))"
+formats ["image/webp"] qualities [75] unoptimized false

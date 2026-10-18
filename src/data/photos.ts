@@ -46,7 +46,7 @@ export type Album = {
 };
 
 export type Photo = {
-  src: string; // path under /public/photos, e.g. "/photos/alpes/01.avif"
+  src: string; // path under /public/photos, e.g. "/photos/alpes/01.jpg"
   width: number;
   height: number;
   title: string;
@@ -68,7 +68,7 @@ export const albums: Album[] = [
     location: "México & Panamá",
     year: 2026,
     order: 1,
-    cover: "/photos/america/05.avif",
+    cover: "/photos/america/05.jpg",
   },
   {
     slug: "norte",
@@ -76,7 +76,7 @@ export const albums: Album[] = [
     location: "España & France",
     year: 2026,
     order: 2,
-    cover: "/photos/norte/01.avif",
+    cover: "/photos/norte/01.jpg",
   },
   {
     slug: "sol",
@@ -84,7 +84,7 @@ export const albums: Album[] = [
     location: "España",
     year: 2026,
     order: 3,
-    cover: "/photos/sol/07.avif",
+    cover: "/photos/sol/07.jpg",
   },
   {
     slug: "ny",
@@ -94,14 +94,14 @@ export const albums: Album[] = [
     // Last in the sequence — its "Next Album" footer block links back to
     // the first (getNextAlbum wraps via modulo), closing the loop.
     order: 4,
-    cover: "/photos/ny/01.avif",
+    cover: "/photos/ny/01.jpg",
   },
 ];
 
 // PLACEHOLDER photos — real titles still needed
 export const photos: Photo[] = [
   {
-    src: "/photos/america/01.avif",
+    src: "/photos/america/01.jpg",
     width: 2500,
     height: 1875,
     title: "San Miguel Street",
@@ -113,7 +113,7 @@ export const photos: Photo[] = [
     id: "san-miguel-street",
   },
   {
-    src: "/photos/america/02.avif",
+    src: "/photos/america/02.jpg",
     width: 1875,
     height: 2500,
     title: "Paseo por San Miguel",
@@ -123,7 +123,7 @@ export const photos: Photo[] = [
     place: { city: "San Miguel de Allende", country: "México", lat: 20.91203419935728, lng: -100.74361528208071, precision: "exact" },
   },
   {
-    src: "/photos/america/03.avif",
+    src: "/photos/america/03.jpg",
     width: 2500,
     height: 1875,
     title: "Bougainvillea",
@@ -135,7 +135,7 @@ export const photos: Photo[] = [
     id: "bougainvillea",
   },
   {
-    src: "/photos/america/04.avif",
+    src: "/photos/america/04.jpg",
     width: 2500,
     height: 1668,
     title: "We are the people",
@@ -145,7 +145,7 @@ export const photos: Photo[] = [
     place: { city: "Xilitla", country: "México", lat: 21.396740663941568, lng: -98.99934376399437, precision: "city" },
   },
   {
-    src: "/photos/america/05.avif",
+    src: "/photos/america/05.jpg",
     width: 2500,
     height: 1875,
     title: "Horses in the Dust",
@@ -157,7 +157,7 @@ export const photos: Photo[] = [
     id: "horses-dust",
   },
   {
-    src: "/photos/america/06.avif",
+    src: "/photos/america/06.jpg",
     width: 2500,
     height: 2336,
     title: "Cowboy",
@@ -169,7 +169,7 @@ export const photos: Photo[] = [
     id: "cowboy-silhouette",
   },
   {
-    src: "/photos/america/07.avif",
+    src: "/photos/america/07.jpg",
     width: 1627,
     height: 2500,
     title: "Una tarde con el caballo Orio",
@@ -179,7 +179,7 @@ export const photos: Photo[] = [
     place: { city: "Puerto Escondido", country: "México", lat: null, lng: null, precision: "city" },
   },
   {
-    src: "/photos/america/08.avif",
+    src: "/photos/america/08.jpg",
     width: 2500,
     height: 2099,
     title: "End of the World",
@@ -191,7 +191,7 @@ export const photos: Photo[] = [
     id: "america-untitled-08",
   },
   {
-    src: "/photos/america/09.avif",
+    src: "/photos/america/09.jpg",
     width: 2500,
     height: 1875,
     title: "San Blas Island (Casa de Papel)",
@@ -203,7 +203,7 @@ export const photos: Photo[] = [
     id: "san-blas-island",
   },
   {
-    src: "/photos/norte/01.avif",
+    src: "/photos/norte/01.jpg",
     width: 1875,
     height: 2500,
     title: "Basque Cliffs",
@@ -215,7 +215,7 @@ export const photos: Photo[] = [
     id: "basque-cliffs",
   },
   {
-    src: "/photos/norte/02.avif",
+    src: "/photos/norte/02.jpg",
     width: 1627,
     height: 2500,
     title: "Sea Through the Trees",
@@ -227,7 +227,7 @@ export const photos: Photo[] = [
     id: "sea-through-trees",
   },
   {
-    src: "/photos/norte/03.avif",
+    src: "/photos/norte/03.jpg",
     width: 2500,
     height: 712,
     title: "Waves",
@@ -239,7 +239,7 @@ export const photos: Photo[] = [
     id: "waves-panorama",
   },
   {
-    src: "/photos/norte/04.avif",
+    src: "/photos/norte/04.jpg",
     width: 2500,
     height: 1875,
     title: "Man in the Sea",
@@ -250,7 +250,7 @@ export const photos: Photo[] = [
     id: "man-in-sea",
   },
   {
-    src: "/photos/norte/05.avif",
+    src: "/photos/norte/05.jpg",
     width: 1875,
     height: 2500,
     title: "El barco del atardecer",
@@ -260,7 +260,7 @@ export const photos: Photo[] = [
     place: { city: "San Sebastián", country: "España", lat: 43.32655454035025, lng: -1.9866726889973427, precision: "exact" },
   },
   {
-    src: "/photos/norte/06.avif",
+    src: "/photos/norte/06.jpg",
     width: 2500,
     height: 1875,
     title: "Biarritz Palace",
@@ -272,7 +272,7 @@ export const photos: Photo[] = [
     id: "biarritz-palace",
   },
   {
-    src: "/photos/norte/07.avif",
+    src: "/photos/norte/07.jpg",
     width: 2500,
     height: 1343,
     title: "El mar de Galicia",
@@ -282,7 +282,7 @@ export const photos: Photo[] = [
     place: { city: "A Coruña", country: "España", lat: 43.38735516612886,lng: -8.40604703489836, precision: "exact" },
   },
   {
-    src: "/photos/norte/08.avif",
+    src: "/photos/norte/08.jpg",
     width: 1406,
     height: 2500,
     title: "Home",
@@ -292,7 +292,7 @@ export const photos: Photo[] = [
     place: { city: "Santiago de Compostela", country: "España", lat: 42.87832948515055,lng: -8.543791924004069, precision: "exact" },
   },
   {
-    src: "/photos/ny/01.avif",
+    src: "/photos/ny/01.jpg",
     width: 2048,
     height: 1536,
     title: "New York Skyline",
@@ -304,7 +304,7 @@ export const photos: Photo[] = [
     id: "ny-skyline",
   },
   {
-    src: "/photos/ny/02.avif",
+    src: "/photos/ny/02.jpg",
     width: 1448,
     height: 1930,
     title: "New York Public Library",
@@ -316,7 +316,7 @@ export const photos: Photo[] = [
     id: "ny-library",
   },
   {
-    src: "/photos/ny/03.avif",
+    src: "/photos/ny/03.jpg",
     width: 2048,
     height: 1536,
     title: "Route to SOHO",
@@ -326,7 +326,7 @@ export const photos: Photo[] = [
     place: { city: "New York", country: "United States", lat: 40.75311059665017, lng: -73.98234710852101, precision: "exact" },
   },
   {
-    src: "/photos/ny/04.avif",
+    src: "/photos/ny/04.jpg",
     width: 2048,
     height: 1536,
     title: "Bridge vibes",
@@ -336,7 +336,7 @@ export const photos: Photo[] = [
     place: { city: "New York", country: "United States", lat: 40.752275142563576, lng: -74.00115585066044, precision: "exact" },
   },
   {
-    src: "/photos/ny/05.avif",
+    src: "/photos/ny/05.jpg",
     width: 2048,
     height: 1536,
     title: "Vessel",
@@ -346,7 +346,7 @@ export const photos: Photo[] = [
     place: { city: "New York", country: "United States", lat: 40.75361120828311,lng: -74.00204870217928, precision: "exact" },
   },
   {
-    src: "/photos/ny/06.avif",
+    src: "/photos/ny/06.jpg",
     width: 2048,
     height: 1350,
     title: "Some pizza?",
@@ -356,7 +356,7 @@ export const photos: Photo[] = [
     place: { city: "New York", country: "United States", lat: 40.722089774542546,lng: -73.99635186453946, precision: "exact" },
   },
   {
-    src: "/photos/ny/07.avif",
+    src: "/photos/ny/07.jpg",
     width: 2048,
     height: 1536,
     title: "Statue of Liberty",
@@ -366,7 +366,7 @@ export const photos: Photo[] = [
     place: { city: "New York", country: "United States", lat: 40.688683004779705,lng: -74.04482308846788, precision: "exact" },
   },
   {
-    src: "/photos/sol/01.avif",
+    src: "/photos/sol/01.jpg",
     width: 1875,
     height: 2500,
     title: "Dune in San Sebastián",
@@ -376,7 +376,7 @@ export const photos: Photo[] = [
     place: { city: "San Sebastián", country: "España", lat: 43.326681795284905,lng: -1.9871325760639986,  precision: "exact" },
   },
   {
-    src: "/photos/sol/02.avif",
+    src: "/photos/sol/02.jpg",
     width: 1875,
     height: 2500,
     title: "Tarde con amigos",
@@ -386,7 +386,7 @@ export const photos: Photo[] = [
     place: { city: "San Sebastián", country: "España", lat: 43.31961562166937, lng: -2.0333128663450326, precision: "exact" },
   },
   {
-    src: "/photos/sol/03.avif",
+    src: "/photos/sol/03.jpg",
     width: 1875,
     height: 2500,
     title: "Red Sun, Boat",
@@ -398,7 +398,7 @@ export const photos: Photo[] = [
     id: "red-sun-boat",
   },
   {
-    src: "/photos/sol/04.avif",
+    src: "/photos/sol/04.jpg",
     width: 1406,
     height: 2500,
     title: "PreEclipse",
@@ -408,7 +408,7 @@ export const photos: Photo[] = [
     place: { city: "Villaquirán de la puebla", country: "España", lat: 42.27533681781175, lng:-4.104323261215063, precision: "exact" },
   },
   {
-    src: "/photos/sol/05.avif",
+    src: "/photos/sol/05.jpg",
     width: 2500,
     height: 3333,
     title: "Cristo Silhouette",
@@ -420,7 +420,7 @@ export const photos: Photo[] = [
     id: "cristo-silhouette",
   },
   {
-    src: "/photos/sol/06.avif",
+    src: "/photos/sol/06.jpg",
     width: 1875,
     height: 2500,
     title: "Luna de Sol",
@@ -430,7 +430,7 @@ export const photos: Photo[] = [
     place: { city: "Villaquirán de la puebla", country: "España", lat: 42.27533681781175, lng:-4.104323261215063, precision: "exact" },
   },
   {
-    src: "/photos/sol/07.avif",
+    src: "/photos/sol/07.jpg",
     width: 1875,
     height: 2500,
     title: "Total Eclipse",

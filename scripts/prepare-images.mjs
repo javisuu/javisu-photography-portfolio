@@ -1,5 +1,5 @@
 #!/usr/bin/env node
-// Reads originals from /photos-master/<Album>/, exports resized AVIF
+// Reads originals from /photos-master/<Album>/, exports resized JPEG
 // versions into /public/photos/<slug>/, and writes a JSON manifest
 // (scripts/photos-manifest.json) with the structural facts — width,
 // height, order, cover flag, and any EXIF capture data found — needed
@@ -130,13 +130,16 @@ async function processAlbum(albumDirName) {
       ? { height: Math.min(MAX_LONG_EDGE, metadata.height ?? MAX_LONG_EDGE) }
       : { width: Math.min(MAX_LONG_EDGE, metadata.width ?? MAX_LONG_EDGE) };
 
-    const outName = `${String(order).padStart(2, "0")}.avif`;
+    // JPEG, not AVIF: Vercel's image optimizer passes an AVIF source
+    // through untouched at full size for every requested width, so the
+    // browser decoded 2500px AVIFs on the main thread (specs/007).
+    const outName = `${String(order).padStart(2, "0")}.jpg`;
     const outPath = path.join(outDir, outName);
     const outputInfo = await image
       .resize({ ...resizeOpts, withoutEnlargement: true })
       .withExif({ IFD0: { Artist: ARTIST, Copyright: COPYRIGHT } })
       .withXmp(XMP)
-      .avif({ quality: 62 })
+      .jpeg({ quality: 86, mozjpeg: true })
       .toFile(outPath);
 
     photos.push({

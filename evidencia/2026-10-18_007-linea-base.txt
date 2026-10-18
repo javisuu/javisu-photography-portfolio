@@ -1,0 +1,69 @@
+# Spec 007 · linea base de /_next/image en produccion · 2026-10-18T16:57:31+02:00 · rama feat/007-vercel-image-resize · base f72ca09
+
+## Cabeceras por ancho y Accept (url=/photos/america/01.avif, q=75)
+$ curl -s -o /dev/null -D - -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=256&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: HIT
+
+$ curl -s -o /dev/null -D - -H "Accept: image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=256&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: HIT
+
+$ curl -s -o /dev/null -D - -H "Accept: */*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=256&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: HIT
+
+$ curl -s -o /dev/null -D - -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=640&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: HIT
+
+$ curl -s -o /dev/null -D - -H "Accept: image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=640&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: HIT
+
+$ curl -s -o /dev/null -D - -H "Accept: */*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=640&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: MISS
+
+$ curl -s -o /dev/null -D - -H "Accept: image/avif,image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=1080&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: HIT
+
+$ curl -s -o /dev/null -D - -H "Accept: image/webp,*/*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=1080&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: HIT
+
+$ curl -s -o /dev/null -D - -H "Accept: */*" "https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=1080&q=75"
+HTTP/1.1 200 OK
+Content-Length: 250846
+Content-Type: image/avif
+X-Matched-Path: /photos/america/01.avif
+X-Vercel-Cache: MISS
+
+## Fichero de origen
+$ wc -c public/photos/america/01.avif
+250846 public/photos/america/01.avif

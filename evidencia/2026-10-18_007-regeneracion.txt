@@ -1,0 +1,125 @@
+# Spec 007 · regeneracion de las fotos en JPEG · 2026-10-18T17:27:58+02:00 · rama feat/007-vercel-image-resize · base f72ca09
+
+## T1
+$ grep -c avif scripts/prepare-images.mjs
+0
+
+## T2 · regenerar en el scratchpad (--out) y comparar con src/data/photos.ts
+$ node scripts/prepare-images.mjs --out <scratchpad>/007/out
+Processing album "América"...
+Processing album "Norte"...
+Processing album "NY"...
+Processing album "SOL"...
+  ! "SOL": order numbers are missing or collide (check for duplicate NN prefixes) — falling back to alphabetical order for this album.
+
+Done. Exported images to ..\..\..\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\1a6d5d37-e28b-4b2e-832e-a79acb68256b\scratchpad\007\out. Manifest written to ..\..\..\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\1a6d5d37-e28b-4b2e-832e-a79acb68256b\scratchpad\007\out\photos-manifest.json.
+src/data/photos.ts still needs real titles, and album location/year — update it from the manifest.
+exit=0
+$ node <scratchpad>/007/comparar.mjs <scratchpad>/007/out/photos-manifest.json <scratchpad>/007/out
+OK    /photos/america/01.jpg manifiesto 2500x1875 · photos.ts 2500x1875 · 515781 bytes
+OK    /photos/america/02.jpg manifiesto 1875x2500 · photos.ts 1875x2500 · 680643 bytes
+OK    /photos/america/03.jpg manifiesto 2500x1875 · photos.ts 2500x1875 · 1038576 bytes
+OK    /photos/america/04.jpg manifiesto 2500x1668 · photos.ts 2500x1668 · 835286 bytes
+OK    /photos/america/05.jpg manifiesto 2500x1875 · photos.ts 2500x1875 · 170308 bytes
+OK    /photos/america/06.jpg manifiesto 2500x2336 · photos.ts 2500x2336 · 207766 bytes
+OK    /photos/america/07.jpg manifiesto 1627x2500 · photos.ts 1627x2500 · 187479 bytes
+OK    /photos/america/08.jpg manifiesto 2500x2099 · photos.ts 2500x2099 · 165724 bytes
+OK    /photos/america/09.jpg manifiesto 2500x1875 · photos.ts 2500x1875 · 891070 bytes
+OK    /photos/norte/01.jpg manifiesto 1875x2500 · photos.ts 1875x2500 · 293901 bytes
+OK    /photos/norte/02.jpg manifiesto 1627x2500 · photos.ts 1627x2500 · 319373 bytes
+OK    /photos/norte/03.jpg manifiesto 2500x712 · photos.ts 2500x712 · 294092 bytes
+OK    /photos/norte/04.jpg manifiesto 2500x1875 · photos.ts 2500x1875 · 626793 bytes
+OK    /photos/norte/05.jpg manifiesto 1875x2500 · photos.ts 1875x2500 · 338486 bytes
+OK    /photos/norte/06.jpg manifiesto 2500x1875 · photos.ts 2500x1875 · 518775 bytes
+OK    /photos/norte/07.jpg manifiesto 2500x1343 · photos.ts 2500x1343 · 448113 bytes
+OK    /photos/norte/08.jpg manifiesto 1406x2500 · photos.ts 1406x2500 · 203332 bytes
+OK    /photos/ny/01.jpg manifiesto 2048x1536 · photos.ts 2048x1536 · 391757 bytes
+OK    /photos/ny/02.jpg manifiesto 1448x1930 · photos.ts 1448x1930 · 246247 bytes
+OK    /photos/ny/03.jpg manifiesto 2048x1536 · photos.ts 2048x1536 · 458888 bytes
+OK    /photos/ny/04.jpg manifiesto 2048x1536 · photos.ts 2048x1536 · 334580 bytes
+OK    /photos/ny/05.jpg manifiesto 2048x1536 · photos.ts 2048x1536 · 483032 bytes
+OK    /photos/ny/06.jpg manifiesto 2048x1350 · photos.ts 2048x1350 · 316886 bytes
+OK    /photos/ny/07.jpg manifiesto 2048x1536 · photos.ts 2048x1536 · 182897 bytes
+OK    /photos/sol/01.jpg manifiesto 1875x2500 · photos.ts 1875x2500 · 174659 bytes
+OK    /photos/sol/02.jpg manifiesto 1875x2500 · photos.ts 1875x2500 · 429464 bytes
+OK    /photos/sol/03.jpg manifiesto 1875x2500 · photos.ts 1875x2500 · 309003 bytes
+OK    /photos/sol/04.jpg manifiesto 1406x2500 · photos.ts 1406x2500 · 333678 bytes
+OK    /photos/sol/05.jpg manifiesto 2500x3333 · photos.ts 2500x3333 · 142046 bytes
+OK    /photos/sol/06.jpg manifiesto 1875x2500 · photos.ts 1875x2500 · 45861 bytes
+OK    /photos/sol/07.jpg manifiesto 1875x2500 · photos.ts 1875x2500 · 148569 bytes
+covers photos.ts ["/photos/america/05","/photos/norte/01","/photos/sol/07","/photos/ny/01"] · manifiesto ["/photos/america/05","/photos/norte/01","/photos/ny/01","/photos/sol/07"] · coinciden
+resultado: 31 de 31 coinciden (photos.ts tiene 31) · total JPEG 11.7 MB
+$ du -sh public/photos   # AVIF actuales
+5.8M	public/photos
+
+## T3 · JPEG en public/photos y extensiones en photos.ts
+$ node scripts/prepare-images.mjs
+Processing album "América"...
+Processing album "Norte"...
+Processing album "NY"...
+Processing album "SOL"...
+  ! "SOL": order numbers are missing or collide (check for duplicate NN prefixes) — falling back to alphabetical order for this album.
+
+Done. Exported images to public\photos. Manifest written to scripts\photos-manifest.json.
+src/data/photos.ts still needs real titles, and album location/year — update it from the manifest.
+exit=0
+$ sed -i "s#\(/photos/[a-z0-9-]*/[0-9][0-9]\)\.avif#\1.jpg#g" src/data/photos.ts
+$ grep -c "\.avif" src/data/photos.ts
+0
+$ grep -c "\.jpg" src/data/photos.ts
+36
+# cada src/cover apunta a un fichero que existe
+FALTA public/photos/alpes/01.jpg
+comprobados: 32 rutas unicas
+
+## CA9 · autoria en las 31 fotos
+$ node -e "<exifr Artist|Copyright de cada public/photos/*/*.jpg>"
+FALLA america 01.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA america 02.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA america 03.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA america 04.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA america 05.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA america 06.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA america 07.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA america 08.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA america 09.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA norte 01.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA norte 02.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA norte 03.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA norte 04.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA norte 05.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA norte 06.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA norte 07.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA norte 08.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA ny 01.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA ny 02.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA ny 03.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA ny 04.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA ny 05.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA ny 06.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA ny 07.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA sol 01.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA sol 02.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA sol 03.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA sol 04.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA sol 05.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA sol 06.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+FALLA sol 07.jpg Javier Suarez Suquia (C) 2026 Javier Suarez Suquia. All rights reserved.
+ejemplo america/01.jpg: Javier Suarez Suquia | (C) 2026 Javier Suarez Suquia. All rights reserved. | xmp creator: "Javier Suárez Suquía"
+resultado: 0 de 31 con Artist y Copyright
+
+## T4 · borrar los AVIF
+$ git rm -q public/photos/*/*.avif
+exit=0
+$ find public/photos -name "*.avif" | wc -l
+0
+$ grep -rn "\.avif" src
+src/app/about/page.tsx:49:          src="/photos/about/portrait.avif"
+$ du -sh public/photos
+12M	public/photos
+
+## CA9 (criterio corregido: EXIF ASCII como en la CA4 de la spec 002, XMP con tildes)
+$ node -e "<exifr {xmp:true}: Artist, Copyright y creator de cada public/photos/*/*.jpg>"
+resultado: 31 de 31 con EXIF Artist/Copyright y XMP creator/rights
+# nota: la ruta 'FALTA public/photos/alpes/01.jpg' de T3 es el ejemplo del comentario de src/data/photos.ts:49, no un dato
+# nota: el aviso de orden de SOL tambien sale en T2 y no cambia nada: T2 da 31 de 31 iguales a photos.ts
