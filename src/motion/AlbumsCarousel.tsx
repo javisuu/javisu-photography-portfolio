@@ -548,7 +548,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [albums]);
+  }, [albums, anchorRestOffsetPx]);
 
   // Keyboard: arrow keys inject the same one-shot velocity kick a firm
   // flick would, reusing the exact same momentum/step/settle physics.

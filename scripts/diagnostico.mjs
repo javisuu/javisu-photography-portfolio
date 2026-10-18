@@ -53,7 +53,7 @@ if (!only) {
   log(errs ? r.out.trim() : "ok");
 
   rule("eslint");
-  const l = sh("npx eslint src");
+  const l = sh("npx eslint src --max-warnings=0");
   const m = l.out.match(/(\d+) errors?, (\d+) warnings?/) || l.out.match(/(\d+) problems? \((\d+) errors?, (\d+) warnings?\)/);
   results.lint = m ? l.out.trim() : (l.code === 0 ? "ok" : l.out.trim());
   log(typeof results.lint === "string" ? results.lint || "ok" : "ok");
@@ -234,4 +234,5 @@ log(`consola      ${totalConsole} errores en ${Object.keys(results.console).leng
 log(`invariantes  ${results.invariants.length - failed.length} de ${results.invariants.length}`);
 if (failed.length) { log("\nFALLOS"); failed.forEach((f) => log(`- ${f.route} · ${f.name} · ${f.detail}`)); }
 log("");
-process.exit(failed.length || totalConsole || results.tsc ? 1 : 0);
+const lintFailed = !only && results.lint !== "ok" && results.lint !== "";
+process.exit(failed.length || totalConsole || results.tsc || lintFailed ? 1 : 0);

@@ -1,0 +1,124 @@
+SPEC 004 · lint-carrusel-deps · 2026-10-18 · rama feat/004-lint-carrusel-deps · base 4f184e3
+Salida literal de los comandos de los criterios de aceptacion.
+
+=== CA1 npx eslint src --max-warnings=0 ===
+exit=0
+
+=== CA2 npx tsc --noEmit ===
+exit=0
+
+=== CA3 git diff --stat main -- src/ ===
+ src/motion/AlbumsCarousel.tsx | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+=== CA3 git diff main -- src/ ===
+diff --git a/src/motion/AlbumsCarousel.tsx b/src/motion/AlbumsCarousel.tsx
+index 5417cbc..489de6d 100644
+--- a/src/motion/AlbumsCarousel.tsx
++++ b/src/motion/AlbumsCarousel.tsx
+@@ -548,7 +548,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
+
+     rafId = requestAnimationFrame(tick);
+     return () => cancelAnimationFrame(rafId);
+-  }, [albums]);
++  }, [albums, anchorRestOffsetPx]);
+
+   // Keyboard: arrow keys inject the same one-shot velocity kick a firm
+   // flick would, reusing the exact same momentum/step/settle physics.
+
+=== CA4 grep -n max-warnings=0 scripts/diagnostico.mjs ===
+56:  const l = sh("npx eslint src --max-warnings=0");
+
+=== CA5 grep -n -B1 "process.exit(failed.length" scripts/diagnostico.mjs ===
+237-const lintFailed = !only && results.lint !== "ok" && results.lint !== "";
+238:process.exit(failed.length || totalConsole || results.tsc || lintFailed ? 1 : 0);
+
+=== node --check scripts/diagnostico.mjs ===
+exit=0
+
+=== CA6 node scripts/diagnostico.mjs ===
+exit=0. Salida completa: evidencia/2026-10-18_diagnostico_004.txt. Resumen:
+tsc          ok
+lint         ok
+build        ok
+consola      0 errores en 6 rutas
+invariantes  29 de 29
+
+=== CA7 geometria de /albums ===
+Script de solo lectura fuera del repo (scratchpad de la sesion, medir-carrusel.mjs). Usa
+el Playwright del proyecto contra `next dev -p 3101`, a 1440x900 y dpr 1. Selector:
+`main div.absolute.isolate.overflow-hidden` (src/motion/AlbumsCarousel.tsx:657).
+- rest: 3500 ms despues de "load", sin interaccion.
+- afterKey: raton en (720,450), ArrowRight, y 3500 ms de espera.
+Se lee style.width, style.transform y getBoundingClientRect() (left, width) de cada frame.
+
+Mediciones:
+- antes, 1: codigo identico a main (`git diff --stat main -- src/ scripts/` vacio). 0 errores de consola
+- antes, 2: la misma medida repetida para comprobar que es determinista. rest: 29/29 iguales; afterKey: 29/29 iguales
+- despues: tras T2 y T3. 0 errores de consola
+
+Comparacion antes, 1 frente a despues:
+rest      frames antes 29 despues 29 distintos: 0
+afterKey  frames antes 29 despues 29 distintos: 0
+
+Valores (identicos en las tres mediciones; indice = orden en el DOM):
+rest:
+   0  110px    translateX(-1674.5px)
+   1  110px    translateX(-1532.5px)
+   2  110px    translateX(-1390.5px)
+   3  110px    translateX(-1248.5px)
+   4  110px    translateX(-1106.5px)
+   5  110px    translateX(-964.5px)
+   6  110px    translateX(-822.5px)
+   7  110px    translateX(-680.5px)
+   8  110px    translateX(-538.5px)
+   9  110px    translateX(-396.5px)
+  10  110px    translateX(-254.5px)
+  11  110px    translateX(-112.5px)
+  12  110px    translateX(29.5px)
+  13  110px    translateX(171.5px)
+  14  667px    translateX(313.5px)
+  15  110px    translateX(1012.5px)
+  16  110px    translateX(1154.5px)
+  17  110px    translateX(1296.5px)
+  18  110px    translateX(1438.5px)
+  19  110px    translateX(1580.5px)
+  20  110px    translateX(1722.5px)
+  21  110px    translateX(1864.5px)
+  22  110px    translateX(2006.5px)
+  23  110px    translateX(2148.5px)
+  24  110px    translateX(2290.5px)
+  25  110px    translateX(2432.5px)
+  26  110px    translateX(2574.5px)
+  27  110px    translateX(2716.5px)
+  28  110px    translateX(2858.5px)
+afterKey:
+   0  110px    translateX(-1447.5px)
+   1  110px    translateX(-1305.5px)
+   2  110px    translateX(-1163.5px)
+   3  110px    translateX(-1021.5px)
+   4  110px    translateX(-879.5px)
+   5  110px    translateX(-737.5px)
+   6  110px    translateX(-595.5px)
+   7  110px    translateX(-453.5px)
+   8  110px    translateX(-311.5px)
+   9  110px    translateX(-169.5px)
+  10  110px    translateX(-27.5px)
+  11  110px    translateX(114.5px)
+  12  110px    translateX(256.5px)
+  13  110px    translateX(398.5px)
+  14  375px    translateX(540.5px)
+  15  110px    translateX(947.5px)
+  16  110px    translateX(1089.5px)
+  17  110px    translateX(1231.5px)
+  18  110px    translateX(1373.5px)
+  19  110px    translateX(1515.5px)
+  20  110px    translateX(1657.5px)
+  21  110px    translateX(1799.5px)
+  22  110px    translateX(1941.5px)
+  23  110px    translateX(2083.5px)
+  24  110px    translateX(2225.5px)
+  25  110px    translateX(2367.5px)
+  26  110px    translateX(2509.5px)
+  27  110px    translateX(2651.5px)
+  28  110px    translateX(2793.5px)
