@@ -1,0 +1,155 @@
+SPEC 005 · diagnostico-produccion · 2026-10-18 · rama feat/005-diagnostico-produccion · base 76a2757
+Salida literal de los comandos de los criterios de aceptacion. <PROD> = https://javisu-photography-portfolio.vercel.app
+(dominio publico; la URL de despliegue que dio Javi esta protegida con login, ver CA6). Que commit tiene desplegado <PROD>: SIN VERIFICAR.
+
+=== CA1 y CA3: node scripts/diagnostico.mjs --url <PROD> --repeticiones 3 ===
+Salida completa: evidencia/2026-10-18_diagnostico_produccion.txt. Seccion entrada y resumen:
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 1140 · participantes 7 · fase B 1590 · rezagadas 0 · reposo 2340
+     frame del arranque 917 ms · despues: frames >50 ms 3, frame max 83 ms · long tasks 4 (1071 ms) · [entrance] start x1
+     al monton: 1290 1290 1290 1290 1290 1290 1290
+  2: inicio 1344 · participantes 7 · fase B 1778 · rezagadas 0 · reposo 2461
+     frame del arranque 933 ms · despues: frames >50 ms 2, frame max 83 ms · long tasks 5 (1166 ms) · [entrance] start x1
+     al monton: 1495 1495 1495 1495 1495 1495 1495
+  3: inicio 1463 · participantes 7 · fase B 1928 · rezagadas 0 · reposo 2678
+     frame del arranque 1117 ms · despues: frames >50 ms 2, frame max 83 ms · long tasks 4 (1289 ms) · [entrance] start x1
+     al monton: 1612 1612 1612 1612 1612 1612 1612
+  fase B      mediana 1778 · max 1928
+  reposo      mediana 2461 · max 2678
+  frames >50 mediana 2 · max 3
+  frame max   mediana 83 · max 83
+  arranque    mediana 933 · max 1117
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 6 rutas
+invariantes  29 de 29
+entrada      arranque 933 ms · fase B 1778 ms · reposo 2461 ms · frames >50 ms: 2 (medianas de 3)
+
+exit=0
+
+=== CA2 netstat -ano | grep LISTENING | grep -c ':3100 ' (antes de CA1 y a los 20 s de lanzarlo) ===
+=== CA2 antes ===
+0
+=== CA2 durante (20 s) ===
+0
+
+=== CA4: node scripts/diagnostico.mjs (local, completo) ===
+Salida completa: evidencia/2026-10-18_diagnostico_005.txt. Seccion entrada y resumen:
+=== entrada / ===
+ms desde el inicio de la navegacion · 1 repeticion · cache vacia en cada una
+  1: inicio 411 · participantes 7 · fase B 784 · rezagadas 0 · reposo 1517
+     frame del arranque 233 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 3 (303 ms) · [entrance] start x1
+     al monton: 517 517 517 517 517 517 517
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        ok
+consola      0 errores en 6 rutas
+invariantes  29 de 29
+entrada      arranque 233 ms · fase B 784 ms · reposo 1517 ms · frames >50 ms: 0
+
+exit=0
+
+=== CA5: con 'npx next dev -p 3101' corriendo, time node scripts/diagnostico.mjs --skip-build ===
+DIAGNOSTICO 2026-10-18 · feat/005-diagnostico-produccion · 76a2757 · 2 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+omitido (--skip-build)
+
+=== next dev en :3100 ===
+next dev salio (codigo 1) antes de responder. Su salida:
+▲ Next.js 16.3.2 (Turbopack)
+- Local:         http://localhost:3100
+- Network:       http://172.23.208.1:3100
+✓ Ready in 487ms
+✓ Running next.config.ts took 39ms
+⨯ Another next dev server is already running.
+
+- Local:        http://localhost:3101
+- PID:          23892
+- Dir:          C:\Users\jsuqu\Documents\aprendizaje_autonomo\javisu-photography-portfolio
+- Log:          .next\dev\logs\next-development.log
+
+You can access the existing server at http://localhost:3101,
+or run taskkill /PID 23892 /F to stop it and start a new one.
+[?25h
+
+
+real	0m13.698s
+user	0m0.015s
+sys	0m0.015s
+exit=2
+
+=== CA6 ===
+$ node scripts/diagnostico.mjs --url no-es-una-url
+URL invalida: "no-es-una-url". Ejemplo: --url https://dominio.vercel.app
+exit=2
+$ node scripts/diagnostico.mjs --url ftp://x.com
+URL invalida: "ftp://x.com". Ejemplo: --url https://dominio.vercel.app
+exit=2
+$ node scripts/diagnostico.mjs --repeticiones 0
+--repeticiones invalido: "0". Tiene que ser un entero >= 1
+exit=2
+$ node scripts/diagnostico.mjs --repeticiones x
+--repeticiones invalido: "x". Tiene que ser un entero >= 1
+exit=2
+
+$ node scripts/diagnostico.mjs --url https://javisu-photography-portfolio-or61ohpd6-javisuus-projects.vercel.app (salida desde 'servidor remoto')
+=== servidor remoto ===
+https://javisu-photography-portfolio-or61ohpd6-javisuus-projects.vercel.app redirige a otro origen (https://vercel.com): seguramente esta protegido con login.
+Usa el dominio publico de produccion, el que ven los visitantes.
+exit=2
+
+=== CA7 npx tsc --noEmit ===
+exit=0
+=== CA7 npx eslint src --max-warnings=0 ===
+exit=0
+=== CA8 git diff --stat main -- src/ ===
+(fin, vacio si no hay lineas encima)
+=== T7 grep -n -- --url ===
+.claude/commands/diagnostico.md:8:   - Para medir la web desplegada: `node scripts/diagnostico.mjs --url https://javisu-photography-portfolio.vercel.app --repeticiones 3`. No ejecuta tsc, lint ni build y no arranca `next dev`. Usa el dominio publico: las URLs de cada despliegue (`...-<hash>-javisuus-projects.vercel.app`) estan protegidas con login, y el harness sale con 2 si lo detecta. Guarda la salida en `evidencia/AAAA-MM-DD_diagnostico_produccion.txt`.
+scripts/diagnostico.mjs:6://   node scripts/diagnostico.mjs --url https://x.vercel.app
+scripts/diagnostico.mjs:23:// --url: una web ya desplegada. Se valida antes de abrir nada.
+scripts/diagnostico.mjs:24:const urlArg = args.includes("--url") ? args[args.indexOf("--url") + 1] ?? "" : null;
+scripts/diagnostico.mjs:32:    console.log(`URL invalida: ${JSON.stringify(urlArg)}. Ejemplo: --url https://dominio.vercel.app`);
+
+=== T4: validacion local de la heuristica de fases (MSYS_NO_PATHCONV=1 node scripts/diagnostico.mjs --medir / --repeticiones 3) ===
+Esperado por el codigo: fase B ~350 ms despues del inicio (PILE_MIN_DWELL_MS, LandingComposition.tsx:89),
+reposo ~750 ms + escalonado despues de la fase B (ENTRANCE_DURATION_MS, :86), 0 rezagadas.
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 620 · participantes 7 · fase B 1028 · rezagadas 0 · reposo 1778
+     frame del arranque 350 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 3 (444 ms) · [entrance] start x1
+     al monton: 744 744 744 744 744 744 744
+  2: inicio 574 · participantes 7 · fase B 954 · rezagadas 0 · reposo 1704
+     frame del arranque 300 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 3 (406 ms) · [entrance] start x1
+     al monton: 688 688 688 688 688 688 688
+  3: inicio 558 · participantes 7 · fase B 944 · rezagadas 0 · reposo 1694
+     frame del arranque 283 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 3 (387 ms) · [entrance] start x1
+     al monton: 661 661 661 661 661 661 661
+  fase B      mediana 954 · max 1028
+  reposo      mediana 1704 · max 1778
+  frames >50 mediana 0 · max 0
+  frame max   mediana 50 · max 50
+  arranque    mediana 300 · max 350
+
+=== RESUMEN ===
+
+=== T5: coste del muestreo de estilos (script del scratchpad coste-muestreo.mjs, next dev -p 3101, 3 repeticiones) ===
+Ventana: 2000 ms desde [entrance] start, solo intervalos enteros despues del inicio. con = leyendo opacity/transform inline por frame; sin = solo el tiempo del frame.
+{"con":[{"frames":115,"long":0,"max":17},{"frames":114,"long":0,"max":33},{"frames":115,"long":0,"max":17}],"sin":[{"frames":99,"long":0,"max":33},{"frames":113,"long":0,"max":33},{"frames":114,"long":0,"max":17}]}
+
+Resultado: 0 frames > 50 ms en los dos modos; frame max 17-33 ms en los dos. El muestreo de estilos no anade jank medible.
+Nota: la primera version del harness contaba tambien el intervalo que contiene [entrance] start (la tarea de hidratacion,
+283-417 ms en local), por eso T5 y el harness discrepaban. Ahora se da aparte como 'frame del arranque'.

@@ -5,6 +5,8 @@ description: Mide el estado real del sitio (tipos, lint, build, consola e invari
 Ejecuta el diagnostico del sitio.
 
 1. Lanza `node scripts/diagnostico.mjs`. Guarda su salida completa en `evidencia/AAAA-MM-DD_diagnostico.txt` usando la fecha de `date +%F`. Nunca edites ese fichero a mano.
+   - Para medir la web desplegada: `node scripts/diagnostico.mjs --url https://javisu-photography-portfolio.vercel.app --repeticiones 3`. No ejecuta tsc, lint ni build y no arranca `next dev`. Usa el dominio publico: las URLs de cada despliegue (`...-<hash>-javisuus-projects.vercel.app`) estan protegidas con login, y el harness sale con 2 si lo detecta. Guarda la salida en `evidencia/AAAA-MM-DD_diagnostico_produccion.txt`.
+   - La seccion `entrada /` (tambien en local) es informativa y no una invariante: frame del arranque, fase B, reposo y frames de mas de 50 ms de la entrada del landing.
 2. Si falta Playwright, dilo y para: `npm i -D playwright && npx playwright install chromium`.
 3. Responde exactamente con este formato y nada mas:
 
