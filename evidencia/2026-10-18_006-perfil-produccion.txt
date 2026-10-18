@@ -1,0 +1,96 @@
+$ node scripts/perfil-arranque.mjs --url https://javisu-photography-portfolio.vercel.app --repeticiones 3
+# 2026-10-18T15:44:15+02:00 · rama feat/006-perfil-hidratacion · base d82d59f
+
+=== servidor remoto ===
+ok · http 200
+
+=== perfil arranque / · repeticion 1 ===
+frame del arranque: sin trace 700 ms · con trace 467 ms (ventana del trace 330 ms)
+AVISO: el trace cambia el frame un -33 % (mas del 30 %): los ms del reparto valen como proporcion, no como cifra
+reparto (tiempo propio en el hilo principal):
+  decodificacion       159 ms   48 %
+  ejecucion JS         156 ms   47 %
+  otros                  6 ms    2 %
+  GC                     5 ms    2 %
+  estilo/layout          4 ms    1 %
+  pintado/GPU            0 ms    0 %
+  red/espera             0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 98 % del frame
+eventos con mas tiempo propio: Decode Image 159 · FunctionCall 152 · SimpleWatcher::OnHandleReady 3 · Layout 2 · ThreadControllerImpl::RunTask 2
+top 10 por tiempo propio (muestras de CPU de V8):
+    252 ms  createImageBitmap (nativo) <- n 1958ujab6jjhm.js:47:1224  [paquete desconocido]
+     18 ms  setShaders 0vh-nnzi4w5df.js:0:39590  [paquete desconocido]
+      7 ms  (program) (nativo)
+      7 ms  getExtension 0vh-nnzi4w5df.js:0:9567  [paquete desconocido]
+      5 ms  (anonima) 0vh-nnzi4w5df.js:0:4006  [paquete desconocido]
+      5 ms  (garbage collector) (nativo)
+      3 ms  (anonima) 1958ujab6jjhm.js:47:8224  [paquete desconocido]
+      2 ms  aS 2rp0q1b7htlpq.js:0:79188  [paquete desconocido]
+      2 ms  iw 2rp0q1b7htlpq.js:0:118450  [paquete desconocido]
+      1 ms  N turbopack-134fh5pw7v7p9.js:0:5962  [paquete desconocido]
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\6ed62e7a-244b-43f9-b0b3-1b03642adadf\scratchpad\traces\perfil-1792331059367-1.json
+
+=== perfil arranque / · repeticion 2 ===
+frame del arranque: sin trace 933 ms · con trace 800 ms (ventana del trace 663 ms)
+reparto (tiempo propio en el hilo principal):
+  decodificacion       410 ms   62 %
+  ejecucion JS         240 ms   36 %
+  GC                     7 ms    1 %
+  estilo/layout          3 ms    0 %
+  otros                  3 ms    0 %
+  red/espera             0 ms    0 %
+  pintado/GPU            0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 100 % del frame
+eventos con mas tiempo propio: Decode Image 410 · FunctionCall 237 · Layout 2 · ThreadControllerImpl::RunTask 2 · UpdateLayoutTree 1
+top 10 por tiempo propio (muestras de CPU de V8):
+    599 ms  createImageBitmap (nativo) <- n 1958ujab6jjhm.js:47:1224  [paquete desconocido]
+     18 ms  setShaders 0vh-nnzi4w5df.js:0:39590  [paquete desconocido]
+      7 ms  (garbage collector) (nativo)
+      5 ms  (anonima) 0vh-nnzi4w5df.js:0:4006  [paquete desconocido]
+      5 ms  getExtension 0vh-nnzi4w5df.js:0:9567  [paquete desconocido]
+      3 ms  (anonima) 1958ujab6jjhm.js:47:8224  [paquete desconocido]
+      3 ms  (program) (nativo)
+      1 ms  (anonima) 1958ujab6jjhm.js:47:11096  [paquete desconocido]
+      1 ms  aS 2rp0q1b7htlpq.js:0:79188  [paquete desconocido]
+      1 ms  updateAttribute 0vh-nnzi4w5df.js:0:32613  [paquete desconocido]
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\6ed62e7a-244b-43f9-b0b3-1b03642adadf\scratchpad\traces\perfil-1792331065618-2.json
+
+=== perfil arranque / · repeticion 3 ===
+frame del arranque: sin trace 817 ms · con trace 750 ms (ventana del trace 613 ms)
+reparto (tiempo propio en el hilo principal):
+  decodificacion       382 ms   62 %
+  ejecucion JS         220 ms   36 %
+  estilo/layout          5 ms    1 %
+  GC                     4 ms    1 %
+  otros                  2 ms    0 %
+  pintado/GPU            0 ms    0 %
+  red/espera             0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 100 % del frame
+eventos con mas tiempo propio: Decode Image 382 · FunctionCall 217 · Layout 3 · UpdateLayoutTree 2 · V8.HandleInterrupts 2
+top 10 por tiempo propio (muestras de CPU de V8):
+    549 ms  createImageBitmap (nativo) <- n 1958ujab6jjhm.js:47:1224  [paquete desconocido]
+     16 ms  setShaders 0vh-nnzi4w5df.js:0:39590  [paquete desconocido]
+      5 ms  (anonima) 0vh-nnzi4w5df.js:0:4006  [paquete desconocido]
+      5 ms  getExtension 0vh-nnzi4w5df.js:0:9567  [paquete desconocido]
+      5 ms  (anonima) 1958ujab6jjhm.js:47:8224  [paquete desconocido]
+      4 ms  (garbage collector) (nativo)
+      4 ms  (program) (nativo)
+      2 ms  (anonima) 1958ujab6jjhm.js:47:11096  [paquete desconocido]
+      1 ms  uu 2rp0q1b7htlpq.js:0:134332  [paquete desconocido]
+      1 ms  (anonima) 1958ujab6jjhm.js:47:483  [paquete desconocido]
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\6ed62e7a-244b-43f9-b0b3-1b03642adadf\scratchpad\traces\perfil-1792331071899-3.json
+
+=== medianas de 3 ===
+frame del arranque: sin trace 817 ms · con trace 750 ms
+  parse/compilacion      0 ms    0 %
+  ejecucion JS         220 ms   36 %
+  GC                     5 ms    1 %
+  estilo/layout          4 ms    1 %
+  pintado/GPU            0 ms    0 %
+  decodificacion       382 ms   62 %
+  otros                  3 ms    0 %
+  red/espera             0 ms    0 %
+exit=0

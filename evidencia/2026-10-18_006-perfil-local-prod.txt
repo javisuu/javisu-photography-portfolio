@@ -1,0 +1,100 @@
+$ netstat -ano | grep LISTENING | grep -c ":31"  (antes)
+0
+$ node scripts/perfil-arranque.mjs --local-prod --repeticiones 3
+# 2026-10-18T15:44:35+02:00 · rama feat/006-perfil-hidratacion · base d82d59f
+
+=== next build --no-mangling + next start en :3102 ===
+build ok
+ok
+
+=== perfil arranque / · repeticion 1 ===
+frame del arranque: sin trace 183 ms · con trace 200 ms (ventana del trace 105 ms)
+reparto (tiempo propio en el hilo principal):
+  ejecucion JS          68 ms   65 %
+  decodificacion        31 ms   30 %
+  estilo/layout          3 ms    3 %
+  GC                     2 ms    2 %
+  otros                  0 ms    0 %
+  pintado/GPU            0 ms    0 %
+  red/espera             0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 100 % del frame
+eventos con mas tiempo propio: FunctionCall 66 · Decode Image 31 · Layout 2 · UpdateLayoutTree 1 · V8.HandleInterrupts 1
+top 10 por tiempo propio (muestras de CPU de V8):
+     40 ms  createImageBitmap (nativo) <- decode 14e0_ml8iggad.js:47:2296  [paquete desconocido]
+     21 ms  setShaders 1ipns3itl1tp_.js:0:46824  [paquete desconocido]
+      4 ms  getExtension 1ipns3itl1tp_.js:0:11097  [paquete desconocido]
+      4 ms  Renderer 1ipns3itl1tp_.js:0:4973  [paquete desconocido]
+      3 ms  (garbage collector) (nativo)
+      2 ms  (anonima) 14e0_ml8iggad.js:47:15835  [paquete desconocido]
+      2 ms  beginWork 20c6_7mfkz_h0.js:0:230250  [paquete desconocido]
+      2 ms  (program) (nativo)
+      1 ms  commitHookEffectListMount 20c6_7mfkz_h0.js:0:258864  [paquete desconocido]
+      1 ms  (anonima) 14e0_ml8iggad.js:47:2161  [paquete desconocido]
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\6ed62e7a-244b-43f9-b0b3-1b03642adadf\scratchpad\traces\perfil-1792331089052-1.json
+
+=== perfil arranque / · repeticion 2 ===
+frame del arranque: sin trace 150 ms · con trace 150 ms (ventana del trace 70 ms)
+reparto (tiempo propio en el hilo principal):
+  ejecucion JS          43 ms   62 %
+  decodificacion        23 ms   33 %
+  estilo/layout          2 ms    3 %
+  GC                     1 ms    1 %
+  otros                  0 ms    0 %
+  pintado/GPU            0 ms    0 %
+  red/espera             0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 100 % del frame
+eventos con mas tiempo propio: FunctionCall 41 · Decode Image 23 · Layout 1 · UpdateLayoutTree 1 · V8.HandleInterrupts 1
+top 10 por tiempo propio (muestras de CPU de V8):
+     30 ms  createImageBitmap (nativo) <- decode 14e0_ml8iggad.js:47:2296  [paquete desconocido]
+     13 ms  setShaders 1ipns3itl1tp_.js:0:46824  [paquete desconocido]
+      5 ms  getExtension 1ipns3itl1tp_.js:0:11097  [paquete desconocido]
+      4 ms  Renderer 1ipns3itl1tp_.js:0:4973  [paquete desconocido]
+      2 ms  (anonima) 14e0_ml8iggad.js:47:15835  [paquete desconocido]
+      1 ms  renderWithHooks 20c6_7mfkz_h0.js:0:152467  [paquete desconocido]
+      1 ms  (garbage collector) (nativo)
+      1 ms  commitMutationEffectsOnFiber 20c6_7mfkz_h0.js:0:293221  [paquete desconocido]
+      1 ms  (program) (nativo)
+      1 ms  preload 20c6_7mfkz_h0.js:0:438007  [paquete desconocido]
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\6ed62e7a-244b-43f9-b0b3-1b03642adadf\scratchpad\traces\perfil-1792331093461-2.json
+
+=== perfil arranque / · repeticion 3 ===
+frame del arranque: sin trace 183 ms · con trace 167 ms (ventana del trace 84 ms)
+reparto (tiempo propio en el hilo principal):
+  ejecucion JS          55 ms   65 %
+  decodificacion        25 ms   29 %
+  estilo/layout          3 ms    3 %
+  GC                     1 ms    2 %
+  otros                  0 ms    0 %
+  pintado/GPU            0 ms    0 %
+  red/espera             0 ms    0 %
+  parse/compilacion      0 ms    0 %
+  con nombre: 100 % del frame
+eventos con mas tiempo propio: FunctionCall 52 · Decode Image 25 · Layout 2 · UpdateLayoutTree 1 · V8.HandleInterrupts 1
+top 10 por tiempo propio (muestras de CPU de V8):
+     34 ms  createImageBitmap (nativo) <- decode 14e0_ml8iggad.js:47:2296  [paquete desconocido]
+     12 ms  setShaders 1ipns3itl1tp_.js:0:46824  [paquete desconocido]
+      4 ms  instantiateModule turbopack-03i5huvdkxicg.js:0:13113  [paquete desconocido]
+      3 ms  Renderer 1ipns3itl1tp_.js:0:4973  [paquete desconocido]
+      3 ms  getExtension 1ipns3itl1tp_.js:0:11097  [paquete desconocido]
+      3 ms  (anonima) 14e0_ml8iggad.js:47:15835  [paquete desconocido]
+      2 ms  Plane 1ipns3itl1tp_.js:0:44413  [paquete desconocido]
+      2 ms  renderWithHooks 20c6_7mfkz_h0.js:0:152467  [paquete desconocido]
+      2 ms  (garbage collector) (nativo)
+      1 ms  (program) (nativo)
+trace: C:\Users\jsuqu\AppData\Local\Temp\claude\C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio\6ed62e7a-244b-43f9-b0b3-1b03642adadf\scratchpad\traces\perfil-1792331097766-3.json
+
+=== medianas de 3 ===
+frame del arranque: sin trace 183 ms · con trace 167 ms
+  parse/compilacion      0 ms    0 %
+  ejecucion JS          55 ms   65 %
+  GC                     1 ms    2 %
+  estilo/layout          3 ms    3 %
+  pintado/GPU            0 ms    0 %
+  decodificacion        25 ms   30 %
+  otros                  0 ms    0 %
+  red/espera             0 ms    0 %
+exit=0
+$ netstat -ano | grep LISTENING | grep -c ":31"  (despues)
+0

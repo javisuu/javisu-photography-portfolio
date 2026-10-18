@@ -1,0 +1,45 @@
+# Spec 006 · perfil del frame de arranque · 2026-10-18T15:46:28+02:00 · rama feat/006-perfil-hidratacion · base d82d59f
+
+## Argumentos invalidos (T1)
+$ node scripts/perfil-arranque.mjs 
+Indica una fuente: --url <base> o --local-prod (no las dos)
+exit=2
+$ node scripts/perfil-arranque.mjs --url no-es-una-url
+URL invalida: "no-es-una-url". Ejemplo: --url https://dominio.vercel.app
+exit=2
+$ node scripts/perfil-arranque.mjs --url https://x.app --local-prod
+Indica una fuente: --url <base> o --local-prod (no las dos)
+exit=2
+$ node scripts/perfil-arranque.mjs --local-prod --repeticiones 0
+--repeticiones invalido: "0". Tiene que ser un entero >= 1
+exit=2
+$ node scripts/perfil-arranque.mjs --url https://x.app --repeticiones x
+--repeticiones invalido: "x". Tiene que ser un entero >= 1
+exit=2
+
+## T2 · que decodifica el frame del arranque (sonda sobre los traces de una repeticion de cada fuente)
+$ node sonda-decodes.mjs <trace produccion> <trace local-prod>
+perfil-1792330964955-1.json | ventana desde nav 391 ms, dura 952 | Decode Image en hilo principal: total 22 595 ms · en ventana 22 595 ms · tipos {"avif":22} | imagenes terminadas antes de la ventana 15 de 15 | ultimo JS termina a 1885 ms | https://javisu-photography-portfolio.vercel.app/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=256&q=75
+perfil-1792330995858-1.json | ventana desde nav 129 ms, dura 88 | Decode Image en hilo principal: total 22 25 ms · en ventana 22 25 ms · tipos {"webp":22} | imagenes terminadas antes de la ventana 15 de 15 | ultimo JS termina a 455 ms | http://localhost:3102/_next/image?url=%2Fphotos%2Famerica%2F01.avif&w=256&q=75
+
+## T2 · que sirve produccion para /_next/image (cabeceras y dimensiones)
+w=256 · Content-Type: image/avif · identico byte a byte a public/photos/america/01.avif
+w=384 · Content-Type: image/avif · identico byte a byte a public/photos/america/01.avif
+w=640 · Content-Type: image/avif · identico byte a byte a public/photos/america/01.avif
+w=1080 · Content-Type: image/avif · identico byte a byte a public/photos/america/01.avif
+01.avif 250846 bytes 2500x1875
+img256.avif 250846 bytes 2500x1875
+
+## CA7
+$ npx tsc --noEmit
+exit=0
+$ npx eslint src --max-warnings=0
+exit=0
+
+## CA8
+$ git diff --stat main -- src/ next.config.ts
+(fin, vacio si no hay lineas encima)
+$ git status --short
+ M .claude/commands/diagnostico.md
+?? scripts/perfil-arranque.mjs
+?? specs/006-perfil-hidratacion/
