@@ -1,6 +1,6 @@
 # Spec 003 · Fijar el runner y las acciones del workflow del espejo
 
-- **Estado:** Aprobada (Javi, 2026-10-18)
+- **Estado:** Implementada (2026-10-18). CA1 a CA8 pasan (`tasks.md`)
 - **Fecha:** 2026-10-18
 - **Requiere decision de Javi:** No (no toca wordmark, blend, `GLSurface` ni scroll infinito; no choca con el spec). Las preguntas abiertas ya tienen respuesta (2026-10-18). Javi tiene que hacer el push y mirar la Action en GitHub (CA5 y CA6)
 

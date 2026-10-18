@@ -43,3 +43,4 @@ Es un proyecto personal: no se miden horas y no hay fecha de entrega. Lo que imp
 
 - Los numeros de Core Web Vitals son anteriores al landing persistente y al atlas de canvas: hay que volver a medirlos en F4.
 - Falta redactar los ADR de las decisiones ya tomadas: stack, retirada de los efectos de cambio de letra en el wordmark, landing persistente desde el layout raiz, y atlas como globo en vez de mapa plano.
+- El workflow del espejo va fijado a `runs-on: ubuntu-24.04` (`.github/workflows/mirror.yml:21`, spec 003). GitHub retirara esa imagen algun dia, sin fecha conocida. Cuando avise, se repite la spec 003 con la imagen siguiente.

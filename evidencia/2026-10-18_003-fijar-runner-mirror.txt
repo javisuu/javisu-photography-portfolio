@@ -17,3 +17,14 @@
 
 ## CA4 $ grep -c -- "--force" .github/workflows/mirror.yml
 2
+
+# Tras el push de Javi (0029941..6544808), 2026-10-18
+
+## CA5 $ git filter-repo --refs main --path public/photos --path docs/referencias --invert-paths (clon local de 6544808) && git rev-parse main
+c98b101845ff2841f74a412aa117769f132e804c
+$ git ls-remote https://github.com/javisuu/javisu-photography-portfolio.git main
+c98b101845ff2841f74a412aa117769f132e804c	refs/heads/main
+
+## CA7 $ git clone <espejo> && git log --all --name-only --pretty=format: | grep -ciE '\.(avif|webp|jpe?g|png|tiff?)$'
+1
+public/atlas/land-mask.png
