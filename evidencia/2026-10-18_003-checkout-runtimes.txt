@@ -1,0 +1,9 @@
+# 2026-10-18 · runtime de actions/checkout por version mayor
+$ for t in v4 v5 v6 v7; do curl -s https://raw.githubusercontent.com/actions/checkout/$t/action.yml | grep using:; done
+v4:   using: node20
+v5:   using: node24
+v6:   using: node24
+v7:   using: node24
+
+# Ultimas releases (github.com/actions/checkout/releases, consultado 2026-10-18): v7.0.1, v6.1.0, v5.1.0, v4.4.0 (20 jul); v7.0.0 (18 jun)
+v2:   using: node12

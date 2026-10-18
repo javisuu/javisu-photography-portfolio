@@ -1,0 +1,19 @@
+# 2026-10-18 · spec 003 · verificacion local (rama feat/003-fijar-runner-mirror, base 0029941)
+
+## CA1 $ grep -nE "runs-on:|uses:" .github/workflows/mirror.yml
+21:    runs-on: ubuntu-24.04
+23:      - uses: actions/checkout@v5
+
+## CA2 $ curl -s https://raw.githubusercontent.com/actions/checkout/v5/action.yml | grep using:
+  using: node24
+
+## CA3 $ git diff main -- .github/workflows/mirror.yml | grep -E '^[+-][^+-]'
+-    runs-on: ubuntu-latest
++    # Pinned, not ubuntu-latest: a silent image change could break the
++    # pip install below and stop the mirror (specs/003-fijar-runner-mirror/).
++    runs-on: ubuntu-24.04
+-      - uses: actions/checkout@v4
++      - uses: actions/checkout@v5
+
+## CA4 $ grep -c -- "--force" .github/workflows/mirror.yml
+2

@@ -16,9 +16,11 @@ concurrency:
 jobs:
   mirror:
     if: github.repository == 'javisuu/javisu-photography-portfolio-private'
-    runs-on: ubuntu-latest
+    # Pinned, not ubuntu-latest: a silent image change could break the
+    # pip install below and stop the mirror (specs/003-fijar-runner-mirror/).
+    runs-on: ubuntu-24.04
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
         with:
           ref: main
           fetch-depth: 0
