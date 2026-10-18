@@ -2,9 +2,9 @@
 
 > Fichero vivo. Lo lee `/estado` y lo actualiza `/cerrar-sesion`. Cada afirmacion lleva evidencia o `SIN VERIFICAR`. No se registran horas ni hay calendario por dias.
 
-**Ultima actualizacion:** 2026-10-17
+**Ultima actualizacion:** 2026-10-18 (diagnostico del 2026-10-17)
 **Fase:** F3 · Motion (ver `docs/ROADMAP.md`). Landing, carrusel, pagina de album, About, Credits y Atlas estan dados por cerrados. Queda la pasada de 5 etapas a medias: la etapa 3 (re-verificar About y Credits) sigue sin hacer. Despues vienen la transicion carrusel→album, los digitos rodantes y la regla de hover sobre imagen.
-**Rama:** `feat/002-proteger-fotos` · ultimo commit `50e3017`, el mismo que `main` y `origin/main`. Hay cambios de documentacion del cierre de la spec 002 sin commit (`git status`)
+**Rama:** `main` · ultimo commit `f4e8823`, el mismo que `origin/main`. El espejo publico esta en `5ad12bf`, que es `f4e8823` filtrado (comprobado con `git ls-remote` frente a un filtrado local). `feat/002-proteger-fotos` esta entera en `main` y se puede borrar con `git branch -d` (pendiente de que Javi lo decida). Cada spec nueva sale en una rama propia desde `main`
 **Repo:** privado en `github.com/javisuu/javisu-photography-portfolio-private` (Vercel despliega desde aqui). El nombre original `javisu-photography-portfolio` es el espejo publico sin fotos, que llena `.github/workflows/mirror.yml` en cada push a `main` (`specs/002-proteger-fotos/tasks.md`, seccion "Verificacion GitHub")
 
 ## Build
@@ -71,7 +71,6 @@ El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27)
 - Javi: handle de Instagram para `/about` (hoy `[PLACEHOLDER]`). Pedido el 2026-09-01
 - Javi: textos de las notas laterales (parrafo largo y frase corta, ver el paso 5) y en que fotos van. Pedido el 2026-09-20. El campo para guardarlos no existe en `src/data/photos.ts`; lo crea la spec del paso 5
 - Javi: las coordenadas de las 5 fotos que aun tienen `lat`/`lng: null` (Puerto Escondido x3 y San Blas x2, `src/data/photos.ts:155,167,179,189,201`). Las otras 26 de 31 ya las tienen. Pedido el 2026-09-23
-- Javi: autorizacion para fusionar en `main` y hacer push del commit de cierre de esta sesion. Ese push vuelve a lanzar el espejo y publica en el espejo el `CLAUDE.md` y los `docs/` del commit, sin fotos. Pedido el 2026-10-17
 
 ## Pendiente de verificar
 
@@ -90,3 +89,4 @@ El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27)
 | 2026-10-15 | Recuento de coordenadas: 26 de 31 fotos tienen `lat`/`lng` y faltan 5 (`src/data/photos.ts:155,167,179,189,201`). Spec 002 redactada: repo privado y espejo publico sin fotos, licencia, copyright 2026 en los metadatos y exclusion de IA. Encontrada otra imagen con fotos en el historial: `docs/referencias/2026-10-11_notas-laterales.png`. Diagnostico de cierre: verde, 29 de 29 | `specs/002-proteger-fotos/spec.md`, `evidencia/2026-10-15_diagnostico_cierre.txt` |
 | 2026-10-15 | Spec 002, parte local (commit `e3dad79`): `LICENSE` (MIT para el codigo, todos los derechos reservados para las fotos), `README.md` del espejo, autoria "Javier Suárez Suquía" en EXIF/XMP de los 31 AVIF (mismos pixeles, `photos.ts` sin cambios), `robots.ts` con 16 crawlers de IA excluidos, `noai, noimageai`, workflow `mirror.yml` y `/credits` con el nombre completo. CA1 a CA8 verificados. Diagnostico de cierre: verde, 29 de 29 | `specs/002-proteger-fotos/tasks.md`, `evidencia/2026-10-15_diagnostico_002.txt`, `evidencia/2026-10-15_diagnostico_cierre_002.txt` |
 | 2026-10-17 | Spec 002, parte GitHub, cerrada. 0 forks. Commit `50e3017` y fusion fast-forward de `main` (`9bf0416..50e3017`). Javi renombro y privatizo el repo **antes** del push, para no publicar la captura de `docs/referencias/` ni los AVIF nuevos. Remoto actualizado y push de `main` (lo hizo Javi). Espejo creado y llenado por la Action manual. Pasan CA9 (hash `235968f`, igual al del filtrado local), CA10 (1 imagen, `land-mask.png`), CA11 y CA12. `CLAUDE.md` gana la seccion "Repo, licence and the public mirror" y la spec pasa a Implementada. Nuevo B6: tirones de la entrada en produccion. Diagnostico: verde, 29 de 29 | `specs/002-proteger-fotos/tasks.md`, `specs/002-proteger-fotos/spec.md:3`, `CLAUDE.md`, `evidencia/2026-10-17_diagnostico.txt` |
+| 2026-10-17 | Commit de cierre `f4e8823`, fusionado en `main` y con push de Javi. La Action `mirror` se lanzo sola con el push, por primera vez, y llevo el espejo a `5ad12bf`: el mismo hash que filtrar `f4e8823` en local. El espejo funciona sin intervencion | `git log`, `git ls-remote` del espejo (salida en la conversacion; no hay copia en `evidencia/`) |
