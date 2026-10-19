@@ -1,6 +1,6 @@
 # Spec 008 · Entrada sin latigazo
 
-- **Estado:** Aprobada
+- **Estado:** Implementada (2026-10-19, medido en produccion — commit `c6279de`, ver `tasks.md`)
 - **Fecha:** 2026-10-19
 - **Requiere decision de Javi:** Si (motivo: toca el ritmo de llegada al monton de `src/motion/LandingComposition.tsx`, parte de la entrada persistente del landing. Javi pidio explicitamente abrir esta spec el 2026-10-19, en la misma sesion que la midio, y el mismo dia aprobo el alcance: solo el candidato 1, ver "Fuera de alcance". `GLSurface.tsx` no se toca en esta iteracion.)
 
