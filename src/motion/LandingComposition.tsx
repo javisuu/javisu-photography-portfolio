@@ -89,6 +89,15 @@ const PILE_FADE_IN_MS = 180;
 const PILE_MIN_DWELL_MS = 350;
 const PILE_MAX_WAIT_MS = 2500;
 const PILE_STRAGGLER_FADE_MS = 300;
+// Minimum visual spacing between one photo joining the pile and the
+// next — NOT a decode time. Spec 008: with photos this fast to decode
+// (spec 007), `whenImageReady` now resolves for every participant in
+// the same microtask flush (all already `.complete` by the time the
+// entrance starts), so without this throttle the pile never reads as
+// building up, it just pops in all at once. A real straggler (actually
+// slow to decode) is never delayed beyond its own arrival — see
+// nextAllowedJoinAt below.
+const PILE_JOIN_MIN_GAP_MS = 70;
 // Deliberately small — this is a pile of prints settling slightly
 // differently, not a scatter. No scaling ever, anywhere: every photo
 // sits in the pile at its own final rendered size (see
@@ -266,6 +275,11 @@ type PileEntranceState = {
   // own fade-in start) — absent until that photo's decode resolves.
   joinedAt: Map<number, number>;
   startTime: number;
+  // Spec 008: earliest time the NEXT join is allowed to actually run,
+  // enforcing PILE_JOIN_MIN_GAP_MS between consecutive joins — see
+  // scheduleJoin in startPileEntrance. Advances by that gap every time
+  // a join is scheduled, whether or not it had to wait.
+  nextAllowedJoinAt: number;
   dispersing: boolean;
   disperseStartTime: number;
   // Rank-based stagger delay (ms), assigned once, only for items that
@@ -477,10 +491,12 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       return;
     }
 
+    const entranceStartNow = performance.now();
     const state: PileEntranceState = {
       participants,
       joinedAt: new Map(),
-      startTime: performance.now(),
+      startTime: entranceStartNow,
+      nextAllowedJoinAt: entranceStartNow,
       dispersing: false,
       disperseStartTime: 0,
       disperseDelays: new Map(),
@@ -551,11 +567,31 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         state.joinedAt.set(i, performance.now());
         maybeScheduleDispersal();
       }
+      // Spec 008: throttles join() to at least PILE_JOIN_MIN_GAP_MS after
+      // the previous one, so a burst of already-`.complete` images (the
+      // common case now that decode is fast, spec 007) still reads as a
+      // pile building up rather than popping in at once. A genuinely slow
+      // image is never delayed past its own real readiness: nextAllowedJoinAt
+      // only pushes later arrivals back, never pulls an earlier one forward.
+      function scheduleJoin() {
+        if (!activeRef.current || entranceRef.current !== state) return; // superseded
+        const now = performance.now();
+        const runAt = Math.max(now, state.nextAllowedJoinAt);
+        state.nextAllowedJoinAt = runAt + PILE_JOIN_MIN_GAP_MS;
+        if (runAt <= now) {
+          join();
+        } else {
+          const t = setTimeout(() => {
+            if (activeRef.current && entranceRef.current === state) join();
+          }, runAt - now);
+          timeoutsRef.current.push(t);
+        }
+      }
       if (!img) {
-        join();
+        scheduleJoin();
         return;
       }
-      whenImageReady(img).then(join);
+      whenImageReady(img).then(scheduleJoin);
     });
 
     const maxWaitTimer = setTimeout(() => {
