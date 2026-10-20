@@ -42,5 +42,6 @@ Es un proyecto personal: no se miden horas y no hay fecha de entrega. Lo que imp
 ## Deuda conocida
 
 - Los numeros de Core Web Vitals son anteriores al landing persistente y al atlas de canvas: hay que volver a medirlos en F4.
+- B7, candidato 2: sacar la inicializacion de WebGL del frame de arranque (`GLSurface.tsx`). Es una tarea condicionada de F4: solo se abre si la medida en movil muestra tirones en la entrada del landing (decidido con Javi el 2026-10-20, `docs/ESTADO.md`).
 - Falta redactar los ADR de las decisiones ya tomadas: stack, retirada de los efectos de cambio de letra en el wordmark, landing persistente desde el layout raiz, y atlas como globo en vez de mapa plano.
 - El workflow del espejo va fijado a `runs-on: ubuntu-24.04` (`.github/workflows/mirror.yml:21`, spec 003). GitHub retirara esa imagen algun dia, sin fecha conocida. Cuando avise, se repite la spec 003 con la imagen siguiente.
