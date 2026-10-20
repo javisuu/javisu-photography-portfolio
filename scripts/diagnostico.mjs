@@ -279,6 +279,82 @@ for (const route of routes) {
   }
 }
 
+// ---------- barra de scroll ----------
+// Playwright arranca Chromium headless con --hide-scrollbars: con ese flag
+// innerWidth - clientWidth da 0 aunque la pagina pinte barra (spec 009).
+// Esta seccion abre su propio navegador sin el flag; las invariantes de
+// arriba siguen midiendose como siempre, para no mover su linea base.
+// Cada medida de scroll va en un contexto nuevo, con scrollY en 0.
+const SCROLL_STEP_PX = 600;
+const SCROLL_WAIT_MS = 1000;
+const MAX_RATIO_DEVIATION = 0.01;
+rule("barra de scroll");
+const sbBrowser = await chromium.launch({ ignoreDefaultArgs: ["--hide-scrollbars"] });
+async function sbOpen(route, ctxOpts = {}) {
+  const ctx = await sbBrowser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...ctxOpts });
+  const p = await ctx.newPage();
+  await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+  await p.waitForTimeout(SETTLE_MS);
+  return { ctx, p };
+}
+async function sbScrolled(route, ctxOpts, act) {
+  const { ctx, p } = await sbOpen(route, ctxOpts);
+  const before = await p.evaluate(() => scrollY).catch(() => null);
+  await act(p);
+  await p.waitForTimeout(SCROLL_WAIT_MS);
+  const after = await p.evaluate(() => scrollY).catch(() => null);
+  await ctx.close();
+  return { before, after, ok: before !== null && after !== null && after > before };
+}
+for (const route of routes) {
+  const isAlbum = route.startsWith("/album/");
+  const { ctx, p } = await sbOpen(route);
+  const m = await p.evaluate(() => {
+    const main = [...document.querySelectorAll("main")].filter((el) => getComputedStyle(el).display !== "none")[0];
+    const r = { gutter: innerWidth - document.documentElement.clientWidth, scrollHeight: document.documentElement.scrollHeight, vh: innerHeight };
+    // Proporcion de la caja frente a la del fichero. Cuenta tambien las
+    // <img> ocultas tras GLSurface (visibility: hidden): su caja es la que
+    // GLSurface copia para pintar cada plano.
+    const devs = [...(main?.querySelectorAll("img") ?? [])]
+      .filter((img) => img.naturalWidth > 0 && img.naturalHeight > 0)
+      .map((img) => {
+        const b = img.getBoundingClientRect();
+        if (b.width < 1 || b.height < 1) return null;
+        return { src: img.currentSrc.split("/").slice(-1)[0].slice(0, 60), dev: Math.abs(b.width / b.height / (img.naturalWidth / img.naturalHeight) - 1) };
+      })
+      .filter(Boolean);
+    r.photos = devs.length;
+    r.worst = devs.sort((a, b) => b.dev - a.dev)[0] ?? null;
+    const cv = main?.querySelector("canvas");
+    if (cv && getComputedStyle(cv).position === "fixed") {
+      const b = cv.getBoundingClientRect();
+      r.canvas = { css: [Math.round(b.width), Math.round(b.height)], viewport: [innerWidth, innerHeight] };
+    }
+    return r;
+  }).catch((e) => ({ evalError: e.message }));
+  await ctx.close();
+  log(`  ${route}: ${JSON.stringify(m)}`);
+  addInv(route, "sin barra de scroll", m.gutter === 0, `innerWidth - clientWidth = ${m.gutter}`);
+  if (route === "/" || isAlbum) {
+    addInv(route, "proporcion de las fotos", m.photos > 0 && m.worst.dev < MAX_RATIO_DEVIATION,
+      m.photos ? `${m.photos} fotos, desvio max ${m.worst.dev.toFixed(4)} (${m.worst.src})` : "ninguna foto medida");
+    if (m.canvas) addInv(route, "canvas GL = viewport",
+      Math.abs(m.canvas.css[0] - m.canvas.viewport[0]) <= 1 && Math.abs(m.canvas.css[1] - m.canvas.viewport[1]) <= 1,
+      `caja ${m.canvas.css} vs viewport ${m.canvas.viewport}`);
+    const wheel = await sbScrolled(route, {}, async (pg) => { await pg.mouse.move(720, 450); await pg.mouse.wheel(0, SCROLL_STEP_PX); });
+    log(`    rueda: scrollY ${wheel.before} -> ${wheel.after}`);
+    addInv(route, "scroll con rueda", wheel.ok, `scrollY ${wheel.before} -> ${wheel.after}`);
+  }
+  if (isAlbum) {
+    for (const [label, opts] of [["", {}], [" (reduced motion)", { reducedMotion: "reduce" }]]) {
+      const key = await sbScrolled(route, opts, (pg) => pg.keyboard.press("PageDown"));
+      log(`    teclado${label}: scrollY ${key.before} -> ${key.after}`);
+      addInv(route, `scroll con teclado${label}`, key.ok, `scrollY ${key.before} -> ${key.after}`);
+    }
+  }
+}
+await sbBrowser.close();
+
 // ---------- entrada del landing ----------
 // Mide desde fuera, sin tocar el sitio. Cada repeticion abre un contexto
 // nuevo (cache vacia, como un visitante nuevo) e instala, antes de cualquier

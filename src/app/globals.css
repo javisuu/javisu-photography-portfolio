@@ -11,6 +11,21 @@
   --font-serif: var(--font-eb-garamond);
 }
 
+/* No page scrollbar (specs/009-ocultar-barra-scroll): it only hides how
+   the document's scrollbar is painted — overflow is untouched, so wheel,
+   keyboard, touch and Lenis all keep scrolling the real page. Scoped to
+   html, not `*`: inner scroll boxes (the atlas cluster list,
+   src/motion/Atlas.tsx) keep their scrollbar, since there it's the only
+   cue that the list goes on. scrollbar-width covers Chrome 121+ and
+   Firefox; the ::-webkit-scrollbar rule covers Safari and older
+   Chromium. */
+html {
+  scrollbar-width: none;
+}
+html::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   background: var(--background);
   color: var(--foreground);
