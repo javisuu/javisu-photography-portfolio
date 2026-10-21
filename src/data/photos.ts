@@ -36,6 +36,33 @@ export type Place = {
   precision: PlacePrecision;
 };
 
+// Javi's own words alongside an album (spec 010). Text is his — never
+// invent copy. `placeholder: true` marks stand-in text: it renders under
+// `next dev` only and is stripped from production by the album page.
+// `lang` is per text (BCP 47, e.g. "es", "en"); omit it to inherit the
+// document's.
+export type AlbumText = {
+  body: string;
+  lang?: string;
+  placeholder?: true;
+  // 'beside': in the free side of that photo's row, top-aligned, signed.
+  // 'between': its own row after that photo, large serif, signed.
+  // Side text is only allowed next to a portrait or square photo in an
+  // offset row (order 2, 3, 5, 6...) — tsc can't check that, the
+  // diagnostic's `textos del album` section does.
+  placement:
+    | { kind: "beside"; photoOrder: number }
+    | { kind: "between"; afterPhotoOrder: number };
+};
+
+// A short line beside one photo, vertically centred on it, unsigned.
+// Same placement rules as a 'beside' AlbumText.
+export type PhotoQuote = {
+  text: string;
+  lang?: string;
+  placeholder?: true;
+};
+
 export type Album = {
   slug: string;
   title: string;
@@ -43,6 +70,8 @@ export type Album = {
   year: number;
   order: number;
   cover: string; // src of the photo marked -cover in photos-master
+  /** At most one long text per album — see AlbumText. */
+  text?: AlbumText;
 };
 
 export type Photo = {
@@ -58,6 +87,7 @@ export type Photo = {
   isFeatured?: boolean;
   /** Stable descriptive key, set where a photo has been identified by content. */
   id?: string;
+  quote?: PhotoQuote;
 };
 
 // PLACEHOLDER albums — real location/year still needed
@@ -77,6 +107,13 @@ export const albums: Album[] = [
     year: 2026,
     order: 2,
     cover: "/photos/norte/01.jpg",
+    // PLACEHOLDER — dev only, pending Javi's real text (spec 010)
+    text: {
+      body: "[PLACEHOLDER] Parrafo largo del album entre dos fotos. Ocupa el ancho de unas tres o cuatro lineas en grande, lo justo para revisar el tamano, el interlineado y la firma antes de que llegue el texto real.",
+      lang: "es",
+      placeholder: true,
+      placement: { kind: "between", afterPhotoOrder: 2 },
+    },
   },
   {
     slug: "sol",
@@ -85,6 +122,13 @@ export const albums: Album[] = [
     year: 2026,
     order: 3,
     cover: "/photos/sol/07.jpg",
+    // PLACEHOLDER — dev only, pending Javi's real text (spec 010)
+    text: {
+      body: "[PLACEHOLDER] Nota lateral larga junto a una de las primeras fotos del album. Tiene unas cinco lineas a este ancho, como la de la captura de referencia, para revisar la medida, el gris, la separacion con la foto y la firma que va debajo.",
+      lang: "es",
+      placeholder: true,
+      placement: { kind: "beside", photoOrder: 2 },
+    },
   },
   {
     slug: "ny",
@@ -258,6 +302,8 @@ export const photos: Photo[] = [
     order: 5,
     capture: { focalLength: "128mm", aperture: "f/6.3", iso: "ISO 160" },
     place: { city: "San Sebastián", country: "España", lat: 43.32655454035025, lng: -1.9866726889973427, precision: "exact" },
+    // PLACEHOLDER — dev only, pending Javi's real text (spec 010)
+    quote: { text: "[PLACEHOLDER] Una cita corta, de dos lineas.", lang: "es", placeholder: true },
   },
   {
     src: "/photos/norte/06.jpg",
@@ -396,6 +442,8 @@ export const photos: Photo[] = [
     place: { city: "San Sebastián", country: "España", lat: 43.326681795284905,lng: -1.9871325760639986, precision: "exact" },
     isFeatured: true,
     id: "red-sun-boat",
+    // PLACEHOLDER — dev only, pending Javi's real text (spec 010)
+    quote: { text: "[PLACEHOLDER] Una cita corta, de dos lineas.", lang: "es", placeholder: true },
   },
   {
     src: "/photos/sol/04.jpg",
@@ -442,6 +490,15 @@ export const photos: Photo[] = [
     id: "eclipse-totality",
   },
 ];
+
+// Placeholder texts (spec 010) exist only for reviewing layout under
+// next dev. Stripped here, at the source, so that no consumer can carry
+// them into a production build — the landing, mounted from the root
+// layout, serializes every featured Photo into each page's payload.
+if (process.env.NODE_ENV === "production") {
+  for (const album of albums) if (album.text?.placeholder) delete album.text;
+  for (const photo of photos) if (photo.quote?.placeholder) delete photo.quote;
+}
 
 export function getAlbumBySlug(slug: string): Album | undefined {
   return albums.find((album) => album.slug === slug);

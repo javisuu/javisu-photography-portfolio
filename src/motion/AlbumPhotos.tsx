@@ -7,8 +7,9 @@
 // only the painting changes, exactly like the landing's own integration.
 
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
-import type { Photo } from "@/data/photos";
+import { Fragment, useEffect, useRef, useState } from "react";
+import { Interlude, Quote, SideNote } from "@/components/AlbumTexts";
+import type { AlbumText, Photo } from "@/data/photos";
 import GLSurface from "./GLSurface";
 import { useLenis } from "./useLenis";
 
@@ -36,7 +37,13 @@ function placementClass(index: number) {
   }
 }
 
-export default function AlbumPhotos({ photos }: { photos: Photo[] }) {
+export default function AlbumPhotos({
+  photos,
+  albumText,
+}: {
+  photos: Photo[];
+  albumText?: AlbumText;
+}) {
   const lenisRef = useLenis();
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [glActive, setGlActive] = useState(false);
@@ -63,12 +70,8 @@ export default function AlbumPhotos({ photos }: { photos: Photo[] }) {
 
   return (
     <>
-      {photos.map((photo, index) => (
-        <div
-          key={photo.src}
-          data-photo-index={index}
-          className={`flex flex-col gap-4 px-6 py-16 md:px-16 ${placementClass(index)}`}
-        >
+      {photos.map((photo, index) => {
+        const image = (
           <Image
             ref={(el) => {
               imgRefs.current[index] = el;
@@ -86,12 +89,14 @@ export default function AlbumPhotos({ photos }: { photos: Photo[] }) {
             // exactly as the plain CSS album page always has.
             style={{ visibility: glActive ? "hidden" : "visible" }}
           />
-          {/* Place outranks technical data: number/title/place share one
-              baseline row, capture data drops to its own line below as
-              the footnote. Caption always shows "City, Country" alone —
-              never degree/minute/second coordinates, exact or otherwise;
-              that level of precision is an atlas-hover thing only (see
-              Place's precision field), not a caption thing. */}
+        );
+        // Place outranks technical data: number/title/place share one
+        // baseline row, capture data drops to its own line below as
+        // the footnote. Caption always shows "City, Country" alone —
+        // never degree/minute/second coordinates, exact or otherwise;
+        // that level of precision is an atlas-hover thing only (see
+        // Place's precision field), not a caption thing.
+        const caption = (
           <div className="flex flex-col gap-1">
             <div className="flex flex-wrap items-baseline gap-2">
               <span className="text-[14px] tabular-nums text-[#BBBBBB]">
@@ -111,8 +116,65 @@ export default function AlbumPhotos({ photos }: { photos: Photo[] }) {
               {photo.capture.focalLength} — {photo.capture.aperture} — {photo.capture.iso}
             </span>
           </div>
-        </div>
-      ))}
+        );
+        const sideNote =
+          albumText?.placement.kind === "beside" &&
+          albumText.placement.photoOrder === photo.order
+            ? albumText
+            : undefined;
+        const interlude =
+          albumText?.placement.kind === "between" &&
+          albumText.placement.afterPhotoOrder === photo.order
+            ? albumText
+            : undefined;
+        // Offset-right rows put the text in the left column. A long side
+        // note sits a fixed 96px off the photo; a quote alone instead takes
+        // the whole free side as its column and centres in it, so it reads
+        // in the middle of the white space rather than against the photo.
+        const right = index % 3 === 2;
+        const quoteOnly = !sideNote;
+        const gridCols = quoteOnly
+          ? `md:w-full ${right ? "md:grid-cols-[1fr_auto]" : "md:grid-cols-[auto_1fr]"}`
+          : "md:grid-cols-[auto_auto] md:gap-x-24";
+        const photoCol = right ? "md:col-start-2" : "md:col-start-1";
+        const textCol = quoteOnly
+          ? `${right ? "md:col-start-1" : "md:col-start-2"} md:justify-self-center md:self-center`
+          : `${right ? "md:col-start-1 md:justify-self-end" : "md:col-start-2"} md:self-start`;
+
+        return (
+          <Fragment key={photo.src}>
+            {sideNote || photo.quote ? (
+              // Row with side text (spec 010): a two-column grid from md
+              // up, the photo and its caption in one column, the text in
+              // the other, row 1 only — so it aligns against the <img>
+              // itself, not image-plus-caption. Below md it all stacks,
+              // the text after the caption.
+              <div
+                data-photo-index={index}
+                className={`flex flex-col px-6 py-16 md:px-16 ${placementClass(index)}`}
+              >
+                <div className={`grid gap-y-4 ${gridCols}`}>
+                  <div className={`md:row-start-1 ${photoCol}`}>{image}</div>
+                  <div className={`md:row-start-2 ${photoCol}`}>{caption}</div>
+                  <div className={`flex flex-col gap-10 md:row-start-1 ${textCol}`}>
+                    {sideNote && <SideNote body={sideNote.body} lang={sideNote.lang} />}
+                    {photo.quote && <Quote text={photo.quote.text} lang={photo.quote.lang} />}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div
+                data-photo-index={index}
+                className={`flex flex-col gap-4 px-6 py-16 md:px-16 ${placementClass(index)}`}
+              >
+                {image}
+                {caption}
+              </div>
+            )}
+            {interlude && <Interlude body={interlude.body} lang={interlude.lang} />}
+          </Fragment>
+        );
+      })}
 
       <GLSurface
         nodes={imgRefs}

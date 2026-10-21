@@ -60,7 +60,7 @@ export default async function AlbumPage({
         </p>
       </div>
 
-      <AlbumPhotos photos={albumPhotos} />
+      <AlbumPhotos photos={albumPhotos} albumText={album.text} />
 
       <Link
         href={`/album/${nextAlbum.slug}`}

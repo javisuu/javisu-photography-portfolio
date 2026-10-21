@@ -355,6 +355,130 @@ for (const route of routes) {
 }
 await sbBrowser.close();
 
+// ---------- textos del album ----------
+// Spec 010. Recorre todos los albumes de src/data/photos.ts y mide cada
+// [data-album-text] y [data-photo-quote] a 1440x900 contra su <img>.
+// En local se pintan tambien los [PLACEHOLDER] (solo en next dev); con
+// --url se comprueba que no llegue ninguno a produccion (CA8).
+const TEXT_MIN_GAP_PX = 64;
+const SIDE_TOP_MAX_PX = 100;
+const QUOTE_CENTER_MAX_PX = 24;
+const SIGNATURE = "JAVIER SUÁREZ SUQUÍA";
+if (!only || only.startsWith("/album/")) {
+  rule("textos del album");
+  const txCtx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  const tp = await txCtx.newPage();
+  // /albums solo enlaza la diapositiva abierta del carrusel: la lista de
+  // albumes sale de src/data/photos.ts, que es la fuente unica.
+  const albumRoutes = only
+    ? [only]
+    : [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => `/album/${x[1]}`);
+  for (const route of albumRoutes) {
+    await tp.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+    await tp.waitForTimeout(SETTLE_MS);
+    const m = await tp.evaluate(() => {
+      const box = (e) => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; };
+      const grey = (el) => { const c = getComputedStyle(el).color.match(/[\d.]+/g).map(Number); return c[0] === c[1] && c[1] === c[2]; };
+      const main = [...document.querySelectorAll("main")].find((el) => getComputedStyle(el).display !== "none");
+      const rows = [...main.querySelectorAll("[data-photo-index]")];
+      const titleCount = Number((main.textContent.match(/(\d+)\s*Photos/i) || [])[1]);
+      const texts = [...main.querySelectorAll("[data-album-text],[data-photo-quote]")].map((t) => {
+        const kind = t.hasAttribute("data-photo-quote") ? "cita" : t.dataset.textKind;
+        const row = t.closest("[data-photo-index]");
+        const img = row?.querySelector("img");
+        const idx = row ? Number(row.dataset.photoIndex) : null;
+        // Para "entre fotos": las <img> de la fila anterior y la siguiente en el DOM.
+        let prev = null, next = null;
+        if (!row) {
+          const all = rows.map((r) => r.querySelector("img"));
+          prev = all.filter((i) => i.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_FOLLOWING).pop() ?? null;
+          next = all.find((i) => i.compareDocumentPosition(t) & Node.DOCUMENT_POSITION_PRECEDING) ?? null;
+        }
+        const ps = [...t.querySelectorAll("p")];
+        const greyBg = (el) => { const c = getComputedStyle(el).backgroundColor.match(/[\d.]+/g).slice(0, 3).map(Number); return c[0] === c[1] && c[1] === c[2]; };
+        // Bordes del contenido de la fila (sin su padding): el hueco libre
+        // va de la foto al borde del contenido del lado contrario.
+        const rb = row?.getBoundingClientRect();
+        const content = row ? [rb.left + parseFloat(getComputedStyle(row).paddingLeft), rb.right - parseFloat(getComputedStyle(row).paddingRight)] : null;
+        return {
+          kind, lang: t.lang, idx, text: t.innerText, content,
+          box: box(t), img: img ? box(img) : null,
+          landscape: img ? img.naturalWidth > img.naturalHeight : null,
+          ratioDev: img ? Math.abs(img.getBoundingClientRect().width / img.getBoundingClientRect().height / (img.naturalWidth / img.naturalHeight) - 1) : null,
+          prev: prev ? box(prev) : null, next: next ? box(next) : null,
+          greys: ps.every(grey) && [...t.querySelectorAll("span[aria-hidden]")].every(greyBg),
+          // Fila de la primera foto despues de un texto "entre fotos".
+          nextIdx: next ? Number(next.closest("[data-photo-index]").dataset.photoIndex) : null,
+          sig: kind === "cita" ? null : (ps[1]?.innerText.trim() ?? ""),
+        };
+      });
+      return { rows: rows.length, titleCount, texts, vw: innerWidth, vh: innerHeight };
+    }).catch((e) => ({ evalError: e.message }));
+    if (m.evalError) { addInv(route, "textos del album medibles", false, m.evalError); continue; }
+    if (remote) {
+      const ph = m.texts.filter((t) => t.text.includes("[PLACEHOLDER]")).length;
+      addInv(route, "sin textos [PLACEHOLDER] en produccion", ph === 0, `${ph} textos de prueba publicados`);
+      continue;
+    }
+    log(`  ${route}: ${m.texts.length} textos, ${m.rows} filas de foto`);
+    addInv(route, "filas de foto = fotos del titulo", m.rows === m.titleCount, `${m.rows} filas, el titulo dice ${m.titleCount}`);
+    const longs = m.texts.filter((t) => t.kind !== "cita").length;
+    if (m.texts.length) addInv(route, "como mucho un texto largo", longs <= 1, `${longs} textos largos`);
+    for (const t of m.texts) {
+      const tag = `${t.kind}${t.idx !== null ? ` foto ${t.idx + 1}` : ""}`;
+      const f1 = (v) => Math.round(v * 10) / 10;
+      if (t.kind === "between") {
+        const cx = f1(t.box.l + t.box.w / 2 - m.vw / 2);
+        log(`    ${tag}: caja ${f1(t.box.w)}x${f1(t.box.h)}, desvio del centro ${cx} px`);
+        addInv(route, `${tag}: centrado y entre dos fotos`,
+          Math.abs(cx) <= 2 && !!t.prev && !!t.next && t.box.t >= t.prev.b && t.box.b <= t.next.t,
+          `desvio ${cx} px, anterior ${t.prev ? "si" : "no"}, siguiente ${t.next ? "si" : "no"}`);
+      } else {
+        const left = t.box.l >= t.img.r;
+        const gap = f1(left ? t.box.l - t.img.r : t.img.l - t.box.r);
+        const overlap = Math.max(0, Math.min(t.box.r, t.img.r) - Math.max(t.box.l, t.img.l)) * Math.max(0, Math.min(t.box.b, t.img.b) - Math.max(t.box.t, t.img.t));
+        const offset = t.idx % 3;
+        const sideOk = offset === 1 ? t.box.l >= t.img.r : offset === 2 ? t.box.r <= t.img.l : false;
+        log(`    ${tag}: hueco ${gap} px, arriba ${f1(t.box.t - t.img.t)} px, centro ${f1(t.box.t + t.box.h / 2 - (t.img.t + t.img.h / 2))} px`);
+        addInv(route, `${tag}: sin solaparse y en el lado libre`, overlap === 0 && gap >= TEXT_MIN_GAP_PX && sideOk,
+          `solape ${overlap}, hueco ${gap} px, fila ${["centrada", "izquierda", "derecha"][offset]}`);
+        addInv(route, `${tag}: foto vertical o cuadrada en fila desplazada`, !t.landscape && offset !== 0,
+          `${t.landscape ? "foto horizontal" : "foto vertical"}, fila ${["centrada", "izquierda", "derecha"][offset]}`);
+        addInv(route, `${tag}: ni la primera ni la ultima foto`, t.idx !== 0 && t.idx !== m.rows - 1,
+          `foto ${t.idx + 1} de ${m.rows}`);
+        if (t.kind === "cita") {
+          // La cita se centra en el hueco libre entero, no pegada a la foto.
+          const [fl, fr] = offset === 1 ? [t.img.r, t.content[1]] : [t.content[0], t.img.l];
+          const dx = f1(t.box.l + t.box.w / 2 - (fl + fr) / 2);
+          log(`      hueco libre ${f1(fl)}-${f1(fr)} px, desvio del centro ${dx} px`);
+          addInv(route, `${tag}: centrada en el hueco libre`, Math.abs(dx) <= QUOTE_CENTER_MAX_PX, `desvio ${dx} px`);
+        }
+        addInv(route, `${tag}: foto entera y sin deformar`,
+          t.img.h <= 0.85 * m.vh + 1 && t.ratioDev < MAX_RATIO_DEVIATION && t.box.l >= 0 && t.box.r <= m.vw && t.img.l >= 0 && t.img.r <= m.vw,
+          `alto ${f1(t.img.h)}, desvio ${t.ratioDev.toFixed(4)}`);
+        addInv(route, `${tag}: alineacion vertical`,
+          t.kind === "cita" ? Math.abs(t.box.t + t.box.h / 2 - (t.img.t + t.img.h / 2)) <= QUOTE_CENTER_MAX_PX : Math.abs(t.box.t - t.img.t) <= SIDE_TOP_MAX_PX,
+          t.kind === "cita" ? `centro a ${f1(t.box.t + t.box.h / 2 - (t.img.t + t.img.h / 2))} px` : `arriba a ${f1(t.box.t - t.img.t)} px`);
+      }
+      addInv(route, `${tag}: escala de grises`, t.greys, "algun color no es gris");
+      if (t.kind !== "cita") addInv(route, `${tag}: firma`, t.sig === SIGNATURE, `dice ${JSON.stringify(t.sig)}`);
+    }
+    // Un texto entre fotos no lleva data-photo-index: el enlace #photo-N
+    // del atlas tiene que seguir centrando la foto N+1, no el texto.
+    const target = m.texts.find((t) => t.kind === "between")?.nextIdx;
+    if (Number.isInteger(target)) {
+      const lc = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
+      const lp = await lc.newPage();
+      await lp.goto(`${BASE}${route}#photo-${target}`, { waitUntil: "load" }).catch(() => {});
+      await lp.waitForTimeout(SETTLE_MS);
+      const d = await lp.evaluate((i) => { const r = document.querySelector(`[data-photo-index="${i}"]`).getBoundingClientRect(); return Math.round(r.top + r.height / 2 - innerHeight / 2); }, target).catch(() => null);
+      await lc.close();
+      addInv(route, `#photo-${target} centra la foto ${target + 1}, despues del texto`, d !== null && Math.abs(d) <= 50, `desvio ${d} px`);
+    }
+  }
+  await txCtx.close();
+}
+
 // ---------- entrada del landing ----------
 // Mide desde fuera, sin tocar el sitio. Cada repeticion abre un contexto
 // nuevo (cache vacia, como un visitante nuevo) e instala, antes de cualquier

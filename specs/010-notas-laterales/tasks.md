@@ -1,19 +1,76 @@
-# Tareas NNN · Titulo
+# Tareas 010 · Textos del album: nota lateral, cita y parrafo entre fotos
 
-- **Plan:** `plan.md` (aprobado el AAAA-MM-DD)
+- **Plan:** `plan.md` (aprobado el 2026-10-21)
 
 Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin errores y tiene su comprobacion.
 
-- [ ] **T1** · Descripcion
-  - Fichero(s):
-  - Comprobacion:
-- [ ] **T2** · Descripcion
-  - Fichero(s):
-  - Comprobacion:
-
-## Cierre
-
-- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
-- [ ] Criterios de aceptacion de la spec ejecutados
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
-- [ ] Estado de `spec.md` → Implementada
+- [x] **T1** · Linea base de un album sin textos (referencia de CA9)
+  - Fichero(s): ninguno. Salida en el scratchpad: `2026-10-21_010-linea-base.txt`
+  - Comprobacion: `node scripts/diagnostico.mjs --medir /album/america` en verde, con las cajas de cada `<img>` y de cada pie guardadas
+  - **Hecho.** 11 de 11, `scrollHeight` 9252. `--medir` no guarda las cajas, asi que se volcaron con un script del scratchpad (`cajas-album.mjs` → `2026-10-21_010-linea-base-cajas.json`): 9 filas. Una vertical a 85vh mide 573,8 px de ancho.
+- [x] **T2** · Tipos y datos
+  - Fichero(s): `src/data/photos.ts`
+  - Cambio: `AlbumText` y `PhotoQuote`, `Album.text?` y `Photo.quote?`, y cuatro `[PLACEHOLDER]` con `placeholder: true`:
+    - `sol`: texto lateral junto a la foto 2 y cita en la 3
+    - `norte`: texto entre fotos despues de la 2 y cita en la 5
+  - Comprobacion: `npx tsc --noEmit` ok (CA2)
+  - **Hecho.** tsc ok.
+- [x] **T3** · Piezas tipograficas
+  - Fichero(s): `src/components/AlbumTexts.tsx` (crear)
+  - Cambio: `SideNote`, `Quote`, `Interlude` y la firma `JAVIER SUÁREZ SUQUÍA`, con `lang` y los atributos `data-*`
+  - Comprobacion: tsc y lint ok
+- [x] **T4** · Filtro de placeholders y paso de props
+  - Fichero(s): `src/app/album/[slug]/page.tsx`
+  - Cambio: en produccion se quitan `text` y `quote` con `placeholder`, y `albumText` pasa a `AlbumPhotos`
+  - Comprobacion: tsc ok
+  - **Desvio del plan, descubierto en T7.** El filtro en `page.tsx` no bastaba. La cita de `sol` 3 llegaba igualmente al payload RSC de **todas** las paginas: es una foto `isFeatured`, y el landing, montado desde el layout raiz, serializa los `Photo` completos. El filtro paso a `src/data/photos.ts`, justo despues de los arrays: en produccion se borran `text` y `quote` con `placeholder`. `page.tsx` solo pasa `album.text`.
+- [x] **T5** · Pintado en el flujo del album
+  - Fichero(s): `src/motion/AlbumPhotos.tsx`
+  - Cambio:
+    - fila con texto lateral: rejilla de dos columnas desde `md`, con el texto alineado con la `<img>`
+    - texto entre fotos: un bloque sin `data-photo-index`
+    - filas sin texto: identicas a hoy
+  - Comprobacion: `/album/sol` y `/album/norte` cargan en `next dev` sin errores de consola
+  - **Hecho.** El texto se alinea contra la `<img>` porque la rejilla pone el pie en la fila 2.
+- [x] **T6** · Seccion `textos del album` en el diagnostico
+  - Fichero(s): `scripts/diagnostico.mjs`
+  - Cambio:
+    - CA3 a CA7 sobre `/album/sol` y `/album/norte`
+    - con `--url`, solo CA8
+    - comprobar que `norte` tiene 8 `[data-photo-index]` y que la flecha siguiente va de la foto 2 a la 3
+  - Comprobacion: diagnostico completo en verde. Salida en el scratchpad: `2026-10-21_010-textos-album.txt`
+  - **Hecho.** La lista de albumes sale de `src/data/photos.ts`, no de `/albums`: el carrusel solo enlaza la diapositiva abierta, y la primera version de la seccion solo vio `america`.
+  - Diagnostico final: tsc, lint y build ok · 0 errores en 6 rutas · **69 de 69** (CA1).
+  - A 1440x900:
+    - nota lateral (`sol` 2): hueco 96 px, arriba 80 px, firma ok
+    - citas (`sol` 3, `norte` 5): hueco 96 px, centro 0 px
+    - texto entre fotos (`norte`, tras la 2): 1200x171 px, desvio 0 px
+    - fotos con texto: 573,8x765, igual que sin texto
+    - `#photo-2` en `norte` centra la foto 3
+  - Entrada: 217 ms · 0 frames >50 ms. Una pasada intermedia dio 433 ms y 12 frames, pero 3 repeticiones de `--medir /` dieron mediana de 0 frames (`2026-10-21_010-entrada-repeticion.txt`) y el diagnostico final volvio a 217/0. Ruido local.
+- [x] **T7** · CA8 y CA9
+  - CA8: `next build`, despues `next start` y buscar en el HTML de `/album/sol` y `/album/norte`: 0 apariciones de `data-album-text`, `data-photo-quote` y `PLACEHOLDER`
+  - CA9: `--medir /album/america` comparado con T1, ±1 px
+  - Comprobacion: anotar los dos resultados aqui
+  - **CA8:** la primera pasada **fallo**: `PLACEHOLDER` aparecia una vez en el HTML de los 4 albumes, en el payload RSC (ver T4). Tras mover el filtro a `photos.ts`, `next build` da 0 apariciones de los textos de prueba, `data-album-text` y `data-photo-quote` en los 11 HTML prerenderizados de `.next/server/app/`, y 0 en `.next/static`, el JS publico. Solo quedan en un chunk de servidor, `.next/server/chunks/ssr/`, que no se sirve.
+  - **CA9:** `america`: 9 filas, diferencia maxima **0 px** en las cajas de fila, `<img>` y pie, y `scrollHeight` 9252 = 9252 (`2026-10-21_010-cajas-final.json`).
+- [x] **T8** · Revision de Javi (CA11) y ajustes de estilo
+  - Comprobacion: Javi da por buenas las tres piezas en `npm run dev`
+  - **Primera revision (2026-10-21):**
+    - Le gusta todo, sobre todo el parrafo entre fotos al estilo de rluijten, que pondra en casi todos los albumes.
+    - Pide dos cambios (spec, decisiones 8 y 9):
+      - la cita estaba demasiado pegada a la foto: pasa al centro del hueco libre;
+      - ni la primera ni la ultima foto llevan texto lateral.
+    - Cambio en `src/motion/AlbumPhotos.tsx`: una fila con solo una cita usa `1fr` para la columna del texto y lo centra en ella.
+    - El diagnostico gana dos invariantes por cita o nota: `ni la primera ni la ultima foto` y `centrada en el hueco libre`.
+    - Medido contra el `next dev` de Javi en el puerto 3000 (el diagnostico no arranca con otro `next dev` vivo). Script: `citas.mjs`, en el scratchpad.
+      - `sol` 3: hueco libre 64-802 px, cita en 293-573: tercio 2, a 229 px de la foto, desvio de centro 0 px en horizontal y en vertical.
+      - `norte` 5: hueco 638-1376 px, cita en 867-1147: tercio 2, a 229 px, desvio 0 y 0.
+      - Fotos con cita: 574x765, sin cambios.
+    - Javi, tras el ajuste: "I find those changes perfect". CA11 cumplido.
+    - Diagnostico final, con el `npm run dev` de Javi ya parado: tsc, lint y build ok · 0 errores en 6 rutas · **74 de 74** · entrada 233 ms, 0 frames >50 ms (scratchpad: `2026-10-21_010-textos-album-final.txt`).
+- [x] **T9** · Documentacion
+  - Fichero(s): `docs/design-spec-v2.md` §3 y `CLAUDE.md` (que `Album` y `Photo` pueden llevar texto)
+  - CA10: `git diff main --stat -- src/`
+  - **Hecho.** §3 describe las tres piezas, sus reglas y su estilo, con una entrada en el Changelog. `CLAUDE.md` gana una linea en "Architecture rules": donde vive el filtro de placeholders y por que.
+  - **CA10:** cambian `src/data/photos.ts`, `src/motion/AlbumPhotos.tsx` y `src/app/album/[slug]/page.tsx`, y se crea `src/components/AlbumTexts.tsx`. `page.tsx` no estaba en la lista de CA10, pero si en la tabla de ficheros del plan: solo pasa `album.text` a `AlbumPhotos`, en una linea.
