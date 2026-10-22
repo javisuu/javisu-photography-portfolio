@@ -176,6 +176,10 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
 - [ ] **T11** · Revision de Javi (CA11)
   - Comprobacion: Javi prueba `/albums` en `npm run dev` con su trackpad, con `?panel=100` y `?panel=90`, y elige. Su testimonio va aqui
   - Despues: `PANEL` queda en el valor elegido y se quita la lectura de `?panel`. Si pide ajustes de `ω` o de `MAX_COMMITS_EN_COLA`, se repiten T6/T7 y T10
+  - **Primera revision (2026-10-22):**
+    - Javi: "90 looks better, I find those changes really good". `PANEL_OPACITY` = 0,9, y fuera `?panel` (`9a8ef13`).
+    - Pregunta por el salto que queda y por que la velocidad esta limitada. Se le anade `?cola=libre` (`7211405`): "libre feels better".
+    - Con sus capturas de cynx.io explica la estela del lado ya recorrido. Abre la enmienda 1 (abajo); CA11 queda abierto hasta revisarla.
 - [ ] **T12** · Documentacion
   - Fichero(s): `docs/design-spec-v2.md` §2 y su Changelog, `CLAUDE.md` (build order, carrusel)
   - Comprobacion: `git diff main --stat` solo muestra los ficheros de la tabla del plan, mas `specs/011-carrusel-fluido/`
@@ -188,3 +192,17 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
 - [ ] Criterios de aceptacion de la spec ejecutados
 - [ ] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
 - [ ] Estado de `spec.md` → Implementada
+
+## Enmienda 1 (2026-10-22): scroll libre y estela
+
+- [ ] **T14** · Quitar la cola (plan, enmienda 1, parte 1)
+  - Fichero(s): `src/motion/AlbumsCarousel.tsx`
+  - Comprobacion: geometria = T2 (0 px); fling fuerte con mas albumes que con cola (10 frente a 7, `2026-10-22_011-cola-libre-dev.txt`); tsc y lint ok
+- [ ] **T15** · Medida de CA5 nuevo y CA12 en el script
+  - Fichero(s): `scripts/medir-carrusel.mjs`
+  - Comprobacion: contra T14, sin estela: CA5 nuevo en 0 frames con fallo y una estela que no existe
+- [ ] **T16** · La estela (plan, enmienda 1, parte 2)
+  - Fichero(s): `src/motion/AlbumsCarousel.tsx`
+  - Comprobacion: CA5 nuevo, CA6, CA7, CA8 y CA12, con salidas en el scratchpad; diagnostico en verde
+- [ ] **T17** · Revision de Javi (CA11) y ajuste de las tres constantes
+- [ ] **T18** · Documentacion: design spec §2 (scroll libre y estela; fuera "one album at a time") y `CLAUDE.md`

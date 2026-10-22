@@ -137,3 +137,35 @@ Las cifras se miden con un script nuevo del repo, `scripts/medir-carrusel.mjs`. 
    - (c) lomo de libro: el titulo del album en vertical, EB Garamond en mayusculas pequenas con tracking, sobre negro;
    - (d) curvas de nivel del lugar del album, que enlazan con el atlas. Es la mas cara de hacer.
    Se combinan: por ejemplo, (c) sobre (b). Ninguna desatura la foto: el design spec lo prohibe ("never desaturation of the work", `docs/design-spec-v2.md:93`).
+
+## Enmienda 1 (2026-10-22): scroll libre y estela por velocidad
+
+- **Estado:** aprobada por Javi el 2026-10-22
+
+### Que vio Javi en la revision de CA11
+
+- **El panel al 90 %**, mejor que opaco. Hecho en `9a8ef13`.
+- **"Un album de cada vez" limita la velocidad.** Con `?cola=libre` (`7211405`, solo `next dev`), sin la espera a la pareja anterior, "feels better". Medido en su `next dev` con el fling fuerte (`2026-10-22_011-cola-libre-dev.txt`, scratchpad): **7 albumes y como mucho 2 a medio plegar** con cola, **10 albumes y hasta 4** sin ella.
+- **En cynx.io tambien cambian varias a la vez, y queda natural.** La premisa de la decision 1 ("solo cambian la que se abre y la que se cierra") salio de capturas cada ~1 s con WebGL por software en headless, demasiado lentas para verlo. Las tres capturas de Javi, de las 23:07 en su pantalla, si lo ensenan. Anchos en px de pantalla; la plegada de cynx mide 141:
+  - **Scroll rapido, captura 1:** a la izquierda de la que se abre, 216 → 270 → 367 → 378, cada vez mas anchas hacia ella. A la derecha: 141, 141, 141.
+  - **Scroll rapido, captura 2:** a la izquierda 165 → 210 y la que se abre a 776. A la derecha: 141, 141, 141.
+  - **En reposo, captura 3:** todas las plegadas a 141 y la abierta a 909.
+- **La explicacion de Javi:** cynx no toca las plegadas del lado hacia el que avanza, y eso ya lo tenemos (el lado anclado). Lo que no tenemos es que las del otro lado, las que acaban de pasar, cambien de ancho segun la velocidad. Nuestra version las cierra del todo enseguida. "Cuando una foto se abre, no significa que las demas tengan que estar plegadas al 100 %": tienen que hacer sitio a la que se abre, no cerrarse de golpe. Ese cierre brusco es el salto que queda en CA6 (fling 13 px, rafaga 26,5 px; `tasks.md`, T10).
+
+### Decisiones nuevas
+
+| # | Pregunta | Decision |
+|---|---|---|
+| 9 | Fling largo (sustituye a la 6) | Scroll libre, como cynx: los commits no esperan a la pareja anterior |
+| 10 | Que puede cambiar de ancho (matiza la 1) | La que se abre y una **estela** del lado ya recorrido: las ultimas en pasar quedan entreabiertas segun la velocidad, mas cuanto mas rapido y mas cuanto mas cerca de la abierta. Con la tira quieta vuelven todas a la plegada. Las del lado hacia el que se avanza no cambian nunca |
+
+### Criterios que cambian
+
+| # | Comando | Resultado esperado |
+|---|---|---|
+| CA5 (sustituye) | `node scripts/medir-carrusel.mjs`, fling fuerte y rafaga (solo hacia delante) | Ninguna diapositiva a mas de una posicion por delante de la abierta (la que se abre si puede) cambia de ancho: 110 ± 0,5 px en todos los frames |
+| CA6 | Igual | Se mantiene: ningun borde mas de 8 px por encima de la mediana de sus 6 vecinos, en los 4 escenarios |
+| CA7, CA8 | Igual | Se mantienen: en reposo no hay estela, y el reposo es el de la linea base |
+| CA9 | Igual | Albumes y tiempo hasta el reposo con la estela, para Javi |
+| CA12 (nuevo) | `node scripts/medir-carrusel.mjs`, fling fuerte | En los frames con la tira en marcha, la estela decrece con la distancia a la abierta (cada una igual o mas estrecha que la anterior) |
+| CA11 | Revision de Javi | Javi da por bueno el scroll libre con estela frente a cynx.io |

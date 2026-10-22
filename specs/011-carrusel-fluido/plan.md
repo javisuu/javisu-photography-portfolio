@@ -131,3 +131,37 @@ Alternativa de reserva: `clip-path: inset()` en el marco. Evita el layout pero r
 | Lo mismo contra produccion, tras el push de Javi | CA2 a CA6 | `evidencia/2026-10-2X_011-produccion.txt` |
 
 El agente no puede escribir en `evidencia/` (`.claude/settings.json:27`). Las salidas van al scratchpad y Javi las copia con los `cp` que le de el agente.
+
+## Enmienda 1 (2026-10-22): scroll libre y estela por velocidad
+
+- **Spec:** `spec.md`, enmienda 1. Aprobado por Javi el 2026-10-22
+
+### 1. Sin cola
+
+Sale la espera de T7: `MAX_QUEUED_COMMITS`, `outgoingIdxRef`, `pairSettled()`, el freno suave y el tope de `offsetPx`, y con ellos el `?cola=libre` de prueba. Los commits vuelven a encadenarse como antes de T7, pero cada diapositiva sigue con su muelle (T6), asi que ninguna cambia de destino de golpe.
+
+### 2. La estela
+
+Hoy el destino de apertura es binario: 1 la activa, 0 las demas. Pasa a ser:
+
+- **La activa:** 1, como hoy.
+- **Las del lado ya recorrido** (el no anclado: `absIndex = activa - travelDir * k`, con k = 1, 2, 3...): un ancho extra sobre la plegada, `ESTELA_MAX_PX * v * ESTELA_DECAE^(k-1)`, convertido en apertura dividiendo entre (natural − 110) y con tope en 1.
+  - `v` es la velocidad de la tira normalizada: `clamp(|velocity| / ESTELA_VELOCIDAD_PLENA, 0, 1)`.
+  - Valores de partida, sacados de las capturas de Javi (cynx a ~1,34 px de pantalla por px CSS): `ESTELA_MAX_PX` = 180, `ESTELA_DECAE` = 0,6, `ESTELA_VELOCIDAD_PLENA` = 30 px por frame. Se ajustan con Javi en la revision.
+- **Las del lado hacia el que se avanza:** 0, como hoy.
+
+El muelle de cada diapositiva sigue a su destino, y como `velocity` cambia de forma continua, la estela tambien. Con la tira quieta `v` = 0, y todas vuelven a 110: el reposo no cambia (CA7, CA8).
+
+`computeFrame` coloca el lado anclado partiendo del borde fijo y usando solo los anchos de ese lado: la estela, que esta en el otro lado, no lo mueve.
+
+### 3. Medida
+
+- `scripts/medir-carrusel.mjs` gana dos cifras para los escenarios solo hacia delante: anchos por delante de la abierta (CA5 nuevo) y monotonia de la estela (CA12).
+- "A medio plegar" se sigue contando, pero deja de ser criterio.
+
+### Riesgos
+
+| Riesgo | Mitigacion |
+|---|---|
+| La estela se ve como un acordeon y no como cynx | Tres constantes, y Javi las prueba en `next dev`. Si no se acierta, se deja el scroll libre sin estela, que ya le gusta mas |
+| Una estela que crece mientras otra pareja se abre vuelve a dar saltos | CA6 se mide igual que antes, en los 4 escenarios |
