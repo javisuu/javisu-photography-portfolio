@@ -1,0 +1,31 @@
+base https://javisu-photography-portfolio.vercel.app · cpu x4 · 1440x900
+
+=== carrusel: llegada (load -> +2,5 s) ===
+  frames 85 · p50 16.7 ms · p95 66.6 ms · max 233 ms · >25 ms 33 · >50 ms 7
+  coste desde navegacion: {"layouts":5,"layoutMs":491.4,"styles":7,"styleMs":183.8,"scriptMs":1826.8,"taskMs":6605.3}
+  long tasks: 9 (3630 ms), max 1861 ms
+  portadas: 59 <img>, 58 cargadas a +2,5 s, 43 lazy
+
+=== carrusel: rueda tipo trackpad (60 eventos x 12 px) + 1,5 s de inercia ===
+  frames 237 · p50 33.3 ms · p95 133.3 ms · max 2817 ms · >25 ms 152 · >50 ms 69
+  coste: {"layouts":182,"layoutMs":612.9,"styles":238,"styleMs":2233.6,"scriptMs":5994.7,"taskMs":13164.2} · por frame: layout 2.59 ms, estilo 9.42 ms
+  cambios de album: 2 · frames >25 ms: 152, de ellos 4 en los 120 ms tras un cambio de album
+  long tasks: 72 (8666 ms)
+
+=== carrusel: rueda tipo raton (8 eventos x 100 px) + 1,5 s de inercia ===
+  frames 73 · p50 50 ms · p95 166.7 ms · max 867 ms · >25 ms 53 · >50 ms 30
+  coste: {"layouts":61,"layoutMs":258.4,"styles":78,"styleMs":1063.9,"scriptMs":1237.9,"taskMs":5126.9} · por frame: layout 3.54 ms, estilo 14.57 ms
+  cambios de album: 3 · frames >25 ms: 53, de ellos 6 en los 120 ms tras un cambio de album
+  long tasks: 35 (3821 ms)
+
+=== album america: navegacion suave desde /albums (ms desde el click/goto · fraccion de pixeles de foto en pantalla · primera <img>) ===
+
+=== album america: carga directa (ms desde el click/goto · fraccion de pixeles de foto en pantalla · primera <img>) ===
+   3605 ms    1.1 %  /album/america sin img
+   5164 ms   33.2 %  /album/america img visible, cargada
+
+=== album norte: navegacion suave desde /albums (ms desde el click/goto · fraccion de pixeles de foto en pantalla · primera <img>) ===
+   6091 ms    0.9 %  /album/norte sin img
+
+=== album norte: carga directa (ms desde el click/goto · fraccion de pixeles de foto en pantalla · primera <img>) ===
+   6015 ms    0.9 %  /album/norte sin img

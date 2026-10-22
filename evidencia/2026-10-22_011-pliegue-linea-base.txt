@@ -1,0 +1,53 @@
+
+=== fling fuerte de trackpad (60 x 50 px) ===
+  frames 350 · diapositivas a medio plegar por frame: 0: 46 · 1: 32 · 2: 38 · 3: 156 · 4: 78
+  maximo de 3 o mas a la vez: 234 frames
+  salto (movimiento de un borde menos la mediana de sus 6 frames vecinos): p50 1.0 px · max 59.5 px (frame 72 de 350)
+    frame 68: izq 529.2 der 864.1 ancho 334.9
+    frame 69: izq 517.7 der 856.8 ancho 339.1
+    frame 70: izq 507.2 der 850.1 ancho 342.9
+    frame 71: izq 497.7 der 843.9 ancho 346.3
+    frame 72 <<: izq 455.9 der 777.2 ancho 321.2
+    frame 73: izq 418.8 der 717.9 ancho 299.1
+    frame 74: izq 385.2 der 664.3 ancho 279.2
+    frame 75: izq 352.9 der 614.2 ancho 261.3
+    frame 76: izq 323.9 der 569.4 ancho 245.5
+
+=== rafaga rapida hacia delante (trackpad, 40 x 30 px) ===
+  frames 253 · diapositivas a medio plegar por frame: 0: 35 · 1: 7 · 2: 130 · 3: 81
+  maximo de 3 o mas a la vez: 81 frames
+  salto (movimiento de un borde menos la mediana de sus 6 frames vecinos): p50 0.6 px · max 59.1 px (frame 47 de 253)
+    frame 43: izq 193.5 der 852.3 ancho 658.8
+    frame 44: izq 188.7 der 848.4 ancho 659.7
+    frame 45: izq 184.4 der 844.8 ancho 660.5
+    frame 46: izq 180.4 der 841.6 ancho 661.1
+    frame 47 <<: izq 175.5 der 778.6 ancho 603.1
+    frame 48: izq 171.0 der 722.5 ancho 551.4
+    frame 49: izq 166.9 der 671.8 ancho 504.9
+    frame 50: izq 163.2 der 626.7 ancho 463.5
+    frame 51: izq 158.5 der 584.8 ancho 426.3
+
+=== hacia delante y giro brusco (20 x 15 px, luego 20 x -15 px) ===
+  frames 238 · diapositivas a medio plegar por frame: 0: 49 · 1: 128 · 2: 61
+  maximo de 3 o mas a la vez: 0 frames
+  salto (movimiento de un borde menos la mediana de sus 6 frames vecinos): p50 0.2 px · max 58.1 px (frame 49 de 238)
+    frame 45: izq 181.0 der 848.0 ancho 667.0
+    frame 46: izq 178.2 der 845.2 ancho 667.0
+    frame 47: izq 175.6 der 842.6 ancho 667.0
+    frame 48: izq 173.2 der 840.2 ancho 667.0
+    frame 49 <<: izq 171.0 der 779.4 ancho 608.3
+    frame 50: izq 168.4 der 724.2 ancho 555.8
+    frame 51: izq 166.0 der 675.1 ancho 509.1
+    frame 52: izq 163.7 der 630.8 ancho 467.0
+    frame 53: izq 161.1 der 590.7 ancho 429.6
+
+=== un paso, pausa corta y paso atras (raton) ===
+  frames 111 · diapositivas a medio plegar por frame: 1: 111
+  maximo de 3 o mas a la vez: 0 frames
+  salto (movimiento de un borde menos la mediana de sus 6 frames vecinos): p50 0.0 px · max 5.1 px (frame 18 de 111)
+    frame 14: izq 1636.2 der 1746.2 ancho 110.0
+    frame 15: izq 1634.7 der 1744.7 ancho 110.0
+    frame 16: izq 1633.3 der 1743.3 ancho 110.0
+    frame 17: izq 1631.9 der 1741.9 ancho 110.0
+    frame 18 <<: izq 1635.7 der 1745.7 ancho 110.0
+    frame 19: izq 1639.2 der 1749.2 ancho 110.0

@@ -1,0 +1,58 @@
+base https://javisu-photography-portfolio.vercel.app · cpu x1 · 1440x900
+
+=== carrusel: llegada (load -> +2,5 s) ===
+  frames 136 · p50 16.7 ms · p95 16.8 ms · max 233 ms · >25 ms 2 · >50 ms 1
+  coste desde navegacion: {"layouts":129,"layoutMs":68.5,"styles":140,"styleMs":67.6,"scriptMs":413.8,"taskMs":910.3}
+  long tasks: 2 (309 ms), max 253 ms
+  portadas: 59 <img>, 44 cargadas a +2,5 s, 43 lazy
+
+=== carrusel: rueda tipo trackpad (60 eventos x 12 px) + 1,5 s de inercia ===
+  frames 381 · p50 16.7 ms · p95 33.3 ms · max 67 ms · >25 ms 20 · >50 ms 1
+  coste: {"layouts":269,"layoutMs":92.7,"styles":385,"styleMs":327.7,"scriptMs":257.6,"taskMs":2080.2} · por frame: layout 0.24 ms, estilo 0.86 ms
+  cambios de album: 2 · frames >25 ms: 20, de ellos 4 en los 120 ms tras un cambio de album
+  long tasks: 0 (0 ms)
+
+=== carrusel: rueda tipo raton (8 eventos x 100 px) + 1,5 s de inercia ===
+  frames 162 · p50 16.7 ms · p95 50 ms · max 67 ms · >25 ms 17 · >50 ms 3
+  coste: {"layouts":146,"layoutMs":51.6,"styles":168,"styleMs":198.1,"scriptMs":131,"taskMs":828.2} · por frame: layout 0.32 ms, estilo 1.22 ms
+  cambios de album: 3 · frames >25 ms: 17, de ellos 6 en los 120 ms tras un cambio de album
+  long tasks: 0 (0 ms)
+
+=== album america: navegacion suave desde /albums (ms desde el click/goto · fraccion de pixeles de foto en pantalla · primera <img>) ===
+   1059 ms    0.7 %  /album/america img visible, sin cargar
+   1751 ms   33.2 %  /album/america img oculta, cargada
+   2333 ms   33.2 %  /album/america img oculta, cargada
+   2790 ms   33.2 %  /album/america img oculta, cargada
+   3291 ms   33.2 %  /album/america img oculta, cargada
+   3865 ms   33.2 %  /album/america img oculta, cargada
+   4384 ms   33.2 %  /album/america img oculta, cargada
+
+=== album america: carga directa (ms desde el click/goto · fraccion de pixeles de foto en pantalla · primera <img>) ===
+   1517 ms    0.7 %  /album/america img visible, sin cargar
+   2135 ms   33.2 %  /album/america img oculta, cargada
+   2679 ms   33.2 %  /album/america img oculta, cargada
+   3322 ms   33.2 %  /album/america img oculta, cargada
+   3929 ms   33.2 %  /album/america img oculta, cargada
+   4597 ms   33.2 %  /album/america img oculta, cargada
+
+=== album norte: navegacion suave desde /albums (ms desde el click/goto · fraccion de pixeles de foto en pantalla · primera <img>) ===
+    996 ms   19.1 %  /album/norte img visible, sin cargar
+   1400 ms   19.1 %  /album/norte img oculta, cargada
+   1769 ms   19.1 %  /album/norte img oculta, cargada
+   2136 ms   19.1 %  /album/norte img oculta, cargada
+   2447 ms   19.1 %  /album/norte img oculta, cargada
+   2782 ms   19.1 %  /album/norte img oculta, cargada
+   3160 ms   19.1 %  /album/norte img oculta, cargada
+   3549 ms   19.1 %  /album/norte img oculta, cargada
+   3987 ms   19.1 %  /album/norte img oculta, cargada
+   4415 ms   19.1 %  /album/norte img oculta, cargada
+
+=== album norte: carga directa (ms desde el click/goto · fraccion de pixeles de foto en pantalla · primera <img>) ===
+    695 ms    0.9 %  /album/norte img visible, sin cargar
+   1608 ms   19.1 %  /album/norte img visible, cargada
+   2109 ms   19.1 %  /album/norte img oculta, cargada
+   2499 ms   19.1 %  /album/norte img oculta, cargada
+   2971 ms   19.1 %  /album/norte img oculta, cargada
+   3357 ms   19.1 %  /album/norte img oculta, cargada
+   3760 ms   19.1 %  /album/norte img oculta, cargada
+   4124 ms   19.1 %  /album/norte img oculta, cargada
