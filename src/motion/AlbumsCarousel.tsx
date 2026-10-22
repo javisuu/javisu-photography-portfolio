@@ -219,9 +219,9 @@ function driftPxFor(absIndex: number, activeIdx: number, naturalWidth: number, f
 // The <img> inside a slide must reveal/hide from the SAME edge the layout
 // itself is hinged from (see computeFrame) — otherwise the layout grows
 // one way while the image crops the other, which reads as two facing
-// curtains. Forward hinges RIGHT (image pinned right:0, reveal/hide on
-// the left); backward hinges LEFT (pinned left:0, reveal/hide on the
-// right).
+// curtains. Forward hinges RIGHT (image pinned to the frame's right edge,
+// reveal/hide on the left); backward hinges LEFT (pinned left, reveal/hide
+// on the right).
 //
 // There is no third, centre-anchored state: a folded sliver is pinned
 // exactly the same way an open slide is, just at width S instead of its
@@ -237,21 +237,37 @@ function driftPxFor(absIndex: number, activeIdx: number, naturalWidth: number, f
 // the physics loop for where that per-slide freeze lives; travelDir here
 // is whatever direction was frozen for THIS slide, not necessarily the
 // live global one.
-type ImageAnchor = { left: string; right: string; transform: string };
-function imageAnchorFor(travelDir: number, driftPx: number): ImageAnchor {
-  return travelDir > 0
-    ? { left: "auto", right: "0px", transform: `translateX(${driftPx}px)` }
-    : { left: "0px", right: "auto", transform: `translateX(${driftPx}px)` };
+//
+// Counter-scale (spec 011): the fold never changes a width, so it never
+// triggers layout. The frame is always laid out at the cover's NATURAL
+// width and shown at `width` by scaleX(width / natural) from its left
+// edge; its child carries the inverse scaleX(natural / width), so the two
+// cancel and the image paints at its real size, clipped by the frame's
+// (scaled) overflow box to exactly `width`. The child's transform-origin
+// is the pinned edge: about the right edge, the image's right edge lands
+// on the frame's visible right edge; about the left, left on left — the
+// same crop the old right:0 / left:0 positioning gave.
+function frameTransformFor(x: number, width: number, naturalWidth: number) {
+  return `translateX(${x}px) scaleX(${width / naturalWidth})`;
+}
+function counterScaleFor(width: number, naturalWidth: number) {
+  return `scaleX(${naturalWidth / width})`;
+}
+function pinnedOriginFor(travelDir: number) {
+  return travelDir > 0 ? "100% 0" : "0 0";
+}
+function driftTransformFor(driftPx: number) {
+  return `translateX(${driftPx}px)`;
 }
 
-type WrittenStyle = Partial<Record<"width" | "transform" | "imageLeft" | "imageRight" | "imageTransform", string>>;
+type WrittenStyle = Partial<Record<"transform" | "counterScale" | "pinnedOrigin" | "drift", string>>;
 
 // Writes one inline style property only if it differs from what the
 // physics loop last wrote there (spec 011): a slide that isn't moving costs
 // nothing per frame.
 function writeIfChanged(
   el: HTMLElement,
-  property: "width" | "transform" | "left" | "right",
+  property: "transform" | "transformOrigin",
   value: string,
   written: WrittenStyle,
   key: keyof WrittenStyle = property as keyof WrittenStyle
@@ -282,6 +298,7 @@ type SlideProps = {
   // slide's row position doesn't re-render them all.
   initial: { width: number; x: number; dir: number; drift: number };
   frameRefs: React.RefObject<Map<number, HTMLDivElement>>;
+  counterRefs: React.RefObject<Map<number, HTMLDivElement>>;
   imageRefs: React.RefObject<Map<number, HTMLImageElement>>;
   writtenRef: React.RefObject<Map<number, WrittenStyle>>;
   onActiveHover: (hovered: boolean) => void;
@@ -310,6 +327,7 @@ const Slide = memo(function Slide({
   priority,
   initial: initialProp,
   frameRefs,
+  counterRefs,
   imageRefs,
   writtenRef,
   onActiveHover,
@@ -329,45 +347,59 @@ const Slide = memo(function Slide({
       style={{
         top: 0,
         left: 0,
-        width: initial.width,
+        width: naturalWidth,
         height: SLIDE_HEIGHT,
         maxWidth: "none",
-        transform: `translateX(${initial.x}px)`,
+        transformOrigin: "0 0",
+        transform: frameTransformFor(initial.x, initial.width, naturalWidth),
       }}
     >
-      {/* The frame is purely a clipping window: its WIDTH is the
-          only thing that ever animates its own size, revealing
+      {/* The frame is purely a clipping window: its VISIBLE width is
+          the only thing that ever animates its own size, revealing
           more or less of the image below as its openness rises or
           falls — a curtain opening, not a zoom. The image itself
-          never changes size (no scale/zoom transform anywhere in
-          this file). Width, position, and drift are written
-          directly by the physics loop every frame — no CSS
-          transition on any of them, it would only fight the
-          loop's own writes. */}
-      <Image
+          never changes size on screen: the frame's scaleX and the
+          counter-scale below cancel exactly (see frameTransformFor).
+          Position, scale, and drift are written directly by the
+          physics loop every frame — no CSS transition on any of
+          them, it would only fight the loop's own writes. */}
+      <div
         ref={(el) => {
-          if (el) imageRefs.current.set(absIndex, el);
-          else imageRefs.current.delete(absIndex);
+          if (el) counterRefs.current.set(absIndex, el);
+          else counterRefs.current.delete(absIndex);
         }}
-        src={album.cover.src}
-        alt={album.title}
-        width={album.cover.width}
-        height={album.cover.height}
+        className="absolute inset-0"
         style={{
-          position: "absolute",
-          top: 0,
-          width: naturalWidth,
-          height: SLIDE_HEIGHT,
-          maxWidth: "none",
-          objectFit: "cover",
-          filter: blur ? `blur(${blur}px)` : "none",
-          transition: IMAGE_FILTER_TRANSITION,
-          ...imageAnchorFor(initial.dir, initial.drift),
+          transformOrigin: pinnedOriginFor(initial.dir),
+          transform: counterScaleFor(initial.width, naturalWidth),
         }}
-        sizes={`${naturalWidth}px`}
-        draggable={false}
-        priority={priority}
-      />
+      >
+        <Image
+          ref={(el) => {
+            if (el) imageRefs.current.set(absIndex, el);
+            else imageRefs.current.delete(absIndex);
+          }}
+          src={album.cover.src}
+          alt={album.title}
+          width={album.cover.width}
+          height={album.cover.height}
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            width: naturalWidth,
+            height: SLIDE_HEIGHT,
+            maxWidth: "none",
+            objectFit: "cover",
+            filter: blur ? `blur(${blur}px)` : "none",
+            transition: IMAGE_FILTER_TRANSITION,
+            transform: driftTransformFor(initial.drift),
+          }}
+          sizes={`${naturalWidth}px`}
+          draggable={false}
+          priority={priority}
+        />
+      </div>
       {/* Dark veil — a separate overlay, not opacity on the image
           (which would wash it toward white instead of dimming it
           toward black). */}
@@ -411,7 +443,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // Mirrors travelDirRef so render has a non-ref value (reading refs
   // during render trips react-hooks/refs) to pick a newly-mounted slide's
   // anchor edge (both layout and image, see computeFrame and
-  // imageAnchorFor) for its first paint. Commit-locked (see travelDirRef
+  // pinnedOriginFor) for its first paint. Commit-locked (see travelDirRef
   // below), not tied to the live velocity's sign. Newly-mounted slides are
   // always far from active, so approximating their initial openness as the
   // resting shape (1 if active, else 0) is a safe, low-consequence
@@ -481,6 +513,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const rowRef = useRef<HTMLDivElement | null>(null);
   const rowTransformRef = useRef("");
   const frameRefs = useRef(new Map<number, HTMLDivElement>());
+  const counterRefs = useRef(new Map<number, HTMLDivElement>());
   const imageRefs = useRef(new Map<number, HTMLImageElement>());
   // The last value the physics loop wrote to each slide, so a slide whose
   // geometry didn't change this frame isn't written (and restyled) again.
@@ -620,7 +653,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         setIsActiveHovered(false);
         // Both slides in this step's pair start a fresh fold/unfold right
         // now — the only moment either is allowed to change its frozen
-        // image anchor (see imageAnchorDirRef and imageAnchorFor above).
+        // image anchor (see imageAnchorDirRef and pinnedOriginFor above).
         imageAnchorDirRef.current.set(prevActiveIdx, travelDirRef.current);
         imageAnchorDirRef.current.set(activeIdxRef.current, travelDirRef.current);
       }
@@ -705,14 +738,17 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           written = {};
           writtenRef.current.set(absIndex, written);
         }
+        const naturalWidth = naturalWidthFor(albums[mod(absIndex, albums.length)].cover);
         const frameEl = frameRefs.current.get(absIndex);
-        if (frameEl) {
-          writeIfChanged(frameEl, "width", `${width}px`, written);
-          writeIfChanged(frameEl, "transform", `translateX(${x}px)`, written);
+        if (frameEl) writeIfChanged(frameEl, "transform", frameTransformFor(x, width, naturalWidth), written);
+        const counterEl = counterRefs.current.get(absIndex);
+        if (counterEl) {
+          writeIfChanged(counterEl, "transform", counterScaleFor(width, naturalWidth), written, "counterScale");
+          const anchorDir = imageAnchorDirRef.current.get(absIndex) ?? travelDir;
+          writeIfChanged(counterEl, "transformOrigin", pinnedOriginFor(anchorDir), written, "pinnedOrigin");
         }
         const imageEl = imageRefs.current.get(absIndex);
         if (imageEl) {
-          const naturalWidth = naturalWidthFor(albums[mod(absIndex, albums.length)].cover);
           // Drift stays live only while this slide's width hasn't yet
           // reached its resting target (still actively folding/
           // unfolding); once it has, the last computed value is left
@@ -724,11 +760,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           if (!settled || !driftRef.current.has(absIndex)) {
             driftRef.current.set(absIndex, driftPxFor(absIndex, activeIdxRef.current, naturalWidth, width));
           }
-          const anchorDir = imageAnchorDirRef.current.get(absIndex) ?? travelDir;
-          const anchor = imageAnchorFor(anchorDir, driftRef.current.get(absIndex)!);
-          writeIfChanged(imageEl, "left", anchor.left, written, "imageLeft");
-          writeIfChanged(imageEl, "right", anchor.right, written, "imageRight");
-          writeIfChanged(imageEl, "transform", anchor.transform, written, "imageTransform");
+          writeIfChanged(imageEl, "transform", driftTransformFor(driftRef.current.get(absIndex)!), written, "drift");
         }
       });
     }
@@ -844,6 +876,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
                   drift: driftPxFor(absIndex, activeIdx, naturalWidthFor(album.cover), init.width),
                 }}
                 frameRefs={frameRefs}
+                counterRefs={counterRefs}
                 imageRefs={imageRefs}
                 writtenRef={writtenRef}
                 onActiveHover={setIsActiveHovered}

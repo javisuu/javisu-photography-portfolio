@@ -63,7 +63,21 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
 
     Quitar `will-change` de la fila lo empeora todo (fling 3,33 ms, trackpad 1,85 ms; `2026-10-22_011-t4-sinwc-cpu4.txt`), y se deja. Entre pasadas casi iguales, la cifra de estilo varia hasta un 50 %. CA3 se juzga en T10, sin blur (T8) y con la contra-escala (T5).
   - El reposo da 4–6 mutaciones por frame en `div.absolute`, sin cambio de `width` ni de `transform`, en las dos versiones. Viene de la medida: a los 0 ms de reposo de produccion sin script se llega sin el. Causa SIN VERIFICAR.
-- [ ] **T5** · Contra-escala (CA3, CA4, CA7; riesgo 1)
+- [x] **T5** · Contra-escala (CA3, CA4, CA7; riesgo 1)
+  - **Hecho.** El marco mide siempre el ancho natural y lleva `translateX(x) scaleX(w / natural)` con origen en su borde izquierdo. Un hijo lleva `scaleX(natural / w)`, con origen en el borde anclado (`100% 0` hacia delante, `0 0` hacia atras), y la imagen dentro solo lleva su deriva.
+    - Desvio menor del plan: el origen del marco es siempre el izquierdo. El resultado en pantalla es el mismo y la `x` de `computeFrame` se usa tal cual.
+    - Sin `will-change` en los marcos: una capa propia se rasteriza a la escala de su transform, y era la via del riesgo 1.
+  - **Geometria:** frente a T2, **0 px** en los 5 estados.
+  - **CA4:** escrituras de `width` por frame **0** en todos los escenarios (antes 0,7–4), y `left`/`right` 0–0,1. Layout por frame a CPU×4: fling 0,66 → 0,16 ms, trackpad 0,44 → 0,06 ms (`2026-10-22_011-t5-cpu4.txt`).
+  - **Estilo por frame:** sube otra vez: fling 3,97 ms, rafaga 4,40 ms. Queda pendiente de T8, que quita las transiciones de `filter` que corren justo en esos escenarios; ver la nota de ruido de T4.
+  - **Riesgo 1:** `nitidez.mjs` (scratchpad) congela los rAF a 250, 400 y 550 ms de un `ArrowRight`. Compara en gris la franja visible de la portada que se abre con la misma franja ya en reposo; T4 se mide igual, como control (`nitidez/`).
+
+    | | 250 ms | 400 ms | 550 ms |
+    |---|---|---|---|
+    | T4, ancho | media 6,62 (max 75) | 0,22 (43) | 0,62 (46) |
+    | T5, contra-escala | 3,72 (65) | **0** (0) | **0,29** (19) |
+
+    A 250 ms la diferencia es el `blur` de 300 ms que aun se esta quitando, en las dos versiones. Desde 400 ms la contra-escala es igual o mas nitida que el ancho. No hace falta la reserva `clip-path`.
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: el marco mide el ancho natural, lleva `scaleX(w / natural)` con `transform-origin` en el borde anclado, y un hijo la escala inversa. La imagen deja de escribir `left`/`right`; el anclaje congelado pasa al origen. `will-change: transform`
   - Comprobacion:
