@@ -319,7 +319,10 @@ type SlideProps = {
   // physics loop owns width, position, image anchor and drift. Left out of
   // the memo comparison (see sameSlide), so a commit that shifts every
   // slide's row position doesn't re-render them all.
-  initial: { width: number; x: number; dir: number; drift: number };
+  // `onScreen`: inside the viewport when it mounted, so its cover loads
+  // eagerly (spec 011) — at arrival, every cover you can see, not only the
+  // open one; slides mounted later at the strip's edges stay lazy.
+  initial: { width: number; x: number; dir: number; drift: number; onScreen: boolean };
   frameRefs: React.RefObject<Map<number, HTMLDivElement>>;
   counterRefs: React.RefObject<Map<number, HTMLDivElement>>;
   imageRefs: React.RefObject<Map<number, HTMLImageElement>>;
@@ -417,6 +420,7 @@ const Slide = memo(function Slide({
           sizes={`${naturalWidth}px`}
           draggable={false}
           priority={priority}
+          loading={priority ? undefined : initial.onScreen ? "eager" : "lazy"}
         />
         {/* Grain panel (see PANEL_OPACITY) — inside the counter-scaled
             layer, so the grain is never stretched by the fold. A
@@ -989,6 +993,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
                   x: init.x,
                   dir: directionSnapshot,
                   drift: driftPxFor(absIndex, activeIdx, naturalWidthFor(album.cover), init.width),
+                  onScreen: init.x + init.width > 0 && init.x < viewportWidth,
                 }}
                 frameRefs={frameRefs}
                 counterRefs={counterRefs}

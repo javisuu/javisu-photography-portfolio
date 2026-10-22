@@ -134,7 +134,18 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
   - Fichero(s): `scripts/generate-grain.mjs` (crear), `public/textures/grano.png` (crear), `src/motion/AlbumsCarousel.tsx`
   - Cambio: textura 256x256 en escala de grises, semilla fija. Fuera `filter: blur()`, su transicion y el velo. Panel negro con el grano dentro del hijo contra-escalado, `pointer-events: none`, `opacity` = `PANEL * (1 - openness)`. En `next dev`, `?panel=100|90` cambia `PANEL`
   - Comprobacion: dos ejecuciones de `generate-grain.mjs` dan el mismo hash. 0 escrituras de `filter` por frame. El panel no tapa el clic en la diapositiva abierta ni el arrastre. Con reduced motion el pliegue sigue (decision 2)
-- [ ] **T9** · Llegada (CA2)
+- [x] **T9** · Llegada (CA2)
+  - **Trace** (`--trace`, CPU×4, local): el frame mas largo de la llegada (183 ms) es una sola llamada de 168 ms dentro de `.next/static/chunks/11pxbv08d7b0-.js`, el chunk de `react-dom` (contiene `hydrateRoot`). Es la hidratacion de React.
+  - **La causa esta fuera del carrusel.** La tarea larga aparece igual en rutas sin carrusel (`llegada-rutas.mjs`, CPU×4, 3 cargas por ruta; `2026-10-22_011-t9-llegada-rutas.txt`):
+    - `/albums`: 154, 219 y 247 ms;
+    - `/about`: 232, 254 y 237 ms;
+    - `/credits`: 214, 237 y 233 ms.
+
+    Lo comun a las tres es el landing persistente, montado desde el layout raiz en todas las rutas. Segun el plan, aqui se para y se anota, sin arreglarlo. Queda para una spec propia.
+  - **Lo que si es del carrusel:** las portadas que se ven al montar (`initial.onScreen`) pasan a `loading="eager"`. Las que se montan despues, en los bordes de la tira, siguen `lazy`.
+  - **CA2, llegada a CPU×1** (`2026-10-22_011-t9-cpu1.txt`, mediana de 3): frame max **33 ms** (≤ 50), 0 long tasks.
+  - **A CPU×4** (`-t9-cpu4.txt`): long task de **217 ms**. CA3 pide que ninguna pase de 200 ms: **no se cumple**, por la hidratacion comun de arriba.
+  - **Portadas:** 9 "en pantalla" y 2 `lazy`, frente a 6 de 7 antes. La medida cuenta como en pantalla la caja del hijo contra-escalado, que mide el ancho natural, asi que esas 2 son portadas con la caja dentro del viewport pero la franja visible fuera. Las 9 estaban cargadas a +2,5 s.
   - Fichero(s): `src/motion/AlbumsCarousel.tsx` (y nada fuera del carrusel)
   - Cambio: primero `--trace` de la llegada para encontrar el frame de 233 ms. Despues, `loading="eager"` en las portadas visibles al llegar y lo que el trace senale dentro del carrusel. Si la causa esta fuera (el landing persistente, por ejemplo), se para y se anota aqui sin arreglarlo
   - Comprobacion: CA2 con `--repeticiones 3`, antes y despues
