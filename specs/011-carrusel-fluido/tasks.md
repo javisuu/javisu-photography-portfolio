@@ -149,7 +149,26 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
   - Fichero(s): `src/motion/AlbumsCarousel.tsx` (y nada fuera del carrusel)
   - Cambio: primero `--trace` de la llegada para encontrar el frame de 233 ms. Despues, `loading="eager"` en las portadas visibles al llegar y lo que el trace senale dentro del carrusel. Si la causa esta fuera (el landing persistente, por ejemplo), se para y se anota aqui sin arreglarlo
   - Comprobacion: CA2 con `--repeticiones 3`, antes y despues
-- [ ] **T10** · Medida final local y diagnostico (CA2 a CA10)
+- [x] **T10** · Medida final local y diagnostico (CA2 a CA10)
+  - **Salidas:**
+    - fluidez, `e48c320`, local, mediana de 3: `2026-10-22_011-t9-cpu1.txt` y `-t9-cpu4.txt` (T9 ya era el codigo final);
+    - geometria: `2026-10-22_011-geometria-despues.txt` y los `.json` de 30, 60 y 120 fps;
+    - diagnostico: `2026-10-22_diagnostico_011.txt`.
+
+  | CA | Resultado | |
+  |---|---|---|
+  | CA1 | Linea base reproducida, con los tres desvios de medida de T1 | si |
+  | CA2 | CPU×1, trackpad y raton: 0 frames >25 ms y 0 >50 ms, tambien en la peor pasada. Llegada: frame max 33 ms | si |
+  | CA3 | CPU×4, trackpad y raton: p50 16,7 ms, p95 16,7 ms. Estilo 0,43 y 0,75 ms por frame. Llegada: una long task de 217 ms, la hidratacion comun a todas las rutas (T9) | si, salvo la llegada |
+  | CA4 | Escrituras de `width` y `filter` por frame: 0 en todos los escenarios; `left`/`right` 0–0,1 | si |
+  | CA5 | Frames con 3 o mas diapositivas a medio plegar: 0 en los 4 escenarios (max 2) | si |
+  | CA6 | Salto max de borde, CPU×1: fling 13,1 px, rafaga 26,5, giro 5,8, paso 4,6 (limite 8) | **no**: fling y rafaga (T7) |
+  | CA7 | Reposo frente a T2: 0 px en los 5 estados | si |
+  | CA8 | Reposo a 30 y 120 fps: 0 y ≤ 0,3 px. Tiempo hasta el reposo 667–733 ms a las tres frecuencias | si |
+  | CA9 | Fling fuerte: **8 albumes** en 652 ms (antes, 11 en 804) | para Javi |
+  | CA10 | Diagnostico: tsc, eslint y build ok · 0 errores de consola en 6 rutas · **105 de 105** · entrada 200 ms, 0 frames >50 ms | si |
+
+  - **Peor pasada:** la peor de las 3, en todos los escenarios y a CPU×1 y ×4, da 0 frames >25 ms. En la linea base, pasadas sueltas daban p95 33–50 ms.
   - Comprobacion:
     - `medir-carrusel.mjs --cpu 1` y `--cpu 4`, local. Salida: `2026-10-2X_011-despues-local.txt`
     - `--geometria`, y con `--fps 30` y `--fps 120`. Salida: `2026-10-2X_011-geometria-despues.json`
