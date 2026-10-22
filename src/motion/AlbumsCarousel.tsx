@@ -512,6 +512,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // The slide that closed at the last commit — with the active one, the
   // pair a same-direction commit waits on (see MAX_QUEUED_COMMITS).
   const outgoingIdxRef = useRef<number | null>(null);
+  // Whether a same-direction commit waits for the previous pair (see
+  // MAX_QUEUED_COMMITS). Under `next dev`, /albums?cola=libre turns the
+  // wait off so Javi can compare free fast scrolling on his own trackpad
+  // (spec 011, T11). PLACEHOLDER — removed once he decides.
+  const queueEnabledRef = useRef(true);
   const activeIdxRef = useRef(activeIdx);
   // Which edge is currently hinged — updated ONLY at an actual commit
   // (inside the while loop below), never from the live sign of velocity.
@@ -674,7 +679,10 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // further past it the strip is, all of it at the cap.
       const waitingDir = Math.sign(offsetPxRef.current);
       const waiting =
-        Math.abs(offsetPxRef.current) >= STEP_DISTANCE && waitingDir === travelDirRef.current && !pairSettled();
+        queueEnabledRef.current &&
+        Math.abs(offsetPxRef.current) >= STEP_DISTANCE &&
+        waitingDir === travelDirRef.current &&
+        !pairSettled();
       if (waiting && Math.sign(velocityRef.current) === waitingDir) {
         const over = clamp(
           (Math.abs(offsetPxRef.current) - STEP_DISTANCE) / (STEP_DISTANCE * MAX_QUEUED_COMMITS),
@@ -696,7 +704,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // ease toward the absolute target) — never while the user is idle.
       offsetPxRef.current += velocityRef.current * stepDistanceFactor(frames);
       const maxOffsetPx = STEP_DISTANCE * (1 + MAX_QUEUED_COMMITS);
-      if (Math.abs(offsetPxRef.current) > maxOffsetPx) {
+      if (queueEnabledRef.current && Math.abs(offsetPxRef.current) > maxOffsetPx) {
         offsetPxRef.current = Math.sign(offsetPxRef.current) * maxOffsetPx;
         velocityRef.current = 0;
       }
@@ -718,7 +726,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       const prevActiveIdx = activeIdxRef.current;
       while (Math.abs(offsetPxRef.current) >= STEP_DISTANCE) {
         const dir = Math.sign(offsetPxRef.current);
-        if (dir === travelDirRef.current && !pairSettled()) break;
+        if (queueEnabledRef.current && dir === travelDirRef.current && !pairSettled()) break;
         if (dir !== travelDirRef.current) {
           const outgoingIdx = activeIdxRef.current;
           const outgoingWidth = widthFor(
@@ -881,6 +889,12 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
   }, [albums, anchorRestOffsetPx]);
+
+  // Dev-only queue comparison (see queueEnabledRef). PLACEHOLDER.
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    if (new URLSearchParams(window.location.search).get("cola") === "libre") queueEnabledRef.current = false;
+  }, []);
 
   // Keyboard: arrow keys inject the same one-shot velocity kick a firm
   // flick would, reusing the exact same momentum/step/settle physics.
