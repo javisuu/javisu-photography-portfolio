@@ -84,10 +84,22 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
     - `--geometria` = T2 (±1 px), caja y recorte
     - 0 escrituras por frame de `width`, `left` o `right` en todos los escenarios
     - riesgo 1: captura a mitad de pliegue frente a la misma imagen en reposo, recortada a la misma zona, comparada al pixel con `sharp`. Si la diferencia media pasa de 2 niveles de gris o los bordes tiemblan, se cambia a `clip-path: inset()` y se anota aqui
-- [ ] **T6** · Muelle de apertura y de `restOffsetPx` (CA6)
+- [x] **T6** · Muelle de apertura y de `restOffsetPx` (CA6)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: `openness` y `restOffsetPx` pasan a un muelle criticamente amortiguado con `ω` ≈ 18,6 rad/s, por tiempo (plan, parte 2). Sale `OPENNESS_TAU_MS`
   - Comprobacion: salto maximo de borde ≤ 8 px por encima de su mediana en los cuatro escenarios de pliegue (hoy 58–63 px). `--geometria` = T2 (±1 px). Si no llega, se ajusta `ω` y se anota el valor
+  - **Hecho, CA6 todavia no.** `springStep` es el paso exacto del muelle (misma curva a cualquier frecuencia), con `SPRING_OMEGA` = 18,6. La apertura no pasa de 0 ni de 1, y al llegar se fija exacta, con lo que la diapositiva deja de escribirse.
+  - **Geometria:** frente a T2, **0 px**. El reposo tras una tecla baja de 800–930 ms a 690–720 ms: el muelle acaba, la exponencial tenia cola.
+  - **Salto max de borde, local, mediana de 3** (`2026-10-22_011-t6-cpu1.txt`; antes, linea base de T1):
+
+    | | Antes | Despues |
+    |---|---|---|
+    | Fling fuerte | 37,6 px | 26,5 px |
+    | Rafaga | 37,1 px | 25,1 px |
+    | Giro brusco | 19,9 px | 8,7 px |
+    | Paso y paso atras | 4,6 px | 4,6 px |
+
+  - Los peores saltos que quedan son de diapositivas plegadas del lado no anclado, empujadas por la apertura de la nueva activa mientras otra pareja sigue a medio plegar. Eso lo cambia la cola de T7; `ω` se revisa despues de T7, no antes.
 - [ ] **T7** · Un album de cada vez (CA5, CA9)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: cola de commits con `MAX_COMMITS_EN_COLA` = 1; un commit espera a que la pareja anterior quede a menos de 0,5 px y la fija exacta; tope suave de `offsetPx` mientras espera; un commit en sentido contrario retarga la misma pareja (plan, parte 3)

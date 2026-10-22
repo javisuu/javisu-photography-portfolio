@@ -72,7 +72,15 @@ const KEY_KICK_PX = 18; // arrow keys inject a firm one-shot velocity kick, same
 // 5); below STEP_DISTANCE the strip just follows the raw input 1:1 and
 // stays wherever that leaves it, with no rubber-band and no return-to-rest
 // of its own.
-const OPENNESS_TAU_MS = 450 / 3; // "~450ms to go 0->1" as an exponential time constant — also governs restOffsetPx's ease (see step 5), so layout, width, blur, and veil all resolve on one shared timeline
+// Openness and restOffsetPx move on a critically damped spring (spec 011),
+// not an exponential ease: an exponential starts at full speed — the fold
+// opened with a 58 px leap in its first frame — while a spring starts from
+// rest, and a target that changes mid-way (a reversal) keeps the current
+// velocity instead of snapping. At 18.6 rad/s a full 0 -> 1 lands within
+// 0.5 px of the widest cover in ~500 ms, close to the old "~450ms". It also
+// governs restOffsetPx (see step 5), so layout, width, blur, and veil all
+// resolve on one shared timeline.
+const SPRING_OMEGA = 18.6; // rad/s
 const MAX_DT_MS = 100; // clamp a single frame's elapsed time (e.g. after a backgrounded tab) so physics never jumps
 const OPEN_EPSILON_PX = 0.5; // a slide within this of its resting target width (S if inactive, natural width if active) counts as "settled" — see driftRef in the physics loop
 
@@ -85,6 +93,17 @@ const OPEN_EPSILON_PX = 0.5; // a slide within this of its resting target width 
 function stepDistanceFactor(frames: number) {
   if (frames <= 0) return 0;
   return (FRICTION ** (1 - frames) * (1 - FRICTION ** frames)) / (1 - FRICTION);
+}
+
+// Exact step of a critically damped spring toward `target` over `dtMs`,
+// so it's the same curve at any frame rate. Returns [position, velocity],
+// velocity in units per second.
+function springStep(position: number, velocity: number, target: number, dtMs: number): [number, number] {
+  const t = dtMs / 1000;
+  const error = position - target;
+  const decay = Math.exp(-SPRING_OMEGA * t);
+  const c = velocity + SPRING_OMEGA * error;
+  return [target + (error + c * t) * decay, (velocity - SPRING_OMEGA * c * t) * decay];
 }
 
 function clamp(value: number, min: number, max: number) {
@@ -474,6 +493,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // by whatever is needed at a direction-reversal commit (see the while
   // loop) without disturbing that accumulator's own bounded range.
   const restOffsetPxRef = useRef(0);
+  const restOffsetVelocityRef = useRef(0);
   const velocityRef = useRef(0);
   const activeIdxRef = useRef(activeIdx);
   // Which edge is currently hinged — updated ONLY at an actual commit
@@ -523,6 +543,8 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // window (+ a small margin) each frame so it can't grow unbounded over
   // a long session.
   const opennessRef = useRef(new Map<number, number>());
+  // Each slide's spring velocity (openness per second), alongside it.
+  const opennessVelocityRef = useRef(new Map<number, number>());
   // Per-slide FROZEN image anchor direction (+1 pins right, -1 pins left)
   // — set exactly once, either when a slide first becomes visible (takes
   // whatever the current travelDir is at mount) or when it starts a fold
@@ -579,7 +601,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // STEP_DISTANCE (chaining multiple steps in one frame at high speed, no
   // queueing needed), applying a one-time continuity-preserving jump to
   // restOffsetPx if that commit reverses direction; let every visible
-  // slide's openness lerp toward whether it's currently active, on its
+  // slide's openness spring toward whether it's currently active, on its
   // own clock; ease restOffsetPx toward its absolute target on that SAME
   // clock; write width/transform/drift straight to DOM refs. Only
   // activeIdx changes go through setState — a frame otherwise only ever
@@ -661,23 +683,34 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // 4. Openness is PURELY positional: it depends on nothing but
       // "is this absIndex currently the active one," never on velocity or
       // on where offsetPx sits within the current step. The active slide
-      // always targets 1 and unfolds toward fully open over its own
-      // ~450ms clock; every other slide always targets 0. A commit
-      // instantly swaps which slide is targeting 1, interrupting and
-      // re-targeting whatever fold/unfold was in progress — at speed,
-      // commits chain faster than 450ms apart, so nothing ever finishes
-      // opening before the next commit retargets it. That interrupted
-      // look is the deliberate "attempted unfold, overtaken by the next"
-      // feel, not a special case.
+      // always targets 1 and unfolds toward fully open on its own spring
+      // (see SPRING_OMEGA); every other slide always targets 0. A commit
+      // swaps which slide is targeting 1, and each spring carries its
+      // current velocity into the new target.
       const vw = viewportWidthRef.current;
       const sps = computeSlotsPerSide(vw);
       const frameLo = activeIdxRef.current - sps;
       const frameHi = activeIdxRef.current + sps;
-      const opennessFactor = 1 - Math.exp(-dt / OPENNESS_TAU_MS);
       for (let absIndex = frameLo; absIndex <= frameHi; absIndex++) {
         const target = absIndex === activeIdxRef.current ? 1 : 0;
         const current = opennessRef.current.get(absIndex) ?? 0;
-        opennessRef.current.set(absIndex, current + (target - current) * opennessFactor);
+        const currentVelocity = opennessVelocityRef.current.get(absIndex) ?? 0;
+        if (current !== target || currentVelocity !== 0) {
+          let [next, nextVelocity] = springStep(current, currentVelocity, target, dt);
+          // Never past fully open or closed: a frame wider than its cover
+          // would show past the image's edge.
+          if (next < 0 || next > 1) {
+            next = clamp(next, 0, 1);
+            nextVelocity = 0;
+          }
+          // Settled: snap exactly, so the slide stops being written.
+          if (Math.abs(next - target) < 1e-5 && Math.abs(nextVelocity) < 1e-3) {
+            next = target;
+            nextVelocity = 0;
+          }
+          opennessRef.current.set(absIndex, next);
+          opennessVelocityRef.current.set(absIndex, nextVelocity);
+        }
         // A slide that has never been visible before (and so was never
         // caught by the commit-time assignment above) takes the current
         // direction the moment it mounts, then keeps it — same freeze
@@ -689,7 +722,10 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // Prune openness/anchor/drift state for slides that left the window
       // — keeps these maps bounded over an arbitrarily long session.
       for (const key of opennessRef.current.keys()) {
-        if (key < frameLo - 2 || key > frameHi + 2) opennessRef.current.delete(key);
+        if (key < frameLo - 2 || key > frameHi + 2) {
+          opennessRef.current.delete(key);
+          opennessVelocityRef.current.delete(key);
+        }
       }
       for (const key of imageAnchorDirRef.current.keys()) {
         if (key < frameLo - 2 || key > frameHi + 2) imageAnchorDirRef.current.delete(key);
@@ -698,7 +734,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         if (key < frameLo - 2 || key > frameHi + 2) driftRef.current.delete(key);
       }
 
-      // 5. restOffsetPx eases toward exactly 0 on the SAME clock as
+      // 5. restOffsetPx eases toward exactly 0 on the SAME spring as
       // openness — one shared timeline, so position, width, blur, and
       // veil all resolve together. The target is a true constant now (not
       // derived from the active album's width, unlike the old centring
@@ -708,7 +744,15 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // it STAYS at 0 through every subsequent same-direction commit — the
       // anchored edge is then already exactly on its fixed line the
       // instant the commit fires, with nothing left to ease.
-      restOffsetPxRef.current += (0 - restOffsetPxRef.current) * opennessFactor;
+      if (restOffsetPxRef.current !== 0 || restOffsetVelocityRef.current !== 0) {
+        let [rest, restVelocity] = springStep(restOffsetPxRef.current, restOffsetVelocityRef.current, 0, dt);
+        if (Math.abs(rest) < 0.01 && Math.abs(restVelocity) < 0.1) {
+          rest = 0;
+          restVelocity = 0;
+        }
+        restOffsetPxRef.current = rest;
+        restOffsetVelocityRef.current = restVelocity;
+      }
 
       // 6. Compute this frame's geometry and write it straight to the DOM:
       // slides in row coordinates, the render offset on the row alone (see
