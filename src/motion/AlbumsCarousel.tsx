@@ -16,16 +16,15 @@ const GAP = 32;
 // actively opening/closing ones behave as one rigid, non-deforming block.
 const S = 110;
 
-// Distance from activeIdx -> blur(px) / veil opacity. The only two visual
-// properties still driven by React state with a CSS transition — everything
-// else (position, width, openness, drift) is written directly to the DOM
-// every frame by the physics loop below.
-const BLUR_BY_DISTANCE: Record<number, number> = { 1: 6, 2: 12, 3: 18 };
-const MAX_BLUR = 18;
-const VEIL_ALPHA_BY_DISTANCE: Record<number, number> = { 1: 0.15, 2: 0.22, 3: 0.28 };
-const MAX_VEIL_ALPHA = 0.28;
-const IMAGE_FILTER_TRANSITION = "filter 300ms ease-out";
-const VEIL_TRANSITION = "opacity 300ms ease-out";
+// Depth (spec 011, decision 3): a folded slide is covered by a black panel
+// with film grain (public/textures/grano.png, from scripts/
+// generate-grain.mjs), whose opacity follows that slide's own openness:
+// PANEL_OPACITY * (1 - openness). It replaced a distance-based blur() and
+// grey veil, both CSS transitions on React state: a blur filter is
+// expensive to animate, and opacity is compositing only. Written by the
+// physics loop like everything else continuous.
+const PANEL_OPACITY = 1;
+const GRAIN_TEXTURE = "/textures/grano.png";
 
 const DRIFT_TARGET_PX_AT_MAX_DISTANCE = 14;
 const DRIFT_MAX_DISTANCE = 3;
@@ -78,8 +77,8 @@ const KEY_KICK_PX = 18; // arrow keys inject a firm one-shot velocity kick, same
 // rest, and a target that changes mid-way (a reversal) keeps the current
 // velocity instead of snapping. At 18.6 rad/s a full 0 -> 1 lands within
 // 0.5 px of the widest cover in ~500 ms, close to the old "~450ms". It also
-// governs restOffsetPx (see step 5), so layout, width, blur, and veil all
-// resolve on one shared timeline.
+// governs restOffsetPx (see step 5), so layout, width, and the grain panel
+// all resolve on one shared timeline.
 const SPRING_OMEGA = 18.6; // rad/s
 // One album at a time (spec 011): a commit in the same direction waits until
 // the previous pair (the slide that closed, the one that opened) has
@@ -286,14 +285,14 @@ function driftTransformFor(driftPx: number) {
   return `translateX(${driftPx}px)`;
 }
 
-type WrittenStyle = Partial<Record<"transform" | "counterScale" | "pinnedOrigin" | "drift", string>>;
+type WrittenStyle = Partial<Record<"transform" | "counterScale" | "pinnedOrigin" | "drift" | "panel", string>>;
 
 // Writes one inline style property only if it differs from what the
 // physics loop last wrote there (spec 011): a slide that isn't moving costs
 // nothing per frame.
 function writeIfChanged(
   el: HTMLElement,
-  property: "transform" | "transformOrigin",
+  property: "transform" | "transformOrigin" | "opacity",
   value: string,
   written: WrittenStyle,
   key: keyof WrittenStyle = property as keyof WrittenStyle
@@ -315,8 +314,6 @@ type SlideProps = {
   absIndex: number;
   album: AlbumWithCover;
   isActive: boolean;
-  blur: number;
-  veilAlpha: number;
   priority: boolean;
   // First-paint geometry only, read once at mount: from then on the
   // physics loop owns width, position, image anchor and drift. Left out of
@@ -326,6 +323,7 @@ type SlideProps = {
   frameRefs: React.RefObject<Map<number, HTMLDivElement>>;
   counterRefs: React.RefObject<Map<number, HTMLDivElement>>;
   imageRefs: React.RefObject<Map<number, HTMLImageElement>>;
+  panelRefs: React.RefObject<Map<number, HTMLDivElement>>;
   writtenRef: React.RefObject<Map<number, WrittenStyle>>;
   onActiveHover: (hovered: boolean) => void;
 };
@@ -335,8 +333,6 @@ function sameSlide(a: SlideProps, b: SlideProps) {
     a.absIndex === b.absIndex &&
     a.album === b.album &&
     a.isActive === b.isActive &&
-    a.blur === b.blur &&
-    a.veilAlpha === b.veilAlpha &&
     a.priority === b.priority &&
     a.onActiveHover === b.onActiveHover
   );
@@ -348,13 +344,12 @@ const Slide = memo(function Slide({
   absIndex,
   album,
   isActive,
-  blur,
-  veilAlpha,
   priority,
   initial: initialProp,
   frameRefs,
   counterRefs,
   imageRefs,
+  panelRefs,
   writtenRef,
   onActiveHover,
 }: SlideProps) {
@@ -417,29 +412,36 @@ const Slide = memo(function Slide({
             height: SLIDE_HEIGHT,
             maxWidth: "none",
             objectFit: "cover",
-            filter: blur ? `blur(${blur}px)` : "none",
-            transition: IMAGE_FILTER_TRANSITION,
             transform: driftTransformFor(initial.drift),
           }}
           sizes={`${naturalWidth}px`}
           draggable={false}
           priority={priority}
         />
+        {/* Grain panel (see PANEL_OPACITY) — inside the counter-scaled
+            layer, so the grain is never stretched by the fold. A
+            separate overlay, not opacity on the image (which would wash
+            it toward white instead of covering it in black). */}
+        <div
+          ref={(el) => {
+            if (el) panelRefs.current.set(absIndex, el);
+            else panelRefs.current.delete(absIndex);
+          }}
+          className="pointer-events-none absolute inset-0"
+          style={{
+            backgroundColor: "#000",
+            backgroundImage: `url(${GRAIN_TEXTURE})`,
+            opacity: isActive ? 0 : PANEL_OPACITY,
+          }}
+        />
       </div>
-      {/* Dark veil — a separate overlay, not opacity on the image
-          (which would wash it toward white instead of dimming it
-          toward black). */}
-      <div
-        className="pointer-events-none absolute inset-0 bg-black"
-        style={{ opacity: veilAlpha, transition: VEIL_TRANSITION }}
-      />
       {/* Navigation target: only the active, fully-open slide is
           ever a link — a folded sliver has no anchor at all, so
           clicking one does nothing (dragging it still works, via
           the pointer handlers on the strip's outer container,
           which this overlay doesn't intercept since it never
           calls stopPropagation). Placed last so it sits above the
-          image/veil without needing an explicit z-index. */}
+          image/panel without needing an explicit z-index. */}
       {isActive && (
         <Link
           href={`/album/${album.slug}`}
@@ -460,8 +462,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // size in the mount/resize effect below.
   const [viewportWidth, setViewportWidth] = useState(1440);
   // The only pieces of the motion model that live in React state — all
-  // change rarely (only at a step commit; blur/veil don't need anything
-  // finer). Everything continuous (offsetPx, restOffsetPx, openness,
+  // change rarely (only at a step commit). Everything continuous (offsetPx, restOffsetPx, openness,
   // position, width, drift) lives in refs and is written straight to the
   // DOM by the physics loop.
   const [activeIdx, setActiveIdx] = useState(0);
@@ -545,6 +546,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const frameRefs = useRef(new Map<number, HTMLDivElement>());
   const counterRefs = useRef(new Map<number, HTMLDivElement>());
   const imageRefs = useRef(new Map<number, HTMLImageElement>());
+  const panelRefs = useRef(new Map<number, HTMLDivElement>());
+  // The panel's full opacity. PANEL_OPACITY, except under `next dev`, where
+  // /albums?panel=100 or ?panel=90 overrides it so Javi can compare the two
+  // on his own screen (spec 011, T11). PLACEHOLDER — removed once he picks.
+  const panelOpacityRef = useRef(PANEL_OPACITY);
   // The last value the physics loop wrote to each slide, so a slide whose
   // geometry didn't change this frame isn't written (and restyled) again.
   const writtenRef = useRef(new Map<number, WrittenStyle>());
@@ -790,8 +796,8 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       }
 
       // 5. restOffsetPx eases toward exactly 0 on the SAME spring as
-      // openness — one shared timeline, so position, width, blur, and
-      // veil all resolve together. The target is a true constant now (not
+      // openness — one shared timeline, so position, width, and the grain
+      // panel all resolve together. The target is a true constant now (not
       // derived from the active album's width, unlike the old centring
       // rule) — see the fixed X_RIGHT/X_LEFT anchor-line comment on
       // computeFrame. A commit that continues the same travelDir never
@@ -861,12 +867,25 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           }
           writeIfChanged(imageEl, "transform", driftTransformFor(driftRef.current.get(absIndex)!), written, "drift");
         }
+        const panelEl = panelRefs.current.get(absIndex);
+        if (panelEl) {
+          const openness = opennessRef.current.get(absIndex) ?? 0;
+          const opacity = (panelOpacityRef.current * (1 - openness)).toFixed(3);
+          writeIfChanged(panelEl, "opacity", opacity, written, "panel");
+        }
       });
     }
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
   }, [albums, anchorRestOffsetPx]);
+
+  // Dev-only panel comparison (see panelOpacityRef). PLACEHOLDER.
+  useEffect(() => {
+    if (process.env.NODE_ENV === "production") return;
+    const panel = new URLSearchParams(window.location.search).get("panel");
+    if (panel === "100" || panel === "90") panelOpacityRef.current = Number(panel) / 100;
+  }, []);
 
   // Keyboard: arrow keys inject the same one-shot velocity kick a firm
   // flick would, reusing the exact same momentum/step/settle physics.
@@ -957,16 +976,13 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           {slideIndices.map((absIndex) => {
             const album = albums[mod(absIndex, albums.length)];
             const init = initialFrame.get(absIndex)!;
-            const distance = Math.abs(absIndex - activeIdx);
-            const isActive = distance === 0;
+            const isActive = absIndex === activeIdx;
             return (
               <Slide
                 key={absIndex}
                 absIndex={absIndex}
                 album={album}
                 isActive={isActive}
-                blur={isActive ? 0 : BLUR_BY_DISTANCE[distance] ?? MAX_BLUR}
-                veilAlpha={isActive ? 0 : VEIL_ALPHA_BY_DISTANCE[distance] ?? MAX_VEIL_ALPHA}
                 priority={absIndex === initialActiveIndex}
                 initial={{
                   width: init.width,
@@ -977,6 +993,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
                 frameRefs={frameRefs}
                 counterRefs={counterRefs}
                 imageRefs={imageRefs}
+                panelRefs={panelRefs}
                 writtenRef={writtenRef}
                 onActiveHover={setIsActiveHovered}
               />

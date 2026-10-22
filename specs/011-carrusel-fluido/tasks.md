@@ -110,7 +110,27 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
   - **CA9:** el fling fuerte avanza **8 albumes** (antes 11) y se para a los **658 ms** de la ultima entrada (antes 804).
   - **CA6, salto max de borde:** fling 13 px, rafaga 25,3, giro brusco 5,6, paso y paso atras 3. Lo que queda es la aceleracion de arranque del propio muelle. Cuando una portada empieza a abrirse, las diapositivas plegadas del lado no anclado pasan de moverse ~4 px por frame a ~30 en tres frames. Es continuo en velocidad, pero la medida de CA6 (frente a la mediana de 6 vecinos) lo cuenta.
   - **Probado `ω` = 12** (`2026-10-22_011-t7-omega12.txt`), que acaba en unos 780 ms en lugar de 500: fling 7 px, rafaga 11,8, giro 8,7. Tampoco llega, y el fling baja a 5 albumes. Se deja en 18,6. Bajar `ω` hasta cumplir CA6 haria el pliegue claramente mas lento que los "~450 ms" de hoy: es una decision de sensacion, y va a Javi en T11, junto con si 8 px era el umbral correcto para un arranque continuo.
-- [ ] **T8** · Grano sobre negro (decisiones 3 y 8, CA4)
+- [x] **T8** · Grano sobre negro (decisiones 3 y 8, CA4)
+  - **Hecho.** `scripts/generate-grain.mjs`: semilla 11, gris medio 16, desviacion 13 (gaussiana), PNG de 256x256 y 60 KB. Dos ejecuciones dan el mismo sha256, `94529d9d…041b`.
+    - El panel va dentro del hijo contra-escalado (el grano no se estira), con `pointer-events: none`, y su opacidad la escribe el bucle: `PANEL_OPACITY * (1 - openness)`.
+    - Fuera `filter: blur()`, su transicion y el velo. `Slide` ya solo depende de `isActive` para re-renderizarse.
+    - `?panel=100|90` se lee solo fuera de produccion, marcado `PLACEHOLDER`, y se quita en T11.
+  - **Geometria:** frente a T2, **0 px**. **CA4:** `filter` 0 escrituras por frame en todos los escenarios, igual que `width`.
+  - **Estilo por frame, local, CPU×4, mediana de 3** (T3 de `2026-10-22_011-t3-local-cpu4.txt`; T8 de `-t8-cpu4.txt`):
+
+    | | T3 | T8 |
+    |---|---|---|
+    | Trackpad | 1,19 ms | 0,41 ms |
+    | Raton | 1,48 ms | 0,76 ms |
+    | Fling fuerte | 2,12 ms | 0,76 ms |
+    | Rafaga | 1,83 ms | 0,54 ms |
+
+    Las subidas de T4 y T5 eran las transiciones de `blur`: sin ellas, CA3 (≤ 2 ms) se cumple con margen.
+  - **Clic y arrastre** (`t8-ver.mjs`, scratchpad):
+    - El clic en la diapositiva abierta navega al album, con y sin reduced motion; el arrastre hacia la izquierda avanza; 0 errores.
+    - El mismo arrastre en produccion va y viene entre albumes (01 → 04 → 01 → 02 → 03 → 04 → 03 → 04 → 01, `drag-debug-prod.mjs`). En la rama solo avanza, un album de cada vez.
+  - **Reduced motion:** el pliegue sigue (decision 2): no hay rama de reduced motion en el carrusel.
+  - **Capturas:** `t8/normal-reposo.png` y `t8/normal-pliegue.png`, en el scratchpad.
   - Fichero(s): `scripts/generate-grain.mjs` (crear), `public/textures/grano.png` (crear), `src/motion/AlbumsCarousel.tsx`
   - Cambio: textura 256x256 en escala de grises, semilla fija. Fuera `filter: blur()`, su transicion y el velo. Panel negro con el grano dentro del hijo contra-escalado, `pointer-events: none`, `opacity` = `PANEL * (1 - openness)`. En `next dev`, `?panel=100|90` cambia `PANEL`
   - Comprobacion: dos ejecuciones de `generate-grain.mjs` dan el mismo hash. 0 escrituras de `filter` por frame. El panel no tapa el clic en la diapositiva abierta ni el arrastre. Con reduced motion el pliegue sigue (decision 2)
