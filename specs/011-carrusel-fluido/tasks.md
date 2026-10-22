@@ -205,8 +205,16 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
   - **Hecho.** Cada caja lleva `a` (la diapositiva con enlace es la abierta). En el fling fuerte y la rafaga, `trailStats` mide CA5 y CA12. Contra T14:
     - **CA5:** 0 frames con un ancho distinto de 110 por delante de la que se abre.
     - **CA12:** "estela" en 229 frames, que es la abierta anterior cerrandose (extra max 482 px), y decrece en todos.
-- [ ] **T16** · La estela (plan, enmienda 1, parte 2)
+- [x] **T16** · La estela (plan, enmienda 1, parte 2)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Comprobacion: CA5 nuevo, CA6, CA7, CA8 y CA12, con salidas en el scratchpad; diagnostico en verde
+  - **Hecho.** `TRAIL_MAX_PX` = 180, `TRAIL_DECAY` = 0,6, `TRAIL_FULL_SPEED` = 30. Las diapositivas por detras de la activa en el sentido de la marcha (`behind = (activa − absIndex) · travelDir ≥ 1`) apuntan a una apertura parcial segun la velocidad, y su muelle la sigue.
+  - **Desvio: la deriva.** Con la estela, las plegadas a 2 y 3 posiciones por detras "se movian" y recalculaban su deriva con la distancia nueva. El recorte en reposo cambiaba un paso de deriva (4,67 y 9,3 px): CA7 fallaba con las cajas identicas. La deriva queda viva solo para la pareja que se pliega (`|absIndex − activa| ≤ 1`), como antes de la estela.
+  - **CA7 y CA8:** reposo frente a T2: **0–0,1 px a 60 fps, 0 a 30, ≤ 0,3 a 120**.
+  - **CA5 nuevo:** 0 frames con un ancho distinto de 110 por delante de la que se abre, en el fling y la rafaga, a CPU×1 y ×4.
+  - **CA12:** la estela decrece con la distancia en todos los frames: 273 en el fling, 215 en la rafaga.
+  - La traza por frame (`estela-trace.mjs`) da, por ejemplo, `ny 131 · sol 123` detras de la abierta y 110 en todas las de delante, volviendo a 110 al pararse. La captura a mitad de fling esta en `estela/fling-15.png`: 125 → 135 → 157 hacia la abierta.
+  - **CA6, salto max** (`2026-10-22_011-t16-cpu1.txt`, mediana de 3): fling 23 px, rafaga 12,3, giro 7,1, paso y paso atras **10,7** (antes 4,6). El paso suelto empeora: ahora un solo paso de raton tambien abre estela. No se cumple; va a la revision de Javi con las constantes.
+  - **Fluidez:** 0 frames >50 ms en la mediana, a CPU×1 y ×4. Estilo por frame a CPU×4: 0,71–1,17 ms (≤ 2). Fling fuerte: **11 albumes**, reposo a 558 ms.
 - [ ] **T17** · Revision de Javi (CA11) y ajuste de las tres constantes
 - [ ] **T18** · Documentacion: design spec §2 (scroll libre y estela; fuera "one album at a time") y `CLAUDE.md`

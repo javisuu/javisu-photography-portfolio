@@ -82,6 +82,20 @@ const KEY_KICK_PX = 18; // arrow keys inject a firm one-shot velocity kick, same
 // governs restOffsetPx (see step 5), so layout, width, and the grain panel
 // all resolve on one shared timeline.
 const SPRING_OMEGA = 18.6; // rad/s
+// The trail (spec 011, amendment 1, from Javi's frames of cynx.io): while
+// the strip moves, the slides it has just passed don't fold all the way —
+// they stay part-open behind the active one, wider the faster the strip
+// and the closer to it, and fold back to S as it slows. The opening slide
+// then makes room by narrowing a trail that is already moving, instead of
+// shoving fully folded slivers aside. Only the side already passed (the
+// non-anchored side, see computeFrame); the side ahead never changes. Each
+// trailing slide k (1 = right behind the active one) targets an extra
+// width of TRAIL_MAX_PX * speed * TRAIL_DECAY^(k-1), speed being
+// |velocity| / TRAIL_FULL_SPEED clamped to 1. At rest speed is 0 and every
+// slide folds to S, so the rest layout is unchanged.
+const TRAIL_MAX_PX = 180;
+const TRAIL_DECAY = 0.6;
+const TRAIL_FULL_SPEED = 30; // px per reference frame
 const MAX_DT_MS = 100; // clamp a single frame's elapsed time (e.g. after a backgrounded tab) so physics never jumps
 const OPEN_EPSILON_PX = 0.5; // a slide within this of its resting target width (S if inactive, natural width if active) counts as "settled" — see driftRef in the physics loop
 
@@ -691,19 +705,27 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         imageAnchorDirRef.current.set(activeIdxRef.current, travelDirRef.current);
       }
 
-      // 4. Openness is PURELY positional: it depends on nothing but
-      // "is this absIndex currently the active one," never on velocity or
-      // on where offsetPx sits within the current step. The active slide
-      // always targets 1 and unfolds toward fully open on its own spring
-      // (see SPRING_OMEGA); every other slide always targets 0. A commit
-      // swaps which slide is targeting 1, and each spring carries its
-      // current velocity into the new target.
+      // 4. Openness targets: the active slide always targets 1 and unfolds
+      // toward fully open on its own spring (see SPRING_OMEGA); the slides
+      // just passed target the trail (see TRAIL_MAX_PX), which follows the
+      // strip's speed; every other slide targets 0. A commit swaps which
+      // slide is targeting 1, and each spring carries its current velocity
+      // into the new target. Never where offsetPx sits within the step: the
+      // fold is still not scrubbable by scroll position.
       const vw = viewportWidthRef.current;
       const sps = computeSlotsPerSide(vw);
       const frameLo = activeIdxRef.current - sps;
       const frameHi = activeIdxRef.current + sps;
+      const trailSpeed = clamp(Math.abs(velocityRef.current) / TRAIL_FULL_SPEED, 0, 1);
       for (let absIndex = frameLo; absIndex <= frameHi; absIndex++) {
-        const target = absIndex === activeIdxRef.current ? 1 : 0;
+        let target = absIndex === activeIdxRef.current ? 1 : 0;
+        // Positions behind the active one, on the side already passed.
+        const behind = (activeIdxRef.current - absIndex) * travelDirRef.current;
+        if (behind >= 1 && trailSpeed > 0) {
+          const trailNatural = naturalWidthFor(albums[mod(absIndex, albums.length)].cover);
+          const extraPx = TRAIL_MAX_PX * trailSpeed * TRAIL_DECAY ** (behind - 1);
+          target = Math.min(1, extraPx / (trailNatural - S));
+        }
         const current = opennessRef.current.get(absIndex) ?? 0;
         const currentVelocity = opennessVelocityRef.current.get(absIndex) ?? 0;
         if (current !== target || currentVelocity !== 0) {
@@ -810,9 +832,14 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           // untouched — otherwise a resting sliver would keep drifting
           // just because activeIdx (and so its distance-from-active) kept
           // changing long after this slide itself stopped animating.
+          // Only the pair actually folding (the active slide and its
+          // neighbours) counts: a trail slide (see TRAIL_MAX_PX) also
+          // changes width while the strip moves, but its drift stays frozen,
+          // or the rest crop would depend on how fast the strip got there.
           const targetWidth = absIndex === activeIdxRef.current ? naturalWidth : S;
-          const settled = Math.abs(width - targetWidth) <= OPEN_EPSILON_PX;
-          if (!settled || !driftRef.current.has(absIndex)) {
+          const folding =
+            Math.abs(absIndex - activeIdxRef.current) <= 1 && Math.abs(width - targetWidth) > OPEN_EPSILON_PX;
+          if (folding || !driftRef.current.has(absIndex)) {
             driftRef.current.set(absIndex, driftPxFor(absIndex, activeIdxRef.current, naturalWidth, width));
           }
           writeIfChanged(imageEl, "transform", driftTransformFor(driftRef.current.get(absIndex)!), written, "drift");
