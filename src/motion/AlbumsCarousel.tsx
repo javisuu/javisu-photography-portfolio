@@ -23,7 +23,9 @@ const S = 110;
 // grey veil, both CSS transitions on React state: a blur filter is
 // expensive to animate, and opacity is compositing only. Written by the
 // physics loop like everything else continuous.
-const PANEL_OPACITY = 1;
+// 90%, not fully opaque: Javi compared both on his own screen (spec 011,
+// T11) — a trace of the photo shows through each sliver.
+const PANEL_OPACITY = 0.9;
 const GRAIN_TEXTURE = "/textures/grano.png";
 
 const DRIFT_TARGET_PX_AT_MAX_DISTANCE = 14;
@@ -551,10 +553,6 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const counterRefs = useRef(new Map<number, HTMLDivElement>());
   const imageRefs = useRef(new Map<number, HTMLImageElement>());
   const panelRefs = useRef(new Map<number, HTMLDivElement>());
-  // The panel's full opacity. PANEL_OPACITY, except under `next dev`, where
-  // /albums?panel=100 or ?panel=90 overrides it so Javi can compare the two
-  // on his own screen (spec 011, T11). PLACEHOLDER — removed once he picks.
-  const panelOpacityRef = useRef(PANEL_OPACITY);
   // The last value the physics loop wrote to each slide, so a slide whose
   // geometry didn't change this frame isn't written (and restyled) again.
   const writtenRef = useRef(new Map<number, WrittenStyle>());
@@ -874,7 +872,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         const panelEl = panelRefs.current.get(absIndex);
         if (panelEl) {
           const openness = opennessRef.current.get(absIndex) ?? 0;
-          const opacity = (panelOpacityRef.current * (1 - openness)).toFixed(3);
+          const opacity = (PANEL_OPACITY * (1 - openness)).toFixed(3);
           writeIfChanged(panelEl, "opacity", opacity, written, "panel");
         }
       });
@@ -883,13 +881,6 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
   }, [albums, anchorRestOffsetPx]);
-
-  // Dev-only panel comparison (see panelOpacityRef). PLACEHOLDER.
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production") return;
-    const panel = new URLSearchParams(window.location.search).get("panel");
-    if (panel === "100" || panel === "90") panelOpacityRef.current = Number(panel) / 100;
-  }, []);
 
   // Keyboard: arrow keys inject the same one-shot velocity kick a firm
   // flick would, reusing the exact same momentum/step/settle physics.
