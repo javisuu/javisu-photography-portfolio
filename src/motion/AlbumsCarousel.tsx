@@ -82,13 +82,6 @@ const KEY_KICK_PX = 18; // arrow keys inject a firm one-shot velocity kick, same
 // governs restOffsetPx (see step 5), so layout, width, and the grain panel
 // all resolve on one shared timeline.
 const SPRING_OMEGA = 18.6; // rad/s
-// One album at a time (spec 011): a commit in the same direction waits until
-// the previous pair (the slide that closed, the one that opened) has
-// settled, so no more than two slides are ever mid-fold. While it waits,
-// offsetPx keeps integrating, softly braked from one step past the commit
-// line and capped at MAX_QUEUED_COMMITS steps past it — those commits then
-// run one after another, each once the pair before it settles.
-const MAX_QUEUED_COMMITS = 1;
 const MAX_DT_MS = 100; // clamp a single frame's elapsed time (e.g. after a backgrounded tab) so physics never jumps
 const OPEN_EPSILON_PX = 0.5; // a slide within this of its resting target width (S if inactive, natural width if active) counts as "settled" — see driftRef in the physics loop
 
@@ -509,14 +502,6 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const restOffsetPxRef = useRef(0);
   const restOffsetVelocityRef = useRef(0);
   const velocityRef = useRef(0);
-  // The slide that closed at the last commit — with the active one, the
-  // pair a same-direction commit waits on (see MAX_QUEUED_COMMITS).
-  const outgoingIdxRef = useRef<number | null>(null);
-  // Whether a same-direction commit waits for the previous pair (see
-  // MAX_QUEUED_COMMITS). Under `next dev`, /albums?cola=libre turns the
-  // wait off so Javi can compare free fast scrolling on his own trackpad
-  // (spec 011, T11). PLACEHOLDER — removed once he decides.
-  const queueEnabledRef = useRef(true);
   const activeIdxRef = useRef(activeIdx);
   // Which edge is currently hinged — updated ONLY at an actual commit
   // (inside the while loop below), never from the live sign of velocity.
@@ -654,44 +639,6 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       velocityRef.current += input;
       velocityRef.current *= FRICTION ** frames;
 
-      // Whether the last commit's pair has finished folding/unfolding:
-      // both within OPEN_EPSILON_PX of their resting width. Snaps them
-      // exactly when it is (a <0.5 px correction doesn't show).
-      function pairSettled() {
-        const activeIdx = activeIdxRef.current;
-        const activeNatural = naturalWidthFor(albums[mod(activeIdx, albums.length)].cover);
-        const activeOpenness = opennessRef.current.get(activeIdx) ?? 0;
-        if ((1 - activeOpenness) * (activeNatural - S) > OPEN_EPSILON_PX) return false;
-        const outgoingIdx = outgoingIdxRef.current;
-        if (outgoingIdx !== null) {
-          const outgoingNatural = naturalWidthFor(albums[mod(outgoingIdx, albums.length)].cover);
-          if ((opennessRef.current.get(outgoingIdx) ?? 0) * (outgoingNatural - S) > OPEN_EPSILON_PX) return false;
-          opennessRef.current.set(outgoingIdx, 0);
-          opennessVelocityRef.current.set(outgoingIdx, 0);
-        }
-        opennessRef.current.set(activeIdx, 1);
-        opennessVelocityRef.current.set(activeIdx, 0);
-        return true;
-      }
-
-      // While a same-direction commit is waiting on the pair, brake the
-      // strip softly past the commit line: outward velocity loses more the
-      // further past it the strip is, all of it at the cap.
-      const waitingDir = Math.sign(offsetPxRef.current);
-      const waiting =
-        queueEnabledRef.current &&
-        Math.abs(offsetPxRef.current) >= STEP_DISTANCE &&
-        waitingDir === travelDirRef.current &&
-        !pairSettled();
-      if (waiting && Math.sign(velocityRef.current) === waitingDir) {
-        const over = clamp(
-          (Math.abs(offsetPxRef.current) - STEP_DISTANCE) / (STEP_DISTANCE * MAX_QUEUED_COMMITS),
-          0,
-          1
-        );
-        velocityRef.current *= (1 - over) ** frames;
-      }
-
       // 2. offsetPx integrates velocity per reference frame (see
       // stepDistanceFactor), unconditionally —
       // no rubber-band resistance near any cap, and no easing back toward
@@ -703,18 +650,13 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // only ever recentres as part of a commit (step 5's restOffsetPx
       // ease toward the absolute target) — never while the user is idle.
       offsetPxRef.current += velocityRef.current * stepDistanceFactor(frames);
-      const maxOffsetPx = STEP_DISTANCE * (1 + MAX_QUEUED_COMMITS);
-      if (queueEnabledRef.current && Math.abs(offsetPxRef.current) > maxOffsetPx) {
-        offsetPxRef.current = Math.sign(offsetPxRef.current) * maxOffsetPx;
-        velocityRef.current = 0;
-      }
 
-      // 3. Crossing STEP_DISTANCE advances activeIdx, one album at a time:
-      // a commit that keeps travelDir waits until the previous pair has
-      // settled (see MAX_QUEUED_COMMITS), so the loop runs at most once per
-      // frame in the same direction. A reversal never waits: it hands the
-      // open side back to the slide that was closing, the same pair, whose
-      // springs just turn around. A commit that keeps travelDir the
+      // 3. Crossing STEP_DISTANCE advances activeIdx — a while loop, so a
+      // single fast frame can chain through several albums at once. Commits
+      // never wait for the previous fold to finish (spec 011, amendment 1:
+      // free scrolling, like cynx.io): every slide's openness is on its own
+      // spring (step 4), so a chained commit only retargets springs, it
+      // never snaps a width. A commit that keeps travelDir the
       // same needs no correction (see computeFrame's header comment for
       // why). A commit that REVERSES travelDir switches which edge is the
       // anchor, so restOffsetPx needs a one-time jump to stay continuous:
@@ -726,7 +668,6 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       const prevActiveIdx = activeIdxRef.current;
       while (Math.abs(offsetPxRef.current) >= STEP_DISTANCE) {
         const dir = Math.sign(offsetPxRef.current);
-        if (queueEnabledRef.current && dir === travelDirRef.current && !pairSettled()) break;
         if (dir !== travelDirRef.current) {
           const outgoingIdx = activeIdxRef.current;
           const outgoingWidth = widthFor(
@@ -736,7 +677,6 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           restOffsetPxRef.current += dir * (S - outgoingWidth);
           travelDirRef.current = dir;
         }
-        outgoingIdxRef.current = activeIdxRef.current;
         activeIdxRef.current += dir;
         offsetPxRef.current -= dir * STEP_DISTANCE;
       }
@@ -889,12 +829,6 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
   }, [albums, anchorRestOffsetPx]);
-
-  // Dev-only queue comparison (see queueEnabledRef). PLACEHOLDER.
-  useEffect(() => {
-    if (process.env.NODE_ENV === "production") return;
-    if (new URLSearchParams(window.location.search).get("cola") === "libre") queueEnabledRef.current = false;
-  }, []);
 
   // Keyboard: arrow keys inject the same one-shot velocity kick a firm
   // flick would, reusing the exact same momentum/step/settle physics.

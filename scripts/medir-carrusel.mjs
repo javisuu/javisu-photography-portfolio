@@ -225,7 +225,8 @@ function instrument({ fps, S, SLIDE_HEIGHT }) {
       const r = el.getBoundingClientRect();
       const img = el.querySelector("img");
       const nat = img ? Math.round(SLIDE_HEIGHT * (Number(img.getAttribute("width")) / Number(img.getAttribute("height")))) : 0;
-      return { id: idOf(el), l: r.left, r: r.right, w: r.width, nat };
+      // a: la diapositiva abierta, la unica con enlace.
+      return { id: idOf(el), l: r.left, r: r.right, w: r.width, nat, a: !!el.querySelector("a") };
     }).filter((b) => b.r > -200 && b.l < innerWidth + 200);
   }
 
@@ -304,8 +305,8 @@ async function waitRest(page, maxMs = 6000) {
 const SCENARIOS = [
   { name: "trackpad (60 x 12 px)", boxes: false, steps: Array.from({ length: 60 }, () => [12, 16]) },
   { name: "raton (8 x 100 px)", boxes: false, steps: Array.from({ length: 8 }, () => [100, 120]) },
-  { name: "fling fuerte (60 x 50 px)", boxes: true, steps: Array.from({ length: 60 }, () => [50, 8]) },
-  { name: "rafaga (40 x 30 px)", boxes: true, steps: Array.from({ length: 40 }, () => [30, 16]) },
+  { name: "fling fuerte (60 x 50 px)", boxes: true, forward: true, steps: Array.from({ length: 60 }, () => [50, 8]) },
+  { name: "rafaga (40 x 30 px)", boxes: true, forward: true, steps: Array.from({ length: 40 }, () => [30, 16]) },
   { name: "giro brusco (20 x 15 px y 20 x -15 px)", boxes: true, steps: [...Array.from({ length: 20 }, () => [15, 16]), ...Array.from({ length: 20 }, () => [-15, 16])] },
   { name: "paso y paso atras (raton)", boxes: true, steps: [[120, 250], [-120, 16]] },
 ];
@@ -342,6 +343,36 @@ function albumSteps(frames, total) {
     prev = c;
   }
   return { fwd, back };
+}
+
+// Enmienda 1 de la spec 011, solo en escenarios hacia delante (la tira
+// avanza hacia la derecha: las diapositivas por delante estan a la derecha
+// de la abierta).
+// - CA5: ninguna a mas de una posicion por delante de la abierta cambia de
+//   ancho (la siguiente, la que se abre, si puede).
+// - CA12: la estela (las de detras, a la izquierda) decrece con la
+//   distancia: cada una igual o mas estrecha que la anterior, con 0,5 px de
+//   margen, en los frames en que hay estela.
+function trailStats(frames) {
+  let aheadFrames = 0, aheadMax = 0, trailFrames = 0, trailBad = 0, trailMaxPx = 0;
+  for (const f of frames.filter((x) => x.boxes)) {
+    const bs = [...f.boxes].sort((a, b) => a.l - b.l);
+    const k = bs.findIndex((b) => b.a);
+    if (k < 0) continue;
+    const ahead = bs.slice(k + 2);
+    const dev = Math.max(0, ...ahead.map((b) => Math.abs(b.w - S)));
+    if (dev > EPS) aheadFrames++;
+    aheadMax = Math.max(aheadMax, dev);
+    const behind = bs.slice(0, k).reverse();
+    if (behind.some((b) => b.w > S + EPS)) {
+      trailFrames++;
+      trailMaxPx = Math.max(trailMaxPx, ...behind.map((b) => b.w - S));
+      for (let i = 1; i < behind.length; i++) {
+        if (behind[i].w > behind[i - 1].w + EPS) { trailBad++; break; }
+      }
+    }
+  }
+  return { aheadFrames, aheadMax, trailFrames, trailBad, trailMaxPx };
 }
 
 function foldStats(frames) {
@@ -428,6 +459,7 @@ async function onePass() {
     const r = { ...st, stylePerFrame: (b.styleMs - a.styleMs) / Math.max(1, st.frames), layoutPerFrame: (b.layoutMs - a.layoutMs) / Math.max(1, st.frames), ltCount: l.length, ...writeStats(fs), ...albumSteps(fs, total) };
     if (sc.boxes) {
       const fo = foldStats(fs);
+      if (sc.forward) Object.assign(r, trailStats(fs));
       Object.assign(r, { hist: fo.hist, threePlus: fo.threePlus, maxMid: fo.maxMid, jump: fo.jump, restMs: fo.lastMove === null ? 0 : Math.max(0, fo.lastMove - tInput), trace: fo.trace });
     }
     out[sc.name] = r;
@@ -472,6 +504,10 @@ async function fluidity() {
     log(`  escrituras por frame: mutaciones ${r1(x.recordsPerFrame)} · width ${r1(x.widthPerFrame)} · left/right ${r1(x.leftRightPerFrame)} · filter ${r1(x.filterPerFrame)} · transform ${r1(x.transformPerFrame)}`);
     log(`  albumes: ${x.fwd} adelante, ${x.back} atras`);
     if (sc.boxes) {
+      if (sc.forward) {
+        log(`  CA5, por delante de la que se abre: ${x.aheadFrames} frames con un ancho distinto de ${S} px (max ${r1(x.aheadMax)} px)`);
+        log(`  CA12, estela: en ${x.trailFrames} frames, ${x.trailBad} no decrecen con la distancia · ancho extra max ${Math.round(x.trailMaxPx)} px`);
+      }
       log(`  a medio plegar por frame: ${Object.entries(x.hist).map(([k, v]) => `${k}: ${v}`).join(" · ")} · max ${x.maxMid} · frames con 3 o mas: ${x.threePlus}`);
       log(`  salto max de borde (frente a la mediana de sus 6 vecinos): ${r1(x.jump)} px · reposo ${Math.round(x.restMs)} ms despues de la ultima entrada`);
       for (const line of x.trace) log(`    ${line}`);

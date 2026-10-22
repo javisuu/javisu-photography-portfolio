@@ -195,12 +195,16 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
 
 ## Enmienda 1 (2026-10-22): scroll libre y estela
 
-- [ ] **T14** · Quitar la cola (plan, enmienda 1, parte 1)
+- [x] **T14** · Quitar la cola (plan, enmienda 1, parte 1)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Comprobacion: geometria = T2 (0 px); fling fuerte con mas albumes que con cola (10 frente a 7, `2026-10-22_011-cola-libre-dev.txt`); tsc y lint ok
-- [ ] **T15** · Medida de CA5 nuevo y CA12 en el script
+  - **Hecho.** Salen `MAX_QUEUED_COMMITS`, `outgoingIdxRef`, `pairSettled()`, el freno, el tope y `?cola=libre`. Geometria frente a T2: **0 px**. Fling fuerte: **11 albumes**, reposo a 567 ms. Salto max: fling 26,3 px, rafaga 25,1, giro 7,2, paso 4,6, como en T6 (`2026-10-22_011-t14-cpu1.txt`, mediana de 3). tsc y lint ok.
+- [x] **T15** · Medida de CA5 nuevo y CA12 en el script
   - Fichero(s): `scripts/medir-carrusel.mjs`
   - Comprobacion: contra T14, sin estela: CA5 nuevo en 0 frames con fallo y una estela que no existe
+  - **Hecho.** Cada caja lleva `a` (la diapositiva con enlace es la abierta). En el fling fuerte y la rafaga, `trailStats` mide CA5 y CA12. Contra T14:
+    - **CA5:** 0 frames con un ancho distinto de 110 por delante de la que se abre.
+    - **CA12:** "estela" en 229 frames, que es la abierta anterior cerrandose (extra max 482 px), y decrece en todos.
 - [ ] **T16** · La estela (plan, enmienda 1, parte 2)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Comprobacion: CA5 nuevo, CA6, CA7, CA8 y CA12, con salidas en el scratchpad; diagnostico en verde
