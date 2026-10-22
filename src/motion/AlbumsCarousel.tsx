@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { memo, useEffect, useRef, useState } from "react";
 import type { Album, Photo } from "@/data/photos";
 
 // SLIDE_HEIGHT is the one dimension that is NEVER conditional on distance,
@@ -244,6 +244,158 @@ function imageAnchorFor(travelDir: number, driftPx: number): ImageAnchor {
     : { left: "0px", right: "auto", transform: `translateX(${driftPx}px)` };
 }
 
+type WrittenStyle = Partial<Record<"width" | "transform" | "imageLeft" | "imageRight" | "imageTransform", string>>;
+
+// Writes one inline style property only if it differs from what the
+// physics loop last wrote there (spec 011): a slide that isn't moving costs
+// nothing per frame.
+function writeIfChanged(
+  el: HTMLElement,
+  property: "width" | "transform" | "left" | "right",
+  value: string,
+  written: WrittenStyle,
+  key: keyof WrittenStyle = property as keyof WrittenStyle
+) {
+  if (written[key] === value) return;
+  el.style[property] = value;
+  written[key] = value;
+}
+
+// The anchor's own click never actually fires a real navigation here —
+// see pendingNavHrefRef's comment — so this only exists to stop the
+// browser's default (a full page navigation) from racing the client-side
+// router.push already issued in onPointerUp.
+function onSlotClick(e: React.MouseEvent) {
+  if (e.button === 0) e.preventDefault();
+}
+
+type SlideProps = {
+  absIndex: number;
+  album: AlbumWithCover;
+  isActive: boolean;
+  blur: number;
+  veilAlpha: number;
+  priority: boolean;
+  // First-paint geometry only, read once at mount: from then on the
+  // physics loop owns width, position, image anchor and drift. Left out of
+  // the memo comparison (see sameSlide), so a commit that shifts every
+  // slide's row position doesn't re-render them all.
+  initial: { width: number; x: number; dir: number; drift: number };
+  frameRefs: React.RefObject<Map<number, HTMLDivElement>>;
+  imageRefs: React.RefObject<Map<number, HTMLImageElement>>;
+  writtenRef: React.RefObject<Map<number, WrittenStyle>>;
+  onActiveHover: (hovered: boolean) => void;
+};
+
+function sameSlide(a: SlideProps, b: SlideProps) {
+  return (
+    a.absIndex === b.absIndex &&
+    a.album === b.album &&
+    a.isActive === b.isActive &&
+    a.blur === b.blur &&
+    a.veilAlpha === b.veilAlpha &&
+    a.priority === b.priority &&
+    a.onActiveHover === b.onActiveHover
+  );
+}
+
+// One slide of the strip. Memoized (spec 011): a commit re-renders only the
+// slides whose props actually change, not the ~30 in the window.
+const Slide = memo(function Slide({
+  absIndex,
+  album,
+  isActive,
+  blur,
+  veilAlpha,
+  priority,
+  initial: initialProp,
+  frameRefs,
+  imageRefs,
+  writtenRef,
+  onActiveHover,
+}: SlideProps) {
+  const [initial] = useState(initialProp);
+  const naturalWidth = naturalWidthFor(album.cover);
+  return (
+    <div
+      ref={(el) => {
+        // A (re)mounted node starts with nothing written by the loop.
+        writtenRef.current.delete(absIndex);
+        if (el) frameRefs.current.set(absIndex, el);
+        else frameRefs.current.delete(absIndex);
+      }}
+      data-carousel-slide=""
+      className="absolute isolate block select-none overflow-hidden"
+      style={{
+        top: 0,
+        left: 0,
+        width: initial.width,
+        height: SLIDE_HEIGHT,
+        maxWidth: "none",
+        transform: `translateX(${initial.x}px)`,
+      }}
+    >
+      {/* The frame is purely a clipping window: its WIDTH is the
+          only thing that ever animates its own size, revealing
+          more or less of the image below as its openness rises or
+          falls — a curtain opening, not a zoom. The image itself
+          never changes size (no scale/zoom transform anywhere in
+          this file). Width, position, and drift are written
+          directly by the physics loop every frame — no CSS
+          transition on any of them, it would only fight the
+          loop's own writes. */}
+      <Image
+        ref={(el) => {
+          if (el) imageRefs.current.set(absIndex, el);
+          else imageRefs.current.delete(absIndex);
+        }}
+        src={album.cover.src}
+        alt={album.title}
+        width={album.cover.width}
+        height={album.cover.height}
+        style={{
+          position: "absolute",
+          top: 0,
+          width: naturalWidth,
+          height: SLIDE_HEIGHT,
+          maxWidth: "none",
+          objectFit: "cover",
+          filter: blur ? `blur(${blur}px)` : "none",
+          transition: IMAGE_FILTER_TRANSITION,
+          ...imageAnchorFor(initial.dir, initial.drift),
+        }}
+        sizes={`${naturalWidth}px`}
+        draggable={false}
+        priority={priority}
+      />
+      {/* Dark veil — a separate overlay, not opacity on the image
+          (which would wash it toward white instead of dimming it
+          toward black). */}
+      <div
+        className="pointer-events-none absolute inset-0 bg-black"
+        style={{ opacity: veilAlpha, transition: VEIL_TRANSITION }}
+      />
+      {/* Navigation target: only the active, fully-open slide is
+          ever a link — a folded sliver has no anchor at all, so
+          clicking one does nothing (dragging it still works, via
+          the pointer handlers on the strip's outer container,
+          which this overlay doesn't intercept since it never
+          calls stopPropagation). Placed last so it sits above the
+          image/veil without needing an explicit z-index. */}
+      {isActive && (
+        <Link
+          href={`/album/${album.slug}`}
+          onClick={onSlotClick}
+          onMouseEnter={() => onActiveHover(true)}
+          onMouseLeave={() => onActiveHover(false)}
+          className="absolute inset-0 block select-none"
+          draggable={false}
+        />
+      )}
+    </div>
+  );
+}, sameSlide);
+
 export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] }) {
   const router = useRouter();
   // 1440 is a reasonable first-paint guess, corrected to the real window
@@ -256,20 +408,14 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // DOM by the physics loop.
   const [activeIdx, setActiveIdx] = useState(0);
   const [isDragging, setIsDragging] = useState(false);
-  // A snapshot of the render offset (restOffsetPx + offsetPx combined,
-  // see the physics loop), refreshed whenever activeIdx changes — exists
-  // only so render has a non-ref value for a newly-mounted slide's
-  // first-paint position (reading the refs directly during render trips
-  // react-hooks/refs; the physics loop corrects any few-ms staleness on
-  // the very next frame regardless). Newly-mounted slides are always far
-  // from active, so approximating their initial openness as the resting
-  // shape (1 if active, else 0) — rather than snapshotting the whole
-  // per-slide openness map too — is a safe, low-consequence shortcut.
-  const [renderOffsetSnapshot, setRenderOffsetSnapshot] = useState(0);
-  // Mirrors travelDirRef for the same reason — render needs a non-ref
-  // value to pick the active slide's anchor edge (both layout and image,
-  // see computeFrame and imageAnchorFor) for first paint. Commit-locked
-  // (see travelDirRef below), not tied to the live velocity's sign.
+  // Mirrors travelDirRef so render has a non-ref value (reading refs
+  // during render trips react-hooks/refs) to pick a newly-mounted slide's
+  // anchor edge (both layout and image, see computeFrame and
+  // imageAnchorFor) for its first paint. Commit-locked (see travelDirRef
+  // below), not tied to the live velocity's sign. Newly-mounted slides are
+  // always far from active, so approximating their initial openness as the
+  // resting shape (1 if active, else 0) is a safe, low-consequence
+  // shortcut; the physics loop corrects it on the very next frame.
   const [directionSnapshot, setDirectionSnapshot] = useState(1);
   // Whether the pointer is over the currently-active (fully open) slide —
   // the only slide that's ever a navigation target. Drives the info
@@ -327,8 +473,18 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const pendingNavHrefRef = useRef<string | null>(null);
   const viewportWidthRef = useRef(viewportWidth);
   const rootRef = useRef<HTMLDivElement | null>(null);
+  // The row every slide sits in. Slides are laid out in ROW coordinates
+  // (computeFrame with renderOffsetPx = 0) and the row alone carries
+  // -renderOffsetPx (spec 011): while the strip slides without folding,
+  // that is the only style written per frame, instead of one transform per
+  // slide (~30).
+  const rowRef = useRef<HTMLDivElement | null>(null);
+  const rowTransformRef = useRef("");
   const frameRefs = useRef(new Map<number, HTMLDivElement>());
   const imageRefs = useRef(new Map<number, HTMLImageElement>());
+  // The last value the physics loop wrote to each slide, so a slide whose
+  // geometry didn't change this frame isn't written (and restyled) again.
+  const writtenRef = useRef(new Map<number, WrittenStyle>());
   // Per-slide openness is genuine state (not a formula), so it has to
   // persist across frames keyed by absolute index — pruned to the visible
   // window (+ a small margin) each frame so it can't grow unbounded over
@@ -358,7 +514,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const hi = activeIdx + slotsPerSide;
   const initialFrame = computeFrame(
     activeIdx,
-    renderOffsetSnapshot,
+    0,
     (absIndex) => (absIndex === activeIdx ? 1 : 0),
     lo,
     hi,
@@ -521,12 +677,20 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // instant the commit fires, with nothing left to ease.
       restOffsetPxRef.current += (0 - restOffsetPxRef.current) * opennessFactor;
 
-      // 6. Compute this frame's geometry and write it straight to the DOM.
+      // 6. Compute this frame's geometry and write it straight to the DOM:
+      // slides in row coordinates, the render offset on the row alone (see
+      // rowRef). computeFrame's x is linear in renderOffsetPx, so the sum is
+      // exactly the old per-slide position.
       const travelDir = travelDirRef.current;
       const renderOffsetPx = restOffsetPxRef.current + offsetPxRef.current;
+      const rowTransform = `translateX(${-renderOffsetPx}px)`;
+      if (rowRef.current && rowTransform !== rowTransformRef.current) {
+        rowRef.current.style.transform = rowTransform;
+        rowTransformRef.current = rowTransform;
+      }
       const frame = computeFrame(
         activeIdxRef.current,
-        renderOffsetPx,
+        0,
         (absIndex) => opennessRef.current.get(absIndex) ?? 0,
         frameLo,
         frameHi,
@@ -536,10 +700,15 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         anchorRestOffsetPx
       );
       frame.forEach(({ width, x }, absIndex) => {
+        let written = writtenRef.current.get(absIndex);
+        if (!written) {
+          written = {};
+          writtenRef.current.set(absIndex, written);
+        }
         const frameEl = frameRefs.current.get(absIndex);
         if (frameEl) {
-          frameEl.style.width = `${width}px`;
-          frameEl.style.transform = `translateX(${x}px)`;
+          writeIfChanged(frameEl, "width", `${width}px`, written);
+          writeIfChanged(frameEl, "transform", `translateX(${x}px)`, written);
         }
         const imageEl = imageRefs.current.get(absIndex);
         if (imageEl) {
@@ -557,14 +726,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           }
           const anchorDir = imageAnchorDirRef.current.get(absIndex) ?? travelDir;
           const anchor = imageAnchorFor(anchorDir, driftRef.current.get(absIndex)!);
-          imageEl.style.left = anchor.left;
-          imageEl.style.right = anchor.right;
-          imageEl.style.transform = anchor.transform;
+          writeIfChanged(imageEl, "left", anchor.left, written, "imageLeft");
+          writeIfChanged(imageEl, "right", anchor.right, written, "imageRight");
+          writeIfChanged(imageEl, "transform", anchor.transform, written, "imageTransform");
         }
       });
-      if (activeIdxRef.current !== prevActiveIdx) {
-        setRenderOffsetSnapshot(renderOffsetPx);
-      }
     }
 
     rafId = requestAnimationFrame(tick);
@@ -636,14 +802,6 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     pendingNavHrefRef.current = null;
   }
 
-  // The anchor's own click never actually fires a real navigation here —
-  // see pendingNavHrefRef's comment — so this only exists to stop the
-  // browser's default (a full page navigation) from racing the
-  // client-side router.push already issued in onPointerUp.
-  function onSlotClick(e: React.MouseEvent) {
-    if (e.button === 0) e.preventDefault();
-  }
-
   const slideIndices = Array.from({ length: hi - lo + 1 }, (_, k) => lo + k);
 
   return (
@@ -652,101 +810,47 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       className="flex h-full w-full flex-col items-center justify-center gap-[15px] overflow-hidden pt-[74px]"
     >
       <div
-        style={{ position: "relative", width: "100%", height: SLIDE_HEIGHT }}
+        style={{
+          position: "relative",
+          width: "100%",
+          height: SLIDE_HEIGHT,
+          cursor: isDragging ? "grabbing" : "grab",
+          touchAction: "pan-y",
+        }}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
         onPointerCancel={onPointerUp}
       >
-        {slideIndices.map((absIndex) => {
-          const album = albums[mod(absIndex, albums.length)];
-          const naturalWidth = naturalWidthFor(album.cover);
-          const init = initialFrame.get(absIndex)!;
-          const distance = Math.abs(absIndex - activeIdx);
-          const isActive = distance === 0;
-          const blur = isActive ? 0 : BLUR_BY_DISTANCE[distance] ?? MAX_BLUR;
-          const veilAlpha = isActive ? 0 : VEIL_ALPHA_BY_DISTANCE[distance] ?? MAX_VEIL_ALPHA;
-          const initDrift = driftPxFor(absIndex, activeIdx, naturalWidth, init.width);
-
-          return (
-            <div
-              key={absIndex}
-              ref={(el) => {
-                if (el) frameRefs.current.set(absIndex, el);
-                else frameRefs.current.delete(absIndex);
-              }}
-              className="absolute isolate block select-none overflow-hidden"
-              style={{
-                top: 0,
-                left: 0,
-                width: init.width,
-                height: SLIDE_HEIGHT,
-                maxWidth: "none",
-                transform: `translateX(${init.x}px)`,
-                cursor: isActive ? "pointer" : isDragging ? "grabbing" : "grab",
-                touchAction: "pan-y",
-              }}
-            >
-              {/* The frame is purely a clipping window: its WIDTH is the
-                  only thing that ever animates its own size, revealing
-                  more or less of the image below as its openness rises or
-                  falls — a curtain opening, not a zoom. The image itself
-                  never changes size (no scale/zoom transform anywhere in
-                  this file). Width, position, and drift are written
-                  directly by the physics loop every frame — no CSS
-                  transition on any of them, it would only fight the
-                  loop's own writes. */}
-              <Image
-                ref={(el) => {
-                  if (el) imageRefs.current.set(absIndex, el);
-                  else imageRefs.current.delete(absIndex);
-                }}
-                src={album.cover.src}
-                alt={album.title}
-                width={album.cover.width}
-                height={album.cover.height}
-                style={{
-                  position: "absolute",
-                  top: 0,
-                  width: naturalWidth,
-                  height: SLIDE_HEIGHT,
-                  maxWidth: "none",
-                  objectFit: "cover",
-                  filter: blur ? `blur(${blur}px)` : "none",
-                  transition: IMAGE_FILTER_TRANSITION,
-                  ...imageAnchorFor(directionSnapshot, initDrift),
-                }}
-                sizes={`${naturalWidth}px`}
-                draggable={false}
+        <div ref={rowRef} className="absolute inset-0" style={{ willChange: "transform" }}>
+          {slideIndices.map((absIndex) => {
+            const album = albums[mod(absIndex, albums.length)];
+            const init = initialFrame.get(absIndex)!;
+            const distance = Math.abs(absIndex - activeIdx);
+            const isActive = distance === 0;
+            return (
+              <Slide
+                key={absIndex}
+                absIndex={absIndex}
+                album={album}
+                isActive={isActive}
+                blur={isActive ? 0 : BLUR_BY_DISTANCE[distance] ?? MAX_BLUR}
+                veilAlpha={isActive ? 0 : VEIL_ALPHA_BY_DISTANCE[distance] ?? MAX_VEIL_ALPHA}
                 priority={absIndex === initialActiveIndex}
+                initial={{
+                  width: init.width,
+                  x: init.x,
+                  dir: directionSnapshot,
+                  drift: driftPxFor(absIndex, activeIdx, naturalWidthFor(album.cover), init.width),
+                }}
+                frameRefs={frameRefs}
+                imageRefs={imageRefs}
+                writtenRef={writtenRef}
+                onActiveHover={setIsActiveHovered}
               />
-              {/* Dark veil — a separate overlay, not opacity on the image
-                  (which would wash it toward white instead of dimming it
-                  toward black). */}
-              <div
-                className="pointer-events-none absolute inset-0 bg-black"
-                style={{ opacity: veilAlpha, transition: VEIL_TRANSITION }}
-              />
-              {/* Navigation target: only the active, fully-open slide is
-                  ever a link — a folded sliver has no anchor at all, so
-                  clicking one does nothing (dragging it still works, via
-                  the pointer handlers on the strip's outer container,
-                  which this overlay doesn't intercept since it never
-                  calls stopPropagation). Placed last so it sits above the
-                  image/veil without needing an explicit z-index. */}
-              {isActive && (
-                <Link
-                  href={`/album/${album.slug}`}
-                  onClick={onSlotClick}
-                  onMouseEnter={() => setIsActiveHovered(true)}
-                  onMouseLeave={() => setIsActiveHovered(false)}
-                  className="absolute inset-0 block select-none"
-                  draggable={false}
-                />
-              )}
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       <div className="w-full max-w-4xl px-8 text-[#666]">

@@ -39,10 +39,30 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
     |---|---|---|---|
     | Antes | 1134 ms | 690 ms | 415 ms |
     | Despues | 696 ms | 688 ms | 692 ms |
-- [ ] **T4** · Escrituras solo si cambian y `memo` por diapositiva (CA3, CA4)
+- [x] **T4** · Escrituras solo si cambian y `memo` por diapositiva (CA3, CA4)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: cada diapositiva guarda lo ultimo escrito y no lo reescribe si es igual. La diapositiva pasa a un componente con `React.memo`; un commit re-renderiza solo las dos que cambian de `isActive`. Blur y velo siguen igual en esta tarea
   - Comprobacion: `--geometria` = T2 (±1 px). En reposo, 0 escrituras de estilo por frame. Recalculo de estilo por frame a CPU×4, comparado con T1
+  - **Hecho, con un cambio mas que el plan.** Chrome ya no genera mutacion cuando se escribe el mismo valor (en reposo, produccion da 0 mutaciones en 1 s; script `reposo-mut.mjs`, en el scratchpad). Lo caro era otra cosa: con la tira en marcha, cada diapositiva recibia un `transform` nuevo en cada frame, unas 30. Ahora las diapositivas se colocan en coordenadas de una fila (`computeFrame` con desplazamiento 0), y solo la fila lleva `translateX(-renderOffsetPx)`, con `will-change: transform`. Es la misma suma: `x` es lineal en `renderOffsetPx`.
+    - `Slide` con `memo`. La geometria inicial solo se lee al montar y no entra en la comparacion. Desaparece el estado `renderOffsetSnapshot`.
+    - El cursor `grab`/`grabbing` pasa al contenedor de la tira; la diapositiva abierta sigue con `pointer`, por el enlace.
+    - Cada marco lleva `data-carousel-slide`, que es lo que busca el script de medida.
+  - **Geometria:** `--geometria` frente a T2: **0 px** en los 5 estados.
+  - **Escrituras de `style` por frame, local, CPU×4, mediana de 3** (`2026-10-22_011-t3-local-cpu4.txt` frente a `-t4-cpu4.txt`):
+
+    | | T3 | T4 |
+    |---|---|---|
+    | Trackpad | 30,9 | 12,3 |
+    | Fling fuerte | 36,9 | 23,7 |
+    | Paso y paso atras | 29 | 1,1 |
+
+  - **Estilo por frame: el ruido no deja concluir.** Medido igual (local, CPU×4, mediana de 3):
+    - paso y paso atras: 1,46 → 0,26 ms;
+    - trackpad: 1,19 → 1,15 ms;
+    - con pliegue sube: fling 2,12 → 2,78 ms, rafaga 1,83 → 2,53 ms.
+
+    Quitar `will-change` de la fila lo empeora todo (fling 3,33 ms, trackpad 1,85 ms; `2026-10-22_011-t4-sinwc-cpu4.txt`), y se deja. Entre pasadas casi iguales, la cifra de estilo varia hasta un 50 %. CA3 se juzga en T10, sin blur (T8) y con la contra-escala (T5).
+  - El reposo da 4–6 mutaciones por frame en `div.absolute`, sin cambio de `width` ni de `transform`, en las dos versiones. Viene de la medida: a los 0 ms de reposo de produccion sin script se llega sin el. Causa SIN VERIFICAR.
 - [ ] **T5** · Contra-escala (CA3, CA4, CA7; riesgo 1)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: el marco mide el ancho natural, lleva `scaleX(w / natural)` con `transform-origin` en el borde anclado, y un hijo la escala inversa. La imagen deja de escribir `left`/`right`; el anclaje congelado pasa al origen. `will-change: transform`
