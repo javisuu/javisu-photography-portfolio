@@ -1,0 +1,310 @@
+DIAGNOSTICO 2026-10-22 · feat/010-notas-laterales · 5b88241 · 10 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+ok
+
+=== next dev en :3100 ===
+ok
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x5a4400407600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x5a4400407600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x5a4400407600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x5a4400407600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+  /albums: {"gutter":0,"scrollHeight":900,"vh":900,"photos":29,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F05.jpg&w=750&q=75","dev":0.0019999999999998908}}
+  ok   sin barra de scroll
+  /about: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /album/america: {"gutter":0,"scrollHeight":9663,"vh":900,"photos":10,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F04.jpg&w=1080&q=75","dev":0.001400917949551439},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+  /credits: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+
+=== textos del album ===
+  /album/america: 2 textos, 9 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 6: hueco 106.6 px, arriba 350 px, centro 0 px
+  ok   cita foto 6: sin solaparse y en el lado libre
+  ok   cita foto 6: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 6: no es la primera foto
+      hueco libre 64-557.2 px, desvio del centro 0 px
+  ok   cita foto 6: centrada en el hueco libre
+  ok   cita foto 6: foto entera y sin deformar
+  ok   cita foto 6: alineacion vertical
+  ok   cita foto 6: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+  /album/norte: 3 textos, 8 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 5: hueco 229.1 px, arriba 338 px, centro 0 px
+  ok   cita foto 5: sin solaparse y en el lado libre
+  ok   cita foto 5: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 5: no es la primera foto
+      hueco libre 637.8-1376 px, desvio del centro 0 px
+  ok   cita foto 5: centrada en el hueco libre
+  ok   cita foto 5: foto entera y sin deformar
+  ok   cita foto 5: alineacion vertical
+  ok   cita foto 5: escala de grises
+    cita foto 8: hueco 300.8 px, arriba 338 px, centro 0 px
+  ok   cita foto 8: sin solaparse y en el lado libre
+  ok   cita foto 8: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 8: no es la primera foto
+      hueco libre 494.3-1376 px, desvio del centro 0 px
+  ok   cita foto 8: centrada en el hueco libre
+  ok   cita foto 8: foto entera y sin deformar
+  ok   cita foto 8: alineacion vertical
+  ok   cita foto 8: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+  /album/sol: 3 textos, 7 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    beside foto 2: hueco 96 px, arriba 80 px, centro -222.1 px
+  ok   beside foto 2: sin solaparse y en el lado libre
+  ok   beside foto 2: foto vertical o cuadrada en fila desplazada
+  ok   beside foto 2: no es la primera foto
+  ok   beside foto 2: foto entera y sin deformar
+  ok   beside foto 2: alineacion vertical
+  ok   beside foto 2: escala de grises
+  ok   beside foto 2: firma
+    cita foto 3: hueco 229.1 px, arriba 350 px, centro 0 px
+  ok   cita foto 3: sin solaparse y en el lado libre
+  ok   cita foto 3: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 3: no es la primera foto
+      hueco libre 64-802.3 px, desvio del centro 0 px
+  ok   cita foto 3: centrada en el hueco libre
+  ok   cita foto 3: foto entera y sin deformar
+  ok   cita foto 3: alineacion vertical
+  ok   cita foto 3: escala de grises
+    cita foto 6: hueco 229.1 px, arriba 326 px, centro 0 px
+  ok   cita foto 6: sin solaparse y en el lado libre
+  ok   cita foto 6: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 6: no es la primera foto
+      hueco libre 64-802.3 px, desvio del centro 0 px
+  ok   cita foto 6: centrada en el hueco libre
+  ok   cita foto 6: foto entera y sin deformar
+  ok   cita foto 6: alineacion vertical
+  ok   cita foto 6: escala de grises
+  /album/ny: 1 textos, 7 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+  ok   #photo-2 centra la foto 3, despues del texto
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 1 repeticion · cache vacia en cada una
+  1: inicio 797 · participantes 7 · fase B 1253 · rezagadas 1 · reposo 2003
+     frame del arranque 467 ms · despues: frames >50 ms 2, frame max 50 ms · long tasks 3 (599 ms) · [entrance] start x1
+     al monton: 1019 1103 1103 1103 1153 1219 1253
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        ok
+consola      0 errores en 6 rutas
+invariantes  105 de 105
+entrada      arranque 467 ms · fase B 1253 ms · reposo 2003 ms · frames >50 ms: 2
+
