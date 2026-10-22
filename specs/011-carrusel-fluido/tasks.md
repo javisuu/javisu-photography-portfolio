@@ -100,10 +100,16 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
     | Paso y paso atras | 4,6 px | 4,6 px |
 
   - Los peores saltos que quedan son de diapositivas plegadas del lado no anclado, empujadas por la apertura de la nueva activa mientras otra pareja sigue a medio plegar. Eso lo cambia la cola de T7; `ω` se revisa despues de T7, no antes.
-- [ ] **T7** · Un album de cada vez (CA5, CA9)
+- [x] **T7** · Un album de cada vez (CA5, CA9)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: cola de commits con `MAX_COMMITS_EN_COLA` = 1; un commit espera a que la pareja anterior quede a menos de 0,5 px y la fija exacta; tope suave de `offsetPx` mientras espera; un commit en sentido contrario retarga la misma pareja (plan, parte 3)
   - Comprobacion: 0 frames con 3 o mas diapositivas a medio plegar en todos los escenarios. CA6 sigue cumpliendose, tambien en la tira (riesgo 3). Albumes por fling fuerte y tiempo hasta el reposo, antes (T1) y despues, anotados aqui para CA11
+  - **Hecho; CA5 si, CA6 no.** `MAX_QUEUED_COMMITS` = 1, `outgoingIdxRef` y `pairSettled()`. Mientras espera, la velocidad hacia fuera pierde la fraccion de paso ya pasada, y en el tope (2 pasos) se para. Los numeros salen de `2026-10-22_011-t7-cpu1.txt`, local, mediana de 3.
+  - **Geometria:** frente a T2, **0 px**.
+  - **CA5:** frames con 3 o mas a medio plegar: **0** en los cuatro escenarios (fling fuerte antes: 209). Maximo, 2.
+  - **CA9:** el fling fuerte avanza **8 albumes** (antes 11) y se para a los **658 ms** de la ultima entrada (antes 804).
+  - **CA6, salto max de borde:** fling 13 px, rafaga 25,3, giro brusco 5,6, paso y paso atras 3. Lo que queda es la aceleracion de arranque del propio muelle. Cuando una portada empieza a abrirse, las diapositivas plegadas del lado no anclado pasan de moverse ~4 px por frame a ~30 en tres frames. Es continuo en velocidad, pero la medida de CA6 (frente a la mediana de 6 vecinos) lo cuenta.
+  - **Probado `ω` = 12** (`2026-10-22_011-t7-omega12.txt`), que acaba en unos 780 ms en lugar de 500: fling 7 px, rafaga 11,8, giro 8,7. Tampoco llega, y el fling baja a 5 albumes. Se deja en 18,6. Bajar `ω` hasta cumplir CA6 haria el pliegue claramente mas lento que los "~450 ms" de hoy: es una decision de sensacion, y va a Javi en T11, junto con si 8 px era el umbral correcto para un arranque continuo.
 - [ ] **T8** · Grano sobre negro (decisiones 3 y 8, CA4)
   - Fichero(s): `scripts/generate-grain.mjs` (crear), `public/textures/grano.png` (crear), `src/motion/AlbumsCarousel.tsx`
   - Cambio: textura 256x256 en escala de grises, semilla fija. Fuera `filter: blur()`, su transicion y el velo. Panel negro con el grano dentro del hijo contra-escalado, `pointer-events: none`, `opacity` = `PANEL * (1 - openness)`. En `next dev`, `?panel=100|90` cambia `PANEL`
