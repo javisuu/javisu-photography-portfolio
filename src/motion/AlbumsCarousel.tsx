@@ -43,9 +43,15 @@ const CLICK_DRAG_TOLERANCE_PX = 5;
 // computeFrame's header comment for why that equality is what makes a
 // commit exactly continuous, algebraically, not just empirically.
 const STEP_DISTANCE = S + GAP;
-const FRICTION = 0.92; // per-frame velocity decay (literal per-frame, not time-scaled — matches the spec's "velocity: px/frame")
+// Velocity is in px per REFERENCE frame (1/60 s), and friction/integration
+// are scaled by how many reference frames actually elapsed (spec 011): at
+// 60 Hz the numbers are exactly the per-frame ones these constants were
+// tuned with, and at 30 or 120 Hz the same gesture covers the same distance
+// in the same time instead of running at half or double speed.
+const REFERENCE_FRAME_MS = 1000 / 60;
+const FRICTION = 0.92; // velocity decay per reference frame
 const WHEEL_SENSITIVITY = 0.045; // px/frame of velocity injected per combined wheel-delta px
-const DRAG_SENSITIVITY = 0.7; // px/frame of velocity injected per px of per-frame pointer movement
+const DRAG_SENSITIVITY = 0.7; // px/frame of velocity injected per px of pointer movement since the last frame
 const KEY_KICK_PX = 18; // arrow keys inject a firm one-shot velocity kick, same physics as a flick
 // Rest-position rule: there are exactly two FIXED anchor lines in viewport
 // coordinates, X_RIGHT and X_LEFT (computed once from Wavg, the average
@@ -69,6 +75,17 @@ const KEY_KICK_PX = 18; // arrow keys inject a firm one-shot velocity kick, same
 const OPENNESS_TAU_MS = 450 / 3; // "~450ms to go 0->1" as an exponential time constant — also governs restOffsetPx's ease (see step 5), so layout, width, blur, and veil all resolve on one shared timeline
 const MAX_DT_MS = 100; // clamp a single frame's elapsed time (e.g. after a backgrounded tab) so physics never jumps
 const OPEN_EPSILON_PX = 0.5; // a slide within this of its resting target width (S if inactive, natural width if active) counts as "settled" — see driftRef in the physics loop
+
+// How far one physics step of `frames` reference frames moves, per px/frame
+// of (already decayed) velocity. Plain `frames` (Euler) makes a flick's total
+// travel depend on the frame rate — measured 8–18 px off at 30 and 120 fps
+// on a single arrow key (spec 011, T3). This factor makes the series sum to
+// exactly what one-frame steps give, v*F/(1-F), whatever the step length,
+// and is exactly 1 at 60 Hz.
+function stepDistanceFactor(frames: number) {
+  if (frames <= 0) return 0;
+  return (FRICTION ** (1 - frames) * (1 - FRICTION ** frames)) / (1 - FRICTION);
+}
 
 function clamp(value: number, min: number, max: number) {
   return Math.max(min, Math.min(max, value));
@@ -386,8 +403,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       const dt = Math.min(now - (lastFrameTimeRef.current ?? now), MAX_DT_MS);
       lastFrameTimeRef.current = now;
 
-      // 1. velocity += input; velocity *= friction — per spec, a literal
-      // per-frame update, not scaled by dt (matches "velocity: px/frame").
+      // 1. velocity += input; velocity *= friction, decayed by the number
+      // of reference frames elapsed (see REFERENCE_FRAME_MS). Input is an
+      // impulse — wheel/key events and pointer movement since the last
+      // frame — so it needs no scaling of its own.
+      const frames = dt / REFERENCE_FRAME_MS;
       let input = pendingWheelInputRef.current;
       pendingWheelInputRef.current = 0;
       if (isDraggingRef.current) {
@@ -398,9 +418,10 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         dragLastXRef.current = dragCurrentXRef.current;
       }
       velocityRef.current += input;
-      velocityRef.current *= FRICTION;
+      velocityRef.current *= FRICTION ** frames;
 
-      // 2. offsetPx integrates velocity 1:1, every frame, unconditionally —
+      // 2. offsetPx integrates velocity per reference frame (see
+      // stepDistanceFactor), unconditionally —
       // no rubber-band resistance near any cap, and no easing back toward
       // 0 or anywhere else. Below STEP_DISTANCE the strip just follows
       // wherever the accumulated input left it; once velocity decays to
@@ -409,7 +430,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // from more scroll/drag input or a commit (step 3), and the strip
       // only ever recentres as part of a commit (step 5's restOffsetPx
       // ease toward the absolute target) — never while the user is idle.
-      offsetPxRef.current += velocityRef.current;
+      offsetPxRef.current += velocityRef.current * stepDistanceFactor(frames);
 
       // 3. Crossing STEP_DISTANCE advances activeIdx — a while loop, so a
       // single fast frame can chain through several albums at once with

@@ -26,10 +26,19 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
   - Comprobacion: `medir-carrusel.mjs --url <produccion> --geometria` guarda caja y recorte de cada marco en reposo, al llegar y tras `ArrowRight`, `ArrowRight`, `ArrowLeft`. Salida: `2026-10-2X_011-geometria-antes.json`. Una segunda pasada da 0 px de diferencia con la primera (si no, la medida no sirve como referencia)
   - **Hecho.** `2026-10-22_011-geometria-antes.json` y `.txt`: segunda pasada a **0 px** en los 5 estados. Se anadio un segundo `ArrowLeft`: el primero no llega a cambiar de album (contador 03 → 03), asi que sin el no se comprobaba ningun commit hacia atras.
   - **CA8 ya se cumple hoy, tal como esta escrito.** A 30 y a 120 fps el reposo da 0–0,1 px frente a 60. La fisica por frame recorre la misma distancia en el mismo numero de frames, sea cual sea la frecuencia; lo que cambia es el tiempo. Para que T3 tenga algo que medir, `--geometria` da tambien el tiempo hasta el reposo (`2026-10-22_011-fps-antes.txt`). Con `ArrowLeft 1`, que solo mueve la tira: **694 ms a 60 fps, 344 a 120 y 1402 a 30**. Es decir, a 120 Hz la tira va al doble de velocidad.
-- [ ] **T3** · Fisica por tiempo (CA8)
+- [x] **T3** · Fisica por tiempo (CA8)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: friccion, avance e impulsos escalados por `dt / 16.67` (plan, parte 1). Las constantes no cambian
   - Comprobacion: `--geometria` local a 60 fps = T2 (±1 px); con `--fps 30` y `--fps 120`, la misma diapositiva abierta y el mismo reposo (±1 px). tsc y lint ok
+  - **Hecho.** `velocity *= FRICTION ** frames`, con `frames = dt / REFERENCE_FRAME_MS`. Los impulsos (rueda, tecla, arrastre desde el frame anterior) no se escalan: ya son impulsos.
+  - **Desvio del plan.** El avance `offsetPx += velocity * frames` (Euler) dejaba el reposo a 8,6–18 px del de 60 fps, a 30 fps, y a 4,4–8,7 px a 120. A 30 fps, el segundo `ArrowLeft` acababa incluso en otro album. El avance usa ahora `stepDistanceFactor(frames)`, que hace que la serie sume exactamente lo mismo que con pasos de un frame, sea cual sea la duracion del paso, y vale exactamente 1 a 60 Hz.
+  - Resultado (`2026-10-22_011-t3-fps.txt`, local con `next start`): reposo frente a T2: **0 px a 60 y 30 fps, ≤ 0,2 px a 120**. tsc y lint ok.
+  - Tiempo hasta el reposo con `ArrowLeft 1`, que solo mueve la tira (`2026-10-22_011-fps-antes.txt`, produccion, frente a local):
+
+    | | 30 fps | 60 fps | 120 fps |
+    |---|---|---|---|
+    | Antes | 1134 ms | 690 ms | 415 ms |
+    | Despues | 696 ms | 688 ms | 692 ms |
 - [ ] **T4** · Escrituras solo si cambian y `memo` por diapositiva (CA3, CA4)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: cada diapositiva guarda lo ultimo escrito y no lo reescribe si es igual. La diapositiva pasa a un componente con `React.memo`; un commit re-renderiza solo las dos que cambian de `isActive`. Blur y velo siguen igual en esta tarea
