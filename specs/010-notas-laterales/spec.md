@@ -1,7 +1,7 @@
 # Spec 010 · Textos del album: nota lateral, cita y parrafo entre fotos
 
 - **Estado:** Implementada (2026-10-21). CA1 a CA11 verificados en `tasks.md`
-- **Fecha:** 2026-10-20 · revisada 2026-10-21
+- **Fecha:** 2026-10-20 · revisada 2026-10-21 · enmienda 1, 2026-10-22 (decisiones 3 y 8)
 - **Requiere decision de Javi:** No. No toca el wordmark, el blend, el ciclo de vida de `GLSurface` ni el scroll infinito. Los textos son DOM: `GLSurface` solo copia las `<img>` que recibe en `nodes` (`src/motion/AlbumPhotos.tsx:117-124`)
 
 ## Problema
@@ -37,12 +37,12 @@ Los albumes y fotos sin texto se ven exactamente igual que hoy.
 |---|---|---|
 | 1 | Textos mientras no esten escritos | (c): textos `[PLACEHOLDER]` marcados como tales que solo se pintan en `next dev`; el build de produccion no los pinta |
 | 2 | Firma | `JAVIER SUÁREZ SUQUÍA`, nombre completo, con raya. La lleva siempre el texto largo, en sus dos colocaciones. La cita corta no lleva firma |
-| 3 | Fotos horizontales | Ningun texto lateral (largo o cita) junto a una foto horizontal (`width > height`). Solo verticales y cuadradas |
+| 3 | Fotos horizontales (enmienda 1, 2026-10-22) | Ningun texto lateral (largo o cita) junto a una foto horizontal. Cuenta como horizontal si `width > 1,1 · height`: una foto casi cuadrada (como `america/06`, 2500x2336, 1,07) admite texto. Antes el limite era `width > height` |
 | 4 | Filas centradas (`index % 3 === 0`) | No admiten texto lateral. No se reubican ni cambian la alternancia |
 | 5 | Idioma | El que Javi elija en cada texto. Cada uno lleva su `lang` en el elemento |
 | 6 | Posicion vertical | Texto largo lateral: arriba. Cita: centrada en vertical. Parrafo entre fotos: fila propia, bloque centrado en horizontal |
 | 7 | Cuantos textos largos por album | Como mucho uno (en una de las dos colocaciones) |
-| 8 | Primera y ultima foto (revision, 2026-10-21) | Nunca llevan texto lateral. Que fotos lo llevan lo decide Javi en cada caso. El diagnostico lo comprueba |
+| 8 | Primera y ultima foto (revision, 2026-10-21; enmienda 1, 2026-10-22) | La primera foto nunca lleva texto lateral. La ultima si puede: Javi puso una cita en `norte/08` y la da por buena ("all fine", 2026-10-22). Que fotos lo llevan lo decide Javi en cada caso. El diagnostico lo comprueba |
 | 9 | Posicion horizontal de la cita (revision, 2026-10-21) | Centrada en el hueco libre entero, entre la foto y el borde del contenido del lado contrario: en el tercio central, no pegada a la foto. La nota lateral larga sigue a 96 px de la foto |
 
 Las reglas 3 y 4 no las puede imponer `tsc`, porque dependen de las medidas y del orden de cada foto. Las comprueba el diagnostico (CA4).

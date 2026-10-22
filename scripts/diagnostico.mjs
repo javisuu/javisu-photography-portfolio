@@ -363,6 +363,8 @@ await sbBrowser.close();
 const TEXT_MIN_GAP_PX = 64;
 const SIDE_TOP_MAX_PX = 100;
 const QUOTE_CENTER_MAX_PX = 24;
+// Enmienda 1 de la spec 010: hasta 1,1 de ancho por alto cuenta como cuadrada.
+const NEAR_SQUARE_MAX_RATIO = 1.1;
 const SIGNATURE = "JAVIER SUÁREZ SUQUÍA";
 if (!only || only.startsWith("/album/")) {
   rule("textos del album");
@@ -376,7 +378,7 @@ if (!only || only.startsWith("/album/")) {
   for (const route of albumRoutes) {
     await tp.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
     await tp.waitForTimeout(SETTLE_MS);
-    const m = await tp.evaluate(() => {
+    const m = await tp.evaluate((nearSquare) => {
       const box = (e) => { const r = e.getBoundingClientRect(); return { l: r.left, r: r.right, t: r.top, b: r.bottom, w: r.width, h: r.height }; };
       const grey = (el) => { const c = getComputedStyle(el).color.match(/[\d.]+/g).map(Number); return c[0] === c[1] && c[1] === c[2]; };
       const main = [...document.querySelectorAll("main")].find((el) => getComputedStyle(el).display !== "none");
@@ -403,7 +405,7 @@ if (!only || only.startsWith("/album/")) {
         return {
           kind, lang: t.lang, idx, text: t.innerText, content,
           box: box(t), img: img ? box(img) : null,
-          landscape: img ? img.naturalWidth > img.naturalHeight : null,
+          landscape: img ? img.naturalWidth > nearSquare * img.naturalHeight : null,
           ratioDev: img ? Math.abs(img.getBoundingClientRect().width / img.getBoundingClientRect().height / (img.naturalWidth / img.naturalHeight) - 1) : null,
           prev: prev ? box(prev) : null, next: next ? box(next) : null,
           greys: ps.every(grey) && [...t.querySelectorAll("span[aria-hidden]")].every(greyBg),
@@ -413,7 +415,7 @@ if (!only || only.startsWith("/album/")) {
         };
       });
       return { rows: rows.length, titleCount, texts, vw: innerWidth, vh: innerHeight };
-    }).catch((e) => ({ evalError: e.message }));
+    }, NEAR_SQUARE_MAX_RATIO).catch((e) => ({ evalError: e.message }));
     if (m.evalError) { addInv(route, "textos del album medibles", false, m.evalError); continue; }
     if (remote) {
       const ph = m.texts.filter((t) => t.text.includes("[PLACEHOLDER]")).length;
@@ -444,8 +446,8 @@ if (!only || only.startsWith("/album/")) {
           `solape ${overlap}, hueco ${gap} px, fila ${["centrada", "izquierda", "derecha"][offset]}`);
         addInv(route, `${tag}: foto vertical o cuadrada en fila desplazada`, !t.landscape && offset !== 0,
           `${t.landscape ? "foto horizontal" : "foto vertical"}, fila ${["centrada", "izquierda", "derecha"][offset]}`);
-        addInv(route, `${tag}: ni la primera ni la ultima foto`, t.idx !== 0 && t.idx !== m.rows - 1,
-          `foto ${t.idx + 1} de ${m.rows}`);
+        // Enmienda 1 de la spec 010: la ultima foto si puede llevar texto.
+        addInv(route, `${tag}: no es la primera foto`, t.idx !== 0, `foto ${t.idx + 1} de ${m.rows}`);
         if (t.kind === "cita") {
           // La cita se centra en el hueco libre entero, no pegada a la foto.
           const [fl, fr] = offset === 1 ? [t.img.r, t.content[1]] : [t.content[0], t.img.l];

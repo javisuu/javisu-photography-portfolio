@@ -74,3 +74,12 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - CA10: `git diff main --stat -- src/`
   - **Hecho.** §3 describe las tres piezas, sus reglas y su estilo, con una entrada en el Changelog. `CLAUDE.md` gana una linea en "Architecture rules": donde vive el filtro de placeholders y por que.
   - **CA10:** cambian `src/data/photos.ts`, `src/motion/AlbumPhotos.tsx` y `src/app/album/[slug]/page.tsx`, y se crea `src/components/AlbumTexts.tsx`. `page.tsx` no estaba en la lista de CA10, pero si en la tabla de ficheros del plan: solo pasa `album.text` a `AlbumPhotos`, en una linea.
+
+## Enmienda 1 (2026-10-22)
+
+- [x] **T10** · Textos reales de Javi y reglas 3 y 8 (spec, enmienda 1)
+  - Javi escribio sus textos en `src/data/photos.ts`, pero 7 de 9 seguian con `placeholder: true`: en produccion solo se habrian publicado los parrafos de America y NY. Quitados el flag y los comentarios `// PLACEHOLDER — dev only`.
+  - Erratas corregidas a peticion de Javi: "igualemente", "an drove", "didn't had", "phenomena", "one the many", "may seem as", "colaboration". El nombre "JavierFG" se deja como esta.
+  - Linea base: diagnostico de 103 de 105 (`2026-10-22_diagnostico_010-textos.txt`, en el scratchpad). Fallaban la cita de `norte/08` (ultima foto) y la de `america/06` (2500x2336, horizontal por un 7%).
+  - Decision 8: la ultima foto si admite texto. Decision 3: hasta 1,1 de ancho por alto cuenta como cuadrada (`NEAR_SQUARE_MAX_RATIO`, `scripts/diagnostico.mjs`).
+  - Despues: tsc, lint y build ok · 0 errores en 6 rutas · **105 de 105** (`2026-10-22_diagnostico_010-enmienda1.txt`, en el scratchpad, pendiente de copiar a `evidencia/`). En el HTML de `next build` aparecen 5 citas y 4 textos largos, con 0 apariciones de `PLACEHOLDER`.

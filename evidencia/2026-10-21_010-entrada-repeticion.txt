@@ -1,0 +1,80 @@
+DIAGNOSTICO 2026-10-21 · feat/010-notas-laterales · e510c1a · 8 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x2cbc0041f600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x2cbc0041f600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x2cbc0041f600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x2cbc0041f600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 565 · participantes 7 · fase B 1054 · rezagadas 1 · reposo 1804
+     frame del arranque 300 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 3 (398 ms) · [entrance] start x1
+     al monton: 671 704 721 821 904 937 1054
+  2: inicio 581 · participantes 7 · fase B 1036 · rezagadas 1 · reposo 1786
+     frame del arranque 333 ms · despues: frames >50 ms 1, frame max 50 ms · long tasks 3 (429 ms) · [entrance] start x1
+     al monton: 686 753 753 819 903 953 1036
+  3: inicio 578 · participantes 7 · fase B 1032 · rezagadas 1 · reposo 1766
+     frame del arranque 317 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 3 (398 ms) · [entrance] start x1
+     al monton: 683 733 749 833 899 983 1032
+  fase B      mediana 1036 · max 1054
+  reposo      mediana 1786 · max 1804
+  frames >50 mediana 0 · max 1
+  frame max   mediana 50 · max 50
+  arranque    mediana 317 · max 333
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  11 de 11
+entrada      arranque 317 ms · fase B 1036 ms · reposo 1786 ms · frames >50 ms: 0 (medianas de 3)
+

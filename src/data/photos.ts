@@ -38,7 +38,7 @@ export type Place = {
 
 // Javi's own words alongside an album (spec 010). Text is his — never
 // invent copy. `placeholder: true` marks stand-in text: it renders under
-// `next dev` only and is stripped from production by the album page.
+// `next dev` only and is stripped from production at the end of this file.
 // `lang` is per text (BCP 47, e.g. "es", "en"); omit it to inherit the
 // document's.
 export type AlbumText = {
@@ -47,8 +47,9 @@ export type AlbumText = {
   placeholder?: true;
   // 'beside': in the free side of that photo's row, top-aligned, signed.
   // 'between': its own row after that photo, large serif, signed.
-  // Side text is only allowed next to a portrait or square photo in an
-  // offset row (order 2, 3, 5, 6...) — tsc can't check that, the
+  // Side text is only allowed next to a portrait, square or nearly square
+  // (width ≤ 1.1 × height) photo in an offset row (order 2, 3, 5, 6...),
+  // never the album's first photo — tsc can't check that, the
   // diagnostic's `textos del album` section does.
   placement:
     | { kind: "beside"; photoOrder: number }
@@ -99,6 +100,11 @@ export const albums: Album[] = [
     year: 2026,
     order: 1,
     cover: "/photos/america/05.jpg",
+    text: {
+      body: "Historia de un sueño: mi intercambio en México. A pesar de la escasa selección de fotos que muestro, creo que soy capaz de transmitir la belleza de otra parte del mundo desconocida para muchos.",
+      lang: "es",
+      placement: { kind: "between", afterPhotoOrder: 2 },
+    },
   },
   {
     slug: "norte",
@@ -107,11 +113,9 @@ export const albums: Album[] = [
     year: 2026,
     order: 2,
     cover: "/photos/norte/01.jpg",
-    // PLACEHOLDER — dev only, pending Javi's real text (spec 010)
     text: {
-      body: "[PLACEHOLDER] Parrafo largo del album entre dos fotos. Ocupa el ancho de unas tres o cuatro lineas en grande, lo justo para revisar el tamano, el interlineado y la firma antes de que llegue el texto real.",
+      body: "Lugar donde nací, la cultura en la que vivo e historia que me ha formado. Es quizás el álbum más puro de todos, formado por fotos de los lugares que siempre visito cada año: San Sebastián, Galicia y el sur de Francia.",
       lang: "es",
-      placeholder: true,
       placement: { kind: "between", afterPhotoOrder: 2 },
     },
   },
@@ -122,11 +126,9 @@ export const albums: Album[] = [
     year: 2026,
     order: 3,
     cover: "/photos/sol/07.jpg",
-    // PLACEHOLDER — dev only, pending Javi's real text (spec 010)
     text: {
-      body: "[PLACEHOLDER] Nota lateral larga junto a una de las primeras fotos del album. Tiene unas cinco lineas a este ancho, como la de la captura de referencia, para revisar la medida, el gris, la separacion con la foto y la firma que va debajo.",
+      body: "Fotos de un mismo verano. No me cansaré de ver cada atardecer, a pesar de ser distintamente iguales resultan igualmente distintos. Puedo afirmar que no hay cosa más impresionante que un eclipse en pleno verano.",
       lang: "es",
-      placeholder: true,
       placement: { kind: "beside", photoOrder: 2 },
     },
   },
@@ -139,6 +141,11 @@ export const albums: Album[] = [
     // the first (getNextAlbum wraps via modulo), closing the loop.
     order: 4,
     cover: "/photos/ny/01.jpg",
+    text: {
+      body: "My expectation was really high, the realization of that expectation was even higher. What a city! This album is a collaboration with my friend JavierFG who took part of the photos with his camera.",
+      lang: "en",
+      placement: { kind: "between", afterPhotoOrder: 2 },
+    },
   },
 ];
 
@@ -211,6 +218,7 @@ export const photos: Photo[] = [
     place: { city: "Puerto Escondido", country: "México", lat: null, lng: null, precision: "city" },
     isFeatured: true,
     id: "cowboy-silhouette",
+    quote: { text: "Una tarde en caballo con amigos. La mayoría son sacadas en movimiento encima de Orión.", lang: "es" },
   },
   {
     src: "/photos/america/07.jpg",
@@ -302,8 +310,7 @@ export const photos: Photo[] = [
     order: 5,
     capture: { focalLength: "128mm", aperture: "f/6.3", iso: "ISO 160" },
     place: { city: "San Sebastián", country: "España", lat: 43.32655454035025, lng: -1.9866726889973427, precision: "exact" },
-    // PLACEHOLDER — dev only, pending Javi's real text (spec 010)
-    quote: { text: "[PLACEHOLDER] Una cita corta, de dos lineas.", lang: "es", placeholder: true },
+    quote: { text: "Most of the photos were taken on the same afternoon. This one may seem the simplest, however, it is one of my favourite ones.", lang: "en" },
   },
   {
     src: "/photos/norte/06.jpg",
@@ -336,6 +343,7 @@ export const photos: Photo[] = [
     order: 8,
     capture: { focalLength: "12mm", aperture: "f/4.5", iso: "ISO 100" },
     place: { city: "Santiago de Compostela", country: "España", lat: 42.87832948515055,lng: -8.543791924004069, precision: "exact" },
+    quote: { text: "This simple church is one of the many that compose the city's soul. But for me it represents part of my childhood.", lang: "en" },
   },
   {
     src: "/photos/ny/01.jpg",
@@ -442,8 +450,7 @@ export const photos: Photo[] = [
     place: { city: "San Sebastián", country: "España", lat: 43.326681795284905,lng: -1.9871325760639986, precision: "exact" },
     isFeatured: true,
     id: "red-sun-boat",
-    // PLACEHOLDER — dev only, pending Javi's real text (spec 010)
-    quote: { text: "[PLACEHOLDER] Una cita corta, de dos lineas.", lang: "es", placeholder: true },
+    quote: { text: "If I could define what makes my photos special, it would be the zoom effect", lang: "en" },
   },
   {
     src: "/photos/sol/04.jpg",
@@ -476,6 +483,7 @@ export const photos: Photo[] = [
     order: 6,
     capture: { focalLength: "94mm", aperture: "f/6.3", iso: "ISO 800" },
     place: { city: "Villaquirán de la puebla", country: "España", lat: 42.27533681781175, lng:-4.104323261215063, precision: "exact" },
+    quote: { text: "We took our car and drove to Burgos to see this incredible phenomenon. My camera didn't have a filter, so I used the eclipse glasses to take the picture.", lang: "en" },
   },
   {
     src: "/photos/sol/07.jpg",
