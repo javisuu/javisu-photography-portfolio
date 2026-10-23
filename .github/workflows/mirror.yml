@@ -38,9 +38,12 @@ jobs:
           # Fail loudly rather than publish anything that slipped through.
           # Only main's history: the other refs the checkout fetched are left
           # unfiltered by --refs main, and are never pushed.
+          # The only images allowed through are generated ones, not
+          # photographs, each named exactly: the atlas land mask and the
+          # carousel's grain tile (scripts/generate-grain.mjs, spec 011).
           if git log main --name-only --pretty=format: \
               | grep -iE '\.(avif|webp|jpe?g|png|tiff?|heic|gif)$' \
-              | grep -v '^public/atlas/land-mask\.png$'; then
+              | grep -v -e '^public/atlas/land-mask\.png$' -e '^public/textures/grano\.png$'; then
             echo "::error::image files remain in the filtered history"
             exit 1
           fi

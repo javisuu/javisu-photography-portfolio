@@ -251,3 +251,14 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
 - [x] **T18** · Documentacion: design spec §2 (scroll libre y estela; fuera "one album at a time") y `CLAUDE.md`
   - **Hecho.** En §2, "One album at a time" pasa a "Free scrolling with a trail", con las tres constantes. En el Changelog, la entrada de la spec 011 recoge la enmienda. `CLAUDE.md`, build order, carrusel: "free scrolling with a speed-driven trail".
   - De paso: la frase "Below that distance the strip simply follows the input…" habia quedado, en T12, al final del punto "Fold timing". Vuelve a "Commit is position-triggered".
+
+## Enmienda 2 (2026-10-23): el espejo publico
+
+- [x] **T19** · Excepcion para la textura en la comprobacion del espejo
+  - **Causa:** el push de la spec 011 hizo fallar el workflow `mirror`. Tras quitar las fotos, su comprobacion final rechaza cualquier imagen de la historia salvo `public/atlas/land-mask.png`, y `public/textures/grano.png` (T8) no estaba en la excepcion. Reproducido en local: es el unico fichero que queda. No se publico nada: la comprobacion para antes del push al espejo.
+  - **Arreglo, aprobado por Javi:** "yes, fix the mirror". `.github/workflows/mirror.yml` exceptua `^public/textures/grano\.png$` exacto, no la carpeta, para que cualquier otra imagen que llegue a `public/textures/` siga parando el espejo. Sin `--force`; nada mas cambia.
+  - **Comprobacion local:**
+    - el filtro nuevo sobre la historia de `main` no deja ningun fichero;
+    - con `grano.png`, `textures/otra.png`, `land-mask.png` y `src/foto.jpg` de entrada, deja pasar solo `otra.png` y `foto.jpg`;
+    - el YAML se lee bien.
+  - **Pendiente:** tras el push, el run del workflow en verde y el commit en el espejo. Lo comprueba Javi en GitHub Actions; aqui no hay `gh`.

@@ -1,6 +1,6 @@
 # Spec 011 · Carrusel fluido
 
-- **Estado:** Implementada (2026-10-23, en produccion desde `f662c7d`). Enmienda 2, el espejo, pendiente
+- **Estado:** Implementada (2026-10-23, en produccion desde `f662c7d`). Enmienda 2, el espejo: arreglada, pendiente del run tras el push
 - **Fecha:** 2026-10-22 · revisada 2026-10-22 con las respuestas de Javi
 - **Requiere decision de Javi:** No por zona: no toca el wordmark, el blend, el ciclo de vida de `GLSurface` ni el scroll infinito del landing. El carrusel tiene su propio bucle (`docs/design-spec-v2.md` §2) y no usa `GLSurface` (`CLAUDE.md`, "Architecture rules"). Si cambia dos puntos del diseno de §2, ya decididos por Javi: ver "Decisiones" y "Choca con el spec"
 
