@@ -34,13 +34,19 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     | Borde de la abierta en reposo frente a su linea | −2,1 px | −55,1 px | −19,1 px |
 
     CA1 decia "10 cambios y 11 que pasan de la mitad", del script del scratchpad; el script del repo da 11 y 12 en el mismo fling. CA2, CA3 y CA3b se juzgan sobre todo en "trackpad real", el unico que pasa del umbral.
-- [ ] **T2** · Estado rapido/lento y destino de la activa (CA2, CA3)
+- [x] **T2** · Estado rapido/lento y destino de la activa (CA2, CA3)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: `OPEN_SPEED` = 20 con histeresis a 16. La activa apunta a 0 mientras la tira va rapida y a 1 cuando va lenta. La estela, sin cambios (plan, partes 1 y 2)
   - Comprobacion:
     - CA2: ninguna pasa de la mitad por encima del umbral;
     - CA3: la apertura empieza en menos de 100 ms desde el cruce;
     - CA4 y CA5: reposo ±1 px a 60, 30 y 120 fps;
+    - tsc y lint ok.
+  - **Hecho.** `isFastRef` se actualiza justo despues de la friccion (paso 1); el destino de la activa es `!isFastRef.current ? 1 : 0` (paso 4). Local, `next start`, mediana de 3 (`2026-10-23_012-t2-cpu1.txt` y `-t2-geometria.txt`, scratchpad):
+    - **CA2, trackpad real:** 4 diapositivas pasan de la mitad, **0 con la tira a mas de 20 px/frame** (linea base: 10, 5 por encima). Fling fuerte y rafaga sin cambios (12 y 5): no llegan al umbral.
+    - **CA3, pendiente de T3:** al cruzar, la tira aun lleva inercia y hace un cambio de album mas (+1 a 167 ms), asi que la que queda abierta empieza a abrirse con ese commit. Es lo que resuelve el encaje.
+    - **CA4 y CA5:** reposo ok frente a la referencia de la 011, diferencia max 0,1 px a 60 fps, 0 a 30 y 0,3 a 120.
+    - CA5 de la 011 (nada por delante cambia de ancho): 0 frames. 0 frames >50 ms y 0 errores de consola.
     - tsc y lint ok.
 - [ ] **T3** · Encaje tras un scroll rapido (CA3b)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`

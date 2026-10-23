@@ -96,6 +96,16 @@ const SPRING_OMEGA = 18.6; // rad/s
 const TRAIL_MAX_PX = 180;
 const TRAIL_DECAY = 0.6;
 const TRAIL_FULL_SPEED = 30; // px per reference frame
+// Open on slowing down (spec 012, from cynx.io): while the strip moves
+// faster than OPEN_SPEED no slide opens — the active one targets 0 like
+// the rest, and only the trail keeps intermediate widths. Once it slows
+// below SLOW_SPEED the active one opens on its spring. The gap between the
+// two keeps a trackpad hovering around the threshold from opening and
+// folding the active slide every few frames. In px per reference frame,
+// like velocity, so it holds at any frame rate. A single arrow key
+// (KEY_KICK_PX) stays below OPEN_SPEED and opens as before.
+const OPEN_SPEED = 20;
+const SLOW_SPEED = OPEN_SPEED * 0.8;
 const MAX_DT_MS = 100; // clamp a single frame's elapsed time (e.g. after a backgrounded tab) so physics never jumps
 const OPEN_EPSILON_PX = 0.5; // a slide within this of its resting target width (S if inactive, natural width if active) counts as "settled" — see driftRef in the physics loop
 
@@ -516,6 +526,8 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const restOffsetPxRef = useRef(0);
   const restOffsetVelocityRef = useRef(0);
   const velocityRef = useRef(0);
+  // Whether the strip is above OPEN_SPEED (spec 012), with hysteresis.
+  const isFastRef = useRef(false);
   const activeIdxRef = useRef(activeIdx);
   // Which edge is currently hinged — updated ONLY at an actual commit
   // (inside the while loop below), never from the live sign of velocity.
@@ -652,6 +664,9 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       }
       velocityRef.current += input;
       velocityRef.current *= FRICTION ** frames;
+      const speed = Math.abs(velocityRef.current);
+      if (speed > OPEN_SPEED) isFastRef.current = true;
+      else if (speed < SLOW_SPEED) isFastRef.current = false;
 
       // 2. offsetPx integrates velocity per reference frame (see
       // stepDistanceFactor), unconditionally —
@@ -705,8 +720,9 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         imageAnchorDirRef.current.set(activeIdxRef.current, travelDirRef.current);
       }
 
-      // 4. Openness targets: the active slide always targets 1 and unfolds
-      // toward fully open on its own spring (see SPRING_OMEGA); the slides
+      // 4. Openness targets: the active slide targets 1 and unfolds toward
+      // fully open on its own spring (see SPRING_OMEGA), unless the strip
+      // is fast (see OPEN_SPEED), when it targets 0 like the rest; the slides
       // just passed target the trail (see TRAIL_MAX_PX), which follows the
       // strip's speed; every other slide targets 0. A commit swaps which
       // slide is targeting 1, and each spring carries its current velocity
@@ -718,7 +734,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       const frameHi = activeIdxRef.current + sps;
       const trailSpeed = clamp(Math.abs(velocityRef.current) / TRAIL_FULL_SPEED, 0, 1);
       for (let absIndex = frameLo; absIndex <= frameHi; absIndex++) {
-        let target = absIndex === activeIdxRef.current ? 1 : 0;
+        let target = absIndex === activeIdxRef.current && !isFastRef.current ? 1 : 0;
         // Positions behind the active one, on the side already passed.
         const behind = (activeIdxRef.current - absIndex) * travelDirRef.current;
         if (behind >= 1 && trailSpeed > 0) {
