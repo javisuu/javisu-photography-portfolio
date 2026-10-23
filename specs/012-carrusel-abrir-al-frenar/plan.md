@@ -100,3 +100,94 @@ Mientras encaja hacia la siguiente, la activa todavia es la anterior, y no se ab
 | Lo mismo contra produccion, tras el push | CA2, CA3, CA3b | `evidencia/2026-10-2X_012-produccion.txt` |
 
 El agente no puede escribir en `evidencia/` (`.claude/settings.json:27`). Las salidas van al scratchpad y Javi las copia con los `cp` que le de el agente.
+
+## Enmienda 1: plan
+
+- **Spec:** `spec.md`, enmienda 1 (aprobada por Javi el 2026-10-23). Plan **pendiente de aprobacion**
+
+Todo sigue en `src/motion/AlbumsCarousel.tsx`. Cambian la geometria (`computeFrame`), el commit, los destinos de apertura y el encaje. No cambian el pintado (contra-escala, grano, deriva), la fisica por tiempo, el muelle ni la estela.
+
+### 1. Geometria centrada, sin sentido (decision 11, CA4, CA9)
+
+- **La posicion de la tira** es `p = activeIdx · STEP + offsetPx`, continua: un commit solo cambia el reparto entre los dos sumandos, no `p`.
+- **El centro de cada diapositiva** `i`, con `e_j` = ancho extra de `j` (ancho − 110):
+
+  `centro_i = 720 + (i · STEP − p) + ½ · (suma de e_j a su izquierda − suma de e_j a su derecha)`
+
+  Cada diapositiva que se abre empuja a las de su izquierda medio ancho extra hacia la izquierda, y a las de su derecha medio hacia la derecha. Los huecos quedan en 32 px.
+- **Con una sola abierta y `p` en su sitio,** esa queda centrada en 720 y las demas a paso fijo a los lados.
+- **No depende ni del sentido ni de cual es la activa.** Asi que:
+  - un commit no mueve nada;
+  - un cambio de sentido no necesita correccion;
+  - volver atras da los mismos frames al reves.
+- **Desaparecen** `restOffsetPx`, su muelle y su salto al cambiar de sentido (`:776`, `:881`), y `anchorRestOffsetPx`/`averageNaturalWidth` (las lineas X_RIGHT/X_LEFT).
+- **La fila** (`rowRef`) sigue llevando `offsetPx`, y las diapositivas van en coordenadas relativas a la activa. Cada commit reescribe una vez la posicion de cada una, como hoy.
+- **Con portadas de ancho distinto,** durante un cambio las de fuera de la pareja se deslizan la mitad de la diferencia hacia cada lado, siguiendo el muelle. Nunca de golpe.
+
+### 2. Commit a medio paso, en los dos sentidos (decisiones 7 y 8, CA2, CA3)
+
+- **El commit salta cuando `|offsetPx|` pasa de `STEP/2`** (71 px), hacia cualquier lado, en lugar de `STEP`.
+  - La activa es siempre la mas cercana a `p`, y la abierta queda a menos de medio paso del centro.
+  - El `while` se queda: una tira rapida encadena varios commits en un frame.
+- **`travelDir` deja de afectar a la geometria.** Sigue diciendo de que lado va la estela (`behind`) y que borde fija la imagen (`imageAnchorDirRef`), y se actualiza en cada commit con su signo, como hoy.
+- **Sin histeresis en el umbral,** como cynx. Un trackpad que tiembla justo en 71 px cambia y vuelve, pero los muelles lo convierten en un vaiven pequeno, no en un salto. Si molesta en la revision, se anade un margen.
+- **Decision 8 sale sola:** al saltar hacia delante, la que llega tiene su borde entre 868,5 y 1014,5 px (calculado: 720 − 71 + ancho/2 + 32).
+
+### 3. Apertura con la velocidad (decision 9, CA10)
+
+- **Desaparece el estado rapido/lento de T2 para abrir** (`isFastRef` en el destino de la activa).
+- **La activa apunta a `amp(v)`:**
+  - 1 por debajo de 16 px/frame;
+  - 0,2 a 30 px/frame o mas;
+  - lineal entre los dos.
+
+  Con cambios seguidos, cada muelle sale hacia su destino y el siguiente commit lo devuelve: esa es la "pelea".
+- **La estela,** sin cambios (011, enmienda 1).
+- **Pregunta para Javi:** CA10 dice "ninguna diapositiva pasa del 20 %". La estela de la 011 llega a 180 px de ancho extra a 30 px/frame (`TRAIL_MAX_PX`): un 68 % en una portada de 375. Tu nota (`[\|\|][\|\|\|][\|\|\|]`) parece justo esa estela. Propuesta: **el 20 % es para la que se abre; la estela sigue como la aprobaste en la 011.** CA10 se lee asi.
+
+### 4. Encaje (decision 10, CA3b)
+
+- **Se queda lo de T3:**
+  - el disparo al bajar de 16 px/frame despues de pasar de 20 (`wasFastRef`);
+  - el muelle de `offsetPx` hacia `(snapIdx − activeIdx) · STEP`;
+  - la regla de la cola de inercia (`SNAP_RESUME_PX`, `SNAP_RELEASE_PX`).
+- **Cambia la eleccion del album.** Con el commit a medio paso, el mas cercano a la posicion actual es siempre la activa. Encajar ahi tiraria de la tira hacia atras con ella todavia en marcha a 16 px/frame (184 px de inercia).
+  - Propuesta: el mas cercano a **donde pararia la friccion**, `p + v · F/(1 − F)`, limitado a la activa o la siguiente en el sentido de la velocidad, nunca la anterior.
+  - Es "el mas cercano" medido donde iba a acabar, no donde esta.
+- **Sobra la regla de T3** "la activa no se abre hasta llegar a `snapIdx`". Existia para no romper la continuidad del commit a paso entero, y con la geometria centrada un commit no mueve nada.
+- **Teclas.** Una flecha ya no inyecta velocidad (`KEY_KICK_PX` desaparece): pone `snapIdx = (snapIdx ?? activa) ± 1` y arranca el encaje con la velocidad que haya. Varias pulsaciones seguidas se encadenan, y la tecla llega exacta.
+  - La regla de la cola sigue igual: una tecla durante un encaje lo redirige, no lo cancela.
+- **Tras un scroll lento, no hay encaje:** la tira reposa donde la deja la friccion, a menos de 71 px del centro.
+
+### 5. Medida (CA2, CA3, CA3b, CA4, CA9, CA10)
+
+`scripts/medir-carrusel.mjs` gana:
+- **Escenario "lento ida y vuelta":** 60 eventos de 4 px cada 40 ms, pausa de 2,5 s y vuelta, como el filmado en cynx.
+- **Por cada cambio de album:**
+  - el centro de la abierta frente a 720 en el frame anterior al commit (CA2);
+  - el borde de entrada de la que llega en el primer frame en que pasa de 110,5 px (CA3).
+- **Encaje (CA3b):** el centro de la abierta frente a 720 en reposo. La linea del borde de T1 se sustituye por el centro.
+- **Tope (CA10):** apertura maxima de la que se abre en los frames a 30 px/frame o mas.
+- **Geometria (CA4):** referencia nueva `2026-10-2X_012-geometria-centrada.json`, a 60 fps. Despues se compara contra ella a 30 y 120 fps.
+- **CA9:** el "salto max de borde" de hoy, en todos los escenarios.
+
+### Ficheros
+
+| Fichero | Accion | Que cambia |
+|---|---|---|
+| `src/motion/AlbumsCarousel.tsx` | modificar | `computeFrame` centrado; commit a medio paso; fuera `restOffsetPx`, `anchorRestOffsetPx`, `KEY_KICK_PX` y el destino de T2; `amp(v)`; eleccion del encaje y teclas |
+| `scripts/medir-carrusel.mjs` | modificar | Escenario lento de ida y vuelta, umbral, borde de entrada, encaje por el centro, tope |
+| `docs/design-spec-v2.md`, `CLAUDE.md` | modificar (T6) | §2: abierta centrada, umbral a medio paso, encaje tras scroll rapido, teclas exactas |
+
+### Riesgos
+
+| Riesgo | Probabilidad | Impacto | Mitigacion |
+|---|---|---|---|
+| El borde fijado de la imagen (`pinnedOriginFor`, segun `travelDir`) ya no casa con una geometria centrada: la imagen se revela por un lado mientras el marco crece por los dos | Media | Medio | En la pareja, la vieja conserva casi su borde exterior y la nueva el suyo (con anchos iguales, exacto, como cynx), asi que el borde fijado sigue siendo el exterior. Se mira en la revision; si hace falta, el origen pasa a seguir el borde que menos se mueve |
+| Vaiven en el umbral con un trackpad que tiembla | Media | Bajo | Muelles; margen de histeresis si Javi lo pide |
+| El reposo deja de ser el de hoy | Segura | Medio | Es lo decidido (decision 11). CA4 con referencia nueva |
+| La pagina de album o la transicion futura dependen de X_RIGHT/X_LEFT | Baja | Medio | Solo `computeFrame` y el render inicial (`:631-641`) los usan |
+
+### Vuelta atras
+
+Un commit por pieza en `feat/012-carrusel-abrir-al-frenar`. Lo de antes de la enmienda queda en `efad305`.

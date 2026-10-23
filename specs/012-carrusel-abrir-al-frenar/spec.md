@@ -1,6 +1,6 @@
 # Spec 012 · Carrusel: abrir al frenar
 
-- **Estado:** Aprobada por Javi el 2026-10-23
+- **Estado:** Aprobada por Javi el 2026-10-23. T1 a T4 hechos (`efad305`). **Enmienda 1 aprobada** el mismo dia (revision de Javi, T5); su plan, pendiente
 - **Fecha:** 2026-10-23 · revisada el mismo dia con las respuestas de Javi
 - **Requiere decision de Javi:** Si (choca con el spec: §2 dice que el commit no depende de la velocidad; ver "Choca con el spec"). No toca ninguna de las cuatro zonas que han roto el sitio: el carrusel tiene su propio bucle y no usa `GLSurface` (`CLAUDE.md`, "Architecture rules")
 
@@ -97,3 +97,92 @@ Ninguna. Las seis se cerraron el 2026-10-23 (ver "Decisiones"). Se dejan tal com
 4. **Titulo y contador.** Mientras se va rapido, ¿se actualizan en cada album que pasa, como hoy, o solo al abrirse el final?
 5. **Reduced motion.** ¿Se mantiene tambien aqui el pliegue con `prefers-reduced-motion`, como decidiste en la 011?
 6. **Numeracion.** Esta spec toma el 012, que estaba reservado para la pagina de album que se ve en blanco al principio. Esa pasa a la 013, salvo que prefieras otro orden.
+
+## Enmienda 1 (2026-10-23): umbral a medio paso y abierta centrada
+
+- **Estado:** aprobada por Javi el 2026-10-23
+
+### Que vio Javi en la revision (T5)
+
+Probado en `npm run dev` con su trackpad, codigo de `efad305`. Tres cosas:
+
+1. **"La idea es intentar abrir cada imagen."** Hoy una se abre y la anterior se cierra solo en el commit. En cynx, al frenar, la que llega empieza a abrirse como si fuera a abrirse entera, hasta que pasa un limite y la que queda abierta del todo es la siguiente: "una pelea armonica de plegar y desplegar, no tan rigida como ahora".
+2. **Donde empieza a abrirse.** Aqui, a toda velocidad, practicamente en el centro. En cynx, mas hacia el lado por el que entra: `[_ X _ _]` con el carrusel moviendose de izquierda a derecha, y `[_ _ X _]` en el otro sentido.
+3. **El salto.** Al cambiar de sentido no deberia haber salto: la ultima se pliega y la otra se despliega ocupando el sitio libre. De `[ A A B B ]` a `[ A B B C ]`, nada implica un salto.
+
+Y despues: cynx "tiene el mismo problema". Lo resuelve con un umbral: a muy poca velocidad el carrusel se mueve, pero pasado el umbral la imagen se pliega de golpe. "Eso hace el borde mas flexible en los dos sentidos."
+
+### Lo que hace cynx, medido
+
+Filmado el 2026-10-23 con GPU real, a unos 29 frames por segundo: scroll muy lento hacia delante (60 eventos de 4 px cada 40 ms), pausa de 2,5 s y vuelta atras igual. En el scratchpad: frames en `cynx-lento/`, anchos por frame en `cynx-lento/anchos.json` y hoja de contacto `cynx-lento-hoja.jpg`. Scripts `cynx-lento.mjs` y `cynx-anchos.py`. Paso de cynx: plegada 105 + hueco 24 = 129 px.
+
+- **La abierta reposa centrada:** 380–1059 px, centro en 719,5 de 1440 (`cynx/cynx-00-reposo.jpg`, 2026-10-22).
+- **A muy poca velocidad no se abre nada poco a poco.** La tira entera se desliza con la abierta abierta del todo, unos 62 px en 3,9 s.
+- **Umbral simetrico, a medio paso** (64,5 px).
+  - Hacia delante, el cambio salta cuando el centro de la abierta se ha separado del centro de la pantalla unos 62–66 px.
+  - Tras la pausa, reposo a −25 px. Al volver, salta a unos +62, a la misma distancia del otro lado.
+- **El cambio es una animacion, no va por posicion.** La vieja se pliega y la nueva se despliega en unos 0,6 s: 441 y 300 px a los 4,1 s, la vieja a 117 px a los 4,7 s.
+- **Sin salto.**
+  - Durante el cambio, las de los dos lados solo se mueven con la tira: izquierda 190 → 185 px, derecha 1150 → 1146.
+  - La vieja conserva su borde exterior y la nueva el suyo, asi que la nueva ocupa exactamente el sitio que deja la vieja.
+  - En cynx todas las portadas miden lo mismo.
+- **Sin encaje tras un scroll lento:** durante la pausa se quedo a −25 px.
+
+### Lo que hay en el codigo detras de cada punto
+
+- **1 y 2.**
+  - **El commit es a un paso entero (142 px) y en un solo sentido** (`src/motion/AlbumsCarousel.tsx`, paso 3 del bucle).
+  - La siguiente no se abre antes (plan, "Por que no se abre la siguiente antes de llegar a ella"). Cuando se abre, ya esta casi en el centro.
+  - Ademas, T2 no deja que la activa se abra con la tira rapida, y eso quita la "pelea".
+- **3. El reposo depende del sentido.**
+  - Hacia delante se fija el borde derecho de la abierta en `centro + Wavg/2` = 980,5 px; hacia atras, el izquierdo en `centro − Wavg/2` = 459,5 (`:245-251`, `2026-10-22_011-geometria-antes.json`).
+  - Una portada de 667 px reposa en 313,5–980,5 o en 459,5–1126,5 segun de donde venga: 146 px de diferencia.
+  - Cada cambio de sentido lo corrige con un salto de `restOffsetPx`, que luego se relaja con el muelle (`:776`). Es el salto que ve Javi, y el "salto max de borde" de la medida: fling fuerte 23,2 px (`2026-10-23_012-t3-cpu1.txt`). CA6 de la 011 pedia 8; Javi lo acepto sin cumplirse.
+
+### Decisiones nuevas (Javi, 2026-10-23)
+
+| # | Pregunta | Decision |
+|---|---|---|
+| 7 | Cuando cambia la abierta (sustituye el commit a un paso entero) | **Umbral a medio paso, en los dos sentidos, como cynx.** La abierta puede separarse del centro hasta medio paso (71 px) hacia cualquier lado. Pasado ese punto, la vieja se pliega y la siguiente se despliega con el muelle de hoy, no por posicion. Con cambios seguidos, los muelles se solapan: esa es la "pelea" |
+| 8 | Donde empieza a abrirse | **En el lado por el que entra.** Sale solo de la 7: al saltar el umbral hacia delante, el borde de la que llega esta entre 868,5 y 1014,5 px segun el ancho de la abierta (centro 720 − 71 + ancho/2 + hueco 32, con anchos de 375 a 667), en el tercer cuarto (`[_ _ X _]`). Hacia atras, el espejo |
+| 9 | Con velocidad (sustituye el umbral 20/16 de las decisiones 1 y 2) | **Se funde en tiras, sin umbral.** Lo que se abre baja poco a poco con la velocidad, pero no a cero. A 30 px/frame o mas, como mucho un 20 % del ancho extra (una portada de 375 px llega a unos 163, frente a 110 plegada); por debajo de 16 px/frame, del todo. Nota de Javi, a toda velocidad de derecha a izquierda: `[\|\|][\|\|\|][\|\|\|][\|][\|]`. La que se abre lo intenta, pero llega la siguiente y la anterior se cierra; por eso las tiras de la zona de apertura se ven mas anchas que las plegadas. Las que han quedado mas lejos hacia el lado ya recorrido estan mas plegadas: la estela |
+| 10 | Encaje (sustituye la 3) | **Solo tras un scroll rapido**, al album mas cercano y nunca al anterior, como en T3. Tras un scroll lento no hay encaje: la tira reposa donde se deja, con la abierta a menos de medio paso del centro. Una tecla lleva exactamente al album siguiente, centrado |
+| 11 | Donde reposa la abierta | **Centrada en la pantalla**, sea cual sea su ancho y venga de donde venga, como cynx. La posicion de cada diapositiva depende solo de la posicion de la tira y de cuanto esta abierta cada una, nunca del sentido ni de cual es la activa. Asi un cambio de sentido no necesita correccion, y no hay salto |
+
+**Consecuencias:**
+- **Las portadas no miden lo mismo:** de 375 a 667 px, y en cynx todas igual. Durante un cambio, las de fuera de la pareja se deslizan poco a poco la mitad de la diferencia de ancho hacia cada lado, nunca de golpe.
+- **El reposo cambia:** una portada de 667 px pasa de 313,5–980,5 a 386,5–1053,5, y una de 375, de 605,5–980,5 a 532,5–907,5. CA4 necesita una referencia nueva.
+- **Una tecla** hoy deja 65 px de sobra (T3). Con la decision 10 llega exactamente.
+- **El arrastre:** mientras el dedo esta puesto no hay encaje.
+- **Reduced motion** sigue con el pliegue (decision 5).
+
+### Choca con el spec
+
+- **§2 de `docs/design-spec-v2.md`:**
+  - las lineas fijas X_RIGHT/X_LEFT y el borde anclado segun el sentido pasan a la abierta centrada;
+  - "Commit is position-triggered" sigue valiendo, pero a medio paso y en los dos sentidos;
+  - "no snap-back" se mantiene tras un scroll lento, no tras uno rapido (como en T3).
+- **Spec 011, CA5:** "nada por delante de la que se abre cambia de ancho" sigue valiendo, porque solo cambian de ancho la pareja y la estela. Pero durante un cambio, las de fuera de la pareja ya no estan quietas: se deslizan la mitad de la diferencia de ancho.
+- **Objetivo de la 012 ("en reposo, exactamente como hoy") y CA4:** el reposo pasa a centrado.
+
+### Criterios que cambian
+
+Mismas condiciones que los de arriba. Los que no salen aqui se mantienen: CA6 (fluidez y coste), CA7 (diagnostico) y CA8 (revision de Javi). El script gana un escenario lento de ida y vuelta, como el filmado en cynx.
+
+| # | Comando | Resultado esperado |
+|---|---|---|
+| CA2 (sustituye) | `node scripts/medir-carrusel.mjs`, escenario lento de ida y vuelta | La abierta cambia cuando su centro se separa del centro de la pantalla medio paso (71 px, ±3), hacia delante y hacia atras; nunca antes |
+| CA3 (sustituye) | Igual, primer frame en que la que llega pasa de 110,5 px | Su borde de entrada esta en el tercer cuarto hacia delante (720–1080 px) y en el segundo hacia atras (360–720) |
+| CA3b (sustituye) | `node scripts/medir-carrusel.mjs`, "trackpad real" y "con inercia" | Tras un scroll rapido: una sola abierta, centrada ±1 px, y las demas a 110 ± 0,5 px. Album final igual al del cruce o el siguiente, nunca el anterior. Tras un scroll lento: la abierta a menos de 71 px del centro, sin encaje |
+| CA4 (sustituye) | `node scripts/medir-carrusel.mjs --geometria <salida> --comparar <referencia nueva>`, a 60, 30 y 120 fps | A la llegada, la abierta centrada ±1 px. `ArrowRight` deja el album siguiente centrado ±1 px; `ArrowRight` + `ArrowLeft`, la geometria de la llegada ±1 px. La referencia nueva se toma a 60 fps con este codigo |
+| CA9 (nuevo) | `node scripts/medir-carrusel.mjs`, todos los escenarios, incluidos los cambios de sentido | Sin salto: ningun borde mas de 8 px por encima de la mediana de sus 6 vecinos. Es el CA6 de la 011, que no se cumplio (23,2 px) |
+| CA10 (nuevo) | Igual, "trackpad real" (30 px/frame) | Con la tira a 30 px/frame o mas, ninguna diapositiva pasa del 20 % de su ancho extra. La estela decrece con la distancia hacia el lado recorrido (CA12 de la 011) |
+
+### Preguntas abiertas
+
+Ninguna. Las tres se cerraron el 2026-10-23:
+1. **Donde reposa la abierta:** centrada (decision 11), tras ver que cynx tambien lo hace.
+2. **Cuanto se abren a toda velocidad:** un 20 % del ancho extra a 30 px/frame (decision 9). Se ajusta en la revision.
+3. **Numeracion:** enmienda 1 de la 012, que no esta fusionada y tiene CA8 abierto.
+   - T2 y T3 se rehacen sobre el modelo nuevo.
+   - Se quedan la medida de T1, el escenario con inercia y la regla de la cola de T3.
