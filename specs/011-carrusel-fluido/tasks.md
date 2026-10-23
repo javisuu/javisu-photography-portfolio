@@ -183,8 +183,29 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
 - [ ] **T12** · Documentacion
   - Fichero(s): `docs/design-spec-v2.md` §2 y su Changelog, `CLAUDE.md` (build order, carrusel)
   - Comprobacion: `git diff main --stat` solo muestra los ficheros de la tabla del plan, mas `specs/011-carrusel-fluido/`
-- [ ] **T13** · Produccion, tras el merge y el push de Javi
+- [x] **T13** · Produccion, tras el merge y el push de Javi
   - Comprobacion: `medir-carrusel.mjs --url <produccion> --cpu 1` y `--cpu 4`. Salida: `2026-10-2X_011-produccion.txt`
+  - **Hecho (2026-10-23)**, contra `f662c7d` desplegado. Javi hizo el push `78e6737..f662c7d`; el despliegue se comprobo con `/textures/grano.png`, que responde 200. Mediana de 3; salidas `2026-10-23_011-produccion-cpu1.txt`, `-cpu4.txt` y `-geometria.txt`.
+
+    | | Linea base (T1, `78e6737`) | Produccion (`f662c7d`) |
+    |---|---|---|
+    | Frames con 3 o mas a medio plegar, fling fuerte | 209 | ya no es criterio (enmienda 1) |
+    | Por delante de la que se abre (CA5) | — | 0 frames fuera de 110 px |
+    | Estela decreciente (CA12) | — | 272 frames, 0 fallos |
+    | Salto max: fling, rafaga, giro, paso | 37,6 · 37,1 · 19,9 · 4,6 px | 23,2 · 12,3 · 7,1 · 10,7 px |
+    | Escrituras de `width`/`filter` por frame | 0,7–4 / 0,1–0,2 | 0 / 0 |
+    | Estilo por frame, CPU×4 (fling) | 1,8 ms | 1,26 ms |
+    | Frames >25 ms, CPU×1 y ×4 | 0 en la mediana, p95 33–50 en pasadas sueltas | 0, tambien en la peor pasada |
+    | Fling fuerte (CA9) | 11 albumes, 804 ms | 11 albumes, 568 ms |
+    | Llegada, CPU×4 | frame max 167 ms, long task 159 ms | frame max 167 ms, long task 161 ms |
+    | Reposo frente a la linea base (CA7) | — | 0–0,1 px |
+    | Errores de consola | 0 | 0 |
+
+  - **Escrituras de `style` por frame en marcha: ~30**, igual que en local con la estela (`2026-10-22_011-t16-cpu1.txt`: 30,4; produccion 30,3). Sin estela eran ~5 (T9).
+    - Mientras la tira se mueve, las diapositivas de la estela se reescriben en cada frame (marco y contra-escala), y su cola tarda en volver a 110 px (111–112 px durante unos 40 frames; `estela-trace.mjs`).
+    - Coste medido: estilo 0,33 ms por frame a CPU×1 y 0,78–1,26 a CPU×4, por debajo de los 2 ms de CA3.
+    - Si hiciera falta, la cola se puede cortar antes (por ejemplo, estela 0 por debajo de una velocidad minima). No se hace sin pedirlo.
+  - **El espejo publico fallo** con este push. Su comprobacion final rechaza cualquier imagen en la historia, salvo `public/atlas/land-mask.png`, y `public/textures/grano.png` no esta en la excepcion. Reproducido en local: es el unico fichero que queda. No se publico nada. Es un error del plan, que dijo que la textura no tocaba el espejo mirando solo el `--path`. El arreglo va como enmienda 2, pendiente de Javi.
 
 ## Cierre
 
@@ -194,7 +215,7 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
   - La long task de 217 ms de CA3 en la llegada, que es hidratacion comun a todas las rutas (T9).
   - Queda T13, la medida en produccion tras el push.
 - [x] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
-- [ ] Estado de `spec.md` → Implementada (tras T13)
+- [x] Estado de `spec.md` → Implementada (2026-10-23, tras T13). Queda abierta la enmienda 2 (espejo)
 
 ## Enmienda 1 (2026-10-22): scroll libre y estela
 
