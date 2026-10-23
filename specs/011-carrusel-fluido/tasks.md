@@ -216,5 +216,14 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
   - La traza por frame (`estela-trace.mjs`) da, por ejemplo, `ny 131 · sol 123` detras de la abierta y 110 en todas las de delante, volviendo a 110 al pararse. La captura a mitad de fling esta en `estela/fling-15.png`: 125 → 135 → 157 hacia la abierta.
   - **CA6, salto max** (`2026-10-22_011-t16-cpu1.txt`, mediana de 3): fling 23 px, rafaga 12,3, giro 7,1, paso y paso atras **10,7** (antes 4,6). El paso suelto empeora: ahora un solo paso de raton tambien abre estela. No se cumple; va a la revision de Javi con las constantes.
   - **Fluidez:** 0 frames >50 ms en la mediana, a CPU×1 y ×4. Estilo por frame a CPU×4: 0,71–1,17 ms (≤ 2). Fling fuerte: **11 albumes**, reposo a 558 ms.
-- [ ] **T17** · Revision de Javi (CA11) y ajuste de las tres constantes
-- [ ] **T18** · Documentacion: design spec §2 (scroll libre y estela; fuera "one album at a time") y `CLAUDE.md`
+- [x] **T17** · Revision de Javi (CA11) y ajuste de las tres constantes
+  - Javi, en su `npm run dev` con la estela: "Its good". Las constantes se quedan como estan (180 px, 0,6 y 30 px por frame).
+  - Javi trajo una descripcion del carrusel de cynx.io, sin verificar contra el sitio. Coincide con lo medido en tres cifras: hueco 24 px, alto abierto 55vh = 495 px y tira de una columna (~105 px).
+  - **Decisiones (2026-10-23), cada una para su spec propia y fuera de la 011:**
+    - (a) **Si:** no abrir ninguna durante el scroll rapido y "florecer" la central al frenar.
+    - (b) **Ok:** revelar la foto con una disolucion radial de borde de ruido.
+    - (c) **Si:** entrada de las diapositivas subiendo 50vh, con duracion segun la distancia al centro.
+    - **No:** cambiar el aspecto de las fotos (escala 0,96 y −3 % al hover, anchos iguales). Las portadas siguen abriendo a su ancho natural. Si el diseno lo pidiera, Javi elegiria otras portadas.
+- [x] **T18** · Documentacion: design spec §2 (scroll libre y estela; fuera "one album at a time") y `CLAUDE.md`
+  - **Hecho.** En §2, "One album at a time" pasa a "Free scrolling with a trail", con las tres constantes. En el Changelog, la entrada de la spec 011 recoge la enmienda. `CLAUDE.md`, build order, carrusel: "free scrolling with a speed-driven trail".
+  - De paso: la frase "Below that distance the strip simply follows the input…" habia quedado, en T12, al final del punto "Fold timing". Vuelve a "Commit is position-triggered".
