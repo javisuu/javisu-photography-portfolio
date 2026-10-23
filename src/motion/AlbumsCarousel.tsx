@@ -36,13 +36,13 @@ const CLICK_DRAG_TOLERANCE_PX = 5;
 // --- Momentum model -------------------------------------------------------
 // The fold/unfold is NEVER directly scrubbable by scroll/drag. Scroll and
 // drag only ever feed `velocity`; `offsetPx` integrates that velocity every
-// frame; crossing STEP_DISTANCE advances the integer `activeIdx`. Openness
-// is driven PURELY by which slide is active — see step 4 below. All of
+// frame; crossing half of STEP_DISTANCE, either way, advances the integer
+// `activeIdx` (spec 012, amendment 1). Openness is driven PURELY by which
+// slide is active — see step 4 below. All of
 // these are tunable "feel" constants — untested live in this environment,
 // expect to retune once you're actually scrolling it.
 // STEP_DISTANCE is exactly one closed slot's pitch (S+GAP) — see
-// computeFrame's header comment for why that equality is what makes a
-// commit exactly continuous, algebraically, not just empirically.
+// computeFrame's header comment for why that makes a commit move nothing.
 const STEP_DISTANCE = S + GAP;
 // Velocity is in px per REFERENCE frame (1/60 s), and friction/integration
 // are scaled by how many reference frames actually elapsed (spec 011): at
@@ -54,33 +54,19 @@ const FRICTION = 0.92; // velocity decay per reference frame
 const WHEEL_SENSITIVITY = 0.045; // px/frame of velocity injected per combined wheel-delta px
 const DRAG_SENSITIVITY = 0.7; // px/frame of velocity injected per px of pointer movement since the last frame
 const KEY_KICK_PX = 18; // arrow keys inject a firm one-shot velocity kick, same physics as a flick
-// Rest-position rule: there are exactly two FIXED anchor lines in viewport
-// coordinates, X_RIGHT and X_LEFT (computed once from Wavg, the average
-// natural cover width across all albums — see averageNaturalWidth and the
-// anchorRestOffsetPx computation in the component body). A forward commit
-// settles with the open slide's RIGHT edge exactly on X_RIGHT; a backward
-// commit settles with its LEFT edge exactly on X_LEFT. These lines do NOT
-// depend on which album is active, so the layout at rest is fully
-// predictable regardless of width — which is what lets the anchored edge
-// stay genuinely static through an entire unfold (see computeFrame):
-// restOffsetPx's target is always exactly 0 (see step 5), and
-// anchorRestOffsetPx already bakes X_RIGHT/X_LEFT's offset from centre
-// into computeFrame, so renderOffsetPx=0 alone reproduces the fixed line.
-// The consequence — the open photo's own centre now varies with its own
-// width (narrower albums rest right-of-centre, wider ones left-of-centre)
-// — is intended, not corrected for. This is the ONLY thing that ever
-// recentres the strip — it applies exclusively as part of a commit (step
-// 5); below STEP_DISTANCE the strip just follows the raw input 1:1 and
-// stays wherever that leaves it, with no rubber-band and no return-to-rest
-// of its own.
-// Openness and restOffsetPx move on a critically damped spring (spec 011),
+// Rest position (spec 012, amendment 1, like cynx.io): the open slide rests
+// CENTRED on the viewport, whatever its width and whichever way the strip
+// came. The strip may drift up to half a step either side of that before
+// the next album takes over (step 3) — the flexible edge, the same in both
+// directions. Nothing pulls the strip back after a slow scroll; only a fast
+// one snaps (see SNAP_SETTLE_PX).
+// Openness moves on a critically damped spring (spec 011),
 // not an exponential ease: an exponential starts at full speed — the fold
 // opened with a 58 px leap in its first frame — while a spring starts from
 // rest, and a target that changes mid-way (a reversal) keeps the current
 // velocity instead of snapping. At 18.6 rad/s a full 0 -> 1 lands within
-// 0.5 px of the widest cover in ~500 ms, close to the old "~450ms". It also
-// governs restOffsetPx (see step 5), so layout, width, and the grain panel
-// all resolve on one shared timeline.
+// 0.5 px of the widest cover in ~500 ms, close to the old "~450ms". The
+// grain panel follows openness, so width and panel resolve together.
 const SPRING_OMEGA = 18.6; // rad/s
 // The trail (spec 011, amendment 1, from Javi's frames of cynx.io): while
 // the strip moves, the slides it has just passed don't fold all the way —
@@ -161,10 +147,6 @@ function naturalWidthFor(cover: Photo) {
   return Math.round(SLIDE_HEIGHT * (cover.width / cover.height));
 }
 
-function widthFor(naturalWidth: number, openness: number) {
-  return S + (naturalWidth - S) * openness;
-}
-
 // Every folded slide is exactly S wide, so the slot count needed to
 // overflow both viewport edges is a closed form, independent of which
 // album is open or how far mid-transition it is (openness only ever makes
@@ -173,100 +155,63 @@ function computeSlotsPerSide(viewportWidth: number) {
   return Math.ceil((viewportWidth + 2 * S) / (S + GAP)) + 2;
 }
 
-// Wavg, the average natural cover width across all albums — the sole input
-// to the two fixed anchor lines (X_RIGHT/X_LEFT, see the constants block
-// above and anchorRestOffsetPx below). Computed once from the albums prop,
-// not per-album, so the anchor lines don't move as activeIdx changes.
-function averageNaturalWidth(albums: AlbumWithCover[]) {
-  const total = albums.reduce((sum, album) => sum + naturalWidthFor(album.cover), 0);
-  return total / albums.length;
-}
-
 type AlbumWithCover = Omit<Album, "cover"> & { cover: Photo };
 type SlideFrame = { width: number; x: number };
 
-// The active slide has ONE edge — the LEADING one, in the direction of
-// travel — pinned directly in VIEWPORT (not row-local) coordinates, as a
-// function of renderOffsetPx alone (the caller combines the bounded
-// physics accumulator with the separately-eased rest bias — see the
-// physics loop's step 2/5 for why those are two different numbers).
-// Forward pins the RIGHT edge and everything grows/travels to its left;
-// backward pins the LEFT edge and everything grows/travels to its right.
-// Slides on the anchored side are laid out by walking outward from that
-// fixed edge using ONLY their own (uniform, S, whenever they're not the
-// active one) widths — never anything belonging to the active slide — so
-// their screen position literally cannot depend on how open the active
-// slide currently is.
+// Every slide's centre is a function of the strip position and of how open
+// each slide is — never of the direction of travel, nor of which slide is
+// active (spec 012, amendment 1). In row coordinates (the row carries
+// -offsetPx, see rowRef), slide i sits at
 //
-// anchorRestOffsetPx is Wavg/2 (see averageNaturalWidth), a constant
-// independent of which album is active — so BASE (viewportWidth/2 +/-
-// anchorRestOffsetPx) is a genuinely fixed line (X_RIGHT / X_LEFT) that
-// never shifts as activeIdx changes. At rest, renderOffsetPx settles to
-// exactly 0 (see the physics loop's step 5), so the anchored edge lands
-// exactly on that fixed line regardless of the active album's width —
-// nothing here ever needs to compensate for width, which is what keeps
-// the anchored edge static through an entire unfold.
+//   centre_i = viewportWidth/2 + (i - activeIdx) * STEP_DISTANCE
+//              + (sum of extra widths left of i - sum right of i) / 2
 //
-// This is also why a commit that CONTINUES in the same direction is
-// exactly continuous, algebraically, not just empirically: right before a
-// forward commit, renderOffsetPx is just under STEP_DISTANCE and the
-// about-to-become-active slide (already rendered as a plain S-wide
-// neighbour) has its own right edge at anchor(activeIdx) + GAP + S. Right
-// after, renderOffsetPx drops by STEP_DISTANCE and that same slide becomes
-// the new anchor at anchor(activeIdx) + STEP_DISTANCE — and since
-// anchor(x) = BASE - renderOffsetPx, dropping it by STEP_DISTANCE raises
-// the anchor by exactly STEP_DISTANCE = GAP + S, matching the pre-commit
-// value exactly. A commit that REVERSES direction needs an extra one-time
-// correction instead, since the anchor edge itself switches sides — see
-// the physics loop's reversal handling for that derivation.
+// extra width being width - S. Each slide that opens pushes the ones on its
+// left half its extra width to the left, and the ones on its right half to
+// the right, so every gap stays GAP. With one slide open and offsetPx 0,
+// that slide is centred and the rest sit at a fixed pitch either side.
+//
+// Hence a commit moves nothing: activeIdx goes up by one and offsetPx
+// down by STEP_DISTANCE, which cancel in screen position. And a reversal
+// needs no correction (the jump spec 011 kept), since the same strip
+// position with the same openness gives the same frame either way. When
+// the pair swapping have different natural widths, the slides outside it
+// slide by half the difference each way, following the springs — never at
+// once.
+//
+// `openness` holds every slide that isn't fully folded, inside or outside
+// [lo, hi] — one outside still pushes the rest — and lo..hi are the slides
+// to lay out.
 function computeFrame(
   activeIdx: number,
-  renderOffsetPx: number,
-  getOpenness: (absIndex: number) => number,
+  openness: Map<number, number>,
   lo: number,
   hi: number,
   albums: AlbumWithCover[],
-  viewportWidth: number,
-  travelDir: number,
-  anchorRestOffsetPx: number
+  viewportWidth: number
 ): Map<number, SlideFrame> {
-  const n = hi - lo + 1;
-  const widths = new Array<number>(n);
-  for (let k = 0; k < n; k++) {
-    const absIndex = lo + k;
-    const album = albums[mod(absIndex, albums.length)];
-    widths[k] = widthFor(naturalWidthFor(album.cover), getOpenness(absIndex));
+  const extraOf = (absIndex: number) =>
+    (naturalWidthFor(albums[mod(absIndex, albums.length)].cover) - S) * (openness.get(absIndex) ?? 0);
+  let extraLeft = 0;
+  let extraRight = 0;
+  for (const [absIndex] of openness) {
+    if (absIndex < lo) extraLeft += extraOf(absIndex);
+    else if (absIndex > hi) extraRight += extraOf(absIndex);
   }
-
-  const kActive = activeIdx - lo;
-  const activeWidth = widths[kActive];
-  let activeLeft: number;
-  let activeRight: number;
-  if (travelDir > 0) {
-    activeRight = viewportWidth / 2 + anchorRestOffsetPx - renderOffsetPx;
-    activeLeft = activeRight - activeWidth;
-  } else {
-    activeLeft = viewportWidth / 2 - anchorRestOffsetPx - renderOffsetPx;
-    activeRight = activeLeft + activeWidth;
-  }
-
-  const left = new Array<number>(n);
-  left[kActive] = activeLeft;
-  let cursor = activeRight + GAP;
-  for (let k = kActive + 1; k < n; k++) {
-    left[k] = cursor;
-    cursor += widths[k] + GAP;
-  }
-  cursor = activeLeft - GAP;
-  for (let k = kActive - 1; k >= 0; k--) {
-    cursor -= widths[k];
-    left[k] = cursor;
-    cursor -= GAP;
+  const extras = new Array<number>(hi - lo + 1);
+  for (let k = 0; k < extras.length; k++) {
+    extras[k] = extraOf(lo + k);
+    extraRight += extras[k];
   }
 
   const result = new Map<number, SlideFrame>();
-  for (let k = 0; k < n; k++) {
-    result.set(lo + k, { width: widths[k], x: left[k] });
+  for (let k = 0; k < extras.length; k++) {
+    // Running sums: left of this slide, and right of it.
+    extraRight -= extras[k];
+    const centre = viewportWidth / 2 + (lo + k - activeIdx) * STEP_DISTANCE + (extraLeft - extraRight) / 2;
+    const width = S + extras[k];
+    result.set(lo + k, { width, x: centre - width / 2 });
+    extraLeft += extras[k];
   }
   return result;
 }
@@ -503,7 +448,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // size in the mount/resize effect below.
   const [viewportWidth, setViewportWidth] = useState(1440);
   // The only pieces of the motion model that live in React state — all
-  // change rarely (only at a step commit). Everything continuous (offsetPx, restOffsetPx, openness,
+  // change rarely (only at a step commit). Everything continuous (offsetPx, openness,
   // position, width, drift) lives in refs and is written straight to the
   // DOM by the physics loop.
   const [activeIdx, setActiveIdx] = useState(0);
@@ -525,24 +470,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // removed rather than actually left).
   const [isActiveHovered, setIsActiveHovered] = useState(false);
 
-  // Half of Wavg — the fixed offset from true viewport centre where the
-  // active slide's anchored edge sits at rest (X_RIGHT = centre +
-  // anchorRestOffsetPx, X_LEFT = centre - anchorRestOffsetPx). Independent
-  // of activeIdx, so it's just a plain per-render value, not a ref.
-  const anchorRestOffsetPx = averageNaturalWidth(albums) / 2;
-
   const offsetPxRef = useRef(0);
-  // The strip's rest bias: eases toward exactly 0 every frame (step 5) —
-  // NOT toward a per-album, width-dependent value — so the anchored edge
-  // (see computeFrame) lands on the fixed X_RIGHT/X_LEFT line regardless of
-  // which album is active, and stays there for the whole unfold rather
-  // than sliding to compensate for width. Kept entirely separate from
-  // offsetPx (which stays a small, bounded, physics-driven accumulator
-  // dedicated to detecting the next commit) specifically so this can jump
-  // by whatever is needed at a direction-reversal commit (see the while
-  // loop) without disturbing that accumulator's own bounded range.
-  const restOffsetPxRef = useRef(0);
-  const restOffsetVelocityRef = useRef(0);
   const velocityRef = useRef(0);
   // Whether the strip is above OPEN_SPEED (spec 012), with hysteresis.
   const isFastRef = useRef(false);
@@ -556,12 +484,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const snapFreeRef = useRef(0);
   const snapFreeMinRef = useRef(0);
   const activeIdxRef = useRef(activeIdx);
-  // Which edge is currently hinged — updated ONLY at an actual commit
-  // (inside the while loop below), never from the live sign of velocity.
-  // Locking it to commits (not to momentary scroll direction) is what
-  // keeps a small back-and-forth wobble that never crosses STEP_DISTANCE
-  // from flipping the anchor formula mid-frame, which would otherwise
-  // desync it from restOffsetPx's own (commit-triggered) updates.
+  // The direction of the last commit — updated ONLY at a commit (inside
+  // the while loop below), never from the live sign of velocity, so a small
+  // wobble that never crosses half a step doesn't flip it. It no longer
+  // touches the layout (see computeFrame): it says which side the trail
+  // is on and which edge each image is pinned to.
   const travelDirRef = useRef(1);
   const lastFrameTimeRef = useRef<number | null>(null);
   const pendingWheelInputRef = useRef(0);
@@ -586,8 +513,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const viewportWidthRef = useRef(viewportWidth);
   const rootRef = useRef<HTMLDivElement | null>(null);
   // The row every slide sits in. Slides are laid out in ROW coordinates
-  // (computeFrame with renderOffsetPx = 0) and the row alone carries
-  // -renderOffsetPx (spec 011): while the strip slides without folding,
+  // (see computeFrame) and the row alone carries -offsetPx (spec 011): while the strip slides without folding,
   // that is the only style written per frame, instead of one transform per
   // slide (~30).
   const rowRef = useRef<HTMLDivElement | null>(null);
@@ -628,22 +554,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const slotsPerSide = computeSlotsPerSide(viewportWidth);
   const lo = activeIdx - slotsPerSide;
   const hi = activeIdx + slotsPerSide;
-  const initialFrame = computeFrame(
-    activeIdx,
-    0,
-    (absIndex) => (absIndex === activeIdx ? 1 : 0),
-    lo,
-    hi,
-    albums,
-    viewportWidth,
-    directionSnapshot,
-    anchorRestOffsetPx
-  );
+  const initialFrame = computeFrame(activeIdx, new Map([[activeIdx, 1]]), lo, hi, albums, viewportWidth);
   const activeAlbum = albums[mod(activeIdx, albums.length)];
 
   // Mount + resize: just refresh the viewport width. computeFrame is a
-  // pure function of (activeIdx, renderOffsetPx, openness, viewportWidth,
-  // travelDir), so a resize simply recomputes correctly on the very next
+  // pure function of (activeIdx, openness, viewportWidth), so a resize simply recomputes correctly on the very next
   // frame — no persisted position to reconcile.
   useEffect(() => {
     function recalc() {
@@ -659,12 +574,10 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // The single rAF loop that owns all motion. Per frame: integrate
   // velocity into offsetPx (or ease it toward 0 once velocity is low and
   // nothing is being dragged); advance activeIdx whenever offsetPx crosses
-  // STEP_DISTANCE (chaining multiple steps in one frame at high speed, no
-  // queueing needed), applying a one-time continuity-preserving jump to
-  // restOffsetPx if that commit reverses direction; let every visible
-  // slide's openness spring toward whether it's currently active, on its
-  // own clock; ease restOffsetPx toward its absolute target on that SAME
-  // clock; write width/transform/drift straight to DOM refs. Only
+  // half a step either way (chaining multiple steps in one frame at high
+  // speed, no queueing needed); let every visible slide's openness spring
+  // toward whether it's currently active, on its own clock; write
+  // width/transform/drift straight to DOM refs. Only
   // activeIdx changes go through setState — a frame otherwise only ever
   // touches the DOM nodes that actually moved or resized.
   useEffect(() => {
@@ -726,13 +639,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // 2. offsetPx integrates velocity per reference frame (see
       // stepDistanceFactor), unconditionally —
       // no rubber-band resistance near any cap, and no easing back toward
-      // 0 or anywhere else. Below STEP_DISTANCE the strip just follows
+      // 0 or anywhere else. Within half a step the strip just follows
       // wherever the accumulated input left it; once velocity decays to
       // ~0 (via friction, step 1), offsetPx simply stops changing and
-      // stays put — nothing pulls it back on its own. It moves again only
-      // from more scroll/drag input or a commit (step 3), and the strip
-      // only ever recentres as part of a commit (step 5's restOffsetPx
-      // ease toward the absolute target) — never while the user is idle.
+      // stays put — nothing pulls it back on its own after a slow scroll.
+      // It moves again only from more scroll/drag input or a snap.
       // While snapping, offsetPx springs to the snap album instead, and
       // velocity follows the spring so the trail does too. The target
       // already subtracts any commit on the way, so it never jumps.
@@ -750,32 +661,18 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         offsetPxRef.current += velocityRef.current * stepDistanceFactor(frames);
       }
 
-      // 3. Crossing STEP_DISTANCE advances activeIdx — a while loop, so a
-      // single fast frame can chain through several albums at once. Commits
-      // never wait for the previous fold to finish (spec 011, amendment 1:
-      // free scrolling, like cynx.io): every slide's openness is on its own
-      // spring (step 4), so a chained commit only retargets springs, it
-      // never snaps a width. A commit that keeps travelDir the
-      // same needs no correction (see computeFrame's header comment for
-      // why). A commit that REVERSES travelDir switches which edge is the
-      // anchor, so restOffsetPx needs a one-time jump to stay continuous:
-      // solving centre(oldTravelDir, before) = centre(newTravelDir, after)
-      // for the outgoing slide's actual current width gives
-      // restOffsetPx += dir * (S - outgoingWidth) — verified directly
-      // (byte-identical before/after on the non-anchored side, forward,
-      // backward, and reversed) rather than tuned.
+      // 3. Crossing half a step, either way, advances activeIdx (spec 012,
+      // amendment 1, like cynx.io) — a while loop, so a single fast frame
+      // can chain through several albums at once. Commits never wait for
+      // the previous fold to finish (spec 011, amendment 1: free
+      // scrolling): every slide's openness is on its own spring (step 4),
+      // so a chained commit only retargets springs, it never snaps a width.
+      // A commit moves nothing on screen, in either direction (see
+      // computeFrame).
       const prevActiveIdx = activeIdxRef.current;
-      while (Math.abs(offsetPxRef.current) >= STEP_DISTANCE) {
+      while (Math.abs(offsetPxRef.current) > STEP_DISTANCE / 2) {
         const dir = Math.sign(offsetPxRef.current);
-        if (dir !== travelDirRef.current) {
-          const outgoingIdx = activeIdxRef.current;
-          const outgoingWidth = widthFor(
-            naturalWidthFor(albums[mod(outgoingIdx, albums.length)].cover),
-            opennessRef.current.get(outgoingIdx) ?? 0
-          );
-          restOffsetPxRef.current += dir * (S - outgoingWidth);
-          travelDirRef.current = dir;
-        }
+        travelDirRef.current = dir;
         activeIdxRef.current += dir;
         offsetPxRef.current -= dir * STEP_DISTANCE;
       }
@@ -855,8 +752,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       }
       // Prune openness/anchor/drift state for slides that left the window
       // — keeps these maps bounded over an arbitrarily long session.
+      // A slide still part-open is kept even outside the window: it still
+      // pushes the rest (see computeFrame), and dropping it would shift them.
       for (const key of opennessRef.current.keys()) {
-        if (key < frameLo - 2 || key > frameHi + 2) {
+        const settled = opennessRef.current.get(key) === 0 && (opennessVelocityRef.current.get(key) ?? 0) === 0;
+        if ((key < frameLo - 2 || key > frameHi + 2) && settled) {
           opennessRef.current.delete(key);
           opennessVelocityRef.current.delete(key);
         }
@@ -868,48 +768,15 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         if (key < frameLo - 2 || key > frameHi + 2) driftRef.current.delete(key);
       }
 
-      // 5. restOffsetPx eases toward exactly 0 on the SAME spring as
-      // openness — one shared timeline, so position, width, and the grain
-      // panel all resolve together. The target is a true constant now (not
-      // derived from the active album's width, unlike the old centring
-      // rule) — see the fixed X_RIGHT/X_LEFT anchor-line comment on
-      // computeFrame. A commit that continues the same travelDir never
-      // touches restOffsetPx at all (step 3), so once it has settled to 0
-      // it STAYS at 0 through every subsequent same-direction commit — the
-      // anchored edge is then already exactly on its fixed line the
-      // instant the commit fires, with nothing left to ease.
-      if (restOffsetPxRef.current !== 0 || restOffsetVelocityRef.current !== 0) {
-        let [rest, restVelocity] = springStep(restOffsetPxRef.current, restOffsetVelocityRef.current, 0, dt);
-        if (Math.abs(rest) < 0.01 && Math.abs(restVelocity) < 0.1) {
-          rest = 0;
-          restVelocity = 0;
-        }
-        restOffsetPxRef.current = rest;
-        restOffsetVelocityRef.current = restVelocity;
-      }
-
-      // 6. Compute this frame's geometry and write it straight to the DOM:
-      // slides in row coordinates, the render offset on the row alone (see
-      // rowRef). computeFrame's x is linear in renderOffsetPx, so the sum is
-      // exactly the old per-slide position.
+      // 5. Compute this frame's geometry and write it straight to the DOM:
+      // slides in row coordinates, offsetPx on the row alone (see rowRef).
       const travelDir = travelDirRef.current;
-      const renderOffsetPx = restOffsetPxRef.current + offsetPxRef.current;
-      const rowTransform = `translateX(${-renderOffsetPx}px)`;
+      const rowTransform = `translateX(${-offsetPxRef.current}px)`;
       if (rowRef.current && rowTransform !== rowTransformRef.current) {
         rowRef.current.style.transform = rowTransform;
         rowTransformRef.current = rowTransform;
       }
-      const frame = computeFrame(
-        activeIdxRef.current,
-        0,
-        (absIndex) => opennessRef.current.get(absIndex) ?? 0,
-        frameLo,
-        frameHi,
-        albums,
-        vw,
-        travelDir,
-        anchorRestOffsetPx
-      );
+      const frame = computeFrame(activeIdxRef.current, opennessRef.current, frameLo, frameHi, albums, vw);
       frame.forEach(({ width, x }, absIndex) => {
         let written = writtenRef.current.get(absIndex);
         if (!written) {
@@ -956,7 +823,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
 
     rafId = requestAnimationFrame(tick);
     return () => cancelAnimationFrame(rafId);
-  }, [albums, anchorRestOffsetPx]);
+  }, [albums]);
 
   // Keyboard: arrow keys inject the same one-shot velocity kick a firm
   // flick would, reusing the exact same momentum/step/settle physics.
