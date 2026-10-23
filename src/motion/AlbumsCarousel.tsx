@@ -53,7 +53,6 @@ const REFERENCE_FRAME_MS = 1000 / 60;
 const FRICTION = 0.92; // velocity decay per reference frame
 const WHEEL_SENSITIVITY = 0.045; // px/frame of velocity injected per combined wheel-delta px
 const DRAG_SENSITIVITY = 0.7; // px/frame of velocity injected per px of pointer movement since the last frame
-const KEY_KICK_PX = 18; // arrow keys inject a firm one-shot velocity kick, same physics as a flick
 // Rest position (spec 012, amendment 1, like cynx.io): the open slide rests
 // CENTRED on the viewport, whatever its width and whichever way the strip
 // came. The strip may drift up to half a step either side of that before
@@ -95,12 +94,16 @@ const FAST_OPENNESS_SPEED = 30;
 // trackpad hovering around 20 from re-arming it every few frames.
 const OPEN_SPEED = 20;
 const SLOW_SPEED = OPEN_SPEED * 0.8;
-// Snap after a fast scroll (spec 012, decision 3): when a fast strip drops
+// Snap after a fast scroll (spec 012, decision 10): when a fast strip drops
 // below SLOW_SPEED, offsetPx leaves friction and springs (SPRING_OMEGA) to
-// the nearer of the active album and the next one in travelDir — never the
-// previous one — starting from the strip's current velocity, and lands
-// exactly on 0, the anchored edge on its fixed line. Without a fast scroll
-// there's no snap: the strip still stays wherever it's left.
+// the album nearest to where friction would have stopped it — the active
+// one or the next in the direction of travel, never the previous one —
+// starting from the strip's current velocity, and lands exactly on 0, the
+// open slide centred. Nearest to where it is now would always be the
+// active one (a commit fires at half a step), dragging a strip still
+// moving at SLOW_SPEED back against ~184 px of momentum. Without a fast
+// scroll there's no snap: the strip stays wherever it's left. An arrow key
+// snaps to the album next to the current target, so it lands exactly.
 const SNAP_SETTLE_PX = 0.01;
 // A trackpad keeps sending smaller and smaller wheel events in the same
 // direction after the gesture (its momentum tail), and they must not pull
@@ -479,10 +482,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const isFastRef = useRef(false);
   // Set while fast, consumed when the snap starts (see SNAP_SETTLE_PX).
   const wasFastRef = useRef(false);
-  // The album the snap lands on, or null when not snapping; the snap's
-  // velocity in px/s (springStep's unit); and the free velocity and its
-  // lowest point, along travelDir (see SNAP_RESUME_PX).
+  // The album the snap lands on, or null when not snapping; its direction;
+  // the snap's velocity in px/s (springStep's unit); and the free velocity
+  // and its lowest point, along snapDir (see SNAP_RESUME_PX).
   const snapIdxRef = useRef<number | null>(null);
+  const snapDirRef = useRef(1);
   const snapVelocityRef = useRef(0);
   const snapFreeRef = useRef(0);
   const snapFreeMinRef = useRef(0);
@@ -495,6 +499,8 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const travelDirRef = useRef(1);
   const lastFrameTimeRef = useRef<number | null>(null);
   const pendingWheelInputRef = useRef(0);
+  // Arrow key presses since the last frame, +1 per ArrowRight.
+  const pendingKeyStepsRef = useRef(0);
   const isDraggingRef = useRef(false);
   const dragStartXRef = useRef(0);
   const dragCurrentXRef = useRef(0);
@@ -607,11 +613,27 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         input += dragInput;
         dragLastXRef.current = dragCurrentXRef.current;
       }
+      // An arrow key snaps to the album next to the current target (or to
+      // the active one, if not snapping), so presses chain and each lands
+      // exactly, from whatever velocity the strip has.
+      const keySteps = pendingKeyStepsRef.current;
+      pendingKeyStepsRef.current = 0;
+      if (keySteps !== 0) {
+        const dir = Math.sign(keySteps);
+        if (snapIdxRef.current === null) {
+          snapVelocityRef.current = (velocityRef.current * 1000) / REFERENCE_FRAME_MS;
+          snapFreeRef.current = Math.max(0, velocityRef.current * dir);
+          snapFreeMinRef.current = snapFreeRef.current;
+        }
+        snapIdxRef.current = (snapIdxRef.current ?? activeIdxRef.current) + keySteps;
+        snapDirRef.current = dir;
+        wasFastRef.current = false;
+      }
       // A new gesture ends the snap and hands the strip back to friction,
       // from the snap's velocity; a momentum tail doesn't (see
       // SNAP_RESUME_PX).
       if (snapIdxRef.current !== null) {
-        const dir = travelDirRef.current;
+        const dir = snapDirRef.current;
         snapFreeRef.current = (snapFreeRef.current + input * dir) * FRICTION ** frames;
         snapFreeMinRef.current = Math.min(snapFreeMinRef.current, snapFreeRef.current);
         if (dragInput !== 0 || input * dir < 0 || snapFreeRef.current > snapFreeMinRef.current + SNAP_RESUME_PX) {
@@ -630,8 +652,12 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           wasFastRef.current = true;
         } else if (speed < SLOW_SPEED) isFastRef.current = false;
         if (!isFastRef.current && wasFastRef.current && !isDraggingRef.current) {
-          const dir = travelDirRef.current;
-          snapIdxRef.current = activeIdxRef.current + (offsetPxRef.current * dir >= STEP_DISTANCE / 2 ? dir : 0);
+          const dir = Math.sign(velocityRef.current) || travelDirRef.current;
+          // Where friction alone would stop it, relative to the active album.
+          const stopPx = offsetPxRef.current + (velocityRef.current * FRICTION) / (1 - FRICTION);
+          const steps = clamp(Math.round((stopPx * dir) / STEP_DISTANCE), 0, 1);
+          snapIdxRef.current = activeIdxRef.current + dir * steps;
+          snapDirRef.current = dir;
           snapVelocityRef.current = (velocityRef.current * 1000) / REFERENCE_FRAME_MS;
           snapFreeRef.current = velocityRef.current * dir;
           snapFreeMinRef.current = snapFreeRef.current;
@@ -702,10 +728,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
 
       // 4. Openness targets: the active slide targets 1 and unfolds toward
       // fully open on its own spring (see SPRING_OMEGA), less the faster
-      // the strip (see FAST_OPENNESS), unless the strip is snapping to the next album (see SNAP_SETTLE_PX), when it
-      // waits for that commit — the slide about to become active must be
-      // exactly S at the commit (see computeFrame); the slides
-      // just passed target the trail (see TRAIL_MAX_PX), which follows the
+      // the strip (see FAST_OPENNESS); the slides just passed target the trail (see TRAIL_MAX_PX), which follows the
       // strip's speed; every other slide targets 0. A commit swaps which
       // slide is targeting 1, and each spring carries its current velocity
       // into the new target. Never where offsetPx sits within the step: the
@@ -722,8 +745,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       );
       const activeTarget = FAST_OPENNESS + (1 - FAST_OPENNESS) * openFade;
       for (let absIndex = frameLo; absIndex <= frameHi; absIndex++) {
-        const opens = snapIdxRef.current === null || snapIdxRef.current === activeIdxRef.current;
-        let target = absIndex === activeIdxRef.current && opens ? activeTarget : 0;
+        let target = absIndex === activeIdxRef.current ? activeTarget : 0;
         // Positions behind the active one, on the side already passed.
         const behind = (activeIdxRef.current - absIndex) * travelDirRef.current;
         if (behind >= 1 && trailSpeed > 0) {
@@ -832,12 +854,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     return () => cancelAnimationFrame(rafId);
   }, [albums]);
 
-  // Keyboard: arrow keys inject the same one-shot velocity kick a firm
-  // flick would, reusing the exact same momentum/step/settle physics.
+  // Keyboard: an arrow key snaps to the next album (see SNAP_SETTLE_PX).
   useEffect(() => {
     function onKeyDown(e: KeyboardEvent) {
-      if (e.key === "ArrowRight") pendingWheelInputRef.current += KEY_KICK_PX;
-      else if (e.key === "ArrowLeft") pendingWheelInputRef.current -= KEY_KICK_PX;
+      if (e.key === "ArrowRight") pendingKeyStepsRef.current += 1;
+      else if (e.key === "ArrowLeft") pendingKeyStepsRef.current -= 1;
     }
     window.addEventListener("keydown", onKeyDown);
     return () => window.removeEventListener("keydown", onKeyDown);

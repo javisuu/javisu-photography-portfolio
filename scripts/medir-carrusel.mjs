@@ -376,23 +376,25 @@ function albumSteps(frames, total) {
 // - del ultimo cruce de la velocidad hacia abajo (de mas de FAST_PX a menos
 //   de SLOW_PX) a la primera apertura de la que queda abierta, y al ultimo
 //   cambio de album (CA3);
-// - el encaje: borde derecho de la abierta en reposo frente a la linea fija,
-//   y album final frente al del cruce (CA3b).
-// La velocidad de la tira sale de una diapositiva a dos o mas posiciones por
-// delante de la abierta: esas no cambian de ancho, asi que se mueven con la
-// tira (incluye restOffsetPx y el encaje, que tambien mueven la tira).
+// - el encaje: album final frente al del cruce (CA3b; el centro en reposo
+//   lo mide swapStats).
 function stopStats(frames, total) {
   const rec = frames.filter((f) => f.boxes);
   const speed = new Array(rec.length).fill(null);
   for (let i = 1; i < rec.length; i++) {
-    const bs = [...rec[i].boxes].sort((a, b) => a.l - b.l);
-    const k = bs.reduce((best, b, j) => (b.w > bs[best].w ? j : best), 0);
-    // Mediana de todas las de delante presentes en los dos frames: una sola
-    // daba picos de 77 px/frame en los cambios de album.
-    const moves = bs.slice(k + 2)
-      .map((b) => { const a = rec[i - 1].boxes.find((x) => x.id === b.id); return a ? Math.abs(b.l - a.l) : null; })
-      .filter((v) => v !== null);
-    if (moves.length) speed[i] = (median(moves) * (1000 / 60)) / Math.max(1, rec[i].t - rec[i - 1].t);
+    // Las dos diapositivas visibles mas exteriores presentes en los dos
+    // frames: con la geometria centrada (enmienda 1), cada una que se abre
+    // entre ellas empuja a una hacia fuera y a la otra igual hacia el otro
+    // lado, asi que la media de sus centros se mueve exactamente con la tira.
+    // Las de delante solas (lo de antes) tambien recogian ese empuje.
+    const prev = new Map(rec[i - 1].boxes.map((b) => [b.id, b]));
+    const both = [...rec[i].boxes].filter((b) => prev.has(b.id)).sort((a, b) => a.l - b.l);
+    if (both.length >= 2) {
+      const c = (b) => (b.l + b.r) / 2;
+      const [a, z] = [both[0], both[both.length - 1]];
+      const move = (c(a) - c(prev.get(a.id)) + c(z) - c(prev.get(z.id))) / 2;
+      speed[i] = (Math.abs(move) * (1000 / 60)) / Math.max(1, rec[i].t - rec[i - 1].t);
+    }
   }
   const half = new Map();
   rec.forEach((f, i) => f.boxes.forEach((b) => {
