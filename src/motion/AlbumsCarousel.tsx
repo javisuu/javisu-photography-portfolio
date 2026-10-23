@@ -106,6 +106,24 @@ const TRAIL_FULL_SPEED = 30; // px per reference frame
 // (KEY_KICK_PX) stays below OPEN_SPEED and opens as before.
 const OPEN_SPEED = 20;
 const SLOW_SPEED = OPEN_SPEED * 0.8;
+// Snap after a fast scroll (spec 012, decision 3): when a fast strip drops
+// below SLOW_SPEED, offsetPx leaves friction and springs (SPRING_OMEGA) to
+// the nearer of the active album and the next one in travelDir — never the
+// previous one — starting from the strip's current velocity, and lands
+// exactly on 0, the anchored edge on its fixed line. Without a fast scroll
+// there's no snap: the strip still stays wherever it's left.
+const SNAP_SETTLE_PX = 0.01;
+// A trackpad keeps sending smaller and smaller wheel events in the same
+// direction after the gesture (its momentum tail), and they must not pull
+// the strip off its line. So while snapping, input feeds a "free" velocity
+// instead — what the strip would do without the snap, seeded with its
+// velocity when the snap began. A tail only slows its decay; a new gesture
+// (or a key) makes it rise. Rising more than SNAP_RESUME_PX above its
+// lowest point, input against travelDir, or a drag ends the snap. Once
+// landed, the snap holds until the free velocity drops below
+// SNAP_RELEASE_PX, the tail spent.
+const SNAP_RESUME_PX = 2; // px per reference frame
+const SNAP_RELEASE_PX = 0.5; // px per reference frame
 const MAX_DT_MS = 100; // clamp a single frame's elapsed time (e.g. after a backgrounded tab) so physics never jumps
 const OPEN_EPSILON_PX = 0.5; // a slide within this of its resting target width (S if inactive, natural width if active) counts as "settled" — see driftRef in the physics loop
 
@@ -528,6 +546,15 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const velocityRef = useRef(0);
   // Whether the strip is above OPEN_SPEED (spec 012), with hysteresis.
   const isFastRef = useRef(false);
+  // Set while fast, consumed when the snap starts (see SNAP_SETTLE_PX).
+  const wasFastRef = useRef(false);
+  // The album the snap lands on, or null when not snapping; the snap's
+  // velocity in px/s (springStep's unit); and the free velocity and its
+  // lowest point, along travelDir (see SNAP_RESUME_PX).
+  const snapIdxRef = useRef<number | null>(null);
+  const snapVelocityRef = useRef(0);
+  const snapFreeRef = useRef(0);
+  const snapFreeMinRef = useRef(0);
   const activeIdxRef = useRef(activeIdx);
   // Which edge is currently hinged — updated ONLY at an actual commit
   // (inside the while loop below), never from the live sign of velocity.
@@ -655,18 +682,46 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       const frames = dt / REFERENCE_FRAME_MS;
       let input = pendingWheelInputRef.current;
       pendingWheelInputRef.current = 0;
+      let dragInput = 0;
       if (isDraggingRef.current) {
         const dx = dragCurrentXRef.current - dragLastXRef.current;
         // Dragging left advances forward (matches the wheel/keyboard sign
         // convention: negative screen movement = "go to next album").
-        input += -dx * DRAG_SENSITIVITY;
+        dragInput = -dx * DRAG_SENSITIVITY;
+        input += dragInput;
         dragLastXRef.current = dragCurrentXRef.current;
       }
-      velocityRef.current += input;
-      velocityRef.current *= FRICTION ** frames;
-      const speed = Math.abs(velocityRef.current);
-      if (speed > OPEN_SPEED) isFastRef.current = true;
-      else if (speed < SLOW_SPEED) isFastRef.current = false;
+      // A new gesture ends the snap and hands the strip back to friction,
+      // from the snap's velocity; a momentum tail doesn't (see
+      // SNAP_RESUME_PX).
+      if (snapIdxRef.current !== null) {
+        const dir = travelDirRef.current;
+        snapFreeRef.current = (snapFreeRef.current + input * dir) * FRICTION ** frames;
+        snapFreeMinRef.current = Math.min(snapFreeMinRef.current, snapFreeRef.current);
+        if (dragInput !== 0 || input * dir < 0 || snapFreeRef.current > snapFreeMinRef.current + SNAP_RESUME_PX) {
+          velocityRef.current = (snapVelocityRef.current * REFERENCE_FRAME_MS) / 1000;
+          snapIdxRef.current = null;
+        } else {
+          input = 0;
+        }
+      }
+      if (snapIdxRef.current === null) {
+        velocityRef.current += input;
+        velocityRef.current *= FRICTION ** frames;
+        const speed = Math.abs(velocityRef.current);
+        if (speed > OPEN_SPEED) {
+          isFastRef.current = true;
+          wasFastRef.current = true;
+        } else if (speed < SLOW_SPEED) isFastRef.current = false;
+        if (!isFastRef.current && wasFastRef.current && !isDraggingRef.current) {
+          const dir = travelDirRef.current;
+          snapIdxRef.current = activeIdxRef.current + (offsetPxRef.current * dir >= STEP_DISTANCE / 2 ? dir : 0);
+          snapVelocityRef.current = (velocityRef.current * 1000) / REFERENCE_FRAME_MS;
+          snapFreeRef.current = velocityRef.current * dir;
+          snapFreeMinRef.current = snapFreeRef.current;
+          wasFastRef.current = false;
+        }
+      }
 
       // 2. offsetPx integrates velocity per reference frame (see
       // stepDistanceFactor), unconditionally —
@@ -678,7 +733,22 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       // from more scroll/drag input or a commit (step 3), and the strip
       // only ever recentres as part of a commit (step 5's restOffsetPx
       // ease toward the absolute target) — never while the user is idle.
-      offsetPxRef.current += velocityRef.current * stepDistanceFactor(frames);
+      // While snapping, offsetPx springs to the snap album instead, and
+      // velocity follows the spring so the trail does too. The target
+      // already subtracts any commit on the way, so it never jumps.
+      if (snapIdxRef.current !== null) {
+        const snapTarget = (snapIdxRef.current - activeIdxRef.current) * STEP_DISTANCE;
+        let [offset, snapVelocity] = springStep(offsetPxRef.current, snapVelocityRef.current, snapTarget, dt);
+        if (Math.abs(offset - snapTarget) < SNAP_SETTLE_PX && Math.abs(snapVelocity) < 0.1) {
+          offset = snapTarget;
+          snapVelocity = 0;
+        }
+        offsetPxRef.current = offset;
+        snapVelocityRef.current = snapVelocity;
+        velocityRef.current = (snapVelocity * REFERENCE_FRAME_MS) / 1000;
+      } else {
+        offsetPxRef.current += velocityRef.current * stepDistanceFactor(frames);
+      }
 
       // 3. Crossing STEP_DISTANCE advances activeIdx — a while loop, so a
       // single fast frame can chain through several albums at once. Commits
@@ -709,6 +779,16 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         activeIdxRef.current += dir;
         offsetPxRef.current -= dir * STEP_DISTANCE;
       }
+      // Landed: the commit has brought the snap album to active, offsetPx
+      // is exactly 0, and any momentum tail is spent.
+      if (
+        snapIdxRef.current === activeIdxRef.current &&
+        offsetPxRef.current === 0 &&
+        snapVelocityRef.current === 0 &&
+        Math.abs(snapFreeRef.current) < SNAP_RELEASE_PX
+      ) {
+        snapIdxRef.current = null;
+      }
       if (activeIdxRef.current !== prevActiveIdx) {
         setActiveIdx(activeIdxRef.current);
         setDirectionSnapshot(travelDirRef.current);
@@ -722,7 +802,10 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
 
       // 4. Openness targets: the active slide targets 1 and unfolds toward
       // fully open on its own spring (see SPRING_OMEGA), unless the strip
-      // is fast (see OPEN_SPEED), when it targets 0 like the rest; the slides
+      // is fast (see OPEN_SPEED), when it targets 0 like the rest, or the
+      // strip is snapping to the next album (see SNAP_SETTLE_PX), when it
+      // waits for that commit — the slide about to become active must be
+      // exactly S at the commit (see computeFrame); the slides
       // just passed target the trail (see TRAIL_MAX_PX), which follows the
       // strip's speed; every other slide targets 0. A commit swaps which
       // slide is targeting 1, and each spring carries its current velocity
@@ -734,7 +817,9 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       const frameHi = activeIdxRef.current + sps;
       const trailSpeed = clamp(Math.abs(velocityRef.current) / TRAIL_FULL_SPEED, 0, 1);
       for (let absIndex = frameLo; absIndex <= frameHi; absIndex++) {
-        let target = absIndex === activeIdxRef.current && !isFastRef.current ? 1 : 0;
+        const opens =
+          !isFastRef.current && (snapIdxRef.current === null || snapIdxRef.current === activeIdxRef.current);
+        let target = absIndex === activeIdxRef.current && opens ? 1 : 0;
         // Positions behind the active one, on the side already passed.
         const behind = (activeIdxRef.current - absIndex) * travelDirRef.current;
         if (behind >= 1 && trailSpeed > 0) {

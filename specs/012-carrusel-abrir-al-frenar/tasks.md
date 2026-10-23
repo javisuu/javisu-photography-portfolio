@@ -34,6 +34,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     | Borde de la abierta en reposo frente a su linea | −2,1 px | −55,1 px | −19,1 px |
 
     CA1 decia "10 cambios y 11 que pasan de la mitad", del script del scratchpad; el script del repo da 11 y 12 en el mismo fling. CA2, CA3 y CA3b se juzgan sobre todo en "trackpad real", el unico que pasa del umbral.
+  - **Correccion (en T3): la linea del encaje estaba mal.** El reposo de `ArrowRight 1` no esta en la linea: una tecla recorre ~207 px, hace un commit y deja 65 px de sobra. La linea buena es la de la llegada (offsetPx 0): borde derecho a 980,5 px, frente a 915,5. El script ya la usa. La fila del borde de la tabla, con la linea buena: fling fuerte **−67,1 px**, rafaga **−120,1** (medidas otra vez en T3, sin encaje) y trackpad real **−84,1** (−19,1 − 65,0, calculado; no se volvio a medir produccion).
 - [x] **T2** · Estado rapido/lento y destino de la activa (CA2, CA3)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: `OPEN_SPEED` = 20 con histeresis a 16. La activa apunta a 0 mientras la tira va rapida y a 1 cuando va lenta. La estela, sin cambios (plan, partes 1 y 2)
@@ -48,7 +49,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **CA4 y CA5:** reposo ok frente a la referencia de la 011, diferencia max 0,1 px a 60 fps, 0 a 30 y 0,3 a 120.
     - CA5 de la 011 (nada por delante cambia de ancho): 0 frames. 0 frames >50 ms y 0 errores de consola.
     - tsc y lint ok.
-- [ ] **T3** · Encaje tras un scroll rapido (CA3b)
+- [x] **T3** · Encaje tras un scroll rapido (CA3b)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: `wasFastRef` y `snapIdxRef`. Muelle de `offsetPx` hacia el activo o el siguiente, el mas cercano, empezando con la velocidad que llevaba la tira. Una entrada nueva lo cancela. La activa no se abre hasta llegar a `snapIdx` (plan, parte 3)
   - Comprobacion:
@@ -56,6 +57,25 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - CA3: tiempo del cruce al commit anotado;
     - CA4 y CA5 sin cambios (una tecla no encaja);
     - tsc y lint ok.
+  - **Hecho, con un cambio frente al plan: no toda entrada nueva cancela el encaje.** Un trackpad sigue mandando eventos cada vez mas pequenos en el mismo sentido despues del gesto (la cola de inercia). Con "cualquier entrada cancela", esa cola movia la tira despues de encajar: −1,6 px de la linea en el escenario nuevo con cola (abajo).
+    - **La regla:** mientras encaja, la entrada alimenta una velocidad "libre", la que tendria la tira sin el encaje, que empieza en la velocidad del cruce. Una cola solo frena su caida; un gesto nuevo, o una tecla, la hace subir. El encaje acaba si sube mas de `SNAP_RESUME_PX` = 2 px/frame sobre su minimo, con entrada en sentido contrario o con un arrastre. Ya encajada, la tira sigue en su linea hasta que la velocidad libre baja de `SNAP_RELEASE_PX` = 0,5 (la cola se ha agotado).
+    - **El caso que pierde:** un scroll lento y constante que empieza justo cuando la tira frena se lee como cola y no la mueve hasta que se suelta. Para T5.
+  - **Escenario nuevo en el script, "trackpad con inercia":** 20 eventos de 60 px y una cola de 60 eventos de 60·0,93^k px, uno por frame.
+  - **Medida local, `next start`, mediana de 3** (`2026-10-23_012-t3-cpu1.txt` y `-t3-geometria.txt`, scratchpad):
+
+    | | Trackpad real | Trackpad con inercia |
+    |---|---|---|
+    | Pasan de la mitad (con la tira a mas de 20) | 3 (0) | 2 (0) |
+    | CA3: apertura desde el cruce | 0 ms | 0 ms |
+    | CA3b: album final frente al del cruce | +0 | +0 |
+    | CA3b: borde de la abierta frente a su linea | **0 px** | **0 px** |
+
+    Fling fuerte y rafaga no pasan del umbral y siguen como en T2. CA5 de la 011: 0 frames. 0 frames >50 ms, 0 errores de consola. Geometria (CA4, CA5): ok, diferencia max 0,1 px a 60 fps, 0 a 30 y 0,3 a 120.
+  - **El encaje al siguiente** no sale en esos dos escenarios, asi que se comprobo de dos formas mas (scratchpad):
+    - **En el navegador** (`barrido-encaje.mjs`): de 26 a 46 eventos de 60 px, los 11 terminan con el borde a **0,00 px** de la linea y el contador nunca retrocede.
+    - **Simulacion numerica del bucle** (`sim-encaje.mjs`, copia de la fisica sin DOM): de 15 a 60 eventos, a 30, 60 y 120 fps, con y sin cola, el encaje va al activo 21–27 veces y al siguiente 19–25 por tanda. **0 fallos:** siempre offsetPx 0, album final igual al elegido, nunca el anterior, y la activa no se abre antes del commit cuando va a la siguiente.
+    - **Un gesto nuevo durante el encaje mueve la tira** (`sim-gesto.mjs`): una muesca de 100 px despues del encaje recorre 51,75 px, lo mismo que hoy.
+  - **"Giro brusco" pasa de 1 cambio de album a 0.** No es una regresion: los escenarios van seguidos en la misma pagina, y el anterior ahora acaba encajado en la linea en lugar de a 19 px dentro del paso, asi que este empieza desde otra posicion. Ese escenario nunca pasa del umbral.
 - [ ] **T4** · Medida final local y diagnostico (CA2 a CA7)
   - Comprobacion:
     - `medir-carrusel.mjs --repeticiones 3` a CPU×1 y ×4;

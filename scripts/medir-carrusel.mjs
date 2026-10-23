@@ -33,7 +33,9 @@ const SETTLE_MS = 3500;
 const FAST_PX = 20;
 const SLOW_PX = 16;
 // Linea fija del borde derecho de la abierta en reposo, hacia delante: la
-// de la geometria de referencia de la spec 011 (ArrowRight 1).
+// de la llegada en la geometria de referencia de la spec 011 (offsetPx 0).
+// No sirve "ArrowRight 1": una tecla recorre ~207 px, hace un commit y deja
+// 65 px de sobra, asi que ese reposo no esta en la linea.
 const GEOM_REF = "evidencia/2026-10-22_011-geometria-antes.json";
 
 const args = process.argv.slice(2);
@@ -317,7 +319,11 @@ const SCENARIOS = [
   // Como un trackpad real: un evento de rueda por frame, despachado desde la
   // propia pagina. page.mouse.wheel espera la ida y vuelta de cada evento,
   // asi que el fling fuerte no pasa de ~8,5 px/frame (spec 012, T1).
-  { name: "trackpad real (40 x 60 px, uno por frame)", boxes: true, forward: true, perFrame: { events: 40, dy: 60 } },
+  { name: "trackpad real (40 x 60 px, uno por frame)", boxes: true, forward: true, perFrame: { dys: Array(40).fill(60) } },
+  // Con la cola de inercia de un trackpad: despues del gesto siguen llegando
+  // eventos cada vez mas pequenos en el mismo sentido (spec 012, T3: no
+  // deben cancelar el encaje).
+  { name: "trackpad con inercia (20 x 60 px y cola de 60 eventos)", boxes: true, forward: true, perFrame: { dys: [...Array(20).fill(60), ...Array.from({ length: 60 }, (_, k) => Math.round(60 * 0.93 ** (k + 1)))] } },
   { name: "giro brusco (20 x 15 px y 20 x -15 px)", boxes: true, steps: [...Array.from({ length: 20 }, () => [15, 16]), ...Array.from({ length: 20 }, () => [-15, 16])] },
   { name: "paso y paso atras (raton)", boxes: true, steps: [[120, 250], [-120, 16]] },
 ];
@@ -379,7 +385,7 @@ let lineCache;
 function anchorLine() {
   if (lineCache !== undefined) return lineCache;
   try {
-    const ref = JSON.parse(readFileSync(GEOM_REF, "utf8")).states["ArrowRight 1"].slides;
+    const ref = JSON.parse(readFileSync(GEOM_REF, "utf8")).states["llegada"].slides;
     const open = ref.reduce((a, b) => (b.w > a.w ? b : a));
     lineCache = open.l + open.w;
   } catch { lineCache = null; }
@@ -535,14 +541,14 @@ async function onePass() {
     const a = await cost(cdp);
     t0 = await now(page);
     if (sc.perFrame) {
-      await page.evaluate(({ events, dy }) => new Promise((done) => {
+      await page.evaluate(({ dys }) => new Promise((done) => {
         let n = 0;
         const fire = () => {
           // El elemento bajo el centro se busca en cada evento: el enlace de
           // la abierta desaparece del DOM en cada cambio de album, y un evento
           // despachado sobre un nodo suelto no llega al carrusel.
-          document.elementFromPoint(innerWidth / 2, innerHeight / 2).dispatchEvent(new WheelEvent("wheel", { deltaY: dy, bubbles: true, cancelable: true }));
-          if (++n < events) requestAnimationFrame(fire); else done();
+          document.elementFromPoint(innerWidth / 2, innerHeight / 2).dispatchEvent(new WheelEvent("wheel", { deltaY: dys[n], bubbles: true, cancelable: true }));
+          if (++n < dys.length) requestAnimationFrame(fire); else done();
         };
         requestAnimationFrame(fire);
       }), sc.perFrame);
