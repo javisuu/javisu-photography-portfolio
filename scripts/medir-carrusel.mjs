@@ -32,11 +32,8 @@ const SETTLE_MS = 3500;
 // (src/motion/AlbumsCarousel.tsx, OPEN_SPEED y su histeresis).
 const FAST_PX = 20;
 const SLOW_PX = 16;
-// Linea fija del borde derecho de la abierta en reposo, hacia delante: la
-// de la llegada en la geometria de referencia de la spec 011 (offsetPx 0).
-// No sirve "ArrowRight 1": una tecla recorre ~207 px, hace un commit y deja
-// 65 px de sobra, asi que ese reposo no esta en la linea.
-const GEOM_REF = "evidencia/2026-10-22_011-geometria-antes.json";
+// Spec 012, enmienda 1: la abierta reposa centrada en la pantalla.
+const CENTER_X = 720;
 
 const args = process.argv.slice(2);
 const val = (k, d = null) => (args.includes(k) ? args[args.indexOf(k) + 1] ?? "" : d);
@@ -324,6 +321,9 @@ const SCENARIOS = [
   // eventos cada vez mas pequenos en el mismo sentido (spec 012, T3: no
   // deben cancelar el encaje).
   { name: "trackpad con inercia (20 x 60 px y cola de 60 eventos)", boxes: true, forward: true, perFrame: { dys: [...Array(20).fill(60), ...Array.from({ length: 60 }, (_, k) => Math.round(60 * 0.93 ** (k + 1)))] } },
+  // Como el scroll filmado en cynx.io (spec 012, enmienda 1): muy lento hacia
+  // delante, pausa y vuelta atras. Un cambio de album en cada sentido.
+  { name: "lento ida y vuelta (60 x 4 px, pausa, 60 x -4 px)", boxes: true, steps: [...Array.from({ length: 59 }, () => [4, 40]), [4, 2540], ...Array.from({ length: 60 }, () => [-4, 40])] },
   { name: "giro brusco (20 x 15 px y 20 x -15 px)", boxes: true, steps: [...Array.from({ length: 20 }, () => [15, 16]), ...Array.from({ length: 20 }, () => [-15, 16])] },
   { name: "paso y paso atras (raton)", boxes: true, steps: [[120, 250], [-120, 16]] },
 ];
@@ -381,16 +381,6 @@ function albumSteps(frames, total) {
 // La velocidad de la tira sale de una diapositiva a dos o mas posiciones por
 // delante de la abierta: esas no cambian de ancho, asi que se mueven con la
 // tira (incluye restOffsetPx y el encaje, que tambien mueven la tira).
-let lineCache;
-function anchorLine() {
-  if (lineCache !== undefined) return lineCache;
-  try {
-    const ref = JSON.parse(readFileSync(GEOM_REF, "utf8")).states["llegada"].slides;
-    const open = ref.reduce((a, b) => (b.w > a.w ? b : a));
-    lineCache = open.l + open.w;
-  } catch { lineCache = null; }
-  return lineCache;
-}
 function stopStats(frames, total) {
   const rec = frames.filter((f) => f.boxes);
   const speed = new Array(rec.length).fill(null);
@@ -434,14 +424,53 @@ function stopStats(frames, total) {
     if (d < -total / 2) d += total;
     finalVsCross = d;
   }
-  const line = anchorLine();
+  // CA10 de la enmienda: apertura maxima de la abierta (la del enlace) con la
+  // tira a 30 px/frame o mas.
+  let capMax = null;
+  rec.forEach((f, i) => {
+    if (speed[i] === null || speed[i] < 30) return;
+    const a = f.boxes.find((b) => b.a);
+    if (a && a.nat > S) capMax = Math.max(capMax ?? 0, (a.w - S) / (a.nat - S));
+  });
   const sp = speed.filter((v) => v !== null).sort((a, b) => a - b);
   return {
     speedMax: sp.length ? sp[sp.length - 1] : 0, speedP90: sp.length ? sp[Math.floor(0.9 * (sp.length - 1))] : 0,
     halfCount: half.size, halfFast, crossed: cross >= 0 ? 1 : 0,
     toOpen, toCommit, finalVsCross,
-    edgeOff: line !== null && finalOpen ? finalOpen.r - line : null,
+    capMax,
   };
+}
+
+// Spec 012, enmienda 1, en todo escenario con cajas:
+// - CA2: en cada cambio de album, el centro de la abierta saliente frente a
+//   CENTER_X en el ultimo frame antes del cambio (con signo: + a la derecha);
+// - CA3: el borde de la que entra mas cercano a la saliente, en el primer
+//   frame en que pasa de S + 0,5 px (buscando hacia atras desde el cambio);
+// - CA3b: el centro de la abierta en reposo, al final, frente a CENTER_X.
+// La abierta es la del enlace (`a`), que React mueve en cada cambio.
+function swapStats(frames) {
+  const rec = frames.filter((f) => f.boxes && f.boxes.some((b) => b.a));
+  const swaps = [];
+  for (let i = 1; i < rec.length; i++) {
+    const was = rec[i - 1].boxes.find((b) => b.a);
+    const now = rec[i].boxes.find((b) => b.a);
+    if (!was || !now || was.id === now.id) continue;
+    const off = (was.l + was.r) / 2 - CENTER_X;
+    let edge = null;
+    for (let k = i; k > 0; k--) {
+      const b = rec[k].boxes.find((x) => x.id === now.id);
+      const a = rec[k - 1].boxes.find((x) => x.id === now.id);
+      if (!b || !a) break;
+      if (b.w > S + 0.5 && a.w <= S + 0.5) {
+        edge = b.l > was.l ? b.l : b.r;
+        break;
+      }
+    }
+    swaps.push({ dir: now.l > was.l ? 1 : -1, off, edge });
+  }
+  const last = rec[rec.length - 1];
+  const open = last ? last.boxes.find((b) => b.a) : null;
+  return { swaps, centerOff: open ? (open.l + open.r) / 2 - CENTER_X : null };
 }
 
 function trailStats(frames) {
@@ -565,6 +594,7 @@ async function onePass() {
     if (sc.boxes) {
       const fo = foldStats(fs);
       if (sc.forward) Object.assign(r, trailStats(fs), stopStats(fs, total));
+      Object.assign(r, swapStats(fs));
       Object.assign(r, { hist: fo.hist, threePlus: fo.threePlus, maxMid: fo.maxMid, jump: fo.jump, restMs: fo.lastMove === null ? 0 : Math.max(0, fo.lastMove - tInput), trace: fo.trace });
     }
     out[sc.name] = r;
@@ -617,8 +647,14 @@ async function fluidity() {
           const ms = (v) => (v === null ? "—" : `${Math.round(v)} ms`);
           log(`  spec 012, al frenar: apertura a ${ms(x.toOpen)} del cruce · ultimo cambio de album a ${ms(x.toCommit)} · album final ${x.finalVsCross >= 0 ? "+" : ""}${x.finalVsCross} frente al del cruce`);
         } else log(`  spec 012, al frenar: la tira no paso de ${FAST_PX} px/frame`);
-        if (x.edgeOff !== null) log(`  spec 012, encaje: borde derecho de la abierta a ${r1(x.edgeOff)} px de su linea`);
+        if (x.capMax !== null) log(`  CA10, a 30 px/frame o mas: la abierta llega como mucho al ${Math.round(100 * x.capMax)} % de su ancho extra`);
         log(`  CA12, estela: en ${x.trailFrames} frames, ${x.trailBad} no decrecen con la distancia · ancho extra max ${Math.round(x.trailMaxPx)} px`);
+      }
+      if (x.centerOff !== null) log(`  CA3b, en reposo: centro de la abierta a ${r1(x.centerOff)} px del centro de la pantalla`);
+      if (x.swaps.length) {
+        const fmt = (w) => `${w.dir > 0 ? "adelante" : "atras"} a ${w.off >= 0 ? "+" : ""}${r1(w.off)} px del centro, entra por ${w.edge === null ? "—" : `${Math.round(w.edge)} px`}`;
+        const shown = x.swaps.length > 6 ? [...x.swaps.slice(0, 3), ...x.swaps.slice(-3)] : x.swaps;
+        log(`  CA2 y CA3, ${x.swaps.length} cambios (pasada 1)${x.swaps.length > 6 ? ", los 3 primeros y los 3 ultimos" : ""}: ${shown.map(fmt).join(" · ")}`);
       }
       log(`  a medio plegar por frame: ${Object.entries(x.hist).map(([k, v]) => `${k}: ${v}`).join(" · ")} · max ${x.maxMid} · frames con 3 o mas: ${x.threePlus}`);
       log(`  salto max de borde (frente a la mediana de sus 6 vecinos): ${r1(x.jump)} px · reposo ${Math.round(x.restMs)} ms despues de la ultima entrada`);
