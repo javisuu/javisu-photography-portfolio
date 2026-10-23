@@ -1,0 +1,33 @@
+MEDIR CARRUSEL 2026-10-22 · feat/011-carrusel-fluido · 78e6737
+contra https://javisu-photography-portfolio.vercel.app · cpu x1 · 60 fps · 1440x900 · 1 repeticion(es)
+
+=== servidor remoto ===
+ok · http 200
+
+=== geometria en reposo · 60 fps ===
+  llegada: contador 01 · 7 diapositivas en pantalla
+  ArrowRight 1: contador 02 · 9 diapositivas en pantalla
+  ArrowRight 2: contador 03 · 9 diapositivas en pantalla
+  ArrowLeft 1: contador 03 · 9 diapositivas en pantalla
+  ArrowLeft 2: contador 02 · 10 diapositivas en pantalla
+  guardado en C:/Users/jsuqu/AppData/Local/Temp/claude/C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio/71eb1df3-07ac-404a-bef7-36bd0f377538/scratchpad/2026-10-22_011-geometria-antes.json
+MEDIR CARRUSEL 2026-10-22 · feat/011-carrusel-fluido · 78e6737
+contra https://javisu-photography-portfolio.vercel.app · cpu x1 · 60 fps · 1440x900 · 1 repeticion(es)
+
+=== servidor remoto ===
+ok · http 200
+
+=== geometria en reposo · 60 fps ===
+  llegada: contador 01 · 7 diapositivas en pantalla
+  ArrowRight 1: contador 02 · 9 diapositivas en pantalla
+  ArrowRight 2: contador 03 · 9 diapositivas en pantalla
+  ArrowLeft 1: contador 03 · 9 diapositivas en pantalla
+  ArrowLeft 2: contador 02 · 10 diapositivas en pantalla
+  guardado en C:/Users/jsuqu/AppData/Local/Temp/claude/C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio/71eb1df3-07ac-404a-bef7-36bd0f377538/scratchpad/geom-check.json
+
+=== comparacion con C:/Users/jsuqu/AppData/Local/Temp/claude/C--Users-jsuqu-Documents-aprendizaje-autonomo-javisu-photography-portfolio/71eb1df3-07ac-404a-bef7-36bd0f377538/scratchpad/2026-10-22_011-geometria-antes.json ===
+  llegada: ok   diferencia max 0 px
+  ArrowRight 1: ok   diferencia max 0 px
+  ArrowRight 2: ok   diferencia max 0 px
+  ArrowLeft 1: ok   diferencia max 0 px
+  ArrowLeft 2: ok   diferencia max 0 px

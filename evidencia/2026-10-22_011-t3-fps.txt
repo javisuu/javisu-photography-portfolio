@@ -1,0 +1,33 @@
+## 60 fps
+  llegada: contador 01 · 7 diapositivas en pantalla
+  ArrowRight 1: contador 02 · 9 diapositivas en pantalla · reposo a 924 ms
+  ArrowRight 2: contador 03 · 9 diapositivas en pantalla · reposo a 812 ms
+  ArrowLeft 1: contador 03 · 9 diapositivas en pantalla · reposo a 688 ms
+  ArrowLeft 2: contador 02 · 10 diapositivas en pantalla · reposo a 857 ms
+  llegada: ok   diferencia max 0 px
+  ArrowRight 1: ok   diferencia max 0 px
+  ArrowRight 2: ok   diferencia max 0 px
+  ArrowLeft 1: ok   diferencia max 0 px
+  ArrowLeft 2: ok   diferencia max 0 px
+## 30 fps
+  llegada: contador 01 · 7 diapositivas en pantalla
+  ArrowRight 1: contador 02 · 9 diapositivas en pantalla · reposo a 915 ms
+  ArrowRight 2: contador 03 · 9 diapositivas en pantalla · reposo a 790 ms
+  ArrowLeft 1: contador 03 · 9 diapositivas en pantalla · reposo a 696 ms
+  ArrowLeft 2: contador 02 · 10 diapositivas en pantalla · reposo a 858 ms
+  llegada: ok   diferencia max 0 px
+  ArrowRight 1: ok   diferencia max 0 px
+  ArrowRight 2: ok   diferencia max 0 px
+  ArrowLeft 1: ok   diferencia max 0 px
+  ArrowLeft 2: ok   diferencia max 0 px
+## 120 fps
+  llegada: contador 01 · 7 diapositivas en pantalla
+  ArrowRight 1: contador 02 · 9 diapositivas en pantalla · reposo a 938 ms
+  ArrowRight 2: contador 03 · 9 diapositivas en pantalla · reposo a 823 ms
+  ArrowLeft 1: contador 03 · 9 diapositivas en pantalla · reposo a 692 ms
+  ArrowLeft 2: contador 02 · 10 diapositivas en pantalla · reposo a 869 ms
+  llegada: ok   diferencia max 0 px
+  ArrowRight 1: ok   diferencia max 0.1 px
+  ArrowRight 2: ok   diferencia max 0.2 px
+  ArrowLeft 1: ok   diferencia max 0.2 px
+  ArrowLeft 2: ok   diferencia max 0.2 px

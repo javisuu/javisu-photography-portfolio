@@ -188,10 +188,13 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
-- [ ] Criterios de aceptacion de la spec ejecutados
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`. Diagnostico final, con la estela: tsc, lint y build ok · 0 errores de consola en 6 rutas · **105 de 105** · entrada 217 ms, 0 frames >50 ms (`2026-10-23_diagnostico_011-enmienda1.txt`)
+- [x] Criterios de aceptacion de la spec ejecutados. Salen dos de su meta, ninguno por un fallo:
+  - CA6, saltos de 7–23 px frente a 8. Javi da el efecto por bueno (T17).
+  - La long task de 217 ms de CA3 en la llegada, que es hidratacion comun a todas las rutas (T9).
+  - Queda T13, la medida en produccion tras el push.
+- [x] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
+- [ ] Estado de `spec.md` → Implementada (tras T13)
 
 ## Enmienda 1 (2026-10-22): scroll libre y estela
 

@@ -1,0 +1,346 @@
+{
+  "base": "https://javisu-photography-portfolio.vercel.app",
+  "fps": 60,
+  "cpu": 1,
+  "head": "78e6737",
+  "states": {
+    "llegada": {
+      "counter": "01",
+      "slides": [
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 29.5,
+          "w": 110,
+          "cropL": 274.33,
+          "cropR": 384.33
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 171.5,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 313.5,
+          "w": 667,
+          "cropL": 0,
+          "cropR": 667
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 1012.5,
+          "w": 110,
+          "cropL": 260.33,
+          "cropR": 370.33
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 1154.5,
+          "w": 110,
+          "cropL": 255.67,
+          "cropR": 365.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 1296.5,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 1438.5,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        }
+      ],
+      "quieto": true
+    },
+    "ArrowRight 1": {
+      "counter": "02",
+      "slides": [
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": -27.48,
+          "w": 110,
+          "cropL": 279,
+          "cropR": 389
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 114.52,
+          "w": 110,
+          "cropL": 274.33,
+          "cropR": 384.33
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 256.52,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 398.52,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 540.53,
+          "w": 374.98,
+          "cropL": 0.02,
+          "cropR": 375
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 947.52,
+          "w": 110,
+          "cropL": 255.67,
+          "cropR": 365.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 1089.52,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 1231.52,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 1373.52,
+          "w": 110,
+          "cropL": 251,
+          "cropR": 361
+        }
+      ],
+      "quieto": true
+    },
+    "ArrowRight 2": {
+      "counter": "03",
+      "slides": [
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": -92.47,
+          "w": 110,
+          "cropL": 274.33,
+          "cropR": 384.33
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 49.53,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 191.53,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 333.53,
+          "w": 110,
+          "cropL": 269.67,
+          "cropR": 379.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 475.53,
+          "w": 374.98,
+          "cropL": 0.02,
+          "cropR": 375
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 882.53,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 1024.53,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 1166.53,
+          "w": 110,
+          "cropL": 251,
+          "cropR": 361
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 1308.53,
+          "w": 110,
+          "cropL": 251,
+          "cropR": 361
+        }
+      ],
+      "quieto": true
+    },
+    "ArrowLeft 1": {
+      "counter": "03",
+      "slides": [
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": -27.54,
+          "w": 110,
+          "cropL": 279,
+          "cropR": 389
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 114.46,
+          "w": 110,
+          "cropL": 274.33,
+          "cropR": 384.33
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 256.46,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 398.46,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 540.46,
+          "w": 110,
+          "cropL": 269.67,
+          "cropR": 379.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 682.46,
+          "w": 375,
+          "cropL": 0,
+          "cropR": 375
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 1089.46,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 1231.46,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 1373.46,
+          "w": 110,
+          "cropL": 251,
+          "cropR": 361
+        }
+      ],
+      "quieto": true
+    },
+    "ArrowLeft 2": {
+      "counter": "02",
+      "slides": [
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": -108.52,
+          "w": 110,
+          "cropL": 571,
+          "cropR": 681
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 33.48,
+          "w": 110,
+          "cropL": 279,
+          "cropR": 389
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 175.48,
+          "w": 110,
+          "cropL": 274.33,
+          "cropR": 384.33
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 317.48,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 459.48,
+          "w": 110,
+          "cropL": 561.67,
+          "cropR": 671.67
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 601.48,
+          "w": 374.98,
+          "cropL": 0,
+          "cropR": 374.98
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+          "l": 1008.48,
+          "w": 110,
+          "cropL": -4.67,
+          "cropR": 105.33
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+          "l": 1150.48,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+          "l": 1292.48,
+          "w": 110,
+          "cropL": 543,
+          "cropR": 653
+        },
+        {
+          "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+          "l": 1434.48,
+          "w": 110,
+          "cropL": 251,
+          "cropR": 361
+        }
+      ],
+      "quieto": true
+    }
+  }
+}

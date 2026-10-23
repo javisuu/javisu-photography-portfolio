@@ -1,0 +1,2 @@
+con cola: cambios de album 7 · max a medio plegar 2 · errores 0
+?cola=libre: cambios de album 10 · max a medio plegar 4 · errores 0
