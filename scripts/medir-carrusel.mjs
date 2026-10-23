@@ -28,6 +28,13 @@ const S = 110; // ancho de una diapositiva plegada (src/motion/AlbumsCarousel.ts
 const EPS = 0.5;
 const SLIDE_HEIGHT = 500;
 const SETTLE_MS = 3500;
+// Spec 012: umbral de "rapido" de la tira, en px por frame de referencia
+// (src/motion/AlbumsCarousel.tsx, OPEN_SPEED y su histeresis).
+const FAST_PX = 20;
+const SLOW_PX = 16;
+// Linea fija del borde derecho de la abierta en reposo, hacia delante: la
+// de la geometria de referencia de la spec 011 (ArrowRight 1).
+const GEOM_REF = "evidencia/2026-10-22_011-geometria-antes.json";
 
 const args = process.argv.slice(2);
 const val = (k, d = null) => (args.includes(k) ? args[args.indexOf(k) + 1] ?? "" : d);
@@ -307,6 +314,10 @@ const SCENARIOS = [
   { name: "raton (8 x 100 px)", boxes: false, steps: Array.from({ length: 8 }, () => [100, 120]) },
   { name: "fling fuerte (60 x 50 px)", boxes: true, forward: true, steps: Array.from({ length: 60 }, () => [50, 8]) },
   { name: "rafaga (40 x 30 px)", boxes: true, forward: true, steps: Array.from({ length: 40 }, () => [30, 16]) },
+  // Como un trackpad real: un evento de rueda por frame, despachado desde la
+  // propia pagina. page.mouse.wheel espera la ida y vuelta de cada evento,
+  // asi que el fling fuerte no pasa de ~8,5 px/frame (spec 012, T1).
+  { name: "trackpad real (40 x 60 px, uno por frame)", boxes: true, forward: true, perFrame: { events: 40, dy: 60 } },
   { name: "giro brusco (20 x 15 px y 20 x -15 px)", boxes: true, steps: [...Array.from({ length: 20 }, () => [15, 16]), ...Array.from({ length: 20 }, () => [-15, 16])] },
   { name: "paso y paso atras (raton)", boxes: true, steps: [[120, 250], [-120, 16]] },
 ];
@@ -353,6 +364,80 @@ function albumSteps(frames, total) {
 // - CA12: la estela (las de detras, a la izquierda) decrece con la
 //   distancia: cada una igual o mas estrecha que la anterior, con 0,5 px de
 //   margen, en los frames en que hay estela.
+// Spec 012, en escenarios hacia delante:
+// - cuantas diapositivas distintas pasan de la mitad de su apertura, y a que
+//   velocidad de la tira lo hicieron (CA1, CA2);
+// - del ultimo cruce de la velocidad hacia abajo (de mas de FAST_PX a menos
+//   de SLOW_PX) a la primera apertura de la que queda abierta, y al ultimo
+//   cambio de album (CA3);
+// - el encaje: borde derecho de la abierta en reposo frente a la linea fija,
+//   y album final frente al del cruce (CA3b).
+// La velocidad de la tira sale de una diapositiva a dos o mas posiciones por
+// delante de la abierta: esas no cambian de ancho, asi que se mueven con la
+// tira (incluye restOffsetPx y el encaje, que tambien mueven la tira).
+let lineCache;
+function anchorLine() {
+  if (lineCache !== undefined) return lineCache;
+  try {
+    const ref = JSON.parse(readFileSync(GEOM_REF, "utf8")).states["ArrowRight 1"].slides;
+    const open = ref.reduce((a, b) => (b.w > a.w ? b : a));
+    lineCache = open.l + open.w;
+  } catch { lineCache = null; }
+  return lineCache;
+}
+function stopStats(frames, total) {
+  const rec = frames.filter((f) => f.boxes);
+  const speed = new Array(rec.length).fill(null);
+  for (let i = 1; i < rec.length; i++) {
+    const bs = [...rec[i].boxes].sort((a, b) => a.l - b.l);
+    const k = bs.reduce((best, b, j) => (b.w > bs[best].w ? j : best), 0);
+    // Mediana de todas las de delante presentes en los dos frames: una sola
+    // daba picos de 77 px/frame en los cambios de album.
+    const moves = bs.slice(k + 2)
+      .map((b) => { const a = rec[i - 1].boxes.find((x) => x.id === b.id); return a ? Math.abs(b.l - a.l) : null; })
+      .filter((v) => v !== null);
+    if (moves.length) speed[i] = (median(moves) * (1000 / 60)) / Math.max(1, rec[i].t - rec[i - 1].t);
+  }
+  const half = new Map();
+  rec.forEach((f, i) => f.boxes.forEach((b) => {
+    if (!half.has(b.id) && b.w - S > 0.5 * (b.nat - S)) half.set(b.id, speed[i]);
+  }));
+  const halfFast = [...half.values()].filter((v) => v !== null && v > FAST_PX).length;
+  // Ultimo cruce hacia abajo.
+  let wasFast = false, cross = -1;
+  for (let i = 0; i < rec.length; i++) {
+    if (speed[i] === null) continue;
+    if (speed[i] > FAST_PX) wasFast = true;
+    else if (wasFast && speed[i] < SLOW_PX) { cross = i; wasFast = false; }
+  }
+  const last = rec[rec.length - 1];
+  const finalOpen = last ? last.boxes.reduce((a, b) => (b.w > a.w ? b : a)) : null;
+  let toOpen = null, toCommit = null, finalVsCross = null;
+  if (cross >= 0 && finalOpen) {
+    for (let i = cross; i < rec.length; i++) {
+      const b = rec[i].boxes.find((x) => x.id === finalOpen.id);
+      const prev = rec[i - 1]?.boxes.find((x) => x.id === finalOpen.id);
+      if (b && prev && b.w > prev.w + 0.05) { toOpen = rec[i].t - rec[cross].t; break; }
+      if (b && b.w >= b.nat - EPS) { toOpen = 0; break; }
+    }
+    for (let i = rec.length - 1; i > cross; i--) {
+      if (rec[i].counter !== rec[i - 1].counter) { toCommit = rec[i].t - rec[cross].t; break; }
+    }
+    let d = (Number(last.counter) - Number(rec[cross].counter)) % total;
+    if (d > total / 2) d -= total;
+    if (d < -total / 2) d += total;
+    finalVsCross = d;
+  }
+  const line = anchorLine();
+  const sp = speed.filter((v) => v !== null).sort((a, b) => a - b);
+  return {
+    speedMax: sp.length ? sp[sp.length - 1] : 0, speedP90: sp.length ? sp[Math.floor(0.9 * (sp.length - 1))] : 0,
+    halfCount: half.size, halfFast, crossed: cross >= 0 ? 1 : 0,
+    toOpen, toCommit, finalVsCross,
+    edgeOff: line !== null && finalOpen ? finalOpen.r - line : null,
+  };
+}
+
 function trailStats(frames) {
   let aheadFrames = 0, aheadMax = 0, trailFrames = 0, trailBad = 0, trailMaxPx = 0;
   for (const f of frames.filter((x) => x.boxes)) {
@@ -449,7 +534,21 @@ async function onePass() {
     await page.evaluate((b) => (window.__rec.recBoxes = b), sc.boxes);
     const a = await cost(cdp);
     t0 = await now(page);
-    for (const [dy, wait] of sc.steps) { await page.mouse.wheel(0, dy); await page.waitForTimeout(wait); }
+    if (sc.perFrame) {
+      await page.evaluate(({ events, dy }) => new Promise((done) => {
+        let n = 0;
+        const fire = () => {
+          // El elemento bajo el centro se busca en cada evento: el enlace de
+          // la abierta desaparece del DOM en cada cambio de album, y un evento
+          // despachado sobre un nodo suelto no llega al carrusel.
+          document.elementFromPoint(innerWidth / 2, innerHeight / 2).dispatchEvent(new WheelEvent("wheel", { deltaY: dy, bubbles: true, cancelable: true }));
+          if (++n < events) requestAnimationFrame(fire); else done();
+        };
+        requestAnimationFrame(fire);
+      }), sc.perFrame);
+    } else {
+      for (const [dy, wait] of sc.steps) { await page.mouse.wheel(0, dy); await page.waitForTimeout(wait); }
+    }
     const tInput = await now(page);
     await page.waitForTimeout(sc.boxes ? 2500 : 1500);
     const b = await cost(cdp);
@@ -459,7 +558,7 @@ async function onePass() {
     const r = { ...st, stylePerFrame: (b.styleMs - a.styleMs) / Math.max(1, st.frames), layoutPerFrame: (b.layoutMs - a.layoutMs) / Math.max(1, st.frames), ltCount: l.length, ...writeStats(fs), ...albumSteps(fs, total) };
     if (sc.boxes) {
       const fo = foldStats(fs);
-      if (sc.forward) Object.assign(r, trailStats(fs));
+      if (sc.forward) Object.assign(r, trailStats(fs), stopStats(fs, total));
       Object.assign(r, { hist: fo.hist, threePlus: fo.threePlus, maxMid: fo.maxMid, jump: fo.jump, restMs: fo.lastMove === null ? 0 : Math.max(0, fo.lastMove - tInput), trace: fo.trace });
     }
     out[sc.name] = r;
@@ -506,6 +605,13 @@ async function fluidity() {
     if (sc.boxes) {
       if (sc.forward) {
         log(`  CA5, por delante de la que se abre: ${x.aheadFrames} frames con un ancho distinto de ${S} px (max ${r1(x.aheadMax)} px)`);
+        log(`  spec 012, velocidad de la tira: max ${r1(x.speedMax)} px/frame · p90 ${r1(x.speedP90)}`);
+        log(`  spec 012: ${x.halfCount} diapositivas pasan de la mitad de su apertura, ${x.halfFast} con la tira a mas de ${FAST_PX} px/frame`);
+        if (x.crossed) {
+          const ms = (v) => (v === null ? "—" : `${Math.round(v)} ms`);
+          log(`  spec 012, al frenar: apertura a ${ms(x.toOpen)} del cruce · ultimo cambio de album a ${ms(x.toCommit)} · album final ${x.finalVsCross >= 0 ? "+" : ""}${x.finalVsCross} frente al del cruce`);
+        } else log(`  spec 012, al frenar: la tira no paso de ${FAST_PX} px/frame`);
+        if (x.edgeOff !== null) log(`  spec 012, encaje: borde derecho de la abierta a ${r1(x.edgeOff)} px de su linea`);
         log(`  CA12, estela: en ${x.trailFrames} frames, ${x.trailBad} no decrecen con la distancia · ancho extra max ${Math.round(x.trailMaxPx)} px`);
       }
       log(`  a medio plegar por frame: ${Object.entries(x.hist).map(([k, v]) => `${k}: ${v}`).join(" · ")} · max ${x.maxMid} · frames con 3 o mas: ${x.threePlus}`);
