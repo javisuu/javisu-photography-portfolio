@@ -133,8 +133,16 @@ Antes de cada `next build`, Javi para su `npm run dev`: comparten `.next/`, y un
   - Comprobacion: CA3b en "trackpad real" y "con inercia"; CA4 (una tecla, centrado ±1 px); sin encaje en el escenario lento; tsc y lint ok
 - [ ] **E5** · Medida final local y diagnostico (CA2 a CA10)
   - Comprobacion: `--repeticiones 3` a CPU×1 y ×4; geometria a 60, 30 y 120 fps; `node scripts/diagnostico.mjs` en verde; tabla de CA aqui
-- [ ] **E6** · Revision de Javi (CA8)
+- [x] **E6** · Revision de Javi (CA8)
   - Comprobacion: Javi prueba `/albums` en `npm run dev` con su trackpad, frente a cynx.io. Testimonio aqui
+  - **Hecho, antes de E5.** Javi lo probo en su `npm run dev` con el codigo de `a0f2a30`, el 2026-10-23: "Esta genial". CA8 cumplido.
+  - Lo medido hasta entonces, contra ese mismo `next dev` (`e4-dev.txt`, scratchpad), sin valor para fluidez ni saltos (el dev pierde frames):
+    - encaje tras un scroll rapido: 1,2 y 1,8 px del centro;
+    - cambio de album en el escenario lento: a −72 px hacia delante y +86 hacia atras, entrando por 1002 y 488 px;
+    - tope a 30 px/frame o mas: 28 %, frente al 20 % de CA10;
+    - salto max de borde: 10 a 21 px, el peor en un frame de 33 ms.
+
+    Todo eso se mide de verdad en E5.
 - [ ] **T6** · Documentacion
   - Fichero(s): `docs/design-spec-v2.md` §2 ("Commit is position-triggered" y "no snap-back") y su Changelog, `CLAUDE.md` (build order, carrusel)
   - Comprobacion: `git diff main --stat` solo muestra los ficheros de la tabla del plan, mas `specs/012-carrusel-abrir-al-frenar/`
