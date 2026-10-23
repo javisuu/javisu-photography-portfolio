@@ -96,8 +96,45 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     | CA8 | Pendiente: T5 | — |
 
     CA1 decia "10 cambios y 11 que pasan de la mitad"; el script del repo da 11 y 12 en el mismo fling (T1).
-- [ ] **T5** · Revision de Javi (CA8)
+- [x] **T5** · Revision de Javi (CA8)
   - Comprobacion: Javi prueba `/albums` en `npm run dev` con su trackpad, frente a cynx.io. Testimonio aqui. Si pide ajustes del umbral (20/16) o del encaje, se repiten T2/T3 y T4
+  - **Hecho: no lo da por bueno.** Pide tres cambios de modelo, recogidos en la enmienda 1 de `spec.md` (aprobada el 2026-10-23), con su plan en `plan.md`. Se hacen en E1 a E6.
+
+### Enmienda 1
+
+Antes de cada `next build`, Javi para su `npm run dev`: comparten `.next/`, y un build con el dev abierto lo rompe (2026-10-23: landing en negro y 404 en `/albums`).
+
+- [ ] **E1** · Medida de la enmienda
+  - Fichero(s): `scripts/medir-carrusel.mjs`
+  - Cambio (plan de la enmienda, parte 5):
+    - escenario "lento ida y vuelta" (60 x 4 px cada 40 ms, pausa de 2,5 s, vuelta);
+    - por cada cambio de album, el centro de la abierta frente a 720 en el frame anterior al commit, y el borde de entrada de la que llega al pasar de 110,5 px;
+    - el encaje medido por el centro de la abierta;
+    - el tope de apertura a 30 px/frame o mas.
+  - Comprobacion: linea base local con el codigo de `efad305`, `--repeticiones 3`. Salida `2026-10-23_012e-linea-base.txt`
+- [ ] **E2** · Geometria centrada y commit a medio paso (CA2, CA3, CA4, CA9)
+  - Fichero(s): `src/motion/AlbumsCarousel.tsx`
+  - Cambio: `computeFrame` centrado y sin sentido; commit en `|offsetPx| > STEP/2`; fuera `restOffsetPx` y `anchorRestOffsetPx` (plan de la enmienda, partes 1 y 2)
+  - Comprobacion:
+    - CA2 y CA3 en el escenario lento;
+    - CA9 en todos;
+    - referencia de geometria nueva a 60 fps, y CA4 a 30 y 120 contra ella;
+    - tsc y lint ok.
+- [ ] **E3** · Apertura con la velocidad (CA10)
+  - Fichero(s): `src/motion/AlbumsCarousel.tsx`
+  - Cambio: la activa apunta a `amp(v)` (1 por debajo de 16 px/frame, 0,2 a 30 o mas); fuera el destino de T2 (plan de la enmienda, parte 3)
+  - Comprobacion: CA10 en "trackpad real"; CA12 de la 011 (la estela decrece); tsc y lint ok
+- [ ] **E4** · Encaje y teclas (CA3b, CA4)
+  - Fichero(s): `src/motion/AlbumsCarousel.tsx`
+  - Cambio (plan de la enmienda, parte 4):
+    - el encaje va al album mas cercano a donde pararia la friccion, el activo o el siguiente;
+    - fuera la espera de la activa a `snapIdx`;
+    - una tecla pone el encaje en el album de al lado, en lugar de dar velocidad (fuera `KEY_KICK_PX`).
+  - Comprobacion: CA3b en "trackpad real" y "con inercia"; CA4 (una tecla, centrado ±1 px); sin encaje en el escenario lento; tsc y lint ok
+- [ ] **E5** · Medida final local y diagnostico (CA2 a CA10)
+  - Comprobacion: `--repeticiones 3` a CPU×1 y ×4; geometria a 60, 30 y 120 fps; `node scripts/diagnostico.mjs` en verde; tabla de CA aqui
+- [ ] **E6** · Revision de Javi (CA8)
+  - Comprobacion: Javi prueba `/albums` en `npm run dev` con su trackpad, frente a cynx.io. Testimonio aqui
 - [ ] **T6** · Documentacion
   - Fichero(s): `docs/design-spec-v2.md` §2 ("Commit is position-triggered" y "no snap-back") y su Changelog, `CLAUDE.md` (build order, carrusel)
   - Comprobacion: `git diff main --stat` solo muestra los ficheros de la tabla del plan, mas `specs/012-carrusel-abrir-al-frenar/`

@@ -103,7 +103,7 @@ El agente no puede escribir en `evidencia/` (`.claude/settings.json:27`). Las sa
 
 ## Enmienda 1: plan
 
-- **Spec:** `spec.md`, enmienda 1 (aprobada por Javi el 2026-10-23). Plan **pendiente de aprobacion**
+- **Spec:** `spec.md`, enmienda 1 (aprobada por Javi el 2026-10-23). Plan aprobado por Javi el mismo dia, con las dos propuestas: el 20 % solo para la que se abre (la estela, como en la 011) y el encaje al album mas cercano a donde pararia la friccion
 
 Todo sigue en `src/motion/AlbumsCarousel.tsx`. Cambian la geometria (`computeFrame`), el commit, los destinos de apertura y el encaje. No cambian el pintado (contra-escala, grano, deriva), la fisica por tiempo, el muelle ni la estela.
 
