@@ -143,6 +143,9 @@ Antes de cada `next build`, Javi para su `npm run dev`: comparten `.next/`, y un
     - salto max de borde: 10 a 21 px, el peor en un frame de 33 ms.
 
     Todo eso se mide de verdad en E5.
+  - **Ajuste pedido en la revision:** "las tiras se deforman un poco con un scroll suave". Era la estela, que empezaba en velocidad 0: a ~1 px/frame daba 6, 3,6 y 2,2 px de ancho extra a las tres de detras. En el escenario lento, 735 de 1096 frames tenian 3 diapositivas a medio plegar (`e4-dev.txt`, scratchpad).
+    - **El cambio, una linea** (`trailSpeed`): la estela empieza en `SLOW_SPEED` (16 px/frame), la velocidad por debajo de la cual la activa se abre del todo, y esta entera a 30 como antes. Javi: "ok, lets try".
+    - **Medido contra su `next dev`** (`e6-estela-dev.txt`, scratchpad): en el escenario lento, 881 frames sin ninguna a medio plegar y 60 con 2 (la pareja del cambio); ninguno con 3. La estela sigue decreciendo con la distancia: 0 fallos en el fling fuerte y la rafaga.
 - [ ] **T6** · Documentacion
   - Fichero(s): `docs/design-spec-v2.md` §2 ("Commit is position-triggered" y "no snap-back") y su Changelog, `CLAUDE.md` (build order, carrusel)
   - Comprobacion: `git diff main --stat` solo muestra los ficheros de la tabla del plan, mas `specs/012-carrusel-abrir-al-frenar/`

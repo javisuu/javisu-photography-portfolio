@@ -76,8 +76,10 @@ const SPRING_OMEGA = 18.6; // rad/s
 // non-anchored side, see computeFrame); the side ahead never changes. Each
 // trailing slide k (1 = right behind the active one) targets an extra
 // width of TRAIL_MAX_PX * speed * TRAIL_DECAY^(k-1), speed being
-// |velocity| / TRAIL_FULL_SPEED clamped to 1. At rest speed is 0 and every
-// slide folds to S, so the rest layout is unchanged.
+// (|velocity| - SLOW_SPEED) / (TRAIL_FULL_SPEED - SLOW_SPEED) clamped to
+// 0..1: no trail below SLOW_SPEED (spec 012, E6), so a gentle scroll
+// doesn't deform the slivers. At rest speed is 0 and every slide folds to
+// S, so the rest layout is unchanged.
 const TRAIL_MAX_PX = 180;
 const TRAIL_DECAY = 0.6;
 const TRAIL_FULL_SPEED = 30; // px per reference frame
@@ -737,7 +739,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       const sps = computeSlotsPerSide(vw);
       const frameLo = activeIdxRef.current - sps;
       const frameHi = activeIdxRef.current + sps;
-      const trailSpeed = clamp(Math.abs(velocityRef.current) / TRAIL_FULL_SPEED, 0, 1);
+      const trailSpeed = clamp((Math.abs(velocityRef.current) - SLOW_SPEED) / (TRAIL_FULL_SPEED - SLOW_SPEED), 0, 1);
       const openFade = clamp(
         (FAST_OPENNESS_SPEED - Math.abs(velocityRef.current)) / (FAST_OPENNESS_SPEED - SLOW_SPEED),
         0,
