@@ -82,14 +82,17 @@ const SPRING_OMEGA = 18.6; // rad/s
 const TRAIL_MAX_PX = 180;
 const TRAIL_DECAY = 0.6;
 const TRAIL_FULL_SPEED = 30; // px per reference frame
-// Open on slowing down (spec 012, from cynx.io): while the strip moves
-// faster than OPEN_SPEED no slide opens — the active one targets 0 like
-// the rest, and only the trail keeps intermediate widths. Once it slows
-// below SLOW_SPEED the active one opens on its spring. The gap between the
-// two keeps a trackpad hovering around the threshold from opening and
-// folding the active slide every few frames. In px per reference frame,
-// like velocity, so it holds at any frame rate. A single arrow key
-// (KEY_KICK_PX) stays below OPEN_SPEED and opens as before.
+// How far the active slide opens fades with speed (spec 012, amendment 1):
+// fully below SLOW_SPEED, FAST_OPENNESS at FAST_OPENNESS_SPEED or more,
+// linear between — no threshold, so nothing pops open. With commits in
+// quick succession each spring heads for its target and the next commit
+// turns it back: the fold-and-unfold "battle", plus the trail. In px per
+// reference frame, like velocity, so it holds at any frame rate.
+const FAST_OPENNESS = 0.2;
+const FAST_OPENNESS_SPEED = 30;
+// A fast scroll (above OPEN_SPEED) arms the snap, which fires once the
+// strip drops below SLOW_SPEED (see SNAP_SETTLE_PX). The gap keeps a
+// trackpad hovering around 20 from re-arming it every few frames.
 const OPEN_SPEED = 20;
 const SLOW_SPEED = OPEN_SPEED * 0.8;
 // Snap after a fast scroll (spec 012, decision 3): when a fast strip drops
@@ -698,9 +701,8 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       }
 
       // 4. Openness targets: the active slide targets 1 and unfolds toward
-      // fully open on its own spring (see SPRING_OMEGA), unless the strip
-      // is fast (see OPEN_SPEED), when it targets 0 like the rest, or the
-      // strip is snapping to the next album (see SNAP_SETTLE_PX), when it
+      // fully open on its own spring (see SPRING_OMEGA), less the faster
+      // the strip (see FAST_OPENNESS), unless the strip is snapping to the next album (see SNAP_SETTLE_PX), when it
       // waits for that commit — the slide about to become active must be
       // exactly S at the commit (see computeFrame); the slides
       // just passed target the trail (see TRAIL_MAX_PX), which follows the
@@ -713,10 +715,15 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
       const frameLo = activeIdxRef.current - sps;
       const frameHi = activeIdxRef.current + sps;
       const trailSpeed = clamp(Math.abs(velocityRef.current) / TRAIL_FULL_SPEED, 0, 1);
+      const openFade = clamp(
+        (FAST_OPENNESS_SPEED - Math.abs(velocityRef.current)) / (FAST_OPENNESS_SPEED - SLOW_SPEED),
+        0,
+        1
+      );
+      const activeTarget = FAST_OPENNESS + (1 - FAST_OPENNESS) * openFade;
       for (let absIndex = frameLo; absIndex <= frameHi; absIndex++) {
-        const opens =
-          !isFastRef.current && (snapIdxRef.current === null || snapIdxRef.current === activeIdxRef.current);
-        let target = absIndex === activeIdxRef.current && opens ? 1 : 0;
+        const opens = snapIdxRef.current === null || snapIdxRef.current === activeIdxRef.current;
+        let target = absIndex === activeIdxRef.current && opens ? activeTarget : 0;
         // Positions behind the active one, on the side already passed.
         const behind = (activeIdxRef.current - absIndex) * travelDirRef.current;
         if (behind >= 1 && trailSpeed > 0) {
