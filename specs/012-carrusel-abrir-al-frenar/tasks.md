@@ -76,12 +76,26 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **Simulacion numerica del bucle** (`sim-encaje.mjs`, copia de la fisica sin DOM): de 15 a 60 eventos, a 30, 60 y 120 fps, con y sin cola, el encaje va al activo 21–27 veces y al siguiente 19–25 por tanda. **0 fallos:** siempre offsetPx 0, album final igual al elegido, nunca el anterior, y la activa no se abre antes del commit cuando va a la siguiente.
     - **Un gesto nuevo durante el encaje mueve la tira** (`sim-gesto.mjs`): una muesca de 100 px despues del encaje recorre 51,75 px, lo mismo que hoy.
   - **"Giro brusco" pasa de 1 cambio de album a 0.** No es una regresion: los escenarios van seguidos en la misma pagina, y el anterior ahora acaba encajado en la linea en lugar de a 19 px dentro del paso, asi que este empieza desde otra posicion. Ese escenario nunca pasa del umbral.
-- [ ] **T4** · Medida final local y diagnostico (CA2 a CA7)
+- [x] **T4** · Medida final local y diagnostico (CA2 a CA7)
   - Comprobacion:
     - `medir-carrusel.mjs --repeticiones 3` a CPU×1 y ×4;
     - `--geometria --comparar evidencia/2026-10-22_011-geometria-antes.json` a 60, 30 y 120 fps;
     - `node scripts/diagnostico.mjs` en verde;
     - salidas en el scratchpad, y una tabla de CA aqui.
+  - **Hecho.** Local, `next build` + `next start`, codigo de `9db1f93`. Salidas en el scratchpad: `2026-10-23_012-t3-cpu1.txt` (CPU×1), `2026-10-23_012-despues-cpu4.txt`, `2026-10-23_012-t3-geometria.txt` y `2026-10-23_diagnostico_012.txt`.
+
+    | CA | Resultado | Cumple |
+    |---|---|---|
+    | CA2 | Ninguna diapositiva pasa de la mitad con la tira a mas de 20 px/frame, en ningun escenario, a CPU×1 y ×4. Trackpad real: 3 pasan de la mitad en todo el gesto (linea base: 10, 5 por encima del umbral). Fling fuerte y rafaga no llegan al umbral (max 8,5 y 4,4 px/frame; 10,1 y 5 a CPU×4) y no cambian | Si, en los escenarios que pasan del umbral |
+    | CA3 | La que queda abierta empieza a abrirse a 0 ms del cruce, en los dos escenarios que lo cruzan, a CPU×1 y ×4. Del cruce al commit, cuando el encaje va al siguiente: solo en el barrido y la simulacion (T3), no medido en ms | Si |
+    | CA3b | Borde de la abierta a 0 px de su linea y album final +0 frente al del cruce, en trackpad real y con inercia, a CPU×1 y ×4. Barrido de 26 a 46 eventos: 0,00 px. Simulacion: 0 fallos, nunca el anterior | Si |
+    | CA4 | Reposo tras `ArrowRight` ×2 y `ArrowLeft` ×2 frente a la 011: diferencia max 0,1 px | Si |
+    | CA5 | Lo mismo a 30 fps (0 px) y 120 fps (0,3 px) | Si |
+    | CA6 | 0 frames >50 ms en todos los escenarios, CPU×1 y ×4. Estilo a CPU×4: max 1,43 ms por frame (fling fuerte). Nada por delante de la que se abre cambia de ancho: 0 frames | Si |
+    | CA7 | tsc, lint y build ok · 0 errores de consola en 6 rutas · 105 de 105 invariantes | Si |
+    | CA8 | Pendiente: T5 | — |
+
+    CA1 decia "10 cambios y 11 que pasan de la mitad"; el script del repo da 11 y 12 en el mismo fling (T1).
 - [ ] **T5** · Revision de Javi (CA8)
   - Comprobacion: Javi prueba `/albums` en `npm run dev` con su trackpad, frente a cynx.io. Testimonio aqui. Si pide ajustes del umbral (20/16) o del encaje, se repiten T2/T3 y T4
 - [ ] **T6** · Documentacion
