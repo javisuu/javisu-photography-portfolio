@@ -104,14 +104,19 @@ export default function DecipherWordmark({
     Array(NAME_ALPHABET.length).fill(null)
   );
 
+  // A 0 is never a real glyph width: it means the landing's <main> is
+  // display:none (it stays mounted on every other route), so a mount,
+  // resize or fonts.ready landing there would otherwise leave every column
+  // 0px wide and stack all six letters on one spot (spec 014). Keep the last
+  // good value instead; beginDecipherTransition re-measures once visible.
   function measureAll() {
     for (let col = 0; col < COLUMN_COUNT; col++) {
-      const el = measureRefs.current[col];
-      if (el) letterWidthsRef.current[col] = el.offsetWidth;
+      const w = measureRefs.current[col]?.offsetWidth ?? 0;
+      if (w > 0) letterWidthsRef.current[col] = w;
     }
     NAME_ALPHABET.forEach((letter, i) => {
-      const el = alphabetMeasureRefs.current[i];
-      if (el) alphabetWidthsRef.current[letter] = el.offsetWidth;
+      const w = alphabetMeasureRefs.current[i]?.offsetWidth ?? 0;
+      if (w > 0) alphabetWidthsRef.current[letter] = w;
     });
   }
 
@@ -289,6 +294,9 @@ export default function DecipherWordmark({
   // both SUQUIA's own — the decipher resolves in place now, it doesn't
   // hand off into a different word.
   function beginDecipherTransition(now: number) {
+    // Only reached while active, i.e. with the landing visible: the one
+    // moment a measurement is guaranteed real, whatever happened before.
+    measureAll();
     transitionStartRef.current = now;
     pendingColsRef.current = new Set();
     for (let col = 0; col < COLUMN_COUNT; col++) {

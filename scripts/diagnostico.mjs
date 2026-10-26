@@ -615,6 +615,114 @@ if (!only || only === "/") {
   }
 }
 
+// ---------- descifrado del wordmark ----------
+// Spec 014. Fuera de / el landing sigue montado con display: none, y todo lo
+// que mida ahi da 0: si el wordmark guarda esos anchos, al entrar en / las
+// seis letras se apilan durante el descifrado. En reposo es un nodo de texto
+// y "wordmark dice SUQUIA" no lo ve, asi que aqui se muestrea por rAF el
+// ancho de cada columna de [data-decipher-live] mientras descifra, segun por
+// donde se llegue a /.
+const DECIPHER_WAIT_MS = 8000;
+const DECIPHER_SUM_TOL_PX = 2;
+const DECIPHER_COL_TOL_PX = 1;
+const DECIPHER_REDUCED_WAIT_MS = 2500;
+function decipherSampler() {
+  window.__descifrado = { samples: [] };
+  const tick = () => {
+    const live = document.querySelector("[data-decipher-live]");
+    if (live) window.__descifrado.samples.push([...live.children].map((c) => c.getBoundingClientRect().width));
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+if (!only || only === "/") {
+  rule("descifrado del wordmark");
+  const visibleLink = (p, href) => p.locator(`main:visible a[href="${href}"]`).first();
+  const waitDecipher = (p) => p.waitForFunction(
+    () => window.__descifrado.samples.length > 0 && !document.querySelector("[data-decipher-live]"),
+    null, { timeout: DECIPHER_WAIT_MS, polling: 100 },
+  ).catch(() => {});
+  // Navegacion de cliente a /, con el muestreo puesto a cero justo antes.
+  async function softToLanding(p) {
+    await p.waitForTimeout(SETTLE_MS);
+    await p.evaluate(() => { window.__descifrado.samples = []; });
+    await visibleLink(p, "/").click();
+    await p.waitForURL(BASE + "/");
+  }
+  async function decipherRun({ start, reduced = false, steps = softToLanding }) {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...(reduced ? { reducedMotion: "reduce" } : {}) });
+    const p = await ctx.newPage();
+    const errs = [];
+    p.on("pageerror", (e) => errs.push(e.message));
+    await p.addInitScript(decipherSampler);
+    await p.goto(BASE + start, { waitUntil: "load" }).catch((e) => errs.push(`goto: ${e.message}`));
+    await steps(p).catch((e) => errs.push(`pasos: ${e.message}`));
+    if (reduced) await p.waitForTimeout(DECIPHER_REDUCED_WAIT_MS);
+    else await waitDecipher(p);
+    const r = await p.evaluate(() => {
+      const main = [...document.querySelectorAll("main")].filter((el) => getComputedStyle(el).display !== "none")[0];
+      const h1 = main?.querySelector("h1");
+      let h1Text = null;
+      if (h1) {
+        const c = h1.cloneNode(true);
+        c.querySelectorAll('[aria-hidden="true"]').forEach((n) => n.remove());
+        h1Text = c.textContent.trim().slice(0, 40);
+      }
+      const root = main?.querySelector(".wordmark-hover-target");
+      return { samples: window.__descifrado.samples, rest: root ? root.getBoundingClientRect().width : null, h1Text };
+    }).catch((e) => ({ samples: [], rest: null, h1Text: null, evalError: e.message }));
+    await ctx.close();
+    return { ...r, errs };
+  }
+
+  const r1 = (v) => Math.round(v * 10) / 10;
+  const scenarios = [
+    ["a", "carga directa en /", { start: "/", steps: async () => {} }],
+    ["b", "carga en /about, clic a /", { start: "/about" }],
+    ["c", "carga en /albums, clic a /", { start: "/albums" }],
+    ["d", "/ -> /about, resize alli, -> /", {
+      start: "/",
+      steps: async (p) => {
+        await waitDecipher(p);
+        await visibleLink(p, "/about").click();
+        await p.waitForURL(BASE + "/about");
+        await p.waitForTimeout(500);
+        await p.setViewportSize({ width: 1300, height: 900 });
+        await p.waitForTimeout(300);
+        await p.setViewportSize({ width: 1440, height: 900 });
+        await softToLanding(p);
+      },
+    }],
+  ];
+  let ref = null;
+  for (const [id, label, opts] of scenarios) {
+    const r = await decipherRun(opts);
+    const uniq = [...new Set(r.samples.map((s) => s.map(r1).join(", ")))];
+    log(`  (${id}) ${label} · ${r.samples.length} muestras · reposo ${r.rest === null ? "—" : r1(r.rest)} px`);
+    log(`      columnas: ${uniq.slice(0, 3).join(" | ") || "—"}${uniq.length > 3 ? ` (+${uniq.length - 3})` : ""}`);
+    if (r.errs.length || r.evalError) log(`      errores: ${[...r.errs, r.evalError].filter(Boolean).join(" | ")}`);
+    const route = `descifrado (${id})`;
+    addInv(route, "hubo descifrado", r.samples.length > 0, "ninguna muestra con [data-decipher-live]");
+    if (!r.samples.length) continue;
+    const zero = r.samples.find((s) => s.some((w) => w < 0.5));
+    addInv(route, "ninguna columna a 0", !zero, `columnas ${zero?.map(r1).join(", ")}`);
+    const off = r.rest === null ? null : r.samples.find((s) => Math.abs(s.reduce((a, b) => a + b, 0) - r.rest) > DECIPHER_SUM_TOL_PX);
+    addInv(route, `suma de columnas = SUQUIA en reposo (±${DECIPHER_SUM_TOL_PX} px)`, r.rest !== null && !off,
+      r.rest === null ? "sin wordmark en reposo" : off ? `suma ${r1(off.reduce((a, b) => a + b, 0))} vs reposo ${r1(r.rest)}` : "");
+    if (id === "a") ref = r.samples[0];
+    else if (ref) {
+      const s = r.samples[0];
+      const same = s.length === ref.length && s.every((w, i) => Math.abs(w - ref[i]) <= DECIPHER_COL_TOL_PX);
+      addInv(route, `columnas = carga directa (±${DECIPHER_COL_TOL_PX} px)`, same, `${s.map(r1).join(", ")} vs ${ref.map(r1).join(", ")}`);
+    }
+  }
+  const rm = await decipherRun({ start: "/about", reduced: true });
+  log(`  (e) reduced motion, carga en /about, clic a / · ${rm.samples.length} muestras · h1 ${JSON.stringify(rm.h1Text)}`);
+  if (rm.errs.length) log(`      errores: ${rm.errs.join(" | ")}`);
+  addInv("descifrado (e)", "reduced motion sin descifrado", rm.samples.length === 0, `${rm.samples.length} muestras`);
+  addInv("descifrado (e)", "reduced motion: wordmark dice SUQUIA", rm.h1Text === "SUQUIA", `dice: ${JSON.stringify(rm.h1Text)}`);
+}
+
 await browser.close();
 killDev();
 
