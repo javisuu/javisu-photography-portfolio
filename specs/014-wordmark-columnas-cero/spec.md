@@ -1,6 +1,6 @@
 # Spec 014 · Wordmark: columnas a cero en el descifrado
 
-- **Estado:** Aprobada por Javi el 2026-10-26 ("OK con la spec"; numeracion 014 confirmada). CA1 a CA6 pasan el mismo dia (`tasks.md`); falta CA7, en produccion
+- **Estado:** Aprobada por Javi el 2026-10-26 ("OK con la spec"; numeracion 014 confirmada). **Implementada** el mismo dia: CA1 a CA7 pasan (`tasks.md`), CA7 en produccion sobre `918f1a3`
 - **Fecha:** 2026-10-26
 - **Requiere decision de Javi:** Si (motivo: wordmark). Javi pidio el arreglo el 2026-10-26 ("abre la spec y arreglalo"), despues de ver la causa y el arreglo propuesto en la conversacion
 

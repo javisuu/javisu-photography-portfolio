@@ -19,6 +19,6 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 ## Cierre
 
 - [x] `node scripts/diagnostico.mjs` en verde. Salida en `evidencia/2026-10-26_014-completo.txt`, copiada por Javi
-- [ ] Criterios de aceptacion de la spec ejecutados: CA1 a CA6 si. Falta CA7, en produccion, despues del push de Javi
+- [x] Criterios de aceptacion de la spec ejecutados: CA1 a CA7. CA7, en produccion (`https://javisu-photography-portfolio.vercel.app`) tras el push de Javi `7fb01af..918f1a3`: la seccion pasa en (a) a (e), con 14 a 15 muestras de `75, 117, 120, 117, 55, 111` en (a) a (d); 64 de 64 y 0 errores. `evidencia/2026-10-26_014-produccion.txt`. Una pasada previa con `repro-wordmark.mjs` mezclo versiones (todavia 0 en `/about`, ya bien en `/albums`): el despliegue cambio a mitad de la medida
 - [x] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado. Solo cambio el design spec; `CLAUDE.md` no describe cuando se mide
-- [ ] Estado de `spec.md` → Implementada (cuando pase CA7)
+- [x] Estado de `spec.md` → Implementada
