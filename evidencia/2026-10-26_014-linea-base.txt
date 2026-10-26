@@ -1,0 +1,108 @@
+DIAGNOSTICO 2026-10-26 · main · 7fb01af · 2 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x35ac00a3aa00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x35ac00a3aa00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x35ac00a3aa00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x35ac00a3aa00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 1 repeticion · cache vacia en cada una
+  1: inicio 622 · participantes 7 · fase B 1093 · rezagadas 1 · reposo 1809
+     frame del arranque 367 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 3 (449 ms) · [entrance] start x1
+     al monton: 743 760 810 876 959 1026 1093
+
+=== descifrado del wordmark ===
+  (a) carga directa en / · 24 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  (b) carga en /about, clic a / · 23 muestras · reposo 595.2 px
+      columnas: 0, 0, 0, 0, 0, 0
+  ok   hubo descifrado
+  FALLA ninguna columna a 0 · columnas 0, 0, 0, 0, 0, 0
+  FALLA suma de columnas = SUQUIA en reposo (±2 px) · suma 0 vs reposo 595.2
+  FALLA columnas = carga directa (±1 px) · 0, 0, 0, 0, 0, 0 vs 75, 117, 120, 117, 55, 111
+  (c) carga en /albums, clic a / · 22 muestras · reposo 595.2 px
+      columnas: 0, 0, 0, 0, 0, 0
+  ok   hubo descifrado
+  FALLA ninguna columna a 0 · columnas 0, 0, 0, 0, 0, 0
+  FALLA suma de columnas = SUQUIA en reposo (±2 px) · suma 0 vs reposo 595.2
+  FALLA columnas = carga directa (±1 px) · 0, 0, 0, 0, 0, 0 vs 75, 117, 120, 117, 55, 111
+  (d) / -> /about, resize alli, -> / · 25 muestras · reposo 595.2 px
+      columnas: 0, 0, 0, 0, 0, 0
+  ok   hubo descifrado
+  FALLA ninguna columna a 0 · columnas 0, 0, 0, 0, 0, 0
+  FALLA suma de columnas = SUQUIA en reposo (±2 px) · suma 0 vs reposo 595.2
+  FALLA columnas = carga directa (±1 px) · 0, 0, 0, 0, 0, 0 vs 75, 117, 120, 117, 55, 111
+  (e) reduced motion, carga en /about, clic a / · 0 muestras · h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  19 de 28
+entrada      arranque 367 ms · fase B 1093 ms · reposo 1809 ms · frames >50 ms: 0
+
+FALLOS
+- descifrado (b) · ninguna columna a 0 · columnas 0, 0, 0, 0, 0, 0
+- descifrado (b) · suma de columnas = SUQUIA en reposo (±2 px) · suma 0 vs reposo 595.2
+- descifrado (b) · columnas = carga directa (±1 px) · 0, 0, 0, 0, 0, 0 vs 75, 117, 120, 117, 55, 111
+- descifrado (c) · ninguna columna a 0 · columnas 0, 0, 0, 0, 0, 0
+- descifrado (c) · suma de columnas = SUQUIA en reposo (±2 px) · suma 0 vs reposo 595.2
+- descifrado (c) · columnas = carga directa (±1 px) · 0, 0, 0, 0, 0, 0 vs 75, 117, 120, 117, 55, 111
+- descifrado (d) · ninguna columna a 0 · columnas 0, 0, 0, 0, 0, 0
+- descifrado (d) · suma de columnas = SUQUIA en reposo (±2 px) · suma 0 vs reposo 595.2
+- descifrado (d) · columnas = carga directa (±1 px) · 0, 0, 0, 0, 0, 0 vs 75, 117, 120, 117, 55, 111
+
