@@ -1,6 +1,6 @@
 # Spec 012 · Carrusel: abrir al frenar
 
-- **Estado:** Aprobada por Javi el 2026-10-23. T1 a T4 hechos (`efad305`). **Enmienda 1 aprobada** el mismo dia (revision de Javi, T5); su plan, pendiente
+- **Estado:** Implementada (2026-10-28). CA6 se cumple en produccion: T7 lo mide igual en local y en produccion, a CPU×4 (ver `tasks.md`, T7). Aprobada por Javi el 2026-10-23. T1 a T4 hechos (`efad305`). Enmienda 1 aprobada el mismo dia (revision de Javi, T5) y hecha en E1 a E6. Enmienda 2 (2026-10-26, Javi): se cierra con lo medido en E5
 - **Fecha:** 2026-10-23 · revisada el mismo dia con las respuestas de Javi
 - **Requiere decision de Javi:** Si (choca con el spec: §2 dice que el commit no depende de la velocidad; ver "Choca con el spec"). No toca ninguna de las cuatro zonas que han roto el sitio: el carrusel tiene su propio bucle y no usa `GLSurface` (`CLAUDE.md`, "Architecture rules")
 
@@ -186,3 +186,26 @@ Ninguna. Las tres se cerraron el 2026-10-23:
 3. **Numeracion:** enmienda 1 de la 012, que no esta fusionada y tiene CA8 abierto.
    - T2 y T3 se rehacen sobre el modelo nuevo.
    - Se quedan la medida de T1, el escenario con inercia y la regla de la cola de T3.
+
+## Enmienda 2 (2026-10-26): se cierra con lo medido
+
+### Que paso
+
+La medida final (E5, `specs/012-carrusel-abrir-al-frenar/tasks.md`) se hizo con el codigo de `f950d14`, el que ya esta en produccion y Javi dio por bueno (CA8, "Esta genial"). Cumplen CA3, CA4 frente a la referencia nueva, CA6, CA7 y CA8. Fallan cuatro:
+- **CA2:** el cambio de album llega con el centro de la abierta a −80,9 y +83,2 px, frente a 71 ± 3.
+- **CA3b y CA4:** la abierta reposa a 1,1 px del centro, frente a ±1 px.
+- **CA9:** el salto max de borde va de 8,7 a 18,1 px, frente a 8.
+- **CA10:** el tope del 20 % se cumple (15 %), pero la estela no decrece con la distancia en 16 de 69 frames de "trackpad real".
+
+### Decision (Javi, 2026-10-26)
+
+**Se cierra la spec con lo medido, sin tocar el codigo.** El criterio que manda es CA8, el de Javi con su trackpad. Cumplir CA9 y la estela supondria tocar otra vez la fisica del carrusel, que ya esta en produccion.
+
+### Criterios que cambian
+
+| # | Antes | Ahora |
+|---|---|---|
+| CA2 | El centro de la abierta, a 71 ± 3 px al cambiar | **El commit, a medio paso de `offsetPx`** (`STEP_DISTANCE / 2` = 71 px, `src/motion/AlbumsCarousel.tsx:704`). El centro visible se mueve ademas `(extraLeft − extraRight)/2` (`:219`) mientras la pareja se abre y se pliega, y por eso la medida da ~81 px. Queda como dato, no como criterio |
+| CA3b, CA4 | Centrada ±1 px | **Centrada ±1,5 px.** El 1,1 px sale igual en todos los reposos, con teclado o sin el. Que sea un desvio de la medida y no del layout: SIN VERIFICAR |
+| CA9 | Ningun borde mas de 8 px sobre la mediana de sus 6 vecinos | **Aceptado sin cumplirse**, como el CA6 de la 011 (alli 23,2 px; hoy, como mucho 18,1, con inercia). Se mantiene como cifra de referencia: un cambio futuro no la puede empeorar |
+| CA10 | Tope del 20 % y estela que decrece | **El tope se mantiene.** La estela que no decrece en "trackpad real" se acepta: Javi no la vio en la revision. Que no empeore frente a 16 de 69 frames |

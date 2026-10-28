@@ -1,0 +1,170 @@
+MEDIR CARRUSEL 2026-10-27 · main · f950d14
+contra https://javisu-photography-portfolio.vercel.app · cpu x4 · 60 fps · 1440x900 · 3 repeticion(es)
+
+=== servidor remoto ===
+ok · http 200
+
+=== llegada a /albums: load -> +2,5 s (mediana de 3) ===
+  frames 139 · p50 16.7 ms · p95 16.8 ms · max 183 ms · >25 ms 2 · >50 ms 1
+  estilo 37.2 ms · layout 30.1 ms desde la navegacion · long tasks 1, max 173 ms
+  portadas: 29 <img>, 10 en pantalla, 10 de ellas cargadas a +2,5 s, 3 lazy
+
+=== reposo: 1 s sin entrada (mediana de 3) ===
+  mutaciones de style por frame 0 · width 0 · left/right 0 · filter 0 · transform 0
+  elementos mutados: ninguno
+
+=== trackpad (60 x 12 px) (mediana de 3) ===
+  fluidez: frames 315 · p50 16.7 ms · p95 33.3 ms · max 34 ms · >25 ms 21 · >50 ms 0 · long tasks 0
+  peor pasada: p95 33.4 ms · >25 ms 30 · >50 ms 3
+  coste por frame: estilo 0.92 ms · layout 0.11 ms
+  escrituras por frame: mutaciones 9.2 · width 0 · left/right 0 · filter 0 · transform 7.8
+  albumes: 3 adelante, 0 atras
+
+=== raton (8 x 100 px) (mediana de 3) ===
+  fluidez: frames 167 · p50 16.7 ms · p95 33.3 ms · max 50 ms · >25 ms 11 · >50 ms 0 · long tasks 0
+  peor pasada: p95 33.3 ms · >25 ms 18 · >50 ms 1
+  coste por frame: estilo 1.30 ms · layout 0.02 ms
+  escrituras por frame: mutaciones 11.8 · width 0 · left/right 0 · filter 0 · transform 9.6
+  albumes: 3 adelante, 0 atras
+
+=== fling fuerte (60 x 50 px) (mediana de 3) ===
+  fluidez: frames 358 · p50 16.7 ms · p95 33.4 ms · max 67 ms · >25 ms 72 · >50 ms 3 · long tasks 4
+  peor pasada: p95 33.4 ms · >25 ms 92 · >50 ms 5
+  coste por frame: estilo 2.06 ms · layout 0.14 ms
+  escrituras por frame: mutaciones 21 · width 0 · left/right 0 · filter 0 · transform 15.1
+  albumes: 10 adelante, 0 atras
+  CA5, por delante de la que se abre: 0 frames con un ancho distinto de 110 px (max 0 px)
+  spec 012, velocidad de la tira: max 8.2 px/frame · p90 6.5
+  spec 012: 11 diapositivas pasan de la mitad de su apertura, 0 con la tira a mas de 20 px/frame
+  spec 012, al frenar: la tira no paso de 20 px/frame
+  CA12, estela: en 183 frames, 0 no decrecen con la distancia · ancho extra max 482 px
+  CA3b, en reposo: centro de la abierta a -67.1 px del centro de la pantalla
+  CA2 y CA3, 10 cambios (pasada 1), los 3 primeros y los 3 ultimos: adelante a -88.2 px del centro, entra por 846 px · adelante a -81.9 px del centro, entra por 988 px · adelante a -75 px del centro, entra por 994 px · adelante a -75.1 px del centro, entra por 857 px · adelante a -79 px del centro, entra por 852 px · adelante a -81.1 px del centro, entra por 987 px
+  a medio plegar por frame: 0: 150 · 2: 97 · 3: 94 · max 3 · frames con 3 o mas: 13
+  salto max de borde (frente a la mediana de sus 6 vecinos): 20.7 px · reposo 555 ms despues de la ultima entrada
+    frame 188: +17 ms · izq 323.2 der 954.7 ancho 631.5
+    frame 189: +17 ms · izq 312.1 der 897.3 ancho 585.2
+    frame 190: +17 ms · izq 300.0 der 826.0 ancho 526.0
+    frame 191 <<: +17 ms · izq 289.3 der 754.4 ancho 465.1
+    frame 192: +17 ms · izq 279.6 der 686.4 ancho 406.8
+    frame 193: +17 ms · izq 270.9 der 625.6 ancho 354.7
+    frame 194: +17 ms · izq 263.0 der 572.0 ancho 309.0
+
+=== rafaga (40 x 30 px) (mediana de 3) ===
+  fluidez: frames 303 · p50 16.7 ms · p95 33.4 ms · max 50 ms · >25 ms 48 · >50 ms 0 · long tasks 1
+  peor pasada: p95 33.4 ms · >25 ms 55 · >50 ms 1
+  coste por frame: estilo 1.70 ms · layout 0.10 ms
+  escrituras por frame: mutaciones 15.7 · width 0 · left/right 0 · filter 0 · transform 11.4
+  albumes: 5 adelante, 0 atras
+  CA5, por delante de la que se abre: 0 frames con un ancho distinto de 110 px (max 0 px)
+  spec 012, velocidad de la tira: max 4.5 px/frame · p90 3.7
+  spec 012: 6 diapositivas pasan de la mitad de su apertura, 0 con la tira a mas de 20 px/frame
+  spec 012, al frenar: la tira no paso de 20 px/frame
+  CA12, estela: en 93 frames, 0 no decrecen con la distancia · ancho extra max 485 px
+  CA3b, en reposo: centro de la abierta a 21.9 px del centro de la pantalla
+  CA2 y CA3, 5 cambios (pasada 1): adelante a -78 px del centro, entra por 997 px · adelante a -79.6 px del centro, entra por 855 px · adelante a -82.6 px del centro, entra por 852 px · adelante a -83.6 px del centro, entra por 991 px · adelante a -77.9 px del centro, entra por 997 px
+  a medio plegar por frame: 0: 156 · 1: 9 · 2: 138 · max 2 · frames con 3 o mas: 0
+  salto max de borde (frente a la mediana de sus 6 vecinos): 20.9 px · reposo 468 ms despues de la ultima entrada
+    frame 1: +17 ms · izq 318.2 der 985.2 ancho 667.0
+    frame 2: +17 ms · izq 317.0 der 984.0 ancho 667.0
+    frame 3 <<: +17 ms · izq 316.0 der 983.0 ancho 667.0
+    frame 4: +17 ms · izq 319.5 der 964.6 ancho 645.1
+    frame 5: +17 ms · izq 330.5 der 925.7 ancho 595.2
+    frame 6: +17 ms · izq 344.8 der 878.5 ancho 533.8
+
+=== trackpad real (40 x 60 px, uno por frame) (mediana de 3) ===
+  fluidez: frames 174 · p50 16.7 ms · p95 33.4 ms · max 67 ms · >25 ms 31 · >50 ms 1 · long tasks 2
+  peor pasada: p95 49.9 ms · >25 ms 40 · >50 ms 2
+  coste por frame: estilo 1.70 ms · layout 0.15 ms
+  escrituras por frame: mutaciones 21.5 · width 0 · left/right 0 · filter 0 · transform 15.5
+  albumes: 8 adelante, 0 atras
+  CA5, por delante de la que se abre: 0 frames con un ancho distinto de 110 px (max 0 px)
+  spec 012, velocidad de la tira: max 22.8 px/frame · p90 17.6
+  spec 012: 8 diapositivas pasan de la mitad de su apertura, 1 con la tira a mas de 20 px/frame
+  spec 012, al frenar: apertura a — del cruce · ultimo cambio de album a — · album final +null frente al del cruce
+  CA12, estela: en 69 frames, 0 no decrecen con la distancia · ancho extra max 386 px
+  CA3b, en reposo: centro de la abierta a 0.8 px del centro de la pantalla
+  CA2 y CA3, 8 cambios (pasada 1), los 3 primeros y los 3 ultimos: adelante a -90.2 px del centro, entra por 844 px · adelante a -8.8 px del centro, entra por 866 px · adelante a +67.8 px del centro, entra por 950 px · adelante a +148.7 px del centro, entra por 976 px · adelante a +143.3 px del centro, entra por 986 px · adelante a +15.6 px del centro, entra por 990 px
+  a medio plegar por frame: 0: 122 · 1: 2 · 2: 8 · 4: 2 · 5: 5 · 6: 47 · 7: 5 · max 7 · frames con 3 o mas: 46
+  salto max de borde (frente a la mediana de sus 6 vecinos): 32.5 px · reposo 567 ms despues de la ultima entrada
+    frame 13: +17 ms · izq 398.5 der 692.2 ancho 293.8
+    frame 14: +17 ms · izq 382.6 der 654.7 ancho 272.1
+    frame 15: +17 ms · izq 366.5 der 620.8 ancho 254.2
+    frame 16 <<: +17 ms · izq 350.3 der 590.6 ancho 240.3
+    frame 17: +17 ms · izq 328.2 der 556.9 ancho 228.7
+    frame 18: +17 ms · izq 298.8 der 517.1 ancho 218.3
+    frame 19: +17 ms · izq 265.8 der 475.4 ancho 209.6
+
+=== trackpad con inercia (20 x 60 px y cola de 60 eventos) (mediana de 3) ===
+  fluidez: frames 230 · p50 16.7 ms · p95 33.3 ms · max 50 ms · >25 ms 20 · >50 ms 1 · long tasks 0
+  peor pasada: p95 33.4 ms · >25 ms 48 · >50 ms 6
+  coste por frame: estilo 0.61 ms · layout 0.02 ms
+  escrituras por frame: mutaciones 14 · width 0 · left/right 0 · filter 0 · transform 11.8
+  albumes: 6 adelante, 0 atras
+  CA5, por delante de la que se abre: 0 frames con un ancho distinto de 110 px (max 0 px)
+  spec 012, velocidad de la tira: max 20.7 px/frame · p90 12.2
+  spec 012: 6 diapositivas pasan de la mitad de su apertura, 1 con la tira a mas de 20 px/frame
+  spec 012, al frenar: apertura a — del cruce · ultimo cambio de album a 17 ms · album final +1 frente al del cruce
+  CA12, estela: en 60 frames, 0 no decrecen con la distancia · ancho extra max 283 px
+  CA3b, en reposo: centro de la abierta a 1.1 px del centro de la pantalla
+  CA2 y CA3, 6 cambios (pasada 1): adelante a -79 px del centro, entra por 855 px · adelante a -24.7 px del centro, entra por 862 px · adelante a +65.1 px del centro, entra por 952 px · adelante a +97.3 px del centro, entra por 985 px · adelante a +89.6 px del centro, entra por 947 px · adelante a -36 px del centro, entra por 866 px
+  a medio plegar por frame: 0: 167 · 1: 3 · 2: 11 · 3: 2 · 4: 2 · 5: 4 · 6: 37 · 7: 5 · max 7 · frames con 3 o mas: 33
+  salto max de borde (frente a la mediana de sus 6 vecinos): 19.1 px · reposo 0 ms despues de la ultima entrada
+    frame 40: +17 ms · izq 1631.2 der 1741.2 ancho 110.0
+    frame 41 <<: +17 ms · izq 1610.1 der 1720.1 ancho 110.0
+    frame 42: +17 ms · izq 1597.4 der 1707.4 ancho 110.0
+    frame 43: +17 ms · izq 1594.6 der 1704.6 ancho 110.0
+    frame 44: +17 ms · izq 1597.3 der 1707.3 ancho 110.0
+
+=== lento ida y vuelta (60 x 4 px, pausa, 60 x -4 px) (mediana de 3) ===
+  fluidez: frames 930 · p50 16.7 ms · p95 16.8 ms · max 33 ms · >25 ms 17 · >50 ms 0 · long tasks 0
+  peor pasada: p95 16.8 ms · >25 ms 32 · >50 ms 1
+  coste por frame: estilo 0.53 ms · layout 0.02 ms
+  escrituras por frame: mutaciones 1.7 · width 0 · left/right 0 · filter 0 · transform 1.4
+  albumes: 1 adelante, 1 atras
+  CA3b, en reposo: centro de la abierta a 1.1 px del centro de la pantalla
+  CA2 y CA3, 2 cambios (pasada 1): adelante a -81.2 px del centro, entra por 993 px · atras a +82.9 px del centro, entra por 448 px
+  a medio plegar por frame: 0: 840 · 2: 58 · max 2 · frames con 3 o mas: 0
+  salto max de borde (frente a la mediana de sus 6 vecinos): 11.2 px · reposo 0 ms despues de la ultima entrada
+    frame 564: +17 ms · izq 316.2 der 426.2 ancho 110.0
+    frame 565: +17 ms · izq 316.6 der 448.3 ancho 131.7
+    frame 566: +17 ms · izq 317.0 der 498.5 ancho 181.5
+    frame 567 <<: +33 ms · izq 317.6 der 623.3 ancho 305.7
+    frame 568: +17 ms · izq 317.9 der 683.4 ancho 365.4
+    frame 569: +17 ms · izq 318.4 der 737.1 ancho 418.7
+    frame 570: +17 ms · izq 318.8 der 784.0 ancho 465.2
+
+=== giro brusco (20 x 15 px y 20 x -15 px) (mediana de 3) ===
+  fluidez: frames 306 · p50 16.7 ms · p95 33.2 ms · max 67 ms · >25 ms 16 · >50 ms 1 · long tasks 0
+  peor pasada: p95 33.3 ms · >25 ms 23 · >50 ms 1
+  coste por frame: estilo 0.80 ms · layout 0.03 ms
+  escrituras por frame: mutaciones 3.1 · width 0 · left/right 0 · filter 0 · transform 2.3
+  albumes: 1 adelante, 1 atras
+  CA3b, en reposo: centro de la abierta a 1.1 px del centro de la pantalla
+  CA2 y CA3, 2 cambios (pasada 1): adelante a -108.5 px del centro, entra por 993 px · atras a +143.8 px del centro, entra por 450 px
+  a medio plegar por frame: 0: 252 · 2: 54 · max 2 · frames con 3 o mas: 0
+  salto max de borde (frente a la mediana de sus 6 vecinos): 12.2 px · reposo 239 ms despues de la ultima entrada
+    frame 131: +17 ms · izq 457.8 der 1124.8 ancho 667.0
+    frame 132: +17 ms · izq 481.5 der 1126.8 ancho 645.3
+    frame 133: +17 ms · izq 533.2 der 1128.7 ancho 595.5
+    frame 134 <<: +17 ms · izq 596.5 der 1131.0 ancho 534.5
+    frame 135: +33 ms · izq 723.2 der 1135.1 ancho 411.9
+    frame 136: +17 ms · izq 778.6 der 1136.9 ancho 358.3
+    frame 137: +17 ms · izq 826.6 der 1138.6 ancho 312.0
+
+=== paso y paso atras (raton) (mediana de 3) ===
+  fluidez: frames 172 · p50 16.7 ms · p95 16.8 ms · max 33 ms · >25 ms 2 · >50 ms 0 · long tasks 0
+  peor pasada: p95 16.8 ms · >25 ms 3 · >50 ms 0
+  coste por frame: estilo 0.28 ms · layout 0.00 ms
+  escrituras por frame: mutaciones 1 · width 0 · left/right 0 · filter 0 · transform 1
+  albumes: 0 adelante, 0 atras
+  CA3b, en reposo: centro de la abierta a 1.1 px del centro de la pantalla
+  a medio plegar por frame: 0: 173 · max 0 · frames con 3 o mas: 0
+  salto max de borde (frente a la mediana de sus 6 vecinos): 3 px · reposo 348 ms despues de la ultima entrada
+    frame 1 <<: +17 ms · izq -180.4 der -70.4 ancho 110.0
+    frame 2: +17 ms · izq -185.4 der -75.4 ancho 110.0
+    frame 3: +17 ms · izq -190.0 der -80.0 ancho 110.0
+    frame 4: +17 ms · izq -194.2 der -84.2 ancho 110.0
+
+=== errores de consola ===
+  0

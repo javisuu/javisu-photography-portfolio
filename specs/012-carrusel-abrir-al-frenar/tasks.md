@@ -104,7 +104,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 
 Antes de cada `next build`, Javi para su `npm run dev`: comparten `.next/`, y un build con el dev abierto lo rompe (2026-10-23: landing en negro y 404 en `/albums`).
 
-- [ ] **E1** · Medida de la enmienda
+- [x] **E1** · Medida de la enmienda (commit `818d3ec`)
   - Fichero(s): `scripts/medir-carrusel.mjs`
   - Cambio (plan de la enmienda, parte 5):
     - escenario "lento ida y vuelta" (60 x 4 px cada 40 ms, pausa de 2,5 s, vuelta);
@@ -112,7 +112,7 @@ Antes de cada `next build`, Javi para su `npm run dev`: comparten `.next/`, y un
     - el encaje medido por el centro de la abierta;
     - el tope de apertura a 30 px/frame o mas.
   - Comprobacion: linea base local con el codigo de `efad305`, `--repeticiones 3`. Salida `2026-10-23_012e-linea-base.txt`
-- [ ] **E2** · Geometria centrada y commit a medio paso (CA2, CA3, CA4, CA9)
+- [x] **E2** · Geometria centrada y commit a medio paso (CA2, CA3, CA4, CA9) (commit `4ee595b`)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: `computeFrame` centrado y sin sentido; commit en `|offsetPx| > STEP/2`; fuera `restOffsetPx` y `anchorRestOffsetPx` (plan de la enmienda, partes 1 y 2)
   - Comprobacion:
@@ -120,19 +120,32 @@ Antes de cada `next build`, Javi para su `npm run dev`: comparten `.next/`, y un
     - CA9 en todos;
     - referencia de geometria nueva a 60 fps, y CA4 a 30 y 120 contra ella;
     - tsc y lint ok.
-- [ ] **E3** · Apertura con la velocidad (CA10)
+- [x] **E3** · Apertura con la velocidad (CA10) (commit `b39fa08`)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio: la activa apunta a `amp(v)` (1 por debajo de 16 px/frame, 0,2 a 30 o mas); fuera el destino de T2 (plan de la enmienda, parte 3)
   - Comprobacion: CA10 en "trackpad real"; CA12 de la 011 (la estela decrece); tsc y lint ok
-- [ ] **E4** · Encaje y teclas (CA3b, CA4)
+- [x] **E4** · Encaje y teclas (CA3b, CA4) (commit `a0f2a30`)
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`
   - Cambio (plan de la enmienda, parte 4):
     - el encaje va al album mas cercano a donde pararia la friccion, el activo o el siguiente;
     - fuera la espera de la activa a `snapIdx`;
     - una tecla pone el encaje en el album de al lado, en lugar de dar velocidad (fuera `KEY_KICK_PX`).
   - Comprobacion: CA3b en "trackpad real" y "con inercia"; CA4 (una tecla, centrado ±1 px); sin encaje en el escenario lento; tsc y lint ok
-- [ ] **E5** · Medida final local y diagnostico (CA2 a CA10)
+- [x] **E5** · Medida final local y diagnostico (CA2 a CA10)
   - Comprobacion: `--repeticiones 3` a CPU×1 y ×4; geometria a 60, 30 y 120 fps; `node scripts/diagnostico.mjs` en verde; tabla de CA aqui
+  - **Medido el 2026-10-26, local, `next build` + `next start`, codigo de `f950d14`** (el de produccion). Sin `npm run dev` abierto. Salidas en el scratchpad: `2026-10-26_012-e5-cpu1.txt`, `-e5-cpu4.txt`, `-e5-geometria60.txt`, `-e5-geometria30.txt`, `-e5-geometria120.txt`, la referencia nueva `2026-10-26_012-geometria-ref.json` y `2026-10-26_diagnostico_012-e5.txt`. Cifras a CPU×1; CPU×4 da lo mismo salvo donde se dice.
+
+    | CA | Resultado | Cumple |
+    |---|---|---|
+    | CA2 | Escenario lento: el cambio de album llega con el centro de la abierta a −80,9 px hacia delante y +83,2 px hacia atras, frente a 71 ± 3. El commit si salta a medio paso de `offsetPx` (`src/motion/AlbumsCarousel.tsx:704`). Los 10 px que sobran son `(extraLeft − extraRight)/2` (`:219`): la pareja se abre y se pliega mientras tanto y mueve el centro visible | **No** |
+    | CA3 | Borde de entrada de la que llega: 994 px hacia delante (720–1080) y 449 hacia atras (360–720) | Si |
+    | CA3b | Trackpad real: centro a 0,8 px, album final +0. Con inercia: 1,1 px, album final +1. Lento: 1,1 px, sin encaje. Los reposos de todos los escenarios lentos y de teclado tambien dan 1,1 px, asi que es un desvio fijo; su causa: SIN VERIFICAR | **No por 0,1 px** (con inercia) |
+    | CA4 | Referencia nueva a 60 fps. A 30 y 120 fps: diferencia max 0 px en los 5 reposos. La llegada, centrada a 1,1 px (el mismo desvio fijo de CA3b) | Si frente a la referencia; la llegada, **no por 0,1 px** |
+    | CA6 | 0 frames >50 ms en todos los escenarios, CPU×1 y ×4. Estilo a CPU×4: max 1,14 ms por frame (fling fuerte). Nada por delante de la que se abre cambia de ancho: 0 frames | Si |
+    | CA7 | tsc, lint y build ok · 0 errores de consola en 6 rutas · 122 de 122 invariantes | Si |
+    | CA9 | Salto max de borde: trackpad real 8,7 px (8,8 a CPU×4), lento 11,6, giro brusco 11,8, rafaga 11,9, fling fuerte 12,6, con inercia 18,1, paso y paso atras 4,6. Tope: 8 | **No** (6 de 7 escenarios) |
+    | CA10 | Trackpad real, a 30 px/frame o mas: la abierta llega al 15 % de su ancho extra (tope 20 %). Pero la estela no decrece con la distancia en 16 de 69 frames (con inercia: 1 de 60; fling fuerte y rafaga: 0) | Si el tope; **no** la estela |
+    | CA8 | "Esta genial" (E6), con el codigo de `a0f2a30` mas el ajuste de la estela | Si |
 - [x] **E6** · Revision de Javi (CA8)
   - Comprobacion: Javi prueba `/albums` en `npm run dev` con su trackpad, frente a cynx.io. Testimonio aqui
   - **Hecho, antes de E5.** Javi lo probo en su `npm run dev` con el codigo de `a0f2a30`, el 2026-10-23: "Esta genial". CA8 cumplido.
@@ -146,15 +159,20 @@ Antes de cada `next build`, Javi para su `npm run dev`: comparten `.next/`, y un
   - **Ajuste pedido en la revision:** "las tiras se deforman un poco con un scroll suave". Era la estela, que empezaba en velocidad 0: a ~1 px/frame daba 6, 3,6 y 2,2 px de ancho extra a las tres de detras. En el escenario lento, 735 de 1096 frames tenian 3 diapositivas a medio plegar (`e4-dev.txt`, scratchpad).
     - **El cambio, una linea** (`trailSpeed`): la estela empieza en `SLOW_SPEED` (16 px/frame), la velocidad por debajo de la cual la activa se abre del todo, y esta entera a 30 como antes. Javi: "ok, lets try".
     - **Medido contra su `next dev`** (`e6-estela-dev.txt`, scratchpad): en el escenario lento, 881 frames sin ninguna a medio plegar y 60 con 2 (la pareja del cambio); ninguno con 3. La estela sigue decreciendo con la distancia: 0 fallos en el fling fuerte y la rafaga.
-- [ ] **T6** · Documentacion
+- [x] **T6** · Documentacion
   - Fichero(s): `docs/design-spec-v2.md` §2 ("Commit is position-triggered" y "no snap-back") y su Changelog, `CLAUDE.md` (build order, carrusel)
   - Comprobacion: `git diff main --stat` solo muestra los ficheros de la tabla del plan, mas `specs/012-carrusel-abrir-al-frenar/`
-- [ ] **T7** · Produccion, tras el merge y el push de Javi
+- [x] **T7** · Produccion, tras el merge y el push de Javi
   - Comprobacion: `medir-carrusel.mjs --url <produccion> --repeticiones 3`, a CPU×1 y ×4. Salida `2026-10-2X_012-produccion.txt`
+  - **Medido el 2026-10-27 y el 2026-10-28 contra produccion, codigo de `f950d14`.** Salidas: `evidencia/2026-10-27_012-produccion-cpu1.txt`, `evidencia/2026-10-27_012-produccion-cpu4.txt`, `evidencia/2026-10-28_012-local-cpu4.txt` y `evidencia/2026-10-28_012-produccion-cpu4.txt`.
+    - CPU×1 (2026-10-27): 0 frames >50 ms en todos los escenarios, y los saltos de borde y la estela, iguales a E5. 0 errores de consola.
+    - CPU×4, primera medida (2026-10-27): medianas de hasta 3 frames >50 ms (fling fuerte), estilo 2,06 ms y salto de 32,5 px en "trackpad real". Era la maquina, no produccion. Lo muestra la segunda medida.
+    - CPU×4, local y produccion seguidas (2026-10-28): las dos dan una mediana de 0 frames >50 ms en todos los escenarios, estilo max 1,26 ms local y 1,10 ms en produccion, CA5 a 0 frames, y saltos de borde iguales al decimal (8,8 en "trackpad real", 18,1 con inercia). Solo la peor pasada de produccion tiene frames caidos (3 en "trackpad" y 4 en el fling fuerte), los dos primeros escenarios con scroll de la pasada; la causa: SIN VERIFICAR.
+  - **CA6 en produccion: cumple** por mediana, como el resto de la spec.
 
 ## Cierre
 
 - [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
-- [ ] Criterios de aceptacion de la spec ejecutados
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
-- [ ] Estado de `spec.md` → Implementada
+- [x] Criterios de aceptacion de la spec ejecutados (E5; los que fallan, aceptados en la enmienda 2 de `spec.md`)
+- [x] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado (T6)
+- [x] Estado de `spec.md` → Implementada (T7, 2026-10-28)
