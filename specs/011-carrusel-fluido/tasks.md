@@ -261,4 +261,4 @@ Orden: primero la medida, despues lo que no cambia el aspecto (fisica por tiempo
     - el filtro nuevo sobre la historia de `main` no deja ningun fichero;
     - con `grano.png`, `textures/otra.png`, `land-mask.png` y `src/foto.jpg` de entrada, deja pasar solo `otra.png` y `foto.jpg`;
     - el YAML se lee bien.
-  - **Pendiente:** tras el push, el run del workflow en verde y el commit en el espejo. Lo comprueba Javi en GitHub Actions; aqui no hay `gh`.
+  - **Hecho el 2026-10-28.** Run del workflow `mirror` en verde tras el push `f950d14..eef0a27`, segun Javi en GitHub Actions ("mirror en verde", sin captura). La cabeza del espejo es `186d1c2` (`git ls-remote` del espejo). Que sea `eef0a27` filtrado: SIN VERIFICAR, no se comparo con un filtrado local.
