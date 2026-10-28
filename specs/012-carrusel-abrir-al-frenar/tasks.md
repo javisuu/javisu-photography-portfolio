@@ -172,7 +172,7 @@ Antes de cada `next build`, Javi para su `npm run dev`: comparten `.next/`, y un
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
+- [x] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/` (`evidencia/2026-10-28_diagnostico.txt`, 122 de 122)
 - [x] Criterios de aceptacion de la spec ejecutados (E5; los que fallan, aceptados en la enmienda 2 de `spec.md`)
 - [x] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado (T6)
 - [x] Estado de `spec.md` → Implementada (T7, 2026-10-28)
