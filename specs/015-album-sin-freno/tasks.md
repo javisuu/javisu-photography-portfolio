@@ -34,10 +34,13 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - Fichero(s): ninguno
   - Comprobacion: CA1 y CA4; salida a `evidencia/2026-11-01_015-completo.txt`. 2026-11-01: tsc, lint y build ok, 0 errores de consola en 6 rutas, 153 de 153 invariantes (incluidas `barra de scroll`, `llegada al album` y `scroll del album`); al soltar la rueda faltaban 595 px, llego en 451 ms; B10 con `scrollY` 0 en los 4 albumes
 
+- [x] **T8** · Medida en produccion
+  - Comprobacion: Produccion 2026-11-01, tras el push `47d4780..4915ec1` (`evidencia/2026-11-01_015-produccion.txt`): 0 errores de consola, 119 de 119 invariantes. Al soltar la rueda faltaban 496 px y llego en 408 ms. B10: `scrollY` 0 en los 4 albumes. CA6: "esta genial asi" (Javi, en local). La misma pasada dio 11 frames >50 ms en la entrada del landing. Local, justo despues: 0 (`evidencia/2026-11-01_015-local-entrada.txt`). Produccion otra vez, con la cache de imagenes ya caliente: 0 y arranque 167 ms (`evidencia/2026-11-01_015-produccion-entrada-2.txt`). Eran las primeras visitas tras el despliegue, no esta spec
+
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
-- [ ] Criterios de aceptacion de la spec ejecutados
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
+- [x] Criterios de aceptacion de la spec ejecutados
+- [x] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
+- [x] Estado de `spec.md` → Implementada
 - [ ] B10 cerrado o actualizado en `docs/ESTADO.md`

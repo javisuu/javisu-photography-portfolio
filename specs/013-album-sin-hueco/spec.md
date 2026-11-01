@@ -1,6 +1,6 @@
 # Spec 013 · Pagina de album sin hueco al llegar
 
-- **Estado:** Aprobada (Javi, 2026-10-31: "Todo OK")
+- **Estado:** Implementada (2026-11-01; enmiendas 1 y 2)
 - **Fecha:** 2026-10-31
 - **Requiere decision de Javi:** Si (motivo: GLSurface, solo como consumidor; ver "Choca con el spec"). La spec no cambia `src/motion/GLSurface.tsx`: usa dos props que ya existen y que hoy no usa ningun llamador (`onTexturesReady` y `readyNodeCount`, `src/motion/GLSurface.tsx:147-161`). Aun asi, depende de cuando dispara esa senal, que forma parte del ciclo de vida de `GLSurface`
 

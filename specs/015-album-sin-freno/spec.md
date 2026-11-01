@@ -1,6 +1,6 @@
 # Spec 015 · Pagina de album sin freno al hacer scroll
 
-- **Estado:** Aprobada (Javi, 2026-11-01: "OK ambos revisados")
+- **Estado:** Implementada (2026-11-01)
 - **Fecha:** 2026-10-31
 - **Requiere decision de Javi:** No. No toca el wordmark, el blend, el ciclo de vida de `GLSurface` ni el scroll infinito del landing: solo cambia las opciones de Lenis de la pagina de album
 

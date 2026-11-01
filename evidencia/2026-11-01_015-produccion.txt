@@ -1,0 +1,379 @@
+DIAGNOSTICO 2026-11-01 · main · 4915ec1 · 1 ficheros sin commit
+contra https://javisu-photography-portfolio.vercel.app
+
+=== tsc --noEmit ===
+omitido (--url)
+
+=== eslint ===
+omitido (--url)
+
+=== next build ===
+omitido (--url)
+
+=== servidor remoto ===
+ok · http 200
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x7b6400a7fe00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x7b6400a7fe00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x7b6400a7fe00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x7b6400a7fe00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · https://javisu-photography-portfolio.vercel.app/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 600
+  ok   scroll con rueda
+  /albums: {"gutter":0,"scrollHeight":900,"vh":900,"photos":29,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F05.jpg&w=750&q=75","dev":0.0019999999999998908}}
+  ok   sin barra de scroll
+  /about: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /album/america: {"gutter":0,"scrollHeight":9663,"vh":900,"photos":10,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F04.jpg&w=1080&q=75","dev":0.001400917949551439},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 600
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+  /credits: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+
+=== llegada al album ===
+ms desde el clic (carga directa: desde el inicio de la navegacion) · 3 repeticiones · cache vacia en cada una
+  1: carrusel → album → /album/america · 48 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 211 · <img> oculta 393 · primer fotograma con foto entera 437
+     secuencia ################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: NEXT ALBUM → /album/norte · 55 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 487 · <img> oculta 647 · primer fotograma con foto entera 690
+     secuencia #######################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: carga directa → /album/norte · 65 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 423 · <img> oculta 423 · primer fotograma con foto entera 557
+     secuencia #################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  2: carrusel → album → /album/america · 49 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 201 · <img> oculta 331 · primer fotograma con foto entera 551
+     secuencia .################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  2: NEXT ALBUM → /album/norte · 47 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 693 · <img> oculta 953 · primer fotograma con foto entera 1181
+     secuencia .##############################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  2: carga directa → /album/norte · 56 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 430 · <img> oculta 768 · primer fotograma con foto entera 802
+     secuencia .#######################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  3: carrusel → album → /album/america · 49 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 345 · <img> oculta 345 · primer fotograma con foto entera 657
+     secuencia #################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  3: NEXT ALBUM → /album/norte · 53 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 452 · <img> oculta 610 · primer fotograma con foto entera 640
+     secuencia #####################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  3: carga directa → /album/norte · 56 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 360 · <img> oculta 814 · primer fotograma con foto entera 846
+     secuencia ..######################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  foto entera, carrusel: mediana 551 · max 657 ms
+  foto entera, next: mediana 690 · max 1181 ms
+  foto entera, directa: mediana 802 · max 846 ms
+  reduced motion, carrusel → album → /album/america · 50 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 275 · <img> oculta 395 · primer fotograma con foto entera 423
+     secuencia .#################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  sin WebGL (--disable-3d-apis, webgl no disponible), carga directa → /album/norte · opacity 1 a 325 ms · muestras a medio fundido 0 · al final opacity 1, visible
+  ok   WebGL desactivado de verdad
+  ok   foto 1 visible sin esperar a GL
+  /album/america: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/norte: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/sol: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/ny: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+
+=== scroll del album ===
+  rafaga en /album/america: 20 x 400 px cada 16 ms, en 2834 ms
+     recorrido 8000 px · al soltar la rueda iba por 7504 px (faltaban 496) · llega 408 ms despues de soltar
+     velocidad maxima 412 px/frame · normalizada 10.30 (curva GL a tope desde 1)
+  ok   la rafaga mueve la pagina
+  B10 /album/america → /album/norte: clic con la pagina moviendose 6202 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/norte → /album/sol: clic con la pagina moviendose 3523 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/sol → /album/ny: clic con la pagina moviendose 3612 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/ny → /album/america: clic con la pagina moviendose 4313 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+
+=== textos del album ===
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 363 · participantes 7 · fase B 849 · rezagadas 1 · reposo 1599
+     frame del arranque 367 ms · despues: frames >50 ms 3, frame max 67 ms · long tasks 4 (485 ms) · [entrance] start x1
+     al monton: 649 683 749 749 749 799 849
+  2: inicio 444 · participantes 7 · fase B 1006 · rezagadas 1 · reposo 1739
+     frame del arranque 417 ms · despues: frames >50 ms 7, frame max 83 ms · long tasks 7 (711 ms) · [entrance] start x1
+     al monton: 756 906 906 906 906 906 1006
+  3: inicio 633 · participantes 7 · fase B 1118 · rezagadas 1 · reposo 1902
+     frame del arranque 433 ms · despues: frames >50 ms 7, frame max 83 ms · long tasks 3 (494 ms) · [entrance] start x1
+     al monton: 952 1052 1052 1052 1052 1052 1118
+  fase B      mediana 1006 · max 1118
+  reposo      mediana 1739 · max 1902
+  frames >50 mediana 7 · max 7
+  frame max   mediana 83 · max 83
+  arranque    mediana 417 · max 433
+
+=== descifrado del wordmark ===
+  (a) carga directa en / · 12 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  (b) carga en /about, clic a / · 14 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (c) carga en /albums, clic a / · 14 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (d) / -> /about, resize alli, -> / · 13 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (e) reduced motion, carga en /about, clic a / · 0 muestras · h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 6 rutas
+invariantes  119 de 119
+entrada      arranque 417 ms · fase B 1006 ms · reposo 1739 ms · frames >50 ms: 7 (medianas de 3)
+

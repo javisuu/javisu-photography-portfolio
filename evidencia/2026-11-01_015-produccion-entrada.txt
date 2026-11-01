@@ -1,0 +1,118 @@
+DIAGNOSTICO 2026-11-01 · main · 4915ec1 · 1 ficheros sin commit
+contra https://javisu-photography-portfolio.vercel.app
+
+=== tsc --noEmit ===
+omitido (--url)
+
+=== eslint ===
+omitido (--url)
+
+=== next build ===
+omitido (--url)
+
+=== servidor remoto ===
+ok · http 200
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x248c00422000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x248c00422000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x248c00422000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x248c00422000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · https://javisu-photography-portfolio.vercel.app/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 600
+  ok   scroll con rueda
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 805 · participantes 7 · fase B 1330 · rezagadas 2 · reposo 2130
+     frame del arranque 633 ms · despues: frames >50 ms 12, frame max 150 ms · long tasks 6 (893 ms) · [entrance] start x1
+     al monton: 1080 1263 1263 1263 1263 1330 1330
+  2: inicio 1157 · participantes 7 · fase B 1757 · rezagadas 1 · reposo 2457
+     frame del arranque 667 ms · despues: frames >50 ms 10, frame max 167 ms · long tasks 9 (1142 ms) · [entrance] start x1
+     al monton: 1457 1641 1641 1641 1641 1641 1757
+  3: inicio 556 · participantes 7 · fase B 1114 · rezagadas 1 · reposo 1848
+     frame del arranque 433 ms · despues: frames >50 ms 11, frame max 100 ms · long tasks 8 (805 ms) · [entrance] start x1
+     al monton: 848 964 964 964 964 1048 1114
+  fase B      mediana 1330 · max 1757
+  reposo      mediana 2130 · max 2457
+  frames >50 mediana 11 · max 12
+  frame max   mediana 150 · max 167
+  arranque    mediana 633 · max 667
+
+=== descifrado del wordmark ===
+  (a) carga directa en / · 8 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  (b) carga en /about, clic a / · 8 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (c) carga en /albums, clic a / · 8 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (d) / -> /about, resize alli, -> / · 8 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (e) reduced motion, carga en /about, clic a / · 0 muestras · h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  28 de 28
+entrada      arranque 633 ms · fase B 1330 ms · reposo 2130 ms · frames >50 ms: 11 (medianas de 3)
+

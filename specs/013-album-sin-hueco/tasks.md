@@ -39,12 +39,12 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 
 - [x] **T9** · Enmienda 2: sin fundido, aparece de golpe con la textura
   - Fichero(s): `src/motion/AlbumPhotos.tsx`, `scripts/diagnostico.mjs`, `CLAUDE.md`, `docs/design-spec-v2.md`
-  - Comprobacion: `--medir /album/norte --repeticiones 3`, 75 de 75, "sin fundido" en verde en las 9 pasadas (`evidencia/2026-11-01_013-enmienda2.txt`). Produccion despues del push: pendiente
+  - Comprobacion: `--medir /album/norte --repeticiones 3`, 75 de 75, "sin fundido" en verde en las 9 pasadas (`evidencia/2026-11-01_013-enmienda2.txt`). Produccion 2026-11-01, tras el push `47d4780..4915ec1` (`evidencia/2026-11-01_015-produccion.txt`): 0 errores de consola, 119 de 119 invariantes. Ningun fotograma en blanco con opacity 1, sin parpadeo y sin fundido en las 9 pasadas. Medianas de "foto entera": carrusel 551, NEXT ALBUM 690 y carga directa 802 ms
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
-- [ ] Criterios de aceptacion de la spec ejecutados
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/`
+- [x] Criterios de aceptacion de la spec ejecutados (CA5 redefinido en la enmienda 2)
+- [x] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
+- [x] Estado de `spec.md` → Implementada
 - [ ] B9 cerrado en `docs/ESTADO.md`
