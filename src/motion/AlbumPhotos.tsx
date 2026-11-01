@@ -24,6 +24,14 @@ import { useLenis } from "./useLenis";
 const ALBUM_BEND_DEPTH = 0.25;
 const ALBUM_BEND_RADIUS_MULTIPLIER = 3;
 
+// Scroll (spec 015). Lenis's default lerp (0.1) left the page ~1000px
+// behind a fast wheel and ~1s to catch up — read as a brake. A higher lerp
+// tracks the wheel closely and still leaves enough per-frame velocity for
+// GLSurface's bend. stopInertiaOnNavigate: clicking NEXT ALBUM mid-glide
+// used to carry the old page's inertia into the new album (B10).
+// Module-level: useLenis only reads options when it constructs Lenis.
+const ALBUM_LENIS_OPTIONS = { lerp: 0.2, stopInertiaOnNavigate: true };
+
 // Arrival (spec 013): GLSurface reports a context before it has any
 // texture, and the <img> is hidden from that moment — so the first photo's
 // slot used to read blank until its texture landed. Only photo 1 is on
@@ -58,7 +66,7 @@ export default function AlbumPhotos({
   photos: Photo[];
   albumText?: AlbumText;
 }) {
-  const lenisRef = useLenis();
+  const lenisRef = useLenis(ALBUM_LENIS_OPTIONS);
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [glActive, setGlActive] = useState(false);
   const firstRowRef = useRef<HTMLDivElement>(null);

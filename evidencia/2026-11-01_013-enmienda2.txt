@@ -1,0 +1,174 @@
+DIAGNOSTICO 2026-11-01 · feat/015-album-sin-freno · 47d4780 · 11 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta /album/norte ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Norte",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x297c00426e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/norte
+    [warning] [.WebGL-0x297c00426e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/norte
+    [warning] [.WebGL-0x297c00426e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/norte
+    [warning] [.WebGL-0x297c00426e00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/album/norte
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /album/norte: {"gutter":0,"scrollHeight":8111,"vh":900,"photos":9,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=1080&q=75","dev":0.0016382501977978414},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+
+=== llegada al album ===
+ms desde el clic (carga directa: desde el inicio de la navegacion) · 3 repeticiones · cache vacia en cada una
+  1: carrusel → album → /album/america · 155 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 175 · <img> oculta 390 · primer fotograma con foto entera 410
+     secuencia .##########################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: NEXT ALBUM → /album/norte · 154 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 207 · <img> oculta 539 · primer fotograma con foto entera 552
+     secuencia .#########################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: carga directa → /album/norte · 137 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 140 · <img> oculta 762 · primer fotograma con foto entera 778
+     secuencia ....#####################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  2: carrusel → album → /album/america · 153 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 162 · <img> oculta 368 · primer fotograma con foto entera 382
+     secuencia .########################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  2: NEXT ALBUM → /album/norte · 149 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 284 · <img> oculta 341 · primer fotograma con foto entera 370
+     secuencia #####################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  2: carga directa → /album/norte · 140 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 125 · <img> oculta 728 · primer fotograma con foto entera 749
+     secuencia ....########################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  3: carrusel → album → /album/america · 156 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 151 · <img> oculta 364 · primer fotograma con foto entera 385
+     secuencia #.##########################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  3: NEXT ALBUM → /album/norte · 159 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 207 · <img> oculta 519 · primer fotograma con foto entera 534
+     secuencia .##############################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  3: carga directa → /album/norte · 134 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 152 · <img> oculta 772 · primer fotograma con foto entera 783
+     secuencia ....##################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  foto entera, carrusel: mediana 385 · max 410 ms
+  foto entera, next: mediana 534 · max 552 ms
+  foto entera, directa: mediana 778 · max 783 ms
+  reduced motion, carrusel → album → /album/america · 156 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 131 · <img> oculta 359 · primer fotograma con foto entera 378
+     secuencia .###########################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  sin WebGL (--disable-3d-apis, webgl no disponible), carga directa → /album/norte · opacity 1 a 396 ms · muestras a medio fundido 0 · al final opacity 1, visible
+  ok   WebGL desactivado de verdad
+  ok   foto 1 visible sin esperar a GL
+  /album/norte: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+
+=== textos del album ===
+  /album/norte: 3 textos, 8 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 5: hueco 229.1 px, arriba 338 px, centro 0 px
+  ok   cita foto 5: sin solaparse y en el lado libre
+  ok   cita foto 5: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 5: no es la primera foto
+      hueco libre 637.8-1376 px, desvio del centro 0 px
+  ok   cita foto 5: centrada en el hueco libre
+  ok   cita foto 5: foto entera y sin deformar
+  ok   cita foto 5: alineacion vertical
+  ok   cita foto 5: escala de grises
+    cita foto 8: hueco 300.8 px, arriba 338 px, centro 0 px
+  ok   cita foto 8: sin solaparse y en el lado libre
+  ok   cita foto 8: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 8: no es la primera foto
+      hueco libre 494.3-1376 px, desvio del centro 0 px
+  ok   cita foto 8: centrada en el hueco libre
+  ok   cita foto 8: foto entera y sin deformar
+  ok   cita foto 8: alineacion vertical
+  ok   cita foto 8: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  75 de 75
+

@@ -548,6 +548,101 @@ if (!only || only.startsWith("/album/")) {
   await decoder.close();
 }
 
+// ---------- scroll del album ----------
+// Spec 015. El album usa Lenis, que suaviza el scroll: la pagina va por
+// detras de la rueda, y al bajar rapido se nota como un freno. Una rafaga
+// de rueda, y por rAF scrollY: cuanto falta por recorrer al soltar la
+// rueda, cuanto tarda en llegar, y la velocidad maxima por frame (la que
+// GLSurface normaliza con velocityNormalize = 40 para la curva). Despues,
+// B10: NEXT ALBUM con el clic en plena inercia, y donde empieza el nuevo.
+const BURST_STEPS = 20;
+const BURST_DELTA_PX = 400;
+const BURST_GAP_MS = 16;
+const BURST_SETTLE_MS = 3000;
+const ALBUM_VELOCITY_NORMALIZE = 40;
+const B10_CHECK_MS = [500, 1500];
+function scrollSampler() {
+  window.__scroll = { samples: [] };
+  const tick = () => {
+    window.__scroll.samples.push([performance.now(), scrollY, location.pathname]);
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+if (!only || only.startsWith("/album/")) {
+  rule("scroll del album");
+  const slugs = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
+  const burstRoute = only ?? `/album/${slugs[0]}`;
+  async function scrollPage(route, ctxOpts = {}) {
+    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...ctxOpts });
+    const p = await ctx.newPage();
+    const errs = [];
+    p.on("pageerror", (e) => errs.push(e.message));
+    await p.addInitScript(scrollSampler);
+    await p.goto(BASE + route, { waitUntil: "load" }).catch((e) => errs.push(`goto: ${e.message}`));
+    await p.waitForTimeout(SETTLE_MS);
+    await p.mouse.move(720, 450);
+    return { ctx, p, errs };
+  }
+  async function burst(p, steps = BURST_STEPS) {
+    for (let i = 0; i < steps; i++) { await p.mouse.wheel(0, BURST_DELTA_PX); await p.waitForTimeout(BURST_GAP_MS); }
+    return p.evaluate(() => performance.now());
+  }
+  // Rafaga: recorrido pedido, lo que falta al soltar, tiempo hasta llegar.
+  const bm = await scrollPage(burstRoute);
+  const t0 = await bm.p.evaluate(() => { window.__scroll.samples = []; return performance.now(); });
+  const tEnd = await burst(bm.p);
+  await bm.p.waitForTimeout(BURST_SETTLE_MS);
+  const S = await bm.p.evaluate(() => window.__scroll.samples);
+  await bm.ctx.close();
+  const final = S[S.length - 1][1];
+  const atRelease = S.filter(([t]) => t <= tEnd).pop()?.[1] ?? 0;
+  const arrived = S.find(([t, y]) => t >= tEnd && Math.abs(final - y) <= 2)?.[0];
+  let maxV = 0;
+  for (let k = 1; k < S.length; k++) maxV = Math.max(maxV, Math.abs(S[k][1] - S[k - 1][1]));
+  const rr = (v) => Math.round(v);
+  log(`  rafaga en ${burstRoute}: ${BURST_STEPS} x ${BURST_DELTA_PX} px cada ${BURST_GAP_MS} ms, en ${rr(tEnd - t0)} ms`);
+  log(`     recorrido ${rr(final)} px · al soltar la rueda iba por ${rr(atRelease)} px (faltaban ${rr(final - atRelease)}) · llega ${arrived ? rr(arrived - tEnd) : "—"} ms despues de soltar`);
+  log(`     velocidad maxima ${rr(maxV)} px/frame · normalizada ${(maxV / ALBUM_VELOCITY_NORMALIZE).toFixed(2)} (curva GL a tope desde 1)`);
+  if (bm.errs.length) log(`     errores: ${bm.errs.join(" | ")}`);
+  addInv(`scroll ${burstRoute}`, "la rafaga mueve la pagina", final > 0, "scrollY sigue en 0");
+  // B10: clic en NEXT ALBUM en plena inercia (el.click(), para que
+  // Playwright no haga scroll hasta el enlace antes de pulsarlo).
+  for (const slug of slugs) {
+    const from = `/album/${slug}`;
+    const nm = await scrollPage(from);
+    // La rafaga de page.mouse.wheel tarda ~68 ms por paso: cuando acaba,
+    // Lenis ya ha llegado y no queda inercia. Aqui la rueda se lanza desde
+    // la pagina, de golpe, hasta el final, y el clic llega a los 250 ms,
+    // con Lenis aun recorriendo el camino.
+    const r = await nm.p.evaluate(async () => {
+      const main = [...document.querySelectorAll("main")].find((el) => getComputedStyle(el).display !== "none");
+      const a = [...main.querySelectorAll('a[href^="/album/"]')].pop();
+      const need = document.documentElement.scrollHeight - innerHeight;
+      for (let y = 0; y < need + 2000; y += 400) {
+        window.dispatchEvent(new WheelEvent("wheel", { deltaY: 400, clientX: 720, clientY: 450, bubbles: true, cancelable: true }));
+      }
+      await new Promise((res) => setTimeout(res, 250));
+      const s = window.__scroll.samples;
+      const moving = s.length > 2 ? Math.abs(s[s.length - 1][1] - s[s.length - 3][1]) : 0;
+      const tClick = performance.now();
+      a.click();
+      return { href: a.getAttribute("href"), moving, tClick };
+    }).catch((e) => ({ evalError: e.message }));
+    if (r.evalError) { addInv(`B10 ${from}`, "NEXT ALBUM medible", false, r.evalError); await nm.ctx.close(); continue; }
+    await nm.p.waitForURL(BASE + r.href).catch(() => {});
+    await nm.p.waitForTimeout(Math.max(...B10_CHECK_MS) + 200);
+    const S2 = await nm.p.evaluate(() => window.__scroll.samples);
+    await nm.ctx.close();
+    const on = S2.filter(([, , path]) => path === r.href);
+    const at = B10_CHECK_MS.map((ms) => on.filter(([t]) => t <= r.tClick + ms).pop()?.[1]);
+    const maxNew = on.reduce((m, [, y]) => Math.max(m, y), 0);
+    log(`  B10 ${from} → ${r.href}: clic con la pagina moviendose ${rr(r.moving)} px en 2 frames · scrollY en el nuevo a ${B10_CHECK_MS.join(" y ")} ms: ${at.map((y) => (y === undefined ? "—" : rr(y))).join(" y ")} · max ${rr(maxNew)}`);
+    if (nm.errs.length) log(`     errores: ${nm.errs.join(" | ")}`);
+    addInv(`B10 ${from}`, "NEXT ALBUM empieza arriba", at.every((y) => y === 0) && maxNew === 0, `scrollY ${at.map((y) => (y === undefined ? "—" : rr(y))).join("/")}, max ${rr(maxNew)}`);
+  }
+}
+
 // ---------- textos del album ----------
 // Spec 010. Recorre todos los albumes de src/data/photos.ts y mide cada
 // [data-album-text] y [data-photo-quote] a 1440x900 contra su <img>.

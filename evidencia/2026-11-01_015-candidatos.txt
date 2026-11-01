@@ -1,0 +1,54 @@
+##### lerp 0.2
+=== scroll del album ===
+  rafaga en /album/america: 20 x 400 px cada 16 ms, en 1336 ms
+     recorrido 8000 px · al soltar la rueda iba por 7407 px (faltaban 593) · llega 450 ms despues de soltar
+     velocidad maxima 145 px/frame · normalizada 3.63 (curva GL a tope desde 1)
+  ok   la rafaga mueve la pagina
+  B10 /album/america → /album/norte: clic con la pagina moviendose 215 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/norte → /album/sol: clic con la pagina moviendose 177 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/sol → /album/ny: clic con la pagina moviendose 160 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/ny → /album/america: clic con la pagina moviendose 205 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+
+=== textos del album ===
+consola      0 errores en 1 rutas
+invariantes  49 de 49
+##### lerp 0.35
+=== scroll del album ===
+  rafaga en /album/america: 20 x 400 px cada 16 ms, en 1316 ms
+     recorrido 8000 px · al soltar la rueda iba por 7625 px (faltaban 375) · llega 237 ms despues de soltar
+     velocidad maxima 172 px/frame · normalizada 4.30 (curva GL a tope desde 1)
+  ok   la rafaga mueve la pagina
+  B10 /album/america → /album/norte: clic con la pagina moviendose 47 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/norte → /album/sol: clic con la pagina moviendose 54 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/sol → /album/ny: clic con la pagina moviendose 49 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/ny → /album/america: clic con la pagina moviendose 36 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+
+=== textos del album ===
+consola      0 errores en 1 rutas
+invariantes  49 de 49
+##### lerp 0.5
+=== scroll del album ===
+  rafaga en /album/america: 20 x 400 px cada 16 ms, en 1317 ms
+     recorrido 8000 px · al soltar la rueda iba por 7719 px (faltaban 281) · llega 150 ms despues de soltar
+     velocidad maxima 223 px/frame · normalizada 5.58 (curva GL a tope desde 1)
+  ok   la rafaga mueve la pagina
+  B10 /album/america → /album/norte: clic con la pagina moviendose 8 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/norte → /album/sol: clic con la pagina moviendose 11 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/sol → /album/ny: clic con la pagina moviendose 10 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/ny → /album/america: clic con la pagina moviendose 6 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+
+=== textos del album ===
+consola      0 errores en 1 rutas
+invariantes  49 de 49
