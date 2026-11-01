@@ -28,9 +28,18 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 - [x] **T7** · Diagnostico completo en local
   - Fichero(s): ninguno
   - Comprobacion: CA1 y CA8; salida a `evidencia/2026-11-01_013-completo.txt`. 2026-11-01: tsc, lint y build ok, 0 errores de consola en 6 rutas, 145 de 145 invariantes; `llegada al album`: 0 fotogramas en blanco con opacity 1 y sin parpadeo en carrusel, NEXT ALBUM, carga directa y reduced motion; sin WebGL, opacity 1 a 305 ms sin fundido; foto 1 `eager` + `fetchpriority=high` en los 4 albumes
-- [ ] **T8** · Commit; Javi fusiona y hace push. Medida en produccion
+- [x] **T8** · Commit; Javi fusiona y hace push. Medida en produccion
   - Fichero(s): ninguno
-  - Comprobacion: CA2 a CA6 con `--url ... --repeticiones 3`; salida a `evidencia/AAAA-MM-DD_013-produccion.txt`; Javi lo confirma en su maquina (CA9)
+  - Comprobacion: CA2 a CA6 con `--url ... --repeticiones 3`; salida a `evidencia/2026-11-01_013-produccion.txt`; Javi lo confirma en su maquina (CA9)
+  - 2026-11-01, commits `d76746f` y `47d4780`, push de Javi `eef0a27..47d4780`. Produccion: 0 errores de consola, 105 de 105 invariantes.
+    - CA2, CA3 y CA4: 0 fotogramas en blanco con opacity 1 y sin parpadeo en las 9 pasadas y con reduced motion.
+    - CA6: los 4 albumes con la foto 1 `eager` + `fetchpriority=high`.
+    - CA7: sin WebGL, opacity 1 a 371 ms, sin fundido.
+    - **CA5 no se cumple del todo.** Medianas de "foto entera" frente a linea base + 400 ms: carrusel 715 contra 706 (+9 ms), NEXT ALBUM 717 contra 617 (+100 ms), carga directa 830 contra 932 (cumple). El fundido arranca cuando la textura ya esta subida, no cuando GL tiene contexto, y eso suma la espera de la textura a los 400 ms. Pendiente de que Javi lo acepte como medido.
+
+- [x] **T9** · Enmienda 2: sin fundido, aparece de golpe con la textura
+  - Fichero(s): `src/motion/AlbumPhotos.tsx`, `scripts/diagnostico.mjs`, `CLAUDE.md`, `docs/design-spec-v2.md`
+  - Comprobacion: `--medir /album/norte --repeticiones 3`, 75 de 75, "sin fundido" en verde en las 9 pasadas (`evidencia/2026-11-01_013-enmienda2.txt`). Produccion despues del push: pendiente
 
 ## Cierre
 

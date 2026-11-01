@@ -502,6 +502,9 @@ if (!only || only.startsWith("/album/")) {
     for (const [kind, label] of [["carrusel", "carrusel → album"], ["next", "NEXT ALBUM"], ["directa", "carga directa"]]) {
       const r = await arrivalRun({ kind });
       const t = report(`${k}: ${label}`, r, `llegada (${kind}) ${k}`);
+      // Enmienda 2 de la spec 013: la foto 1 aparece de golpe, sin fundido.
+      const fade = r.samples.filter((s) => s.op > 0 && s.op < 1).length;
+      addInv(`llegada (${kind}) ${k}`, "sin fundido", fade === 0, `${fade} muestras con opacity entre 0 y 1`);
       if (t !== null) fullTimes[kind].push(t);
     }
   }
@@ -510,7 +513,7 @@ if (!only || only.startsWith("/album/")) {
     v.sort((a, b) => a - b);
     log(`  foto entera, ${kind}: mediana ${Math.round(v[Math.floor((v.length - 1) / 2)])} · max ${Math.round(v[v.length - 1])} ms`);
   }
-  // Reduced motion: espera igual, pero sin fundido (de 0 a 1 en un frame).
+  // Reduced motion: igual que sin el, de 0 a 1 en un frame.
   const rm = await arrivalRun({ kind: "carrusel", reduced: true });
   report("reduced motion, carrusel → album", rm, "llegada (reduced motion)");
   const mid = rm.samples.filter((s) => s.op > 0 && s.op < 1);

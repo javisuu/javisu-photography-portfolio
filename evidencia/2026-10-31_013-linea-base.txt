@@ -1,0 +1,92 @@
+B9 · https://javisu-photography-portfolio.vercel.app · 2026-10-31T11:15:55.544Z
+(ms desde el clic; en carga directa, desde el inicio de la navegacion)
+
+[rep 1] == carrusel → album
+  url album            101 ms
+  <img> foto 1 en DOM  101 ms
+  <img> visibility:hidden (GL disponible) 162 ms
+  <img> cargada (complete)                185 ms
+  hueco hidden→cargada 23 ms
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/01.jpg&w=1080&q=75 · inicio 102 · fin 178 · 74206 B
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/02.jpg&w=1080&q=75 · inicio 102 · fin 178 · 159144 B
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/04.jpg&w=1080&q=75 · inicio 102 · fin 196 · 146514 B
+
+[rep 1] == NEXT ALBUM
+  url album            10 ms
+  <img> foto 1 en DOM  10 ms
+  <img> visibility:hidden (GL disponible) 10 ms
+  <img> cargada (complete)                10 ms
+  hueco hidden→cargada 0 ms
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/01.jpg&w=1080&q=75 · inicio 982 · fin 1135 · 46214 B
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/02.jpg&w=1080&q=75 · inicio 982 · fin 1058 · 88790 B
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/05.jpg&w=1080&q=75 · inicio 982 · fin 1035 · 61708 B
+
+[rep 1] == carga directa
+  url album            240 ms
+  <img> foto 1 en DOM  240 ms
+  <img> visibility:hidden (GL disponible) 454 ms
+  <img> cargada (complete)                375 ms
+  hueco hidden→cargada -79 ms
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/01.jpg&w=256&q=75 · inicio 126 · fin 208 · 10250 B
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/06.jpg&w=384&q=75 · inicio 126 · fin 195 · 5452 B
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/03.jpg&w=384&q=75 · inicio 126 · fin 209 · 33734 B
+
+[rep 2] == carrusel → album
+  url album            121 ms
+  <img> foto 1 en DOM  121 ms
+  <img> visibility:hidden (GL disponible) 175 ms
+  <img> cargada (complete)                175 ms
+  hueco hidden→cargada 0 ms
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/01.jpg&w=1080&q=75 · inicio 121 · fin 172 · 74206 B
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/02.jpg&w=1080&q=75 · inicio 121 · fin 245 · 159144 B
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/03.jpg&w=1080&q=75 · inicio 122 · fin 219 · 199036 B
+
+[rep 2] == NEXT ALBUM
+  url album            5 ms
+  <img> foto 1 en DOM  5 ms
+  <img> visibility:hidden (GL disponible) 5 ms
+  <img> cargada (complete)                5 ms
+  hueco hidden→cargada 0 ms
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/01.jpg&w=1080&q=75 · inicio 1036 · fin 1139 · 46214 B
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/03.jpg&w=1080&q=75 · inicio 1036 · fin 1082 · 39658 B
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/02.jpg&w=1080&q=75 · inicio 1036 · fin 1121 · 88790 B
+
+[rep 2] == carga directa
+  url album            255 ms
+  <img> foto 1 en DOM  255 ms
+  <img> visibility:hidden (GL disponible) 463 ms
+  <img> cargada (complete)                367 ms
+  hueco hidden→cargada -96 ms
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/01.jpg&w=256&q=75 · inicio 121 · fin 180 · 10250 B
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/03.jpg&w=384&q=75 · inicio 121 · fin 180 · 33734 B
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/05.jpg&w=640&q=75 · inicio 121 · fin 180 · 7718 B
+
+[rep 3] == carrusel → album
+  url album            126 ms
+  <img> foto 1 en DOM  126 ms
+  <img> visibility:hidden (GL disponible) 188 ms
+  <img> cargada (complete)                188 ms
+  hueco hidden→cargada 0 ms
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/01.jpg&w=1080&q=75 · inicio 127 · fin 179 · 74206 B
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/02.jpg&w=1080&q=75 · inicio 127 · fin 201 · 159144 B
+  recurso ortfolio.vercel.app/_next/image?url=/photos/america/03.jpg&w=1080&q=75 · inicio 127 · fin 246 · 199036 B
+
+[rep 3] == NEXT ALBUM
+  url album            10 ms
+  <img> foto 1 en DOM  10 ms
+  <img> visibility:hidden (GL disponible) 10 ms
+  <img> cargada (complete)                10 ms
+  hueco hidden→cargada 0 ms
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/01.jpg&w=1080&q=75 · inicio 985 · fin 1034 · 46214 B
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/03.jpg&w=1080&q=75 · inicio 985 · fin 1037 · 39658 B
+  recurso -portfolio.vercel.app/_next/image?url=/photos/norte/05.jpg&w=1080&q=75 · inicio 985 · fin 1051 · 61708 B
+
+[rep 3] == carga directa
+  url album            290 ms
+  <img> foto 1 en DOM  290 ms
+  <img> visibility:hidden (GL disponible) 573 ms
+  <img> cargada (complete)                344 ms
+  hueco hidden→cargada -229 ms
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/01.jpg&w=256&q=75 · inicio 159 · fin 247 · 10250 B
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/03.jpg&w=384&q=75 · inicio 159 · fin 235 · 33734 B
+  recurso portfolio.vercel.app/_next/image?url=/photos/america/05.jpg&w=640&q=75 · inicio 159 · fin 235 · 7718 B

@@ -1,0 +1,169 @@
+DIAGNOSTICO 2026-10-31 · feat/013-album-sin-hueco · 09782a6 · 4 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta /album/norte ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Norte",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0xb1400421400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/norte
+    [warning] [.WebGL-0xb1400421400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/norte
+    [warning] [.WebGL-0xb1400421400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/norte
+    [warning] [.WebGL-0xb1400421400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/album/norte
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /album/norte: {"gutter":0,"scrollHeight":8111,"vh":900,"photos":9,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=1080&q=75","dev":0.0016382501977978414},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+
+=== llegada al album ===
+ms desde el clic (carga directa: desde el inicio de la navegacion) · 3 repeticiones · cache vacia en cada una
+  1: carrusel → album → /album/america · 146 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 276 · <img> oculta 411 · primer fotograma con foto entera 418
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (318 ms)
+  ok   sin parpadeo
+  1: NEXT ALBUM → /album/norte · 149 fotogramas · en blanco con opacity 1: 2 · parpadeo: si
+     foto 1 cargada 373 · <img> oculta 525 · primer fotograma con foto entera 519
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 2 fotogramas en blanco con opacity 1 (419 536 ms)
+  FALLA sin parpadeo · la foto 1 se vio y despues desaparecio
+  1: carga directa → /album/norte · 125 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 255 · <img> oculta 773 · primer fotograma con foto entera 287
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (270 ms)
+  ok   sin parpadeo
+  2: carrusel → album → /album/america · 149 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 197 · <img> oculta 337 · primer fotograma con foto entera 349
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (233 ms)
+  ok   sin parpadeo
+  2: NEXT ALBUM → /album/norte · 151 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 375 · <img> oculta 519 · primer fotograma con foto entera 521
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (404 ms)
+  ok   sin parpadeo
+  2: carga directa → /album/norte · 131 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 265 · <img> oculta 785 · primer fotograma con foto entera 299
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (282 ms)
+  ok   sin parpadeo
+  3: carrusel → album → /album/america · 150 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 182 · <img> oculta 344 · primer fotograma con foto entera 337
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (237 ms)
+  ok   sin parpadeo
+  3: NEXT ALBUM → /album/norte · 147 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 321 · <img> oculta 455 · primer fotograma con foto entera 453
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (353 ms)
+  ok   sin parpadeo
+  3: carga directa → /album/norte · 135 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 254 · <img> oculta 779 · primer fotograma con foto entera 276
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (260 ms)
+  ok   sin parpadeo
+  foto entera, carrusel: mediana 349 · max 418 ms
+  foto entera, next: mediana 519 · max 521 ms
+  foto entera, directa: mediana 287 · max 299 ms
+  reduced motion, carrusel → album → /album/america · 155 fotogramas · en blanco con opacity 1: 1 · parpadeo: no
+     foto 1 cargada 171 · <img> oculta 325 · primer fotograma con foto entera 315
+  ok   foto 1 medible
+  FALLA sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (215 ms)
+  ok   sin parpadeo
+  ok   sin fundido
+  sin WebGL (--disable-3d-apis, webgl no disponible), carga directa → /album/norte · primera muestra cargada: opacity 1, visible
+  ok   WebGL desactivado de verdad
+  ok   foto 1 visible al cargar
+  /album/norte: foto 1 loading=lazy fetchpriority=null · resto lazy: si
+  FALLA foto 1 eager y fetchpriority high · loading=lazy fetchpriority=null
+  ok   resto de fotos lazy
+
+=== textos del album ===
+  /album/norte: 3 textos, 8 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 5: hueco 229.1 px, arriba 338 px, centro 0 px
+  ok   cita foto 5: sin solaparse y en el lado libre
+  ok   cita foto 5: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 5: no es la primera foto
+      hueco libre 637.8-1376 px, desvio del centro 0 px
+  ok   cita foto 5: centrada en el hueco libre
+  ok   cita foto 5: foto entera y sin deformar
+  ok   cita foto 5: alineacion vertical
+  ok   cita foto 5: escala de grises
+    cita foto 8: hueco 300.8 px, arriba 338 px, centro 0 px
+  ok   cita foto 8: sin solaparse y en el lado libre
+  ok   cita foto 8: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 8: no es la primera foto
+      hueco libre 494.3-1376 px, desvio del centro 0 px
+  ok   cita foto 8: centrada en el hueco libre
+  ok   cita foto 8: foto entera y sin deformar
+  ok   cita foto 8: alineacion vertical
+  ok   cita foto 8: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  54 de 66
+
+FALLOS
+- llegada (carrusel) 1 · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (318 ms)
+- llegada (next) 1 · sin hueco en blanco · 2 fotogramas en blanco con opacity 1 (419 536 ms)
+- llegada (next) 1 · sin parpadeo · la foto 1 se vio y despues desaparecio
+- llegada (directa) 1 · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (270 ms)
+- llegada (carrusel) 2 · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (233 ms)
+- llegada (next) 2 · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (404 ms)
+- llegada (directa) 2 · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (282 ms)
+- llegada (carrusel) 3 · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (237 ms)
+- llegada (next) 3 · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (353 ms)
+- llegada (directa) 3 · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (260 ms)
+- llegada (reduced motion) · sin hueco en blanco · 1 fotogramas en blanco con opacity 1 (215 ms)
+- llegada /album/norte · foto 1 eager y fetchpriority high · loading=lazy fetchpriority=null
+

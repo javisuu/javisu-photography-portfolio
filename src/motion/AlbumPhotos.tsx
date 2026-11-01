@@ -28,11 +28,12 @@ const ALBUM_BEND_RADIUS_MULTIPLIER = 3;
 // texture, and the <img> is hidden from that moment — so the first photo's
 // slot used to read blank until its texture landed. Only photo 1 is on
 // screen at arrival (measured up to 2560x1440), so its row starts at
-// opacity 0 and fades in once that one texture is uploaded. The fade is
-// written per frame, inline, on the <img>'s own parent: GLSurface reads
-// exactly that value each frame (node.parentElement.style.opacity) — a CSS
-// transition would leave the inline value at 1 and the plane would pop.
-const ARRIVAL_FADE_MS = 400;
+// opacity 0 and appears at once when that one texture is uploaded — no
+// fade: a fade only added its own length to an arrival that already reads
+// late (spec 013, amendment 2); the carousel→album transition is what's
+// meant to fix that. The opacity sits inline on the <img>'s own parent,
+// which is exactly what GLSurface reads each frame
+// (node.parentElement.style.opacity).
 // Never wait longer than this: a photo that fails to load never fires
 // GLSurface's load listener, so onTexturesReady would never come.
 const ARRIVAL_MAX_WAIT_MS = 1500;
@@ -61,44 +62,27 @@ export default function AlbumPhotos({
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [glActive, setGlActive] = useState(false);
   const firstRowRef = useRef<HTMLDivElement>(null);
-  const revealStartedRef = useRef(false);
-  const fadeRafRef = useRef(0);
+  const revealedRef = useRef(false);
 
   // Stable on purpose: it reaches GLSurface (directly and through
   // handleAvailability), whose setup effect depends on its callbacks'
   // identity and would rebuild the whole scene if they changed.
-  const reveal = useCallback((instant: boolean) => {
-    if (revealStartedRef.current) return;
-    revealStartedRef.current = true;
-    const row = firstRowRef.current;
-    if (!row) return;
-    if (instant || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
-      row.style.opacity = "1";
-      return;
-    }
-    const t0 = performance.now();
-    const step = (now: number) => {
-      const p = Math.min(1, (now - t0) / ARRIVAL_FADE_MS);
-      row.style.opacity = String(1 - (1 - p) ** 3); // ease-out
-      if (p < 1) fadeRafRef.current = requestAnimationFrame(step);
-    };
-    fadeRafRef.current = requestAnimationFrame(step);
+  const reveal = useCallback(() => {
+    if (revealedRef.current || !firstRowRef.current) return;
+    revealedRef.current = true;
+    firstRowRef.current.style.opacity = "1";
   }, []);
-  const handleTexturesReady = useCallback(() => reveal(false), [reveal]);
   // No WebGL: the <img> stays visible, so there's nothing to wait for.
   const handleAvailability = useCallback(
     (available: boolean) => {
       setGlActive(available);
-      if (!available) reveal(true);
+      if (!available) reveal();
     },
     [reveal]
   );
   useEffect(() => {
-    const id = setTimeout(() => reveal(false), ARRIVAL_MAX_WAIT_MS);
-    return () => {
-      clearTimeout(id);
-      cancelAnimationFrame(fadeRafRef.current);
-    };
+    const id = setTimeout(reveal, ARRIVAL_MAX_WAIT_MS);
+    return () => clearTimeout(id);
   }, [reveal]);
 
   // Each row's <Image> is w-auto/h-auto, constrained only by max-h-[85vh]
@@ -123,7 +107,7 @@ export default function AlbumPhotos({
 
   return (
     <>
-      {/* Without JS the fade never runs: show photo 1 anyway. */}
+      {/* Without JS the reveal never runs: show photo 1 anyway. */}
       <noscript>
         <style>{'[data-photo-index="0"]{opacity:1!important}'}</style>
       </noscript>
@@ -251,7 +235,7 @@ export default function AlbumPhotos({
         bendRadiusMultiplier={ALBUM_BEND_RADIUS_MULTIPLIER}
         onAvailabilityChange={handleAvailability}
         readyNodeCount={1}
-        onTexturesReady={handleTexturesReady}
+        onTexturesReady={reveal}
         className="pointer-events-none fixed inset-0 z-0"
       />
     </>

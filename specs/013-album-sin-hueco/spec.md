@@ -109,3 +109,19 @@ Todos a 1440x900, contra produccion despues del despliegue y en local antes de f
 3. **CA3 y CA7, criterio ajustado** (`scripts/diagnostico.mjs`, seccion `llegada al album`):
    - CA3 solo cuenta como parpadeo un fotograma en blanco con la fila a opacity 1 despues de haberse visto la foto. Al venir del carrusel o de NEXT ALBUM, el primer fotograma aun es la pagina anterior, y se contaba como "foto vista".
    - CA7 pide que, sin WebGL, la foto acabe visible sin fundido. Antes de hidratar, la fila esta a 0 por el HTML del servidor.
+
+## Enmienda 2 (2026-11-01): sin fundido
+
+Medido en produccion, CA5 no se cumplia del todo: el fundido sumaba sus 400 ms a la espera de la textura. NEXT ALBUM llegaba a 717 ms frente a un limite de 617, y el carrusel a 715 frente a 706 (`evidencia/2026-11-01_013-produccion.txt`, `tasks.md` T8). Javi: "pues entonces eliminamos el efecto, ¿que sentido tiene?, se solucionara con una transicion carrusel->album".
+
+- La fila de la foto 1 sigue oculta hasta que su textura esta subida (o 1,5 s, o sin WebGL), pero pasa de 0 a 1 en un frame, sin fundido. Se mantiene lo que quita el hueco en blanco y el parpadeo.
+- El diagnostico comprueba "sin fundido" en todas las llegadas, no solo con reduced motion.
+- CA5 pasa a medir el retraso frente a la linea base, sin sumar fundido. En local (`evidencia/2026-11-01_013-enmienda2.txt`, medianas de 3), frente a la linea base local (`evidencia/2026-10-31_013-linea-base-diagnostico.txt`):
+
+| Llegada | Ahora | Linea base | Diferencia |
+|---|---|---|---|
+| Carrusel | 385 ms | 349 ms | +36 ms |
+| NEXT ALBUM | 534 ms | 519 ms | +15 ms |
+| Carga directa | 778 ms | 287 ms | +491 ms |
+
+La carga directa sube porque antes la `<img>` del DOM se pintaba antes que GL y luego desaparecia (el parpadeo de CA3). Ahora la foto espera a GL y no desaparece. Javi ya acepto esa espera: la llegada lenta la resolvera la transicion.
