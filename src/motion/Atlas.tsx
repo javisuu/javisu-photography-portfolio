@@ -189,6 +189,21 @@ function getReducedMotionServerSnapshot() {
 
 type Cluster = { members: { mark: AtlasMark; index: number }[]; x: number; y: number; opacity: number };
 
+// Read-only probe for scripts/diagnostico.mjs (spec 016): the globe is one
+// canvas with no DOM to measure, so the diagnostic reads the view state and
+// last frame's projected clusters from here. Nothing in it writes state.
+// Cluster x/y are relative to the canvas box, exactly as hit-testing uses them.
+type AtlasProbe = {
+  state: () => { R: number; lambda0: number; phi0: number; minR: number; maxR: number; width: number; height: number };
+  clusters: () => { x: number; y: number; opacity: number; srcs: string[] }[];
+  latticeCount: () => { built: number; drawn: number };
+};
+declare global {
+  interface Window {
+    __atlas?: AtlasProbe;
+  }
+}
+
 function clusterKey(cluster: Cluster): string {
   return cluster.members.map((m) => m.mark.src).join("|");
 }
@@ -262,6 +277,8 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   // themselves, so hit-testing is always consistent with what's
   // actually on screen.
   const lastClustersRef = useRef<Cluster[]>([]);
+  // Dots actually painted in the last pass — read by the probe only.
+  const lastDrawnDotsRef = useRef(0);
 
   const reducedMotionRef = useRef(reducedMotion);
   useEffect(() => {
@@ -298,6 +315,27 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         rafRef.current = null;
       }
       if (idleDriftTimeoutRef.current !== null) clearTimeout(idleDriftTimeoutRef.current);
+    };
+  }, []);
+
+  useEffect(() => {
+    const probe: AtlasProbe = {
+      state: () => ({
+        R: RRef.current,
+        lambda0: lambda0Ref.current,
+        phi0: phi0Ref.current,
+        minR: zoomBoundsRef.current.minR,
+        maxR: zoomBoundsRef.current.maxR,
+        width: viewportSizeRef.current.width,
+        height: viewportSizeRef.current.height,
+      }),
+      clusters: () =>
+        lastClustersRef.current.map((c) => ({ x: c.x, y: c.y, opacity: c.opacity, srcs: c.members.map((m) => m.mark.src) })),
+      latticeCount: () => ({ built: latticeRef.current?.points.length ?? 0, drawn: lastDrawnDotsRef.current }),
+    };
+    window.__atlas = probe;
+    return () => {
+      if (window.__atlas === probe) delete window.__atlas;
     };
   }, []);
 
@@ -534,6 +572,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       }
       ctx.fillStyle = COLOR_DOT;
       const r = DOT_RADIUS_PX;
+      let drawn = 0;
       for (const { lambda, phi } of latticeRef.current!.points) {
         const p = project(lambda, phi, lambda0, phi0, R, cx, cy);
         if (!p) continue;
@@ -541,8 +580,10 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         if (op <= 0) continue;
         ctx.globalAlpha = op;
         ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+        drawn++;
       }
       ctx.globalAlpha = 1;
+      lastDrawnDotsRef.current = drawn;
     }
 
     // Photo marks — projected the same way, clustered by ON-SCREEN
