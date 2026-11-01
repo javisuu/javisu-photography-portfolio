@@ -9,7 +9,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 - [x] **T1** · Sonda de solo lectura `window.__atlas` (`state()`, `clusters()`, `latticeCount()`) y seccion `atlas` en el diagnostico, ejecutada sobre el codigo de hoy
   - Fichero(s): `src/motion/Atlas.tsx`, `scripts/diagnostico.mjs`
   - Comprobacion: `node scripts/diagnostico.mjs --medir /atlas` da la linea base. Hoy CA2 falla (R maximo ≈ 974 px) y CA4 no encuentra `[data-atlas-viewer]`. CA3 da una cifra de frames. Salida en `evidencia/AAAA-MM-DD_016-linea-base.txt`
-  - **Hecho 2026-11-01.** Linea base: 8 de 20 en la seccion `atlas`, 0 errores de consola. Salida en el scratchpad de la sesion, pendiente de que Javi la copie a `evidencia/2026-11-01_016-linea-base.txt` (regla deny de `evidencia/**`). Cifras:
+  - **Hecho 2026-11-01.** Linea base: 8 de 20 en la seccion `atlas`, 0 errores de consola. Salida: `evidencia/2026-11-01_016-linea-base.txt` (resumen en `:74-79`; copiada por Javi desde el scratchpad, por la regla deny de `evidencia/**`). Cifras:
     - Encuadre por defecto: R 256 (minR 195, maxR 974), caja 1440x609. Reticula: 4423 puntos construidos y 3184 pintados.
     - Par de CA2: norte/05 y sol/01, en San Sebastian, a 40 m. Separarlo a 14 px pide R ≈ 2,24 M. Hoy, en 12 pasos de rueda R llega a 974 y el par sigue agrupado (grupo de 11 fotos).
     - **CA3 ya falla hoy:** 2 frames > 50 ms (el peor, 67 ms) durante la rueda hasta 974. Al maximo, la reticula de todo el globo tiene 48.630 puntos construidos y 43.004 pintados. Es justo lo que corrige T3.

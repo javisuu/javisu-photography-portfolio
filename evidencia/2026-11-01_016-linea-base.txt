@@ -1,0 +1,94 @@
+DIAGNOSTICO 2026-11-01 · feat/016-atlas-visor · c9a89ab · 2 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+
+=== atlas ===
+  fotos: 31 · con coordenadas: 26 · exact: 25
+  sonda: R 256 · minR 195 · maxR 974 · caja 1440x609
+  ok   sonda window.__atlas presente
+  par exact mas cercano (coordenadas distintas): /photos/norte/05.jpg y /photos/sol/01.jpg · San Sebastián · 40 m · separarlo a 14 px pide R ≈ 2241044
+  reticula en el encuadre por defecto: 4423 construidos · 3184 pintados
+  clic en el grupo de /photos/norte/05.jpg: 11 fotos en (848, 207)
+  rueda hasta el maximo: 12 pasos · R final 974 · separacion del par 0.0 px (estimada: siguen agrupadas)
+  frames durante la rueda: 55 · > 50 ms despues del primero: 2 · peor 67 ms · reticula al maximo: 48630 construidos, 43004 pintados
+  FALLA CA2 par mas cercano separado (> 14 px) al zoom maximo · R 974, separacion 0.0 px
+  FALLA CA3 0 frames > 50 ms en la rueda hasta el maximo · 2 frames, peor 67 ms
+  grupo elegido: 4 fotos (america/01.jpg, america/02.jpg, america/03.jpg, america/04.jpg·c)
+  visor: no hay [data-atlas-viewer] · sigue saliendo el panel de lista
+  FALLA CA4 clic en grupo abre el visor, no la lista · sin [data-atlas-viewer]
+  FALLA CA4 foto grande entera en el viewport, proporcion < 1 % · sin foto medible
+  FALLA CA4 tira con una miniatura por foto del grupo · 0 miniaturas, 4 fotos
+  FALLA CA5 la flecha pasa por todas las fotos del grupo, en orden, sin repetir · sin visor
+  FALLA CA7 sin coordenadas DMS en fotos city · sin visor
+  FALLA CA6 visor tapa <= 40 % del canvas · sin visor
+  FALLA CA6 el globo responde a un arrastre con el visor abierto · sin visor
+  reduced motion: primera muestra del visor —
+  FALLA CA8 reduced motion: visor sin fundido ni desplazamiento · sin visor
+  zonas: no existe src/data/atlas-zones.json · parejas que necesitan zona: 42 · fuera de zona: 42
+  FALLA CA10 toda pareja exact sin separar a R 4563 cae en una zona · 42 parejas fuera (sin atlas-zones.json)
+  fuera de zona (encuadre por defecto): 12 pasos · R final 974
+  ok   CA11 fuera de zona el zoom se para en R <= 4563
+  FALLA CA12 cita de OpenStreetMap visible · no esta en el texto visible de /atlas
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  8 de 20
+
+FALLOS
+- atlas · CA2 par mas cercano separado (> 14 px) al zoom maximo · R 974, separacion 0.0 px
+- atlas · CA3 0 frames > 50 ms en la rueda hasta el maximo · 2 frames, peor 67 ms
+- atlas · CA4 clic en grupo abre el visor, no la lista · sin [data-atlas-viewer]
+- atlas · CA4 foto grande entera en el viewport, proporcion < 1 % · sin foto medible
+- atlas · CA4 tira con una miniatura por foto del grupo · 0 miniaturas, 4 fotos
+- atlas · CA5 la flecha pasa por todas las fotos del grupo, en orden, sin repetir · sin visor
+- atlas · CA7 sin coordenadas DMS en fotos city · sin visor
+- atlas · CA6 visor tapa <= 40 % del canvas · sin visor
+- atlas · CA6 el globo responde a un arrastre con el visor abierto · sin visor
+- atlas · CA8 reduced motion: visor sin fundido ni desplazamiento · sin visor
+- atlas · CA10 toda pareja exact sin separar a R 4563 cae en una zona · 42 parejas fuera (sin atlas-zones.json)
+- atlas · CA12 cita de OpenStreetMap visible · no esta en el texto visible de /atlas
+
