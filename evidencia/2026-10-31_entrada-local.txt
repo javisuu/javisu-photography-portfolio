@@ -1,0 +1,108 @@
+DIAGNOSTICO 2026-10-31 · main · 09782a6 · 0 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x718c00bacc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x718c00bacc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x718c00bacc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x718c00bacc00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 544 · participantes 7 · fase B 1008 · rezagadas 1 · reposo 1741
+     frame del arranque 250 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 3 (353 ms) · [entrance] start x1
+     al monton: 641 691 708 808 858 941 1008
+  2: inicio 516 · participantes 7 · fase B 985 · rezagadas 1 · reposo 1718
+     frame del arranque 283 ms · despues: frames >50 ms 0, frame max 34 ms · long tasks 3 (383 ms) · [entrance] start x1
+     al monton: 618 685 701 768 851 901 985
+  3: inicio 532 · participantes 7 · fase B 980 · rezagadas 1 · reposo 1713
+     frame del arranque 267 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 3 (362 ms) · [entrance] start x1
+     al monton: 630 680 713 763 863 913 980
+  fase B      mediana 985 · max 1008
+  reposo      mediana 1718 · max 1741
+  frames >50 mediana 0 · max 0
+  frame max   mediana 34 · max 50
+  arranque    mediana 267 · max 283
+
+=== descifrado del wordmark ===
+  (a) carga directa en / · 24 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  (b) carga en /about, clic a / · 24 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (c) carga en /albums, clic a / · 24 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (d) / -> /about, resize alli, -> / · 25 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (e) reduced motion, carga en /about, clic a / · 0 muestras · h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  28 de 28
+entrada      arranque 267 ms · fase B 985 ms · reposo 1718 ms · frames >50 ms: 0 (medianas de 3)
+

@@ -1,0 +1,274 @@
+DIAGNOSTICO 2026-10-31 · main · 09782a6 · 0 ficheros sin commit
+contra https://javisu-photography-portfolio.vercel.app
+
+=== tsc --noEmit ===
+omitido (--url)
+
+=== eslint ===
+omitido (--url)
+
+=== next build ===
+omitido (--url)
+
+=== servidor remoto ===
+ok · http 200
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x5a240040d600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x5a240040d600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x5a240040d600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · https://javisu-photography-portfolio.vercel.app/
+    [warning] [.WebGL-0x5a240040d600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · https://javisu-photography-portfolio.vercel.app/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+  /albums: {"gutter":0,"scrollHeight":900,"vh":900,"photos":29,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F05.jpg&w=750&q=75","dev":0.0019999999999998908}}
+  ok   sin barra de scroll
+  /about: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /album/america: {"gutter":0,"scrollHeight":9663,"vh":900,"photos":10,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F04.jpg&w=1080&q=75","dev":0.001400917949551439},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+  /credits: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+
+=== textos del album ===
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 661 · participantes 7 · fase B 1116 · rezagadas 1 · reposo 1849
+     frame del arranque 133 ms · despues: frames >50 ms 0, frame max 17 ms · long tasks 2 (158 ms) · [entrance] start x1
+     al monton: 749 783 816 899 966 1049 1116
+  2: inicio 317 · participantes 7 · fase B 770 · rezagadas 1 · reposo 1504
+     frame del arranque 150 ms · despues: frames >50 ms 0, frame max 17 ms · long tasks 2 (160 ms) · [entrance] start x1
+     al monton: 420 454 487 554 620 687 770
+  3: inicio 320 · participantes 7 · fase B 775 · rezagadas 1 · reposo 1509
+     frame del arranque 150 ms · despues: frames >50 ms 0, frame max 17 ms · long tasks 2 (160 ms) · [entrance] start x1
+     al monton: 409 442 475 559 625 692 775
+  fase B      mediana 775 · max 1116
+  reposo      mediana 1509 · max 1849
+  frames >50 mediana 0 · max 0
+  frame max   mediana 17 · max 17
+  arranque    mediana 150 · max 150
+
+=== descifrado del wordmark ===
+  (a) carga directa en / · 36 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  (b) carga en /about, clic a / · 37 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (c) carga en /albums, clic a / · 36 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (d) / -> /about, resize alli, -> / · 33 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (e) reduced motion, carga en /about, clic a / · 0 muestras · h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 6 rutas
+invariantes  64 de 64
+entrada      arranque 150 ms · fase B 775 ms · reposo 1509 ms · frames >50 ms: 0 (medianas de 3)
+

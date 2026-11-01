@@ -7,7 +7,7 @@
 // only the painting changes, exactly like the landing's own integration.
 
 import Image from "next/image";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { Interlude, Quote, SideNote } from "@/components/AlbumTexts";
 import type { AlbumText, Photo } from "@/data/photos";
 import GLSurface from "./GLSurface";
@@ -23,6 +23,19 @@ import { useLenis } from "./useLenis";
 // GLSurface) precisely so instances can differ like this.
 const ALBUM_BEND_DEPTH = 0.25;
 const ALBUM_BEND_RADIUS_MULTIPLIER = 3;
+
+// Arrival (spec 013): GLSurface reports a context before it has any
+// texture, and the <img> is hidden from that moment — so the first photo's
+// slot used to read blank until its texture landed. Only photo 1 is on
+// screen at arrival (measured up to 2560x1440), so its row starts at
+// opacity 0 and fades in once that one texture is uploaded. The fade is
+// written per frame, inline, on the <img>'s own parent: GLSurface reads
+// exactly that value each frame (node.parentElement.style.opacity) — a CSS
+// transition would leave the inline value at 1 and the plane would pop.
+const ARRIVAL_FADE_MS = 400;
+// Never wait longer than this: a photo that fails to load never fires
+// GLSurface's load listener, so onTexturesReady would never come.
+const ARRIVAL_MAX_WAIT_MS = 1500;
 
 // Alternating placement per the design spec's vertical top-down flow:
 // centered / offset-left / offset-right, repeating every three photos.
@@ -47,6 +60,46 @@ export default function AlbumPhotos({
   const lenisRef = useLenis();
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [glActive, setGlActive] = useState(false);
+  const firstRowRef = useRef<HTMLDivElement>(null);
+  const revealStartedRef = useRef(false);
+  const fadeRafRef = useRef(0);
+
+  // Stable on purpose: it reaches GLSurface (directly and through
+  // handleAvailability), whose setup effect depends on its callbacks'
+  // identity and would rebuild the whole scene if they changed.
+  const reveal = useCallback((instant: boolean) => {
+    if (revealStartedRef.current) return;
+    revealStartedRef.current = true;
+    const row = firstRowRef.current;
+    if (!row) return;
+    if (instant || window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      row.style.opacity = "1";
+      return;
+    }
+    const t0 = performance.now();
+    const step = (now: number) => {
+      const p = Math.min(1, (now - t0) / ARRIVAL_FADE_MS);
+      row.style.opacity = String(1 - (1 - p) ** 3); // ease-out
+      if (p < 1) fadeRafRef.current = requestAnimationFrame(step);
+    };
+    fadeRafRef.current = requestAnimationFrame(step);
+  }, []);
+  const handleTexturesReady = useCallback(() => reveal(false), [reveal]);
+  // No WebGL: the <img> stays visible, so there's nothing to wait for.
+  const handleAvailability = useCallback(
+    (available: boolean) => {
+      setGlActive(available);
+      if (!available) reveal(true);
+    },
+    [reveal]
+  );
+  useEffect(() => {
+    const id = setTimeout(() => reveal(false), ARRIVAL_MAX_WAIT_MS);
+    return () => {
+      clearTimeout(id);
+      cancelAnimationFrame(fadeRafRef.current);
+    };
+  }, [reveal]);
 
   // Each row's <Image> is w-auto/h-auto, constrained only by max-h-[85vh]
   // — its rendered height depends on the browser resolving that against
@@ -70,6 +123,10 @@ export default function AlbumPhotos({
 
   return (
     <>
+      {/* Without JS the fade never runs: show photo 1 anyway. */}
+      <noscript>
+        <style>{'[data-photo-index="0"]{opacity:1!important}'}</style>
+      </noscript>
       {photos.map((photo, index) => {
         const image = (
           <Image
@@ -82,6 +139,12 @@ export default function AlbumPhotos({
             height={photo.height}
             className="h-auto w-auto max-h-[85vh] max-w-full"
             sizes="(max-width: 768px) 90vw, 70vw"
+            // Photo 1 is the only one on screen at arrival: fetch it first.
+            // Not `preload` (Next 16's replacement for `priority`): its
+            // <link rel="preload"> held photo 1 back ~2 s under next dev
+            // (spec 013, T4).
+            loading={index === 0 ? "eager" : "lazy"}
+            fetchPriority={index === 0 ? "high" : undefined}
             onLoad={handleImageLoad}
             // MANDATORY FALLBACK, same rule as the landing: only hidden
             // once GLSurface confirms a working WebGL context. If that
@@ -163,9 +226,14 @@ export default function AlbumPhotos({
                 </div>
               </div>
             ) : (
+              // Photo 1 never carries text (src/data/photos.ts), so its row
+              // is always this branch, and the row is its <img>'s direct
+              // parent — caption included, so both arrive together.
               <div
+                ref={index === 0 ? firstRowRef : undefined}
                 data-photo-index={index}
                 className={`flex flex-col gap-4 px-6 py-16 md:px-16 ${placementClass(index)}`}
+                style={index === 0 ? { opacity: 0 } : undefined}
               >
                 {image}
                 {caption}
@@ -181,7 +249,9 @@ export default function AlbumPhotos({
         lenisRef={lenisRef}
         bendDepth={ALBUM_BEND_DEPTH}
         bendRadiusMultiplier={ALBUM_BEND_RADIUS_MULTIPLIER}
-        onAvailabilityChange={setGlActive}
+        onAvailabilityChange={handleAvailability}
+        readyNodeCount={1}
+        onTexturesReady={handleTexturesReady}
         className="pointer-events-none fixed inset-0 z-0"
       />
     </>

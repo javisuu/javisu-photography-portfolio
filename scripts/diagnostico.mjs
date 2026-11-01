@@ -355,6 +355,196 @@ for (const route of routes) {
 }
 await sbBrowser.close();
 
+// ---------- llegada al album ----------
+// Spec 013. Al llegar a /album/<slug>, GLSurface oculta las <img> en cuanto
+// tiene contexto, antes de tener texturas: el hueco de la foto 1 se veia en
+// blanco. El DOM no ve el canvas, asi que se graba la pantalla (screencast) y
+// se clasifica cada fotograma por los pixeles del interior de la caja de la
+// foto 1: "en blanco" si casi todo es el fondo. A la vez se muestrea por rAF
+// la opacity inline de su fila (la que GLSurface lee) y su caja.
+const ARRIVAL_WAIT_MS = 3000;
+const ARRIVAL_BG = [250, 250, 250];
+const ARRIVAL_BG_TOL = 2;
+const ARRIVAL_INSET_PX = 8;
+// Fraccion de pixeles distintos del fondo por debajo de la cual el fotograma
+// cuenta como en blanco (ruido de la compresion JPEG del screencast).
+const ARRIVAL_BLANK_MAX_FRACTION = 0.005;
+function arrivalSampler() {
+  window.__llegada = { samples: [] };
+  const tick = () => {
+    const main = [...document.querySelectorAll("main")].find((el) => getComputedStyle(el).display !== "none");
+    const row = main?.querySelector('[data-photo-index="0"]');
+    const img = row?.querySelector("img");
+    if (img) {
+      const r = img.getBoundingClientRect();
+      const op = parseFloat(row.style.opacity);
+      window.__llegada.samples.push({
+        t: performance.timeOrigin + performance.now(), path: location.pathname,
+        op: Number.isFinite(op) ? op : 1, vis: getComputedStyle(img).visibility,
+        complete: img.complete && img.naturalWidth > 0,
+        box: [r.left, r.top, r.right, r.bottom],
+      });
+    }
+    requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+}
+if (!only || only.startsWith("/album/")) {
+  rule("llegada al album");
+  const slugs = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
+  const direct = only ?? `/album/${slugs[1] ?? slugs[0]}`;
+  log(`ms desde el clic (carga directa: desde el inicio de la navegacion) · ${reps} repeticion${reps > 1 ? "es" : ""} · cache vacia en cada una`);
+  // Una pagina en blanco del mismo navegador decodifica los fotogramas.
+  const decoder = await browser.newPage();
+  async function classify(frames, samples, target, t0) {
+    const own = samples.filter((s) => s.path === target);
+    const out = [];
+    for (const f of frames) {
+      if (f.t < t0) continue;
+      // La muestra de rAF mas reciente anterior al fotograma (o la primera).
+      const prev = own.filter((s) => s.t <= f.t).pop();
+      if (!prev) continue;
+      const res = await decoder.evaluate(async ({ data, box, deviceWidth, vh, bg, tol, inset }) => {
+        const img = new Image();
+        img.src = `data:image/jpeg;base64,${data}`;
+        await img.decode();
+        const c = document.createElement("canvas");
+        c.width = img.width; c.height = img.height;
+        const ctx = c.getContext("2d", { willReadFrequently: true });
+        ctx.drawImage(img, 0, 0);
+        const scale = img.width / deviceWidth;
+        const x0 = Math.max(0, Math.round((box[0] + inset) * scale)), x1 = Math.min(img.width, Math.round((box[2] - inset) * scale));
+        const y0 = Math.max(0, Math.round((box[1] + inset) * scale)), y1 = Math.min(img.height, Math.round((Math.min(box[3], vh) - inset) * scale));
+        if (x1 - x0 < 4 || y1 - y0 < 4) return null;
+        const d = ctx.getImageData(x0, y0, x1 - x0, y1 - y0).data;
+        let off = 0;
+        for (let i = 0; i < d.length; i += 4) {
+          if (Math.abs(d[i] - bg[0]) > tol || Math.abs(d[i + 1] - bg[1]) > tol || Math.abs(d[i + 2] - bg[2]) > tol) off++;
+        }
+        return off / (d.length / 4);
+      }, { data: f.data, box: prev.box, deviceWidth: f.deviceWidth, vh: 900, bg: ARRIVAL_BG, tol: ARRIVAL_BG_TOL, inset: ARRIVAL_INSET_PX });
+      if (res === null) continue;
+      out.push({ t: f.t, blank: res < ARRIVAL_BLANK_MAX_FRACTION, op: prev.op, frac: res });
+    }
+    return out;
+  }
+  async function arrivalRun({ kind, reduced = false, noGl = false }) {
+    const br = noGl ? await chromium.launch({ args: ["--disable-3d-apis"] }) : browser;
+    const ctx = await br.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...(reduced ? { reducedMotion: "reduce" } : {}) });
+    const p = await ctx.newPage();
+    const errs = [];
+    p.on("pageerror", (e) => errs.push(e.message));
+    await p.addInitScript(arrivalSampler);
+    const cdp = await ctx.newCDPSession(p);
+    const frames = [];
+    cdp.on("Page.screencastFrame", (f) => {
+      frames.push({ t: f.metadata.timestamp * 1000, data: f.data, deviceWidth: f.metadata.deviceWidth });
+      cdp.send("Page.screencastFrameAck", { sessionId: f.sessionId }).catch(() => {});
+    });
+    const startCast = () => cdp.send("Page.startScreencast", { format: "jpeg", quality: 80, maxWidth: 1440, maxHeight: 900, everyNthFrame: 1 });
+    let target = direct, t0;
+    try {
+      if (kind === "directa") {
+        await p.goto("about:blank");
+        await startCast();
+        t0 = Date.now();
+        await p.goto(BASE + direct, { waitUntil: "commit" });
+      } else {
+        const start = kind === "carrusel" ? "/albums" : `/album/${slugs[0]}`;
+        await p.goto(BASE + start, { waitUntil: "load" });
+        await p.waitForTimeout(SETTLE_MS);
+        const links = p.locator('main:visible a[href^="/album/"]');
+        const link = kind === "carrusel" ? links.first() : links.last();
+        target = await link.getAttribute("href");
+        if (kind === "next") { await link.scrollIntoViewIfNeeded(); await p.waitForTimeout(800); }
+        await startCast();
+        t0 = await p.evaluate(() => performance.timeOrigin + performance.now());
+        await link.click();
+        await p.waitForURL(BASE + target);
+      }
+    } catch (e) { errs.push(`pasos: ${e.message}`); }
+    await p.waitForTimeout(ARRIVAL_WAIT_MS);
+    await cdp.send("Page.stopScreencast").catch(() => {});
+    const rec = await p.evaluate(() => window.__llegada).catch(() => null);
+    const webgl = noGl ? await p.evaluate(() => { const c = document.createElement("canvas"); return !!(c.getContext("webgl2") || c.getContext("webgl")); }).catch(() => null) : null;
+    await ctx.close();
+    if (noGl) await br.close();
+    const samples = (rec?.samples ?? []).filter((s) => s.path === target && s.t >= t0);
+    const cls = t0 === undefined ? [] : await classify(frames, samples, target, t0);
+    return { target, t0, samples, cls, errs, webgl };
+  }
+  function report(label, r, route) {
+    const rel = (t) => (t === undefined ? "—" : Math.round(t - r.t0));
+    const gaps = r.cls.filter((f) => f.blank && f.op >= 1);
+    const firstPhoto = r.cls.findIndex((f) => !f.blank);
+    // Parpadeo: la foto se vio y despues su hueco quedo en blanco con la
+    // fila a opacity 1. Un blanco con la fila transparente es el fundido de
+    // entrada, no un parpadeo. Al venir del carrusel o de NEXT ALBUM, el
+    // primer fotograma aun puede ser la pagina anterior, ya compuesta.
+    const flicker = firstPhoto >= 0 && r.cls.slice(firstPhoto).some((f) => f.blank && f.op >= 1);
+    const full = r.cls.find((f) => !f.blank && f.op >= 1);
+    const tLoaded = r.samples.find((s) => s.complete)?.t;
+    const tHidden = r.samples.find((s) => s.vis === "hidden")?.t;
+    log(`  ${label} → ${r.target} · ${r.cls.length} fotogramas · en blanco con opacity 1: ${gaps.length} · parpadeo: ${flicker ? "si" : "no"}`);
+    log(`     foto 1 cargada ${rel(tLoaded)} · <img> oculta ${rel(tHidden)} · primer fotograma con foto entera ${rel(full?.t)}`);
+    // Un caracter por fotograma: "_" en blanco con opacity 1 (el hueco),
+    // "." en blanco con la fila aun transparente, "#" con foto.
+    log(`     secuencia ${r.cls.map((f) => (!f.blank ? "#" : f.op >= 1 ? "_" : ".")).join("")}`);
+    if (r.errs.length) log(`     errores: ${r.errs.join(" | ")}`);
+    addInv(route, "foto 1 medible", r.cls.length > 0, "ningun fotograma con la foto 1 en pantalla");
+    if (!r.cls.length) return null;
+    addInv(route, "sin hueco en blanco", gaps.length === 0, `${gaps.length} fotogramas en blanco con opacity 1 (${gaps.slice(0, 5).map((f) => rel(f.t)).join(" ")} ms)`);
+    addInv(route, "sin parpadeo", !flicker, "la foto 1 se vio y despues desaparecio");
+    return full ? full.t - r.t0 : null;
+  }
+  const fullTimes = { carrusel: [], next: [], directa: [] };
+  for (let k = 1; k <= reps; k++) {
+    for (const [kind, label] of [["carrusel", "carrusel → album"], ["next", "NEXT ALBUM"], ["directa", "carga directa"]]) {
+      const r = await arrivalRun({ kind });
+      const t = report(`${k}: ${label}`, r, `llegada (${kind}) ${k}`);
+      if (t !== null) fullTimes[kind].push(t);
+    }
+  }
+  for (const [kind, v] of Object.entries(fullTimes)) {
+    if (v.length < 2) continue;
+    v.sort((a, b) => a - b);
+    log(`  foto entera, ${kind}: mediana ${Math.round(v[Math.floor((v.length - 1) / 2)])} · max ${Math.round(v[v.length - 1])} ms`);
+  }
+  // Reduced motion: espera igual, pero sin fundido (de 0 a 1 en un frame).
+  const rm = await arrivalRun({ kind: "carrusel", reduced: true });
+  report("reduced motion, carrusel → album", rm, "llegada (reduced motion)");
+  const mid = rm.samples.filter((s) => s.op > 0 && s.op < 1);
+  addInv("llegada (reduced motion)", "sin fundido", mid.length === 0, `${mid.length} muestras con opacity entre 0 y 1`);
+  // Sin WebGL: la foto se muestra en cuanto la pagina sabe que no hay GL, de
+  // golpe. Un fundido aqui querria decir que llego por el tiempo maximo de
+  // espera, no por la salida sin GL. (Antes de hidratar, la fila esta a 0
+  // desde el HTML del servidor: eso no cuenta.)
+  const ng = await arrivalRun({ kind: "directa", noGl: true });
+  const last = ng.samples[ng.samples.length - 1];
+  const ngMid = ng.samples.filter((s) => s.op > 0 && s.op < 1).length;
+  const ngShown = ng.samples.find((s) => s.op >= 1);
+  log(`  sin WebGL (--disable-3d-apis, webgl ${ng.webgl ? "disponible" : "no disponible"}), carga directa → ${ng.target} · opacity 1 a ${ngShown ? Math.round(ngShown.t - ng.t0) : "—"} ms · muestras a medio fundido ${ngMid} · al final ${last ? `opacity ${last.op}, ${last.vis}` : "—"}`);
+  addInv("llegada (sin WebGL)", "WebGL desactivado de verdad", ng.webgl === false, `webgl ${ng.webgl}`);
+  addInv("llegada (sin WebGL)", "foto 1 visible sin esperar a GL", !!last && last.op >= 1 && last.vis === "visible" && ngMid === 0,
+    last ? `opacity ${last.op}, ${last.vis}, ${ngMid} muestras a medio fundido` : "sin muestras");
+  // Prioridad de carga: la foto 1 eager y fetchpriority high, el resto lazy.
+  const ap = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  for (const slug of only ? [only.slice("/album/".length)] : slugs) {
+    await ap.goto(`${BASE}/album/${slug}`, { waitUntil: "load" }).catch(() => {});
+    const a = await ap.evaluate(() => {
+      const main = [...document.querySelectorAll("main")].find((el) => getComputedStyle(el).display !== "none");
+      const imgs = [...main.querySelectorAll("[data-photo-index] img")];
+      return { first: imgs[0] ? [imgs[0].getAttribute("loading"), imgs[0].getAttribute("fetchpriority")] : null, restLazy: imgs.slice(1).every((i) => i.getAttribute("loading") === "lazy") };
+    }).catch((e) => ({ evalError: e.message }));
+    const route = `llegada /album/${slug}`;
+    log(`  /album/${slug}: foto 1 loading=${a.first?.[0]} fetchpriority=${a.first?.[1]} · resto lazy: ${a.restLazy ? "si" : "no"}`);
+    addInv(route, "foto 1 eager y fetchpriority high", !!a.first && a.first[0] === "eager" && a.first[1] === "high", a.evalError ?? `loading=${a.first?.[0]} fetchpriority=${a.first?.[1]}`);
+    addInv(route, "resto de fotos lazy", !!a.restLazy, "alguna foto despues de la 1 no es lazy");
+  }
+  await ap.close();
+  await decoder.close();
+}
+
 // ---------- textos del album ----------
 // Spec 010. Recorre todos los albumes de src/data/photos.ts y mide cada
 // [data-album-text] y [data-photo-quote] a 1440x900 contra su <img>.
