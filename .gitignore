@@ -55,3 +55,6 @@ next-env.d.ts
 
 # intermediate output of scripts/prepare-images.mjs
 /scripts/photos-manifest.json
+
+# build inputs of scripts/generate-atlas-local-masks.mjs (OSM land polygons, ~1 GB; spec 016)
+/atlas-source/

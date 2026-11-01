@@ -32,9 +32,20 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **Rueda hasta R = 974 sobre San Sebastian:** 0 frames > 50 ms (antes 2) y el peor baja de 67 a 17 ms. CA3 pasa. Al maximo se recorren 26.911 puntos y se pintan 12.853. El "43.004 pintados" de la linea base no es comparable: el codigo viejo contaba tambien los puntos fuera del canvas.
     - **Mismos puntos, comprobado pixel a pixel.** Captura del canvas con el `Atlas.tsx` de `HEAD` y con el nuevo, en tres estados: encuadre por defecto, 6 pasos de rueda sin rotar y grupo de San Sebastian centrado a R = 974. 0 pixeles distintos (umbral 8/255) en los tres. Estado final identico en las dos: R 973,6, lambda0 -0,0340, phi0 0,7565. Scripts `shots.mjs` y `diff.mjs` en el scratchpad de la sesion; salida en la conversacion
   - La sonda cambia `built` por `visited` (puntos recorridos en la ultima pasada): ya no hay una reticula construida que contar
-- [ ] **T4** · Script de mascaras locales: rasterizador extraido a funcion comun, zonas desde `photos.ts`, piramide por zona y `atlas-zones.json`. Dependencia `shapefile` (dev) y `atlas-source/` en `.gitignore`
+- [x] **T4** · Script de mascaras locales: rasterizador extraido a funcion comun, zonas desde `photos.ts`, piramide por zona y `atlas-zones.json`. Dependencia `shapefile` (dev) y `atlas-source/` en `.gitignore`
   - Fichero(s): `scripts/generate-atlas-local-masks.mjs`, `scripts/generate-atlas-land-mask.mjs`, `package.json`, `.gitignore`, `public/atlas/local/`, `src/data/atlas-zones.json`
   - Comprobacion: salen 3 zonas (San Sebastian, Nueva York, San Miguel de Allende). Los PNG suman menos de 300 KB. `land-mask.png` regenerado da el mismo hash que el actual. Una captura de cada nivel, mirada a ojo: la costa de San Sebastian y Manhattan se reconoce
+  - **Hecho 2026-11-01.** `node scripts/generate-atlas-local-masks.mjs` tarda 2,3 s: lee 873.918 registros del `.shp` (1,3 GB) y solo parsea los 1830 que tocan una zona. Salen 3 zonas y 7 mascaras de 1024x1024, 76 KB en total:
+    - San Miguel de Allende: 3 coordenadas, las mas cercanas a 226 m, needR 590.809. Niveles de 400 y 40 km. 100 % tierra (es interior, como preveia el plan).
+    - San Sebastian: 5 coordenadas, a 40 m, needR 3.361.566. Niveles de 400, 40 y 9,1 km (8,9 m/px, maxR 10 M).
+    - Nueva York: 6 coordenadas, a 167 m, needR 803.474. Niveles de 400 y 40 km.
+    - Mirado a ojo, en un mosaico de los 7 niveles (`preview2.png`, en el scratchpad): se reconocen la costa vasca y las Landas, la bahia de La Concha, y Manhattan con el Hudson y el East River.
+  - **`land-mask.png` identico:** regenerado con el rasterizador comun, mismo sha256 (`948d1af1…6ac9`) y 0 bytes distintos al decodificarlo.
+  - **Desviaciones del plan:**
+    1. **Sin dependencia `shapefile`.** Un lector propio de unas 30 lineas usa el indice `.shx` y la caja delimitadora que encabeza cada registro, y solo parsea los registros de las zonas. Se instalo y se desinstalo: `package.json` queda sin cambios. Con el paquete, el repo daba las mismas 22 vulnerabilidades de `npm audit` que sin el.
+    2. **Rasterizador por lineas de barrido** (`scripts/lib/land-raster.mjs`), no la comprobacion punto a punto del script del mundo, que con los vertices de OSM seria demasiado lenta. Usa la misma formula y la misma comparacion (`lng < x`), por eso la mascara del mundo sale identica.
+    3. **Paridad por poligono.** La primera pasada pintaba lineas de mar en los bordes de las teselas de 1°: los poligonos partidos de OSM se solapan un poco en esos bordes, y una regla par/impar global cuenta el solape dos veces. Ahora la paridad es por poligono y se unen los poligonos. Antes del arreglo San Miguel daba 99,9 % de tierra (una fila de mar entera, la 771); despues, 100 %.
+  - La GeoJSON de Natural Earth se descargo para comprobar el hash y se borro despues, como dice la cabecera del script
 - [ ] **T5** · Deriva y umbral de inercia escalados por `min(1, 974 / R)`
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: con R ≤ 974, la deriva medida con la sonda (lambda0 en 2 s) es igual a la de la linea base. Con R forzado alto se mueve menos de 1 px/frame en pantalla

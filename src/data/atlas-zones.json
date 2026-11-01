@@ -1,0 +1,129 @@
+{
+  "source": "OpenStreetMap land polygons (osmdata.openstreetmap.de), © OpenStreetMap contributors, ODbL",
+  "worldMaxR": 4563,
+  "zones": [
+    {
+      "name": "san-miguel-de-allende",
+      "city": "San Miguel de Allende",
+      "bbox": [
+        20.908692,
+        -100.745785,
+        20.915019,
+        -100.742615
+      ],
+      "needR": 590809,
+      "levels": [
+        {
+          "file": "/atlas/local/san-miguel-de-allende-0.png",
+          "bbox": [
+            19.113212,
+            -102.669673,
+            22.710499,
+            -98.818727
+          ],
+          "w": 1024,
+          "h": 1024,
+          "maxR": 228337
+        },
+        {
+          "file": "/atlas/local/san-miguel-de-allende-1.png",
+          "bbox": [
+            20.731991,
+            -100.936747,
+            21.09172,
+            -100.551653
+          ],
+          "w": 1024,
+          "h": 1024,
+          "maxR": 2283366
+        }
+      ]
+    },
+    {
+      "name": "san-sebastian",
+      "city": "San Sebastián",
+      "bbox": [
+        43.317642,
+        -2.034313,
+        43.327682,
+        -1.975973
+      ],
+      "needR": 3361566,
+      "levels": [
+        {
+          "file": "/atlas/local/san-sebastian-0.png",
+          "bbox": [
+            41.524019,
+            -4.4775,
+            45.121305,
+            0.467214
+          ],
+          "w": 1024,
+          "h": 1024,
+          "maxR": 228337
+        },
+        {
+          "file": "/atlas/local/san-sebastian-1.png",
+          "bbox": [
+            43.142798,
+            -2.252379,
+            43.502526,
+            -1.757907
+          ],
+          "w": 1024,
+          "h": 1024,
+          "maxR": 2283366
+        },
+        {
+          "file": "/atlas/local/san-sebastian-2.png",
+          "bbox": [
+            43.281659,
+            -2.061504,
+            43.363665,
+            -1.948782
+          ],
+          "w": 1024,
+          "h": 1024,
+          "maxR": 10016325
+        }
+      ]
+    },
+    {
+      "name": "new-york-city",
+      "city": "New York City",
+      "bbox": [
+        40.687683,
+        -74.045823,
+        40.760307,
+        -73.978464
+      ],
+      "needR": 803474,
+      "levels": [
+        {
+          "file": "/atlas/local/new-york-city-0.png",
+          "bbox": [
+            38.925352,
+            -76.385458,
+            42.522638,
+            -71.638828
+          ],
+          "w": 1024,
+          "h": 1024,
+          "maxR": 228337
+        },
+        {
+          "file": "/atlas/local/new-york-city-1.png",
+          "bbox": [
+            40.544131,
+            -74.249475,
+            40.903859,
+            -73.774812
+          ],
+          "w": 1024,
+          "h": 1024,
+          "maxR": 2283366
+        }
+      ]
+    }
+  ]
+}
