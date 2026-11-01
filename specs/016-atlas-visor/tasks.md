@@ -17,9 +17,10 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - CA10: 42 parejas exact necesitan zona y no existe `atlas-zones.json`. CA11 pasa (974 ≤ 4563). CA12: sin cita de OSM.
   - Un primer intento midio mal: `document.querySelector("main canvas")` cogia el canvas del landing, montado y oculto (caja 0), y los clics y la rueda caian fuera del globo. Corregido para tomar el `<main>` visible.
   - De paso, `existsSync` (`scripts/diagnostico.mjs:14`) ya se usa (CA10), y desaparece su aviso de import sin usar (paso 5 de `docs/ESTADO.md`). `npx eslint .` del repo entero todavia da 1 aviso, en otro fichero: `scripts/medir-carrusel.mjs:154`, `'S' is defined but never used` (medido el 2026-11-01)
-- [ ] **T2** · Centroides aprobados por Javi (Puerto Escondido `15.8720, -97.0767` y San Blas `9.5583, -78.9483`, `precision: "city"`) y "New York" → "New York City"
+- [x] **T2** · Centroides aprobados por Javi (Puerto Escondido `15.8720, -97.0767` y San Blas `9.5583, -78.9483`, `precision: "city"`) y "New York" → "New York City"
   - Fichero(s): `src/data/photos.ts:206,218,231,241,253` y `:368,380,390,400,410,420`
   - Comprobacion: tsc ok. La linea de cifras de `/atlas` pasa de 26 a 31 fotos, sin contar dos veces Nueva York. Aparecen dos marcas de grupo nuevas (`clusters()` de la sonda)
+  - **Hecho 2026-11-01.** tsc ok y 0 `lat: null` en `src/data/photos.ts`. En `/atlas` (`next dev`, 1440x900, 0 errores de pagina), la linea de cifras dice `31 Photographs — 11 Cities — 5 Countries`. La sonda da 6 grupos en el encuadre por defecto, dos de ellos nuevos: Puerto Escondido (america/05-07) y San Blas (america/08-09). Salida en la conversacion
 
 ## Zoom
 
