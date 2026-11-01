@@ -24,9 +24,14 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 
 ## Zoom
 
-- [ ] **T3** · Reticula acotada al viewport: `unproject`, indices anclados a la esfera y recorrido solo del rango visible. Sin tocar todavia el limite del zoom
+- [x] **T3** · Reticula acotada al viewport: `unproject`, indices anclados a la esfera y recorrido solo del rango visible. Sin tocar todavia el limite del zoom
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: con el encuadre por defecto, `latticeCount()` queda en ±2 % de la linea base. Con zoom maximo y una rotacion, frames > 50 ms ≤ los de la linea base. Invariante del buffer del canvas en verde
+  - **Hecho 2026-11-01.** `node scripts/diagnostico.mjs --medir /atlas`: 9 de 20 (antes 8), 0 errores de consola y buffer del canvas = caja x dpr. Salida en el scratchpad, pendiente de copiar a `evidencia/2026-11-01_016-t3.txt`. Cifras:
+    - **Encuadre por defecto:** 3184 puntos pintados, los mismos que en la linea base. Se recorren 15.617 candidatos (tierra y mar) dentro del rango visible.
+    - **Rueda hasta R = 974 sobre San Sebastian:** 0 frames > 50 ms (antes 2) y el peor baja de 67 a 17 ms. CA3 pasa. Al maximo se recorren 26.911 puntos y se pintan 12.853. El "43.004 pintados" de la linea base no es comparable: el codigo viejo contaba tambien los puntos fuera del canvas.
+    - **Mismos puntos, comprobado pixel a pixel.** Captura del canvas con el `Atlas.tsx` de `HEAD` y con el nuevo, en tres estados: encuadre por defecto, 6 pasos de rueda sin rotar y grupo de San Sebastian centrado a R = 974. 0 pixeles distintos (umbral 8/255) en los tres. Estado final identico en las dos: R 973,6, lambda0 -0,0340, phi0 0,7565. Scripts `shots.mjs` y `diff.mjs` en el scratchpad de la sesion; salida en la conversacion
+  - La sonda cambia `built` por `visited` (puntos recorridos en la ultima pasada): ya no hay una reticula construida que contar
 - [ ] **T4** · Script de mascaras locales: rasterizador extraido a funcion comun, zonas desde `photos.ts`, piramide por zona y `atlas-zones.json`. Dependencia `shapefile` (dev) y `atlas-source/` en `.gitignore`
   - Fichero(s): `scripts/generate-atlas-local-masks.mjs`, `scripts/generate-atlas-land-mask.mjs`, `package.json`, `.gitignore`, `public/atlas/local/`, `src/data/atlas-zones.json`
   - Comprobacion: salen 3 zonas (San Sebastian, Nueva York, San Miguel de Allende). Los PNG suman menos de 300 KB. `land-mask.png` regenerado da el mismo hash que el actual. Una captura de cada nivel, mirada a ojo: la costa de San Sebastian y Manhattan se reconoce

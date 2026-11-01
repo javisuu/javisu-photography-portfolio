@@ -1129,7 +1129,7 @@ if (!only || only === "/atlas") {
     if (st0 && box && pair) {
       log(`  par exact mas cercano (coordenadas distintas): ${pair.p.src} y ${pair.q.src} · ${pair.p.city} · ${rr(pair.a * 6371000)} m · separarlo a ${ATLAS_CLUSTER_PX} px pide R ≈ ${rr(ATLAS_CLUSTER_PX / pair.a)}`);
       const lc0 = await probe(p, () => window.__atlas.latticeCount());
-      log(`  reticula en el encuadre por defecto: ${lc0?.built} construidos · ${lc0?.drawn} pintados`);
+      log(`  reticula en el encuadre por defecto: ${lc0?.visited} puntos recorridos · ${lc0?.drawn} pintados`);
       const c = await clickCluster(p, box, (cl) => cl.find((x) => x.srcs.includes(pair.p.src)));
       log(`  clic en el grupo de ${pair.p.src}: ${c ? `${c.srcs.length} fotos en (${rr(c.x)}, ${rr(c.y)})` : "no encontrado"}`);
       const z = await zoomToMax(p, box);
@@ -1140,7 +1140,7 @@ if (!only || only === "/atlas") {
       const sep = apart ? Math.hypot(cp.x - cq.x, cp.y - cq.y) : pair.a * z.R;
       const lc1 = await probe(p, () => window.__atlas.latticeCount());
       log(`  rueda hasta el maximo: ${z.steps} pasos · R final ${rr(z.R)} · separacion del par ${sep.toFixed(1)} px${apart ? "" : " (estimada: siguen agrupadas)"}`);
-      log(`  frames durante la rueda: ${z.frames} · > ${LONG_FRAME_MS} ms despues del primero: ${z.long} · peor ${rr(z.worst)} ms · reticula al maximo: ${lc1?.built} construidos, ${lc1?.drawn} pintados`);
+      log(`  frames durante la rueda: ${z.frames} · > ${LONG_FRAME_MS} ms despues del primero: ${z.long} · peor ${rr(z.worst)} ms · reticula al maximo: ${lc1?.visited} recorridos, ${lc1?.drawn} pintados`);
       addInv("atlas", `CA2 par mas cercano separado (> ${ATLAS_CLUSTER_PX} px) al zoom maximo`, apart && sep > ATLAS_CLUSTER_PX, `R ${rr(z.R)}, separacion ${sep.toFixed(1)} px`);
       addInv("atlas", `CA3 0 frames > ${LONG_FRAME_MS} ms en la rueda hasta el maximo`, z.long === 0, `${z.long} frames, peor ${rr(z.worst)} ms`);
     }

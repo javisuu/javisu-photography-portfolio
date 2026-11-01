@@ -148,30 +148,103 @@ function sampleLand(mask: LandMask, lat: number, lng: number): boolean {
 }
 
 // ---- Dot lattice ----------------------------------------------------
-// Not baked once — rebuilt whenever R has drifted more than
-// LATTICE_REBUILD_RATIO from the last build (see the rebuild check in
-// the draw loop), at an angular step derived from the CURRENT radius,
-// so on-screen spacing stays pinned to TARGET_PX regardless of zoom.
-// Latitude steps by `delta`; longitude steps by `delta / cos(phi)` so
-// the spacing is uniform on the SPHERE SURFACE, not in lat/lng space —
-// dots naturally compress toward the limb under the projection, which
-// is the curvature cue and is kept, not corrected for.
-type LatticePoint = { lambda: number; phi: number };
+// The angular step `delta` is derived from the radius and only changes
+// once R has drifted more than LATTICE_REBUILD_RATIO from the last one
+// (see draw()), so on-screen spacing stays pinned to TARGET_PX
+// regardless of zoom. Latitude steps by `delta`; longitude steps by
+// `delta / cos(phi)` so the spacing is uniform on the SPHERE SURFACE,
+// not in lat/lng space — dots naturally compress toward the limb under
+// the projection, which is the curvature cue and is kept, not corrected
+// for.
+//
+// The lattice is never materialised for the whole globe (spec 016): at
+// a deep zoom that would be millions of points per rebuild. Every
+// point is addressed by integer indices anchored to the sphere —
+// row k at phi = LAT_MIN + k·delta, column j at lambda = -PI + j·lngStep
+// — so draw() can walk only the rows and columns inside the visible
+// range (visibleRange below) and still land on exactly the same points
+// as a full walk would, frame after frame: nothing swims when rotating.
 
-function buildLattice(mask: LandMask, R: number): LatticePoint[] {
-  const delta = TARGET_PX / R;
-  const points: LatticePoint[] = [];
-  const latMin = LAT_MIN_DEG * DEG;
-  const latMax = LAT_MAX_DEG * DEG;
-  for (let phi = latMin; phi <= latMax; phi += delta) {
-    const lngStep = delta / Math.cos(phi);
-    for (let lambda = -Math.PI; lambda < Math.PI; lambda += lngStep) {
-      if (sampleLand(mask, phi / DEG, lambda / DEG)) {
-        points.push({ lambda, phi });
-      }
+// Inverse orthographic projection: screen -> (lambda, phi), or null off
+// the disc. Same conventions as project().
+function unproject(
+  x: number,
+  y: number,
+  lambda0: number,
+  phi0: number,
+  R: number,
+  cx: number,
+  cy: number
+): { lambda: number; phi: number } | null {
+  const px = x - cx;
+  const py = cy - y;
+  const rho = Math.hypot(px, py);
+  if (rho > R) return null;
+  if (rho < 1e-9) return { lambda: lambda0, phi: phi0 };
+  const c = Math.asin(rho / R);
+  const sinC = Math.sin(c);
+  const cosC = Math.cos(c);
+  const phi = Math.asin(Math.min(1, Math.max(-1, cosC * Math.sin(phi0) + (py * sinC * Math.cos(phi0)) / rho)));
+  const lambda = lambda0 + Math.atan2(px * sinC, rho * cosC * Math.cos(phi0) - py * sinC * Math.sin(phi0));
+  return { lambda, phi };
+}
+
+const VISIBLE_EDGE_SAMPLES = 48; // per viewport edge
+const VISIBLE_LIMB_SAMPLES = 192; // around the whole limb circle
+
+// The lat range and the longitude range (relative to lambda0) of the
+// part of the front hemisphere that falls inside the w×h viewport.
+// phi and lambda have no critical points inside that region except at
+// the poles, so their extremes lie on its boundary: the stretches of the
+// viewport edges that are on the disc, plus the stretches of the limb
+// that are inside the viewport. Those are sampled; a visible pole means
+// every longitude is visible. Callers widen the result by one step.
+function visibleRange(
+  lambda0: number,
+  phi0: number,
+  R: number,
+  cx: number,
+  cy: number,
+  w: number,
+  h: number
+): { phiLo: number; phiHi: number; dlLo: number; dlHi: number; allLongitudes: boolean } {
+  let phiLo = phi0;
+  let phiHi = phi0;
+  let dlLo = 0;
+  let dlHi = 0;
+  const add = (x: number, y: number) => {
+    const p = unproject(x, y, lambda0, phi0, R, cx, cy);
+    if (!p) return;
+    if (p.phi < phiLo) phiLo = p.phi;
+    if (p.phi > phiHi) phiHi = p.phi;
+    const dl = shortestDelta(lambda0, p.lambda);
+    if (dl < dlLo) dlLo = dl;
+    if (dl > dlHi) dlHi = dl;
+  };
+  for (let i = 0; i <= VISIBLE_EDGE_SAMPLES; i++) {
+    const t = i / VISIBLE_EDGE_SAMPLES;
+    add(t * w, 0);
+    add(t * w, h);
+    add(0, t * h);
+    add(w, t * h);
+  }
+  const limbR = R * 0.999999; // just inside, so unproject never rejects it
+  for (let i = 0; i < VISIBLE_LIMB_SAMPLES; i++) {
+    const a = (i / VISIBLE_LIMB_SAMPLES) * Math.PI * 2;
+    const x = cx + limbR * Math.cos(a);
+    const y = cy + limbR * Math.sin(a);
+    if (x >= 0 && x <= w && y >= 0 && y <= h) add(x, y);
+  }
+  let allLongitudes = false;
+  for (const pole of [Math.PI / 2, -Math.PI / 2]) {
+    const p = project(0, pole, lambda0, phi0, R, cx, cy);
+    if (p && p.x >= 0 && p.x <= w && p.y >= 0 && p.y <= h) {
+      allLongitudes = true;
+      if (pole > phiHi) phiHi = pole;
+      if (pole < phiLo) phiLo = pole;
     }
   }
-  return points;
+  return { phiLo, phiHi, dlLo, dlHi, allLongitudes };
 }
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
@@ -196,7 +269,7 @@ type Cluster = { members: { mark: AtlasMark; index: number }[]; x: number; y: nu
 type AtlasProbe = {
   state: () => { R: number; lambda0: number; phi0: number; minR: number; maxR: number; width: number; height: number };
   clusters: () => { x: number; y: number; opacity: number; srcs: string[] }[];
-  latticeCount: () => { built: number; drawn: number };
+  latticeCount: () => { visited: number; drawn: number };
 };
 declare global {
   interface Window {
@@ -238,7 +311,8 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   const RRef = useRef(0);
 
   const maskRef = useRef<LandMask | null>(null);
-  const latticeRef = useRef<{ R: number; points: LatticePoint[] } | null>(null);
+  // R the current angular step was derived from, and that step.
+  const latticeRef = useRef<{ R: number; delta: number } | null>(null);
 
   const rafRef = useRef<number | null>(null);
   const lastFrameAtRef = useRef(0);
@@ -277,8 +351,8 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   // themselves, so hit-testing is always consistent with what's
   // actually on screen.
   const lastClustersRef = useRef<Cluster[]>([]);
-  // Dots actually painted in the last pass — read by the probe only.
-  const lastDrawnDotsRef = useRef(0);
+  // Lattice points walked and dots painted in the last pass — probe only.
+  const lastLatticeRef = useRef({ visited: 0, drawn: 0 });
 
   const reducedMotionRef = useRef(reducedMotion);
   useEffect(() => {
@@ -331,7 +405,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       }),
       clusters: () =>
         lastClustersRef.current.map((c) => ({ x: c.x, y: c.y, opacity: c.opacity, srcs: c.members.map((m) => m.mark.src) })),
-      latticeCount: () => ({ built: latticeRef.current?.points.length ?? 0, drawn: lastDrawnDotsRef.current }),
+      latticeCount: () => ({ ...lastLatticeRef.current }),
     };
     window.__atlas = probe;
     return () => {
@@ -560,30 +634,54 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     const lambda0 = lambda0Ref.current;
     const phi0 = phi0Ref.current;
 
-    // Rebuild the lattice only when R has drifted more than
-    // LATTICE_REBUILD_RATIO since the cached build — this is the actual
-    // fix: on-screen dot spacing stays pinned to TARGET_PX at every
-    // zoom level instead of degrading as R grows.
+    // Re-derive the angular step only when R has drifted more than
+    // LATTICE_REBUILD_RATIO since the last one — on-screen dot spacing
+    // stays pinned to TARGET_PX at every zoom level instead of degrading
+    // as R grows, and between re-derivations the dots stay put.
     const mask = maskRef.current;
     if (mask) {
       const cached = latticeRef.current;
       if (!cached || Math.abs(R - cached.R) / cached.R > LATTICE_REBUILD_RATIO) {
-        latticeRef.current = { R, points: buildLattice(mask, R) };
+        latticeRef.current = { R, delta: TARGET_PX / R };
       }
+      const delta = latticeRef.current!.delta;
+      const latMin = LAT_MIN_DEG * DEG;
+      const latMax = LAT_MAX_DEG * DEG;
+      const range = visibleRange(lambda0, phi0, R, cx, cy, w, h);
+      const kLo = Math.max(0, Math.ceil((range.phiLo - delta - latMin) / delta));
+      const kHi = Math.floor((Math.min(latMax, range.phiHi + delta) - latMin) / delta);
       ctx.fillStyle = COLOR_DOT;
       const r = DOT_RADIUS_PX;
       let drawn = 0;
-      for (const { lambda, phi } of latticeRef.current!.points) {
-        const p = project(lambda, phi, lambda0, phi0, R, cx, cy);
-        if (!p) continue;
-        const op = limbOpacity(p.cosc);
-        if (op <= 0) continue;
-        ctx.globalAlpha = op;
-        ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
-        drawn++;
+      let visited = 0;
+      for (let k = kLo; k <= kHi; k++) {
+        const phi = latMin + k * delta;
+        if (phi > latMax) break;
+        const lngStep = delta / Math.cos(phi);
+        // Columns in a row: lambda = -PI + j·lngStep while lambda < PI.
+        const n = Math.ceil((Math.PI * 2) / lngStep - 1e-9);
+        let jLo = 0;
+        let jHi = n - 1;
+        if (!range.allLongitudes && range.dlHi - range.dlLo + 2 * lngStep < Math.PI * 2) {
+          jLo = Math.ceil((lambda0 + range.dlLo - lngStep + Math.PI) / lngStep);
+          jHi = Math.floor((lambda0 + range.dlHi + lngStep + Math.PI) / lngStep);
+        }
+        for (let j = jLo; j <= jHi; j++) {
+          const jn = ((j % n) + n) % n;
+          const lambda = -Math.PI + jn * lngStep;
+          visited++;
+          if (!sampleLand(mask, phi / DEG, lambda / DEG)) continue;
+          const p = project(lambda, phi, lambda0, phi0, R, cx, cy);
+          if (!p) continue;
+          const op = limbOpacity(p.cosc);
+          if (op <= 0) continue;
+          ctx.globalAlpha = op;
+          ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+          drawn++;
+        }
       }
       ctx.globalAlpha = 1;
-      lastDrawnDotsRef.current = drawn;
+      lastLatticeRef.current = { visited, drawn };
     }
 
     // Photo marks — projected the same way, clustered by ON-SCREEN
