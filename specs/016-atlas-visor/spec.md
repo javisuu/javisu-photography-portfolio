@@ -78,3 +78,31 @@ A 1440x900 salvo que se diga otra cosa.
 ## Preguntas abiertas
 
 - Ninguna.
+
+## Enmienda 1 (2026-11-01): submapas locales
+
+- **Estado:** Aprobada (Javi, 2026-11-01: "OK", junto con `plan.md`).
+- **Respuestas de Javi a las preguntas del plan (2026-11-01):**
+  1. La cita de OSM va solo en el atlas, junto a la leyenda. `/credits` no se toca.
+  2. Centroides propuestos aceptados: Puerto Escondido `15.8720, -97.0767` y San Blas `9.5583, -78.9483`.
+  3. El recorte de la miniatura del hover se queda como esta ("da igual"). En los datos, "New York" pasa a "New York City" en las 6 fotos (`src/data/photos.ts:368,380,390,400,410,420`), para que la linea de cifras cuente una sola ciudad.
+
+**Hecho nuevo**, medido al redactar el plan sobre `src/data/photos.ts` y `public/atlas/land-mask.png`:
+- El par de fotos `exact` con coordenadas distintas mas cercano de una misma ciudad esta en San Sebastian, a 40 m (norte/05 y sol/01). Para separarlo con margen hace falta R ≈ 3,4 millones de px. Hoy el maximo es 1,6 x 609 ≈ 974 px (`src/motion/Atlas.tsx:55`).
+- La mascara del mundo mide 2048x1024 (unos 20 km por pixel) y sale de Natural Earth 110m (`docs/atlas-data-sources.md`). Por encima de R ≈ 4563 px, un pixel de la mascara ocupa mas de 14 px en pantalla, o sea dos puntos de la reticula: la costa se ve en escalones. A nivel de calle, toda la pantalla cae dentro de un solo pixel: todo puntos o todo vacio.
+- 7 pares de fotos `exact` tienen coordenadas identicas (Porto do Son x2, NY 02=03, Villaquiran x3 y dos pares de San Sebastian). No se separan con ningun zoom: el visor los muestra como grupo.
+
+**Decision de Javi (2026-11-01): submapas locales.** Por encima del limite de la mascara del mundo, solo en las zonas con fotos que lo necesitan, la reticula pasa a leer mascaras locales de alta resolucion. Se generan desde la costa de OpenStreetMap. Fuera de esas zonas, el zoom se para en el limite de la mascara del mundo.
+
+Cambios en la spec:
+- **Decision 5** pasa a ser: el zoom llega a separar las fotos `exact` con coordenadas distintas de una misma ciudad, pero solo dentro de una zona local. En cada punto, el zoom maximo es el que permite la mascara mas fina que cubre el centro de la vista.
+- **Zonas afectadas**, se anaden: `scripts/generate-atlas-local-masks.mjs` (nuevo), `public/atlas/local/` (mascaras generadas), `src/data/atlas-zones.json` (generado) y `docs/atlas-data-sources.md`. Tambien una dependencia de desarrollo para leer shapefiles.
+- **Licencia:** los datos de OSM son ODbL y obligan a citar "© OpenStreetMap contributors". La cita va en el propio atlas. Si ademas va en `/credits` (pagina cerrada), lo decide Javi (pregunta 1 de `plan.md`).
+- **CA2** pasa a decir: zoom al maximo sobre el par de fotos `exact` con coordenadas **distintas** mas cercano de una misma ciudad.
+- **CA nuevos:**
+
+| # | Comando | Resultado esperado |
+|---|---|---|
+| CA10 | Seccion `atlas`: toda pareja de coordenadas `exact` distintas que no se separa a R = 4563 px cae dentro de una zona de `src/data/atlas-zones.json` | 0 parejas fuera de zona (avisa si alguien anade fotos y no regenera las zonas) |
+| CA11 | Seccion `atlas`: con el centro fuera de toda zona, rueda de zoom hasta el tope | R final ≤ 4563 px |
+| CA12 | `/atlas` en reposo | El texto "OpenStreetMap" esta en el DOM y es visible |
