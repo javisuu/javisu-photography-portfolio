@@ -6,6 +6,10 @@
 //   node scripts/diagnostico.mjs --url https://x.vercel.app
 //                                                 mide una web desplegada: sin
 //                                                 tsc/lint/build ni next dev
+//   VERCEL_BYPASS=<secreto> ... --url <preview>   preview protegida con login de
+//                                                 Vercel (Protection Bypass for
+//                                                 Automation); el secreto, solo
+//                                                 en el entorno
 //   --repeticiones N                              mide la entrada del landing N
 //                                                 veces, con la cache vacia
 // Requiere: npm i -D playwright && npx playwright install chromium
@@ -34,6 +38,24 @@ if (urlArg !== null) {
   }
 }
 const BASE = remote ?? `http://localhost:${PORT}`;
+// Previews de Vercel protegidas con login: con --url y la variable de entorno
+// VERCEL_BYPASS (el secreto de "Protection Bypass for Automation", Settings ->
+// Deployment Protection), cada peticion lleva la cabecera de bypass. El
+// secreto vive solo en el entorno de quien lanza el comando: nunca en el repo
+// ni en la salida.
+const BYPASS = remote && process.env.VERCEL_BYPASS
+  ? { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS, "x-vercel-set-bypass-cookie": "true" }
+  : null;
+async function launchBrowser(opts) {
+  const b = await chromium.launch(opts);
+  if (BYPASS) {
+    const newContext = b.newContext.bind(b);
+    const newPage = b.newPage.bind(b);
+    b.newContext = (o = {}) => newContext({ ...o, extraHTTPHeaders: { ...(o.extraHTTPHeaders ?? {}), ...BYPASS } });
+    b.newPage = (o = {}) => newPage({ ...o, extraHTTPHeaders: { ...(o.extraHTTPHeaders ?? {}), ...BYPASS } });
+  }
+  return b;
+}
 const repsArg = args.includes("--repeticiones") ? args[args.indexOf("--repeticiones") + 1] ?? "" : "1";
 const reps = /^\d+$/.test(repsArg) ? Number(repsArg) : 0;
 if (reps < 1) {
@@ -115,17 +137,17 @@ if (remote) {
   // responde 200: sin comparar el origen final mediriamos su pagina de login,
   // no el sitio (paso el 2026-10-18 con una URL de despliegue). Un 401/403
   // directo es lo mismo.
-  const r = await fetch(BASE, { signal: AbortSignal.timeout(15000) }).catch((e) => ({ error: e.message }));
+  const r = await fetch(BASE, { signal: AbortSignal.timeout(15000), headers: BYPASS ?? {} }).catch((e) => ({ error: e.message }));
   if (r.error || r.status >= 400) {
     log(`${BASE} no responde bien: ${r.error ?? `http ${r.status}`}`);
     process.exit(2);
   }
   if (new URL(r.url).origin !== new URL(BASE).origin) {
     log(`${BASE} redirige a otro origen (${new URL(r.url).origin}): seguramente esta protegido con login.`);
-    log("Usa el dominio publico de produccion, el que ven los visitantes.");
+    log(BYPASS ? "Con VERCEL_BYPASS y todo: el secreto no vale para este proyecto o ha caducado." : "Usa el dominio publico de produccion, el que ven los visitantes, o una preview con VERCEL_BYPASS.");
     process.exit(2);
   }
-  log(`ok · http ${r.status}`);
+  log(`ok · http ${r.status}${BYPASS ? " · con bypass de Vercel (VERCEL_BYPASS)" : ""}`);
 } else {
   rule(`next dev en :${PORT}`);
   // Un servidor que ya escucha en el puerto es un huerfano de un run anterior:
@@ -166,7 +188,7 @@ if (remote) {
 const IGNORE = [/_next\/hmr/i, /websocket/i, /favicon/i, /Download the React DevTools/i, /npm notice/i];
 const noise = (t) => IGNORE.some((re) => re.test(t));
 
-const browser = await chromium.launch();
+const browser = await launchBrowser();
 const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
 const msgs = [];
 page.on("console", (m) => {
@@ -289,7 +311,7 @@ const SCROLL_STEP_PX = 600;
 const SCROLL_WAIT_MS = 1000;
 const MAX_RATIO_DEVIATION = 0.01;
 rule("barra de scroll");
-const sbBrowser = await chromium.launch({ ignoreDefaultArgs: ["--hide-scrollbars"] });
+const sbBrowser = await launchBrowser({ ignoreDefaultArgs: ["--hide-scrollbars"] });
 async function sbOpen(route, ctxOpts = {}) {
   const ctx = await sbBrowser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...ctxOpts });
   const p = await ctx.newPage();
@@ -443,7 +465,7 @@ if (!only || only.startsWith("/album/")) {
     return out;
   }
   async function arrivalRun({ kind, reduced = false, noGl = false }) {
-    const br = noGl ? await chromium.launch({ args: ["--disable-3d-apis"] }) : browser;
+    const br = noGl ? await launchBrowser({ args: ["--disable-3d-apis"] }) : browser;
     const ctx = await br.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...(reduced ? { reducedMotion: "reduce" } : {}) });
     const p = await ctx.newPage();
     const errs = [];
