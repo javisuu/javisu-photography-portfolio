@@ -43,9 +43,15 @@ const BASE = remote ?? `http://localhost:${PORT}`;
 // Deployment Protection), cada peticion lleva la cabecera de bypass. El
 // secreto vive solo en el entorno de quien lanza el comando: nunca en el repo
 // ni en la salida.
-const BYPASS = remote && process.env.VERCEL_BYPASS
-  ? { "x-vercel-protection-bypass": process.env.VERCEL_BYPASS, "x-vercel-set-bypass-cookie": "true" }
+// Se limpian comillas y espacios que se cuelan al pegarlo en una terminal.
+const BYPASS_SECRET = (process.env.VERCEL_BYPASS ?? "").trim().replace(/^["']|["']$/g, "");
+const BYPASS = remote && BYPASS_SECRET
+  ? { "x-vercel-protection-bypass": BYPASS_SECRET, "x-vercel-set-bypass-cookie": "true" }
   : null;
+if (BYPASS && !/^[!-~]+$/.test(BYPASS_SECRET)) {
+  console.log(`VERCEL_BYPASS tiene caracteres que no caben en una cabecera HTTP (${BYPASS_SECRET.length} caracteres). Copialo de nuevo de Vercel.`);
+  process.exit(2);
+}
 async function launchBrowser(opts) {
   const b = await chromium.launch(opts);
   if (BYPASS) {
@@ -137,7 +143,10 @@ if (remote) {
   // responde 200: sin comparar el origen final mediriamos su pagina de login,
   // no el sitio (paso el 2026-10-18 con una URL de despliegue). Un 401/403
   // directo es lo mismo.
-  const r = await fetch(BASE, { signal: AbortSignal.timeout(15000), headers: BYPASS ?? {} }).catch((e) => ({ error: e.message }));
+  // "fetch failed" a secas no dice nada: la causa real va en e.cause.
+  const r = await fetch(BASE, { signal: AbortSignal.timeout(15000), headers: BYPASS ?? {} }).catch((e) => ({
+    error: `${e.message}${e.cause ? ` (${e.cause.code ?? ""} ${e.cause.message ?? e.cause})` : ""}`,
+  }));
   if (r.error || r.status >= 400) {
     log(`${BASE} no responde bien: ${r.error ?? `http ${r.status}`}`);
     process.exit(2);
