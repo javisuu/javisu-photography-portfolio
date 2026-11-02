@@ -163,7 +163,7 @@ export default function AtlasViewer({
           >
             ‹
           </button>
-          <div ref={stripRef} className="relative flex min-w-0 flex-1 items-end overflow-x-auto px-2 pb-1 pt-3">
+          <div ref={stripRef} className="atlas-strip relative flex min-w-0 flex-1 items-end overflow-x-auto px-2 pb-1 pt-3">
             {marks.map((m, i) => (
               <button
                 key={m.src}

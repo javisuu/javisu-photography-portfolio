@@ -149,12 +149,12 @@ function easeInOutCubic(t: number): number {
 }
 
 // The viewer's tour (spec 016, amendment 3) moves the globe from photo to
-// photo. A step whose photo is already near the centre (within this share
-// of the canvas's shorter side at the current zoom) just rotates, zooming
-// in to the regional view if further out. A longer step FLIES: it pulls
-// out mid-way, far enough for both ends to fit on screen, and lands on the
-// regional view; it takes longer the further it goes, and eases in and
-// out, since a long flight that starts at full speed reads as a jolt.
+// photo, landing at that photo's own zoom (photoR). A step whose photo is
+// already near the centre (within this share of the canvas's shorter side
+// at the current zoom) just rotates and zooms. A longer step FLIES: it
+// pulls out mid-way, far enough for both ends to fit on screen; it takes
+// longer the further it goes, and eases in and out, since a long flight
+// that starts at full speed reads as a jolt.
 const FLY_NEAR_SHARE = 0.35;
 const FLY_FIT_SHARE = 0.6;
 const FLY_MAX_MS = 1400;
@@ -167,6 +167,7 @@ const FLY_MAX_MS = 1400;
 // split is clear rather than borderline. Infinity when every member sits
 // on the same point: no zoom ever splits it.
 const CLICK_SPLIT_MARGIN = 1.5;
+const SAME_POINT_RAD = 1e-7;
 // A group that can't split still zooms in before it opens, to a regional
 // view: this many km across the shorter side of the canvas — about
 // Central America (Javi, 2026-11-02, after trying San Blas and Puerto
@@ -190,7 +191,9 @@ function splitR(points: { lat: number; lng: number }[]): number {
     maxEdge = Math.max(maxEdge, best[u]);
     for (let i = 0; i < n; i++) if (!inTree[i]) best[i] = Math.min(best[i], ang(u, i));
   }
-  return maxEdge > 0 ? (CLUSTER_THRESHOLD_PX * CLICK_SPLIT_MARGIN) / maxEdge : Infinity;
+  // Points closer than ~0.6 m are the same point: acos near 1 rounds to
+  // ~1e-8 rad rather than 0, so an exact zero test would miss them.
+  return maxEdge > SAME_POINT_RAD ? (CLUSTER_THRESHOLD_PX * CLICK_SPLIT_MARGIN) / maxEdge : Infinity;
 }
 
 // ---- Land mask ----------------------------------------------------
@@ -1300,14 +1303,43 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     // view (never out), then open the viewer on it — the single photo no
     // longer jumps to its album (spec 016, decision 2; amendment 2).
     const vp = viewportSizeRef.current;
-    const regionR = Math.min(vp.width, vp.height) / (CLICK_REGION_KM / EARTH_KM);
     // Members come in tour order: the viewer opens on the first of them,
-    // inside the whole tour (spec 016, amendment 3).
+    // inside the whole tour (spec 016, amendment 3), at that photo's zoom.
     const first = Math.min(...cluster.members.map(({ index }) => index));
     // The globe moves into the space the viewer will leave free in the
     // same motion as the rotation, not as a second step once it opens.
     setCenterShift(atlasViewerWidth(vp.width) / 2);
-    startRecenter(toLambda, toPhi, () => setViewer({ index: first }), Math.min(currentMaxR(), Math.max(RRef.current, regionR)));
+    startRecenter(toLambda, toPhi, () => setViewer({ index: first }), photoR(first));
+  }
+
+  // The zoom a photo is shown at, from the viewer (Javi, 2026-11-02: "en
+  // ny el zoom tiene que llegar hasta la foto individual"): just enough
+  // for its mark to stand alone, CLICK_SPLIT_MARGIN times the cluster
+  // threshold from the nearest photo at a DIFFERENT point (photos sharing
+  // its point never separate, so they don't count). Never above what that
+  // place can reach (possibleMaxR: San Miguel stays at the world limit),
+  // never below the regional view. Asks for the zone's masks if it needs them.
+  function photoR(index: number): number {
+    const mark = marks[index];
+    const vp = viewportSizeRef.current;
+    const regionR = Math.min(vp.width, vp.height) / (CLICK_REGION_KM / EARTH_KM);
+    if (!mark) return regionR;
+    const a = mark.lat * DEG;
+    let nearest = Infinity;
+    for (const o of marks) {
+      // Same point, compared exactly: acos of a dot product near 1 rounds
+      // to ~1e-8 rad, not 0 (measured on San Blas' two photos, 2026-11-02).
+      if (o.lat === mark.lat && o.lng === mark.lng) continue;
+      const b = o.lat * DEG;
+      const c = Math.sin(a) * Math.sin(b) + Math.cos(a) * Math.cos(b) * Math.cos((o.lng - mark.lng) * DEG);
+      const d = Math.acos(Math.min(1, Math.max(-1, c)));
+      if (d < nearest) nearest = d;
+    }
+    const lng = lngDeg(mark.lng * DEG);
+    const separate = (CLUSTER_THRESHOLD_PX * CLICK_SPLIT_MARGIN) / nearest;
+    const target = Math.max(regionR, Math.min(possibleMaxR(mark.lat, lng), separate));
+    if (target > WORLD_MAX_R * LOCAL_PRELOAD_RATIO) requestZonesAt(mark.lat, lng);
+    return target;
   }
 
   // Takes the globe to the tour's photo `index`: a rotation when it is
@@ -1317,7 +1349,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     if (!mark) return;
     const vp = viewportSizeRef.current;
     const span = Math.min(vp.width, vp.height);
-    const regionR = Math.min(currentMaxR(), span / (CLICK_REGION_KM / EARTH_KM));
+    const targetR = photoR(index);
     const R = RRef.current;
     const toLambda = mark.lng * DEG;
     const toPhi = mark.lat * DEG;
@@ -1326,12 +1358,12 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       Math.sin(p0) * Math.sin(toPhi) + Math.cos(p0) * Math.cos(toPhi) * Math.cos(toLambda - lambda0Ref.current);
     const d = Math.acos(Math.min(1, Math.max(-1, cosD)));
     if (d * R <= FLY_NEAR_SHARE * span) {
-      startRecenter(toLambda, toPhi, () => {}, R < regionR ? regionR : undefined);
+      startRecenter(toLambda, toPhi, () => {}, targetR);
       return;
     }
-    const midR = Math.max(zoomBoundsRef.current.minR, Math.min(R, regionR, (FLY_FIT_SHARE * span) / d));
+    const midR = Math.max(zoomBoundsRef.current.minR, Math.min(R, targetR, (FLY_FIT_SHARE * span) / d));
     const duration = RECENTER_MS + (FLY_MAX_MS - RECENTER_MS) * Math.min(1, d / (Math.PI / 2));
-    startRecenter(toLambda, toPhi, () => {}, regionR, { midR, duration });
+    startRecenter(toLambda, toPhi, () => {}, targetR, { midR, duration });
   }
 
   function showTourPhoto(index: number) {

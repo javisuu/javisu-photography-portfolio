@@ -1364,20 +1364,23 @@ if (!only || only === "/atlas") {
         const target = pts[far + 1];
         const centre = { lat: (st.phi0 * 180) / Math.PI, lng: (st.lambda0 * 180) / Math.PI };
         const offPx = angDist(centre, target) * st.R;
-        const regionR = Math.min(st.width, st.height) / (2500 / 6371);
+        // Aterriza con el zoom de la foto: su marca queda sola, o solo con
+        // las fotos que comparten su mismo punto (Javi, 2026-11-02).
+        const own = ((await probe(p, () => window.__atlas.clusters())) ?? []).find((c) => c.srcs.includes(target.src));
+        const alone = !!own && own.srcs.every((s) => bySrc[s] && bySrc[s].lat === target.lat && bySrc[s].lng === target.lng);
         const fr = (await p.evaluate(() => window.__atlasRec.frames)).filter((t) => t >= t0 && t <= t1);
         const deltas = fr.slice(1).map((t, k) => t - fr[k]);
         const long = deltas.slice(1).filter((d) => d > LONG_FRAME_MS).length;
         const vNow = await viewerState(p);
-        log(`  vuelo ${pts[far].city} → ${target.city} (${rr(farD * 6371)} km): centro a ${offPx.toFixed(2)} px de la foto · R ${rr(st.R)} (regional ${rr(regionR)}) · frames > ${LONG_FRAME_MS} ms: ${long}, peor ${rr(Math.max(0, ...deltas.slice(1)))} ms · visor en ${vNow?.src}`);
-        addInv("atlas", "CA15 vuelo al lugar siguiente: centrado, en vista regional, sin frames > 50 ms",
-          offPx < 2 && Math.abs(st.R / regionR - 1) < 0.01 && long === 0 && vNow?.src === target.src,
-          `${offPx.toFixed(2)} px, R ${rr(st.R)} frente a ${rr(regionR)}, ${long} frames largos, visor en ${vNow?.src}`);
+        log(`  vuelo ${pts[far].city} → ${target.city} (${rr(farD * 6371)} km): centro a ${offPx.toFixed(2)} px de la foto · R ${rr(st.R)} · su marca: ${own ? own.srcs.map((s) => s.split("/").slice(-2).join("/")).join(", ") : "—"} · frames > ${LONG_FRAME_MS} ms: ${long}, peor ${rr(Math.max(0, ...deltas.slice(1)))} ms · visor en ${vNow?.src}`);
+        addInv("atlas", "CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms",
+          offPx < 2 && alone && long === 0 && vNow?.src === target.src,
+          `${offPx.toFixed(2)} px, marca ${own?.srcs.join(", ") ?? "—"}, ${long} frames largos, visor en ${vNow?.src}`);
       } else {
-        addInv("atlas", "CA15 vuelo al lugar siguiente: centrado, en vista regional, sin frames > 50 ms", false, "sin visor o sin recorrido");
+        addInv("atlas", "CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms", false, "sin visor o sin recorrido");
       }
     } else {
-      for (const n of ["CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes", "CA16 el boton abre el visor en la primera foto del recorrido", "CA15 vuelo al lugar siguiente: centrado, en vista regional, sin frames > 50 ms"]) addInv("atlas", n, false, "la sonda no expone el recorrido");
+      for (const n of ["CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes", "CA16 el boton abre el visor en la primera foto del recorrido", "CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms"]) addInv("atlas", n, false, "la sonda no expone el recorrido");
     }
     if (errs.length) log(`  errores: ${errs.join(" | ")}`);
     await ctx.close();

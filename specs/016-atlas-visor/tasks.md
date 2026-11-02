@@ -149,6 +149,17 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **CA16:** el boton abre en `america/08`, la primera foto del recorrido.
   - **Efecto colateral:** el agrupado del globo es voraz y depende del orden de las marcas. Con el orden del recorrido, el grupo mas grande del encuadre por defecto pasa de 11 a 15 fotos (Espana y Francia juntas). CA2 y CA13 siguen en verde.
   - **Capturas de comprobacion** (`next dev`, 1440x900, en el scratchpad de la sesion): con el visor en New York City (15/31), el grupo de 7 fotos queda en x = 460, el centro del espacio libre, y se ve el hueco entre lugares en la tira
+  - **Ajuste (Javi, 2026-11-02): zoom por foto y tira sin barra.**
+    - `photoR()` calcula el zoom de cada paso: la foto queda sola en su marca, con los topes de la enmienda. Se usa en el recorrido y al abrir el visor con un clic.
+    - La tira (`.atlas-strip`) oculta la barra de desplazamiento.
+    - Un fallo encontrado al medir: dos fotos con coordenadas identicas daban una distancia de 1,5e-8 rad, no 0, por el redondeo de `acos` cerca de 1. San Blas aterrizaba en 4563 en vez de en la vista regional. Ahora se comparan las coordenadas exactas, y `splitR` trata como el mismo punto lo que este a menos de 1e-7 rad (unos 0,6 m).
+    - Medido paso a paso sobre las 31 fotos (`next dev`, salida en la conversacion):
+      - Nueva York: cada foto en su marca, de R 24.229 a 803.474. Solo ny/02 y ny/03 van juntas, porque comparten punto.
+      - San Sebastian: de R 624.559 a 3.361.566.
+      - Galicia y Biarritz: de 2319 a 3461.
+      - San Blas, Puerto Escondido y Villaquiran (fotos en un mismo punto): vista regional, 1551.
+      - San Miguel: 4563, el techo general.
+    - Seccion `atlas`: 25 de 25, 0 errores de consola. El vuelo de New York City a Porto do Son termina a 0,00 px, con R 3196 y la marca norte/03 + norte/04 (mismo punto). Salida en `evidencia/2026-11-02_016-recorrido-zoom.txt:75-76`
 
 ## Cierre
 
