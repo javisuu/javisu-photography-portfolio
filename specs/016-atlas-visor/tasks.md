@@ -90,25 +90,44 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - **CA3, CA10 y CA11** siguen en verde.
     - **CA4 y CA8** pulsan ahora el grupo de una foto con coordenadas repetidas hasta que se abre (`openGroup`). Eligen Puerto Escondido, 3 fotos `city` en un mismo punto, que se abre al primer clic.
   - **Ajuste (Javi, 2026-11-02):** los grupos que no se pueden partir (San Blas, Puerto Escondido) no acercaban nada. Ahora acercan hasta una vista regional de 2500 km en el lado corto del canvas y luego se abren; el panel provisional se coloca en el centro, donde queda el grupo. Medido: Puerto Escondido se abre a R 1551, y CA2, CA3, CA10, CA11 y CA13 siguen en verde, con 0 errores de consola. Salida en `evidencia/2026-11-02_016-clic-region.txt` (`:59`)
-- [ ] **T8** · Cita de OpenStreetMap junto a la leyenda, solo en el atlas (`/credits` no se toca, decision de Javi)
+- [x] **T8** · Cita de OpenStreetMap junto a la leyenda, solo en el atlas (`/credits` no se toca, decision de Javi)
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: CA12
 
+  - **Hecho 2026-11-02** (`e3cd5d0`). Debajo de la leyenda, 11 px `#A8A8A8`: "Map data © OpenStreetMap contributors", con enlace a openstreetmap.org/copyright (el unico punto de la leyenda que recibe clics). CA12 pasa (`evidencia/2026-11-02_016-visor.txt:76`)
 ## Visor
 
-- [ ] **T9** · `AtlasMark` gana `capture` y `order`, y `page.tsx` ordena las marcas por album y foto
+- [x] **T9** · `AtlasMark` gana `capture` y `order`, y `page.tsx` ordena las marcas por album y foto
   - Fichero(s): `src/app/atlas/page.tsx`, `src/motion/Atlas.tsx` (tipo)
   - Comprobacion: tsc ok. `clusters()` devuelve los miembros de cada grupo en el orden del album
-- [ ] **T10** · `AtlasViewer`: foto grande sin recortar, informacion (DMS solo si es `exact`), enlace al album, entrada en 200 ms y estado final directo con reduced motion
+  - **Hecho 2026-11-02** (`5196376`). `AtlasMark` gana tambien `albumTitle`, para el enlace del visor. tsc ok. Las marcas salen en el orden de `getOrderedAlbums()` y, dentro de cada album, en el de `getPhotosByAlbum()`. `albumPhotoIndex` sigue siendo el mismo indice que antes. El orden dentro de un grupo lo comprueba CA5
+- [x] **T10** · `AtlasViewer`: foto grande sin recortar, informacion (DMS solo si es `exact`), enlace al album, entrada en 200 ms y estado final directo con reduced motion
   - Fichero(s): `src/components/AtlasViewer.tsx`
   - Comprobacion: tsc y lint ok (todavia no se monta)
-- [ ] **T11** · Tira de miniaturas a la misma altura, la actual con `scale`, flechas, ← →, Esc
+  - **Hecho 2026-11-02, junto con T11 y T12.** `src/components/AtlasViewer.tsx`. Tambien contiene `toDMS`, que sale de `Atlas.tsx`, y `atlasViewerWidth()`: `min(520, max(min(280, vw), 0,4·vw))`, con un minimo de 280 px solo para que no se rompa en el movil. La entrada es `.atlas-viewer` en `globals.css`: keyframes de opacidad y 16 px, y `animation: none` con reduced motion.
+  - **Pie de foto:** sigue el del album (`src/motion/AlbumPhotos.tsx:154-174`): titulo en serif cursiva de 20 px, ciudad y pais en mayusculas de 12 px, y captura en mayusculas de 12 px `#A8A8A8`. No usa los "14 px `#666`" del plan, para que la misma informacion se vea igual en los dos sitios. El contador `01 / 03` si va en 14 px `#666`.
+  - **Posicion de la foto:** pegada al pie de foto. Centrada en su hueco, una foto horizontal dejaba mucho blanco hasta el texto; se vio en una captura de comprobacion
+- [x] **T11** · Tira de miniaturas a la misma altura, la actual con `scale`, flechas, ← →, Esc
   - Fichero(s): `src/components/AtlasViewer.tsx`
   - Comprobacion: tsc y lint ok
-- [ ] **T12** · Visor montado en `Atlas.tsx` en lugar del panel de grupo y del `router.push` de la foto suelta; centro del globo desplazado al espacio libre mientras esta abierto
+  - **Hecho 2026-11-02.** Miniaturas a 56 px de alto, enteras y con su propio ancho. La actual crece con `scale(1.15)` desde abajo y las demas quedan al 55 % de opacidad. ‹ › y ← → dan la vuelta al llegar al final, y Esc cierra
+- [x] **T12** · Visor montado en `Atlas.tsx` en lugar del panel de grupo y del `router.push` de la foto suelta; centro del globo desplazado al espacio libre mientras esta abierto
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: seccion `atlas`, CA4 a CA8. 0 errores de consola
 
+  - **Hecho 2026-11-02.**
+    - El visor sustituye al panel de lista y al `router.push` (se quitan `useRouter` y `clusterPanel`).
+    - Un grupo que no se puede partir, o una foto suelta, acerca a la vista regional y abre el visor. La foto suelta tambien acerca, como se le propuso a Javi el 2026-11-02 para que todo se comporte igual.
+    - El centro del globo se desplaza la mitad del ancho del visor (`centerShiftRef`, con la curva del recentrado). El desplazamiento arranca en el mismo clic que el giro, para que no haya un segundo movimiento al abrirse. Si un arrastre corta el giro, el desplazamiento se deshace.
+    - Con el visor abierto, "Reset View" se aparta a su izquierda. "Reset View" tambien cierra el visor.
+  - `MSYS_NO_PATHCONV=1 node scripts/diagnostico.mjs --medir /atlas`: **21 de 21**, 0 errores de consola. Salida en `evidencia/2026-11-02_016-visor.txt`:
+    - **CA4:** visor abierto en Puerto Escondido (3 fotos), foto entera, 3 miniaturas (`:60-63`).
+    - **CA5:** 05 → 06 → 07 (`:65`). **CA7:** sin DMS (`:66`).
+    - **CA6:** tapa el 36,1 % del canvas y el globo gira con un arrastre (`:67-69`).
+    - **CA8:** opacidad 1 y `transform: none` en la primera muestra (`:71`).
+  - **Capturas de comprobacion** (`next dev`, 1440x900, en el scratchpad de la sesion):
+    - Grupo de Puerto Escondido: entra Centroamerica entera, y la marca queda en x = 460, el centro del espacio libre.
+    - Foto suelta de Xilitla (`city`): el visor no muestra coordenadas
 ## Cierre
 
 - [ ] `docs/atlas-data-sources.md` (OSM, ODbL, regenerar), `docs/design-spec-v2.md` §5 y changelog, y `CLAUDE.md` (linea del atlas, licencia)

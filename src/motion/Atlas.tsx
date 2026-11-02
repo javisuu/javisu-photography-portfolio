@@ -17,10 +17,10 @@
 // what keeps the view impossible to get lost in.
 
 import Image from "next/image";
-import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { CaptureData, PlacePrecision } from "@/data/photos";
 import atlasZones from "@/data/atlas-zones.json";
+import AtlasViewer, { atlasViewerWidth, toDMS } from "@/components/AtlasViewer";
 
 export type AtlasMark = {
   src: string;
@@ -101,16 +101,6 @@ const DEG = Math.PI / 180;
 // does — is what actually satisfies the rule.
 function nowMs(): number {
   return performance.now();
-}
-
-function toDMS(value: number, positiveSuffix: string, negativeSuffix: string) {
-  const suffix = value >= 0 ? positiveSuffix : negativeSuffix;
-  const abs = Math.abs(value);
-  const deg = Math.floor(abs);
-  const minFloat = (abs - deg) * 60;
-  const min = Math.floor(minFloat);
-  const sec = Math.round((minFloat - min) * 60);
-  return `${deg}°${min}'${sec}"${suffix}`;
 }
 
 // ---- Projection (orthographic, camera at infinity) --------------------
@@ -414,7 +404,6 @@ function clusterKey(cluster: Cluster): string {
 }
 
 export default function Atlas({ marks }: { marks: AtlasMark[] }) {
-  const router = useRouter();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [viewportSize, setViewportSize] = useState({ width: 0, height: 0 });
@@ -425,7 +414,9 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   // written imperatively inside draw(), outside React's render cycle;
   // reading it during render trips react-hooks/refs).
   const [hoveredCluster, setHoveredCluster] = useState<Cluster | null>(null);
-  const [clusterPanel, setClusterPanel] = useState<{ members: { mark: AtlasMark; index: number }[]; x: number; y: number } | null>(null);
+  // The photo viewer (spec 016): which photos are open and which one shows.
+  // Fixed once opened — if the group later splits under zoom, it stays.
+  const [viewer, setViewer] = useState<{ marks: AtlasMark[]; index: number } | null>(null);
   const reducedMotion = useSyncExternalStore(
     subscribeReducedMotion,
     getReducedMotionSnapshot,
@@ -477,6 +468,15 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   // space: zoom reads as a ratio, and a linear ease from millions of px
   // down to thousands would spend almost all of it invisibly.
   const zoomBackRef = useRef<{ from: number; to: number; startedAt: number } | null>(null);
+  // How far left of the canvas centre the globe's centre sits: half the
+  // viewer's width while it is open, so the globe centres in the space
+  // left free; eased with the recenter's curve (at once, reduced motion).
+  const centerShiftRef = useRef<{ value: number; from: number; to: number; startedAt: number | null }>({
+    value: 0,
+    from: 0,
+    to: 0,
+    startedAt: null,
+  });
 
   const recenterRef = useRef<{
     fromLambda: number;
@@ -812,6 +812,14 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       else stillActive = true;
     }
 
+    const shift = centerShiftRef.current;
+    if (shift.startedAt !== null) {
+      const t = Math.min(1, (now - shift.startedAt) / RECENTER_MS);
+      shift.value = shift.from + (shift.to - shift.from) * easeOutCubic(t);
+      if (t >= 1) shift.startedAt = null;
+      else stillActive = true;
+    }
+
     if (draw()) stillActive = true;
 
     if (stillActive) {
@@ -847,7 +855,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
 
     const R = RRef.current;
     if (R === 0) return false;
-    const cx = w / 2;
+    const cx = w / 2 - centerShiftRef.current.value;
     const cy = h / 2;
     const lambda0 = lambda0Ref.current;
     const phi0 = phi0Ref.current;
@@ -1102,6 +1110,8 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     scheduleIdleDrift();
     inertiaActiveRef.current = false;
     recenterRef.current = null;
+    // A click's recenter cut short never opens its viewer: undo its shift.
+    if (!viewer) setCenterShift(0);
 
     if (pointersRef.current.size === 1) {
       dragRef.current = { lastX: x, lastY: y, downX: x, downY: y, moved: 0 };
@@ -1222,7 +1232,6 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   function handleClick(x: number, y: number) {
     const cluster = findClusterAt(x, y);
     if (!cluster) return;
-    setClusterPanel(null);
 
     // Average lat/lng of the cluster's own members as the recenter
     // target — for a single mark this is just that mark's coordinate.
@@ -1249,31 +1258,43 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         startRecenter(toLambda, toPhi, () => {}, Math.max(RRef.current, targetR));
         return;
       }
-      const vp = viewportSizeRef.current;
-      const regionR = Math.min(vp.width, vp.height) / (CLICK_REGION_KM / EARTH_KM);
-      startRecenter(
-        toLambda,
-        toPhi,
-        () => {
-          // The group ends centred: the (interim, T12) panel goes there.
-          setClusterPanel({ members: cluster.members, x: vp.width / 2, y: vp.height / 2 });
-        },
-        Math.min(currentMaxR(), Math.max(RRef.current, regionR))
-      );
-    } else {
-      const { mark } = cluster.members[0];
-      startRecenter(toLambda, toPhi, () => {
-        router.push(`/album/${mark.album}#photo-${mark.albumPhotoIndex}`);
-      });
     }
+    // A group that can't split, or a single photo: zoom in to a regional
+    // view (never out), then open the viewer on it — the single photo no
+    // longer jumps to its album (spec 016, decision 2; amendment 2).
+    const vp = viewportSizeRef.current;
+    const regionR = Math.min(vp.width, vp.height) / (CLICK_REGION_KM / EARTH_KM);
+    const open = cluster.members.map(({ mark }) => mark);
+    // The globe moves into the space the viewer will leave free in the
+    // same motion as the rotation, not as a second step once it opens.
+    setCenterShift(atlasViewerWidth(vp.width) / 2);
+    startRecenter(toLambda, toPhi, () => setViewer({ marks: open, index: 0 }), Math.min(currentMaxR(), Math.max(RRef.current, regionR)));
+  }
+
+  function setCenterShift(to: number) {
+    const shift = centerShiftRef.current;
+    if (shift.to === to && shift.startedAt === null && shift.value === to) return;
+    if (reducedMotionRef.current) {
+      Object.assign(shift, { value: to, from: to, to, startedAt: null });
+    } else {
+      Object.assign(shift, { from: shift.value, to, startedAt: nowMs() });
+    }
+    requestFrame();
   }
 
   function resetToDefault() {
-    setClusterPanel(null);
+    setViewer(null);
     startRecenter(DEFAULT_LAMBDA0_DEG * DEG, DEFAULT_PHI0_DEG * DEG, () => {});
     const targetR = Math.min(viewportSize.width, viewportSize.height) * 0.42;
     RRef.current = targetR; // radius itself doesn't need the angular recenter easing
   }
+
+  const viewerOpen = viewer !== null;
+  const viewerW = atlasViewerWidth(viewportSize.width);
+  useEffect(() => {
+    setCenterShift(viewerOpen ? viewerW / 2 : 0);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewerOpen, viewerW]);
 
   const hoveredSingle = hoveredCluster && hoveredCluster.members.length === 1 ? hoveredCluster.members[0].mark : null;
 
@@ -1337,52 +1358,16 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         </div>
       )}
 
-      {/* Cluster panel — opened after a cluster's recenter animation
-          finishes (see handleClick); lists every photo in the cluster,
-          each a direct deep link into its album. Dismiss by clicking
-          elsewhere on the globe or the close control. */}
-      {clusterPanel && (
-        <div
-          className="absolute z-20 flex max-h-[70vh] w-[240px] flex-col gap-2 overflow-y-auto bg-[#FAFAFA] p-3 shadow-sm"
-          style={{
-            left: Math.min(Math.max(0, clusterPanel.x - 120), viewportSize.width - 240),
-            top: Math.min(clusterPanel.y + 16, viewportSize.height - 260),
-          }}
-        >
-          <div className="flex items-center justify-between">
-            <span className="text-[12px] uppercase tracking-[0.14em] text-[#666]">
-              {clusterPanel.members.length} Photographs
-            </span>
-            <button
-              type="button"
-              onClick={() => setClusterPanel(null)}
-              className="text-[12px] text-[#666] hover:text-[#111]"
-              aria-label="Close"
-            >
-              ×
-            </button>
-          </div>
-          {clusterPanel.members.map(({ mark }) => (
-            <button
-              key={mark.src}
-              type="button"
-              onClick={() => router.push(`/album/${mark.album}#photo-${mark.albumPhotoIndex}`)}
-              className="flex items-center gap-3 text-left"
-            >
-              <Image
-                src={mark.src}
-                alt={mark.title}
-                width={48}
-                height={48}
-                className="h-12 w-12 shrink-0 object-cover"
-                sizes="48px"
-              />
-              <span className="text-[12px] uppercase tracking-[0.14em] text-[#666] hover:text-[#111]">
-                {mark.city} · {mark.country}
-              </span>
-            </button>
-          ))}
-        </div>
+      {/* Photo viewer (spec 016) — replaces the old cluster list panel
+          and the single photo's jump to its album. */}
+      {viewer && (
+        <AtlasViewer
+          marks={viewer.marks}
+          index={viewer.index}
+          width={viewerW}
+          onIndex={(index) => setViewer((v) => (v ? { ...v, index } : v))}
+          onClose={() => setViewer(null)}
+        />
       )}
 
       {/* Legend + reset control. The OpenStreetMap credit is required by
@@ -1416,6 +1401,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       <button
         type="button"
         onClick={resetToDefault}
+        style={viewer ? { right: viewerW + 24 } : undefined}
         className="absolute bottom-4 right-4 text-[12px] uppercase tracking-[0.14em] text-[#666] hover:text-[#111] md:bottom-6 md:right-6"
       >
         Reset View

@@ -87,6 +87,28 @@ body {
   }
 }
 
+/* Atlas viewer entrance (src/components/AtlasViewer.tsx, spec 016): fade
+   plus a 16 px slide from the right, 200 ms; under reduced motion it is
+   simply there, already in its final state (CA8). */
+@keyframes atlas-viewer-in {
+  from {
+    opacity: 0;
+    transform: translateX(16px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+.atlas-viewer {
+  animation: atlas-viewer-in 200ms ease-out;
+}
+@media (prefers-reduced-motion: reduce) {
+  .atlas-viewer {
+    animation: none;
+  }
+}
+
 /* Wordmark hover target (src/motion/DecipherWordmark.tsx): pointer-events
    stays none by default — the <h1> it lives in is `fixed inset-0`,
    spanning the full viewport, so an unconditional pointer-events grant
