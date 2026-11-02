@@ -1,0 +1,84 @@
+DIAGNOSTICO 2026-11-02 · feat/016-atlas-visor · 5196376 · 3 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+
+=== atlas ===
+  fotos: 31 · con coordenadas: 31 · exact: 25
+  sonda: R 256 · minR 195 · maxR 4563 · caja 1440x609
+  ok   sonda window.__atlas presente
+  par exact mas cercano (coordenadas distintas): /photos/norte/05.jpg y /photos/sol/01.jpg · San Sebastián · 40 m · separarlo a 14 px pide R ≈ 2241044
+  reticula en el encuadre por defecto: 8401 puntos recorridos · 3184 pintados
+  clics en el grupo del par durante el zoom: 11 fotos a R 653 → 8 fotos a R 3461 → 7 fotos a R 36538 → 4 fotos a R 130972 → 3 fotos a R 152150
+  rueda hasta el maximo: 28 pasos · R final 3361566 · separacion del par 21.0 px
+  frames durante la rueda (sin los clics): 98 · > 50 ms despues del primero: 0 · peor 17 ms · reticula al maximo: 15277 recorridos, 5072 pintados
+  ok   CA2 par mas cercano separado (> 14 px) al zoom maximo
+  ok   CA3 0 frames > 50 ms en la rueda hasta el maximo
+  clic en el grupo mas grande (11 fotos): R 256 → 653 · queda en 2 grupos (8+3) · media a 0.00 px del centro · frames > 50 ms: 0, peor 17 ms
+  ok   CA13 clic en un grupo: acerca hasta partirlo, centrado, sin frames > 50 ms
+  grupo elegido: R al abrirlo 1551 · 3 fotos (america/05.jpg·c, america/06.jpg·c, america/07.jpg·c)
+  visor: abierto · foto /photos/america/05.jpg · 3 miniaturas
+  ok   CA4 clic en grupo abre el visor, no la lista
+  ok   CA4 foto grande entera en el viewport, proporcion < 1 %
+  ok   CA4 tira con una miniatura por foto del grupo
+  recorrido con la flecha: america/05.jpg → america/06.jpg → america/07.jpg
+  ok   CA5 la flecha pasa por todas las fotos del grupo, en orden, sin repetir
+  ok   CA7 sin coordenadas DMS en fotos city
+  globo con el visor abierto: tapado 36.1 % · lambda0 -1.6943 → -2.1550
+  ok   CA6 visor tapa <= 40 % del canvas
+  ok   CA6 el globo responde a un arrastre con el visor abierto
+  reduced motion: primera muestra del visor opacity 1 · transform none
+  ok   CA8 reduced motion: visor sin fundido ni desplazamiento
+  zonas: 2 (san-sebastian, new-york-city) · excluidas: San Miguel de Allende · parejas que necesitan zona: 39 · fuera de zona: 0
+  ok   CA10 toda pareja exact sin separar a R 4563 cae en una zona (salvo ciudades excluidas)
+  fuera de zona (encuadre por defecto): 23 pasos · R final 4563
+  ok   CA11 fuera de zona el zoom se para en R <= 4563
+  ok   CA12 cita de OpenStreetMap visible
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  21 de 21
+
