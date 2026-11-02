@@ -1,0 +1,91 @@
+DIAGNOSTICO 2026-11-02 · feat/016-atlas-visor · f04fda1 · 3 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+
+=== atlas ===
+  fotos: 31 · con coordenadas: 31 · exact: 25
+  sonda: R 256 · minR 195 · maxR 4563 · caja 1440x609
+  ok   sonda window.__atlas presente
+  par exact mas cercano (coordenadas distintas): /photos/norte/05.jpg y /photos/sol/01.jpg · San Sebastián · 40 m · separarlo a 14 px pide R ≈ 2241044
+  reticula en el encuadre por defecto: 8401 puntos recorridos · 3184 pintados
+  clics en el grupo del par durante el zoom: 15 fotos a R 362 → 11 fotos a R 653 → 8 fotos a R 3461 → 7 fotos a R 36538 → 4 fotos a R 130972 → 3 fotos a R 3361566
+  rueda hasta el maximo: 9 pasos · R final 3361566 · separacion del par 21.0 px
+  frames durante la rueda (sin los clics): 34 · > 50 ms despues del primero: 0 · peor 17 ms · reticula al maximo: 14841 recorridos, 4882 pintados
+  ok   CA2 par mas cercano separado (> 14 px) al zoom maximo
+  ok   CA3 0 frames > 50 ms en la rueda hasta el maximo
+  clic en el grupo mas grande (15 fotos): R 256 → 362 · queda en 2 grupos (4+11) · media a 0.00 px del centro · frames > 50 ms: 0, peor 17 ms
+  ok   CA13 clic en un grupo: acerca hasta partirlo, centrado, sin frames > 50 ms
+  grupo elegido: R al abrirlo 1551 · 3 fotos (america/05.jpg·c, america/06.jpg·c, america/07.jpg·c)
+  visor: abierto · foto /photos/america/05.jpg · 31 miniaturas · recorrido de 31 fotos
+  ok   CA4 clic en grupo abre el visor, no la lista
+  ok   CA4 foto grande entera en el viewport, proporcion < 1 %
+  ok   CA4 se abre en la primera foto del grupo pulsado
+  ok   CA4 tira con una miniatura por foto del atlas
+  recorrido con la flecha (31 fotos): america/05.jpg → america/06.jpg → america/07.jpg → america/01.jpg → america/02.jpg → america/03.jpg → america/04.jpg → ny/01.jpg → ny/02.jpg → ny/03.jpg → ny/04.jpg → ny/05.jpg → ny/06.jpg → ny/07.jpg → norte/03.jpg → norte/04.jpg → norte/08.jpg → norte/07.jpg → sol/04.jpg → sol/06.jpg → sol/07.jpg → norte/01.jpg → norte/02.jpg → norte/05.jpg → sol/01.jpg → sol/02.jpg → sol/03.jpg → sol/05.jpg → norte/06.jpg → america/08.jpg → america/09.jpg
+  ok   CA5 la flecha pasa por todas las fotos del atlas, en el orden del recorrido, sin repetir
+  ok   CA7 sin coordenadas DMS en fotos city
+  globo con el visor abierto: tapado 36.1 % · lambda0 -0.1514 → -0.6352
+  ok   CA6 visor tapa <= 40 % del canvas
+  ok   CA6 el globo responde a un arrastre con el visor abierto
+  recorrido: San Blas → Puerto Escondido → San Miguel de Allende → Xilitla → New York City → Porto do Son → Santiago de Compostela → A Coruña → Villaquirán de la puebla → San Sebastián → Biarritz · 12152 km (en orden de albumes: 24644 km)
+  ok   CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes
+  boton de entrada: visor en /photos/america/08.jpg
+  ok   CA16 el boton abre el visor en la primera foto del recorrido
+  vuelo New York City → Porto do Son (5266 km): centro a 0.00 px de la foto · R 3196 · su marca: norte/03.jpg, norte/04.jpg · frames > 50 ms: 0, peor 17 ms · visor en /photos/norte/03.jpg
+  ok   CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms
+  reduced motion: primera muestra del visor opacity 1 · transform none
+  ok   CA8 reduced motion: visor sin fundido ni desplazamiento
+  zonas: 2 (san-sebastian, new-york-city) · excluidas: San Miguel de Allende · parejas que necesitan zona: 39 · fuera de zona: 0
+  ok   CA10 toda pareja exact sin separar a R 4563 cae en una zona (salvo ciudades excluidas)
+  fuera de zona (encuadre por defecto): 23 pasos · R final 4563
+  ok   CA11 fuera de zona el zoom se para en R <= 4563
+  ok   CA12 cita de OpenStreetMap visible
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  25 de 25
+
