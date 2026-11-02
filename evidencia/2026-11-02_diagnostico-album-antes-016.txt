@@ -1,0 +1,140 @@
+DIAGNOSTICO 2026-11-02 · main · b5991fe · 4 ficheros sin commit
+
+=== next dev en :3100 ===
+ok
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x580c00c51400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x580c00c51400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x580c00c51400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x580c00c51400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/album/america
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /album/america: {"gutter":0,"scrollHeight":9663,"vh":900,"photos":10,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F04.jpg&w=1080&q=75","dev":0.001400917949551439},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 600
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+
+=== llegada al album ===
+ms desde el clic (carga directa: desde el inicio de la navegacion) · 1 repeticion · cache vacia en cada una
+  1: carrusel → album → /album/america · 13 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 1705 · <img> oculta 1268 · primer fotograma con foto entera 2100
+     secuencia #############
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: NEXT ALBUM → /album/norte · 41 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 1478 · <img> oculta 2178 · primer fotograma con foto entera 2199
+     secuencia .########################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: carga directa → /album/america · 112 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 197 · <img> oculta 918 · primer fotograma con foto entera 935
+     secuencia ....############################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  reduced motion, carrusel → album → /album/america · 29 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 1912 · <img> oculta 1577 · primer fotograma con foto entera 2126
+     secuencia #############################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  sin WebGL (--disable-3d-apis, webgl no disponible), carga directa → /album/america · opacity 1 a 1973 ms · muestras a medio fundido 0 · al final opacity 1, visible
+  ok   WebGL desactivado de verdad
+  ok   foto 1 visible sin esperar a GL
+  /album/america: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+
+=== scroll del album ===
+  rafaga en /album/america: 20 x 400 px cada 16 ms, en 3655 ms
+     recorrido 8000 px · al soltar la rueda iba por 7755 px (faltaban 245) · llega 370 ms despues de soltar
+     velocidad maxima 417 px/frame · normalizada 10.43 (curva GL a tope desde 1)
+  ok   la rafaga mueve la pagina
+  B10 /album/america → /album/norte: clic con la pagina moviendose 4013 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: — y — · max 0
+  FALLA NEXT ALBUM empieza arriba · scrollY —/—, max 0
+  B10 /album/norte → /album/sol: clic con la pagina moviendose 2945 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: — y 0 · max 0
+  FALLA NEXT ALBUM empieza arriba · scrollY —/0, max 0
+  B10 /album/sol → /album/ny: clic con la pagina moviendose 2681 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: — y 0 · max 0
+  FALLA NEXT ALBUM empieza arriba · scrollY —/0, max 0
+  B10 /album/ny → /album/america: clic con la pagina moviendose 4766 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: — y 0 · max 0
+  FALLA NEXT ALBUM empieza arriba · scrollY —/0, max 0
+
+=== textos del album ===
+  /album/america: 2 textos, 9 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 6: hueco 106.6 px, arriba 350 px, centro 0 px
+  ok   cita foto 6: sin solaparse y en el lado libre
+  ok   cita foto 6: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 6: no es la primera foto
+      hueco libre 64-557.2 px, desvio del centro 0 px
+  ok   cita foto 6: centrada en el hueco libre
+  ok   cita foto 6: foto entera y sin deformar
+  ok   cita foto 6: alineacion vertical
+  ok   cita foto 6: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 1 rutas
+invariantes  45 de 49
+
+FALLOS
+- B10 /album/america · NEXT ALBUM empieza arriba · scrollY —/—, max 0
+- B10 /album/norte · NEXT ALBUM empieza arriba · scrollY —/0, max 0
+- B10 /album/sol · NEXT ALBUM empieza arriba · scrollY —/0, max 0
+- B10 /album/ny · NEXT ALBUM empieza arriba · scrollY —/0, max 0
+

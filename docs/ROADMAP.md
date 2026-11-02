@@ -11,7 +11,7 @@ Es un proyecto personal: no se miden horas y no hay fecha de entrega. Lo que imp
 | F1 · Scaffold | Pagina vacia desplegada en Vercel, fuentes cargando | Hecha |
 | F2 · Paginas estaticas | Las 6 rutas con su composicion aprobada, sin motion | Hecha |
 | F3 · Motion | Inventario de motion del design spec completo | **En curso** |
-| F4 · Pulido | Responsive, metadatos/OG, LCP < 2,5 s, CLS ~ 0, 60 fps en movil medio | Pendiente |
+| F4 · Pulido | Responsive, metadatos/OG, LCP < 2,5 s, CLS ~ 0, 60 fps en movil medio | Pendiente. La version multidispositivo (movil e iPad) se adelanta por decision de Javi (2026-11-02) y es lo siguiente |
 
 ## F3 · Motion — detalle
 
@@ -24,7 +24,7 @@ Es un proyecto personal: no se miden horas y no hay fecha de entrega. Lo que imp
 | 5 | Carrusel infinito circular con su modelo de anclaje y commit | Hecha |
 | 6 | Wordmark: descifrado en la llegada, nombre completo en hover | Hecha. Todo mecanismo de cambio de letra se retiro para siempre el 2026-09-26 (ADR pendiente de redactar) |
 | 7 | Scramble de las etiquetas de navegacion | Hecha |
-| 8 | Atlas: globo ortografico en canvas con retícula remuestreada | Hecha |
+| 8 | Atlas: globo ortografico en canvas con retícula remuestreada. Ampliado por la spec 016 (2026-11-02): zoom con mascaras locales de OSM, clic que acerca, visor con recorrido geografico y pin | Hecha |
 | 9 | Transicion carrusel→album (GSAP Flip) | Pendiente |
 | 10 | Digitos rodantes | Pendiente |
 | 11 | Flechas prev/next de foto | Pendiente |
