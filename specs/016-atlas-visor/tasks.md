@@ -178,6 +178,13 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - `pinTargetRef` guarda la foto actual y cuando cambio, para la caida. La sonda gana `pin()`.
     - La primera version (cabeza de 6 px) se confundia con una marca vecina en Nueva York (captura en el scratchpad). Paso a una cabeza de 7,5 px, un tallo de 19 px y un contorno de 2 px del color del fondo.
     - Seccion `atlas`: **27 de 27**, 0 errores de consola. CA17: el pin de norte/03 esta en (460, 304), la misma posicion que su marca. Salida en `evidencia/2026-11-02_016-pin.txt`
+- [x] **T15** · El clic en un grupo que se parte tambien vuela (Javi, 2026-11-02: "Hay un pequeno salto a ny que es raro, como que enfoca mucho antes de moverse por el mapa")
+  - Fichero(s): `src/motion/Atlas.tsx`, `scripts/diagnostico.mjs`
+  - **Hecho 2026-11-02.**
+    - **La causa estaba en el clic, no en el recorrido.** El vuelo Xilitla → Nueva York del recorrido avanza primero (el 94 % del camino en 716 ms) y luego acerca. Pero el clic en un grupo que se parte seguia usando la interpolacion antigua: giro y log R con la misma curva. Con un zoom de x95, la ampliacion empujaba el grupo fuera de la pantalla antes de que el giro lo trajera. Medido frame a frame: el grupo de Nueva York paso de (629, 229) a (-2, -220) y volvio a (722, 301) en 634 ms.
+    - **Cambio:** ese clic usa ahora `flyTo()`, como el recorrido. Medido: la marca se desliza de (629, 229) a (718, 303) sin salirse de la pantalla, y R crece de forma progresiva.
+    - La espera del diagnostico tras cada clic (`ATLAS_RECENTER_WAIT_MS`) sube de 1000 a 1900 ms, porque un vuelo dura hasta 1800 ms.
+    - Seccion `atlas`: 27 de 27. Salida en `evidencia/2026-11-02_016-clic-vuelo.txt`
 
 ## Cierre
 

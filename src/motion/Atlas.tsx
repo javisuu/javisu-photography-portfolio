@@ -1369,7 +1369,11 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       const lng = lngDeg(toLambda);
       if (targetR <= possibleMaxR(lat, lng)) {
         requestZonesAt(lat, lng);
-        startRecenter(toLambda, toPhi, () => {}, Math.max(RRef.current, targetR));
+        // Along the same flight path as the tour: a plain ease of rotation
+        // and log-zoom together flung the group off screen and back when
+        // the zoom ratio was large (New York: x95, the mark reached y = -220
+        // before settling; Javi, 2026-11-02: "un pequeno salto a ny").
+        flyTo(toLambda, toPhi, Math.max(RRef.current, targetR), () => {});
         return;
       }
     }
