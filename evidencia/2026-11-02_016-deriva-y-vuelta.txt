@@ -1,0 +1,15 @@
+SPEC 016 · T5-T7 · deriva escalada, mascaras locales perezosas y vuelta al techo · 2026-11-02 11:10:27 · 3cff38b + cambios sin commit
+node t567.mjs (scratchpad de la sesion) contra next dev :3100, 1440x900, Chromium headless
+
+deriva, encuadre por defecto: R 256 · lambda0 +0.05323 rad en 2.03 s = 1.5018 °/s · en pantalla 6.0 px/s = 0.10 px/frame a 60 Hz
+fuera de zona: 23 pasos · R 4563 · maxR de la sonda 4563 · mascaras locales pedidas: ninguna
+deriva, R maximo fuera de zona: R 4563 · lambda0 +0.01127 rad en 2.02 s = 0.3195 °/s · en pantalla 22.9 px/s = 0.38 px/frame a 60 Hz
+errores: 0
+San Sebastian: 49 pasos · R 228337 · maxR 228337 · mascaras cargadas: /atlas/local/san-sebastian-2.png, /atlas/local/san-sebastian-1.png, /atlas/local/san-sebastian-0.png
+  pedidas en red: san-sebastian-0.png, san-sebastian-1.png, san-sebastian-2.png
+  norte/05 y sol/01: mismo grupo
+deriva, R maximo en San Sebastian: R 228337 · lambda0 +0.00022 rad en 2.10 s = 0.0061 °/s · en pantalla 17.7 px/s = 0.30 px/frame a 60 Hz
+  antes de salir: R 59254 · maxR 228337
+  despues de salir: R 4563 · maxR 4563 · lng -58.125 lat 43.056
+  R por encima del techo durante 583 ms (24 frames), de 59254 a 4563
+errores: 0
