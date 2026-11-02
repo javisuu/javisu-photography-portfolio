@@ -44,9 +44,13 @@ const BASE = remote ?? `http://localhost:${PORT}`;
 // secreto vive solo en el entorno de quien lanza el comando: nunca en el repo
 // ni en la salida.
 // Se limpian comillas y espacios que se cuelan al pegarlo en una terminal.
+// Sin "x-vercel-set-bypass-cookie": con ella Vercel responde con una
+// redireccion que pone una cookie, y el fetch de Node (sin cookies) entra en
+// bucle ("redirect count exceeded", 2026-11-02). La cabecera va en cada
+// peticion, asi que la cookie no hace falta.
 const BYPASS_SECRET = (process.env.VERCEL_BYPASS ?? "").trim().replace(/^["']|["']$/g, "");
 const BYPASS = remote && BYPASS_SECRET
-  ? { "x-vercel-protection-bypass": BYPASS_SECRET, "x-vercel-set-bypass-cookie": "true" }
+  ? { "x-vercel-protection-bypass": BYPASS_SECRET }
   : null;
 if (BYPASS && !/^[!-~]+$/.test(BYPASS_SECRET)) {
   console.log(`VERCEL_BYPASS tiene caracteres que no caben en una cabecera HTTP (${BYPASS_SECRET.length} caracteres). Copialo de nuevo de Vercel.`);
