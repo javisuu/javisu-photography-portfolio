@@ -181,7 +181,11 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 
 ## Cierre
 
-- [ ] `docs/atlas-data-sources.md` (OSM, ODbL, regenerar), `docs/design-spec-v2.md` §5 y changelog, y `CLAUDE.md` (linea del atlas, licencia)
+- [x] `docs/atlas-data-sources.md` (OSM, ODbL, regenerar), `docs/design-spec-v2.md` §5 y changelog, y `CLAUDE.md` (linea del atlas, licencia)
+  - **Hecho 2026-11-02.**
+    - `atlas-data-sources.md`: seccion nueva de mascaras locales (fuente, descarga, ODbL y cita, uso, como regenerar y la costura como limite conocido). Ademas se corrigen dos afirmaciones que ya eran falsas: `buildLattice`, que no existe desde T3, y el zoom maximo de 1,6x.
+    - Design spec §5: masa de tierra, leyenda con la cita, zoom con techo por posicion, clic, un punto nuevo para el visor y el recorrido, y una entrada en el changelog.
+    - `CLAUDE.md`: la linea del atlas y la invariante de la tira del visor
 - [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/AAAA-MM-DD_016-completo.txt` (CA1)
 - [ ] Contra produccion despues del push de Javi: `evidencia/AAAA-MM-DD_016-produccion.txt`
 - [ ] CA9: Javi lo prueba en su maquina y en el movil (testimonio aqui)
