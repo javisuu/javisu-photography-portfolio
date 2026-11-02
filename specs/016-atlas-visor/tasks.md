@@ -89,6 +89,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - **CA2:** sigue pasando, ahora con 28 pasos de rueda en vez de 67, porque los clics acercan.
       - **CA3, CA10 y CA11** siguen en verde.
     - **CA4 y CA8** pulsan ahora el grupo de una foto con coordenadas repetidas hasta que se abre (`openGroup`). Eligen Puerto Escondido, 3 fotos `city` en un mismo punto, que se abre al primer clic.
+  - **Ajuste (Javi, 2026-11-02):** los grupos que no se pueden partir (San Blas, Puerto Escondido) no acercaban nada. Ahora acercan hasta una vista regional de 2500 km en el lado corto del canvas y luego se abren; el panel provisional se coloca en el centro, donde queda el grupo. Medido: Puerto Escondido se abre a R 1551, y CA2, CA3, CA10, CA11 y CA13 siguen en verde, con 0 errores de consola. Salida en `evidencia/2026-11-02_016-clic-region.txt` (`:59`)
 - [ ] **T8** · Cita de OpenStreetMap junto a la leyenda, solo en el atlas (`/credits` no se toca, decision de Javi)
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: CA12

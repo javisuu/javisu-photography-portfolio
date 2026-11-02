@@ -1269,7 +1269,8 @@ if (!only || only === "/atlas") {
     const { ctx, p, errs, box } = await atlasPage();
     if (box && (await cssImpl(p))) {
       const g = await openGroup(p, box);
-      log(`  grupo elegido: ${g ? `${g.srcs.length} fotos (${g.srcs.map((s) => `${s.split("/").slice(-2).join("/")}${precisionOf[s] === "city" ? "·c" : ""}`).join(", ")})` : "ninguno"}`);
+      const Rg = (await cssImpl(p))?.R;
+      log(`  grupo elegido: R al abrirlo ${rr(Rg)} · ${g ? `${g.srcs.length} fotos (${g.srcs.map((s) => `${s.split("/").slice(-2).join("/")}${precisionOf[s] === "city" ? "·c" : ""}`).join(", ")})` : "ninguno"}`);
       const v = await viewerState(p);
       const panel = await p.evaluate(() => [...document.querySelectorAll("main span")].some((s) => /\d+ Photographs/.test(s.textContent) && s.closest("div.absolute")));
       log(`  visor: ${v ? `abierto · foto ${v.src} · ${v.thumbs} miniaturas` : "no hay [data-atlas-viewer]"}${panel ? " · sigue saliendo el panel de lista" : ""}`);

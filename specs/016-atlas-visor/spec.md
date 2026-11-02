@@ -126,3 +126,5 @@ Cambios en la spec:
 | # | Comando | Resultado esperado |
 |---|---|---|
 | CA13 | Seccion `atlas`: clic en el grupo mas grande del encuadre por defecto y espera a que acabe la animacion | Las fotos del grupo quedan repartidas en 2 o mas grupos, la media en pantalla de sus fotos queda a menos de 2 px del centro del canvas y no hay frames > 50 ms durante la animacion |
+
+**Ajuste a la enmienda 2 (Javi, 2026-11-02),** tras probarla: "con las de panama no funciona y con las de puerto escondido el zoom quizas es mas pequeno que en otras, no quiero algo agresivo pero si un zoom que englobe centro america". San Blas (las 2 fotos de Panama) y Puerto Escondido (3) tienen todas sus fotos en un mismo punto (centroide `city`), asi que no se podian partir y el clic solo giraba el globo. Ahora un grupo que no se puede partir tambien acerca antes de abrirse, hasta una vista regional: 2500 km en el lado corto del canvas (`CLICK_REGION_KM`; R ≈ 1550 a 1440x900). Si ya se esta mas cerca, no aleja.

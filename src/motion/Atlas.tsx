@@ -158,6 +158,12 @@ function easeOutCubic(t: number): number {
 // split is clear rather than borderline. Infinity when every member sits
 // on the same point: no zoom ever splits it.
 const CLICK_SPLIT_MARGIN = 1.5;
+// A group that can't split still zooms in before it opens, to a regional
+// view: this many km across the shorter side of the canvas — about
+// Central America (Javi, 2026-11-02, after trying San Blas and Puerto
+// Escondido, whose photos share one point and got no zoom at all).
+const CLICK_REGION_KM = 2500;
+const EARTH_KM = 6371;
 function splitR(points: { lat: number; lng: number }[]): number {
   const n = points.length;
   const v = points.map(({ lat, lng }) => [Math.cos(lat * DEG) * Math.cos(lng * DEG), Math.cos(lat * DEG) * Math.sin(lng * DEG), Math.sin(lat * DEG)]);
@@ -1240,9 +1246,17 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         startRecenter(toLambda, toPhi, () => {}, Math.max(RRef.current, targetR));
         return;
       }
-      startRecenter(toLambda, toPhi, () => {
-        setClusterPanel({ members: cluster.members, x: cluster.x, y: cluster.y });
-      });
+      const vp = viewportSizeRef.current;
+      const regionR = Math.min(vp.width, vp.height) / (CLICK_REGION_KM / EARTH_KM);
+      startRecenter(
+        toLambda,
+        toPhi,
+        () => {
+          // The group ends centred: the (interim, T12) panel goes there.
+          setClusterPanel({ members: cluster.members, x: vp.width / 2, y: vp.height / 2 });
+        },
+        Math.min(currentMaxR(), Math.max(RRef.current, regionR))
+      );
     } else {
       const { mark } = cluster.members[0];
       startRecenter(toLambda, toPhi, () => {
