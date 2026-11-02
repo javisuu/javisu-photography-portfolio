@@ -1,0 +1,366 @@
+DIAGNOSTICO 2026-11-02 ┬À feat/016-atlas-visor ┬À 3ed826f ┬À 0 ficheros sin commit
+contra https://javisu-photography-portfolio-4r3me0wzd-javisuus-projects.vercel.app
+
+=== tsc --noEmit ===
+omitido (--url)
+
+=== eslint ===
+omitido (--url)
+
+=== next build ===
+omitido (--url)
+
+=== servidor remoto ===
+ok ┬À http 200 ┬À con bypass de Vercel (VERCEL_BYPASS)
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x655c00427a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels ┬À https://javisu-photography-portfolio-4r3me0wzd-javisuus-projects.vercel.app/
+    [warning] [.WebGL-0x655c00427a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels ┬À https://javisu-photography-portfolio-4r3me0wzd-javisuus-projects.vercel.app/
+    [warning] [.WebGL-0x655c00427a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels ┬À https://javisu-photography-portfolio-4r3me0wzd-javisuus-projects.vercel.app/
+    [warning] [.WebGL-0x655c00427a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) ┬À https://javisu-photography-portfolio-4r3me0wzd-javisuus-projects.vercel.app/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Am├®rica",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+  /albums: {"gutter":0,"scrollHeight":900,"vh":900,"photos":29,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F05.jpg&w=750&q=75","dev":0.0019999999999998908}}
+  ok   sin barra de scroll
+  /about: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /album/america: {"gutter":0,"scrollHeight":9663,"vh":900,"photos":10,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F04.jpg&w=1080&q=75","dev":0.001400917949551439},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 600
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+  /credits: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas, tira del visor: barra 0 px ┬À se desplaza
+  ok   tira del visor sin barra de scroll
+
+=== llegada al album ===
+ms desde el clic (carga directa: desde el inicio de la navegacion) ┬À 1 repeticion ┬À cache vacia en cada una
+  1: carrusel ÔåÆ album ÔåÆ /album/america ┬À 168 fotogramas ┬À en blanco con opacity 1: 0 ┬À parpadeo: no
+     foto 1 cargada 182 ┬À <img> oculta 120 ┬À primer fotograma con foto entera 276
+     secuencia .#######################################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: NEXT ALBUM ÔåÆ /album/norte ┬À 165 fotogramas ┬À en blanco con opacity 1: 0 ┬À parpadeo: no
+     foto 1 cargada 297 ┬À <img> oculta 191 ┬À primer fotograma con foto entera 352
+     secuencia .####################################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: carga directa ÔåÆ /album/norte ┬À 159 fotogramas ┬À en blanco con opacity 1: 0 ┬À parpadeo: no
+     foto 1 cargada 736 ┬À <img> oculta 986 ┬À primer fotograma con foto entera 1017
+     secuencia ...############################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  reduced motion, carrusel ÔåÆ album ÔåÆ /album/america ┬À 168 fotogramas ┬À en blanco con opacity 1: 0 ┬À parpadeo: no
+     foto 1 cargada 205 ┬À <img> oculta 122 ┬À primer fotograma con foto entera 319
+     secuencia ...#####################################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  sin WebGL (--disable-3d-apis, webgl no disponible), carga directa ÔåÆ /album/norte ┬À opacity 1 a 314 ms ┬À muestras a medio fundido 0 ┬À al final opacity 1, visible
+  ok   WebGL desactivado de verdad
+  ok   foto 1 visible sin esperar a GL
+  /album/america: foto 1 loading=eager fetchpriority=high ┬À resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/norte: foto 1 loading=eager fetchpriority=high ┬À resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/sol: foto 1 loading=eager fetchpriority=high ┬À resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/ny: foto 1 loading=eager fetchpriority=high ┬À resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+
+=== scroll del album ===
+  rafaga en /album/america: 20 x 400 px cada 16 ms, en 1331 ms
+     recorrido 8000 px ┬À al soltar la rueda iba por 7405 px (faltaban 595) ┬À llega 459 ms despues de soltar
+     velocidad maxima 132 px/frame ┬À normalizada 3.30 (curva GL a tope desde 1)
+  ok   la rafaga mueve la pagina
+  B10 /album/america ÔåÆ /album/norte: clic con la pagina moviendose 215 px en 2 frames ┬À scrollY en el nuevo a 500 y 1500 ms: 0 y 0 ┬À max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/norte ÔåÆ /album/sol: clic con la pagina moviendose 177 px en 2 frames ┬À scrollY en el nuevo a 500 y 1500 ms: 0 y 0 ┬À max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/sol ÔåÆ /album/ny: clic con la pagina moviendose 197 px en 2 frames ┬À scrollY en el nuevo a 500 y 1500 ms: 0 y 0 ┬À max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/ny ÔåÆ /album/america: clic con la pagina moviendose 204 px en 2 frames ┬À scrollY en el nuevo a 500 y 1500 ms: 0 y 0 ┬À max 0
+  ok   NEXT ALBUM empieza arriba
+
+=== textos del album ===
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+  ok   sin textos [PLACEHOLDER] en produccion
+
+=== entrada / ===
+ms desde el inicio de la navegacion ┬À 1 repeticion ┬À cache vacia en cada una
+  1: inicio 422 ┬À participantes 7 ┬À fase B 919 ┬À rezagadas 1 ┬À reposo 1669
+     frame del arranque 400 ms ┬À despues: frames >50 ms 3, frame max 67 ms ┬À long tasks 2 (402 ms) ┬À [entrance] start x1
+     al monton: 702 786 786 786 786 836 919
+
+=== descifrado del wordmark ===
+  (a) carga directa en / ┬À 36 muestras ┬À reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (┬▒2 px)
+  (b) carga en /about, clic a / ┬À 37 muestras ┬À reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (┬▒2 px)
+  ok   columnas = carga directa (┬▒1 px)
+  (c) carga en /albums, clic a / ┬À 36 muestras ┬À reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (┬▒2 px)
+  ok   columnas = carga directa (┬▒1 px)
+  (d) / -> /about, resize alli, -> / ┬À 36 muestras ┬À reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (┬▒2 px)
+  ok   columnas = carga directa (┬▒1 px)
+  (e) reduced motion, carga en /about, clic a / ┬À 0 muestras ┬À h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== atlas ===
+  fotos: 31 ┬À con coordenadas: 31 ┬À exact: 25
+  sonda: R 256 ┬À minR 195 ┬À maxR 4563 ┬À caja 1440x609
+  ok   sonda window.__atlas presente
+  par exact mas cercano (coordenadas distintas): /photos/norte/05.jpg y /photos/sol/01.jpg ┬À San Sebasti├ín ┬À 40 m ┬À separarlo a 14 px pide R Ôëê 2241044
+  reticula en el encuadre por defecto: 8401 puntos recorridos ┬À 3184 pintados
+  clics en el grupo del par durante el zoom: 15 fotos a R 362 ÔåÆ 11 fotos a R 653 ÔåÆ 8 fotos a R 3461 ÔåÆ 7 fotos a R 36538 ÔåÆ 4 fotos a R 130972 ÔåÆ 3 fotos a R 3361566
+  rueda hasta el maximo: 9 pasos ┬À R final 3361566 ┬À separacion del par 21.0 px
+  frames durante la rueda (sin los clics): 37 ┬À > 50 ms despues del primero: 0 ┬À peor 17 ms ┬À reticula al maximo: 15726 recorridos, 5209 pintados
+  ok   CA2 par mas cercano separado (> 14 px) al zoom maximo
+  ok   CA3 0 frames > 50 ms en la rueda hasta el maximo
+  clic en el grupo mas grande (15 fotos): R 256 ÔåÆ 362 ┬À queda en 2 grupos (4+11) ┬À media a 0.00 px del centro ┬À frames > 50 ms: 0, peor 50 ms
+  ok   CA13 clic en un grupo: acerca hasta partirlo, centrado, sin frames > 50 ms
+  grupo elegido: R al abrirlo 2098 ┬À 3 fotos (america/05.jpg┬Àc, america/06.jpg┬Àc, america/07.jpg┬Àc)
+  visor: abierto ┬À foto /photos/america/05.jpg ┬À 31 miniaturas ┬À recorrido de 31 fotos
+  ok   CA4 clic en grupo abre el visor, no la lista
+  ok   CA4 foto grande entera en el viewport, proporcion < 1 %
+  ok   CA4 se abre en la primera foto del grupo pulsado
+  ok   CA4 tira con una miniatura por foto del atlas
+  recorrido con la flecha (31 fotos): america/05.jpg ÔåÆ america/06.jpg ÔåÆ america/07.jpg ÔåÆ america/01.jpg ÔåÆ america/02.jpg ÔåÆ america/03.jpg ÔåÆ america/04.jpg ÔåÆ ny/01.jpg ÔåÆ ny/02.jpg ÔåÆ ny/03.jpg ÔåÆ ny/04.jpg ÔåÆ ny/05.jpg ÔåÆ ny/06.jpg ÔåÆ ny/07.jpg ÔåÆ norte/03.jpg ÔåÆ norte/04.jpg ÔåÆ norte/08.jpg ÔåÆ norte/07.jpg ÔåÆ sol/04.jpg ÔåÆ sol/06.jpg ÔåÆ sol/07.jpg ÔåÆ norte/01.jpg ÔåÆ norte/02.jpg ÔåÆ norte/05.jpg ÔåÆ sol/01.jpg ÔåÆ sol/02.jpg ÔåÆ sol/03.jpg ÔåÆ sol/05.jpg ÔåÆ norte/06.jpg ÔåÆ america/08.jpg ÔåÆ america/09.jpg
+  ok   CA5 la flecha pasa por todas las fotos del atlas, en el orden del recorrido, sin repetir
+  ok   CA7 sin coordenadas DMS en fotos city
+  globo con el visor abierto: tapado 36.1 % ┬À lambda0 -0.0366 ÔåÆ -0.0970
+  ok   CA6 visor tapa <= 40 % del canvas
+  ok   CA6 el globo responde a un arrastre con el visor abierto
+  recorrido: San Blas ÔåÆ Puerto Escondido ÔåÆ San Miguel de Allende ÔåÆ Xilitla ÔåÆ New York City ÔåÆ Porto do Son ÔåÆ Santiago de Compostela ÔåÆ A Coru├▒a ÔåÆ Villaquir├ín de la puebla ÔåÆ San Sebasti├ín ÔåÆ Biarritz ┬À 12152 km (en orden de albumes: 24644 km)
+  ok   CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes
+  boton de entrada: visor en /photos/america/08.jpg
+  ok   CA16 el boton abre el visor en la primera foto del recorrido
+  vuelo New York City ÔåÆ Porto do Son (5266 km): centro a 0.00 px de la foto ┬À R 4563 ┬À su marca: norte/03.jpg, norte/04.jpg ┬À frames > 50 ms: 0, peor 17 ms ┬À visor en /photos/norte/03.jpg
+  ok   CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms
+  pin: norte/03.jpg en (460, 304) ┬À su marca en (460, 304)
+  ok   CA17 pin sobre la marca de la foto del visor
+  reduced motion: primera muestra del visor opacity 1 ┬À transform none
+  ok   CA8 reduced motion: visor sin fundido ni desplazamiento
+  zonas: 2 (san-sebastian, new-york-city) ┬À excluidas: San Miguel de Allende ┬À parejas que necesitan zona: 39 ┬À fuera de zona: 0
+  ok   CA10 toda pareja exact sin separar a R 4563 cae en una zona (salvo ciudades excluidas)
+  fuera de zona (encuadre por defecto): 23 pasos ┬À R final 4563
+  ok   CA11 fuera de zona el zoom se para en R <= 4563
+  ok   CA12 cita de OpenStreetMap visible
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+consola      0 errores en 6 rutas
+invariantes  116 de 116
+entrada      arranque 400 ms ┬À fase B 919 ms ┬À reposo 1669 ms ┬À frames >50 ms: 3
+
