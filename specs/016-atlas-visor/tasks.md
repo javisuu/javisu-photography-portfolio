@@ -160,6 +160,16 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - San Blas, Puerto Escondido y Villaquiran (fotos en un mismo punto): vista regional, 1551.
       - San Miguel: 4563, el techo general.
     - Seccion `atlas`: 25 de 25, 0 errores de consola. El vuelo de New York City a Porto do Son termina a 0,00 px, con R 3196 y la marca norte/03 + norte/04 (mismo punto). Salida en `evidencia/2026-11-02_016-recorrido-zoom.txt:75-76`
+  - **Segundo ajuste (Javi, 2026-11-02): vuelo menos agresivo, contexto en las fotos que comparten punto, tira sin barra.**
+    - **La barra seguia ahi por un fallo mio.** En el ajuste anterior, el script de edicion cambio `globals.css` en memoria pero no lo guardo, y yo di la barra por quitada sin medirla. Las capturas no podian mostrarla, porque Chromium headless oculta las barras. Medido ahora con un Chromium sin `--hide-scrollbars`: la barra pasa de 15 a 0 px. Queda como invariante nueva en la seccion `barra de scroll` ("tira del visor sin barra de scroll").
+    - **`flyTo()`** sigue la curva de van Wijk y Nuij (`flyPath`, `FLY_RHO = 1`), con una duracion de 420 ms por unidad de camino, limitada entre 600 y 1800 ms, y ease-in-out sinusoidal. Sustituye al vuelo con caida fija a mitad de camino.
+    - **`photoR()`, fotos que comparten punto:** se muestran en contexto (`CONTEXT_SHARE = 0,35`), con un tope de 4563. En un primer intento sin ese tope, los pares de San Sebastian subian hasta R 3,36 M.
+    - Medido paso a paso en las 31 fotos (`next dev`, salida en la conversacion):
+      - 0 frames > 50 ms en todos los pasos, con duraciones de 590 a 1834 ms.
+      - New York City → Porto do Son: se aleja hasta R 1434, lo justo para cruzar el Atlantico.
+      - Villaquiran: R 4563, el norte de la peninsula de Galicia al Pais Vasco (captura en el scratchpad).
+      - Puerto Escondido: 2098. Nueva York y San Sebastian, igual que antes.
+    - Seccion `atlas`: **26 de 26**, 0 errores de consola. Salida en `evidencia/2026-11-02_016-vuelo.txt` (barra de la tira en `:45-46`, vuelo en `:77-78`)
 
 ## Cierre
 

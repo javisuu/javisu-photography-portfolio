@@ -144,20 +144,45 @@ function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
-function easeInOutCubic(t: number): number {
-  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+function easeInOutSine(t: number): number {
+  return -(Math.cos(Math.PI * t) - 1) / 2;
 }
 
-// The viewer's tour (spec 016, amendment 3) moves the globe from photo to
-// photo, landing at that photo's own zoom (photoR). A step whose photo is
-// already near the centre (within this share of the canvas's shorter side
-// at the current zoom) just rotates and zooms. A longer step FLIES: it
-// pulls out mid-way, far enough for both ends to fit on screen; it takes
-// longer the further it goes, and eases in and out, since a long flight
-// that starts at full speed reads as a jolt.
-const FLY_NEAR_SHARE = 0.35;
-const FLY_FIT_SHARE = 0.6;
-const FLY_MAX_MS = 1400;
+// The viewer's tour and the clicks that open it (spec 016, amendment 3)
+// FLY the globe to a photo along van Wijk & Nuij's optimal zoom-and-pan
+// path ("Smooth and efficient zooming and panning", 2003), the one web
+// maps use: perceived speed stays constant, and it pulls out only as far
+// as the trip needs. A first version dipped through a fixed half-way zoom
+// in a fixed time; Javi found it "un tanto agresiva" (2026-11-02).
+//   u: distance travelled (radians of arc), w: width of view (radians of
+//   arc across the canvas's shorter side, span / R). FLY_RHO trades zoom
+//   for pan: lower pulls out less (van Wijk's own suggestion is 1.42).
+//   The path length S sets the duration, eased in and out.
+const FLY_RHO = 1.0;
+const FLY_MS_PER_S = 420;
+const FLY_MIN_MS = 600;
+const FLY_MAX_MS = 1800;
+
+function flyPath(u1: number, w0: number, w1: number): { S: number; at: (s: number) => { u: number; w: number } } {
+  const rho = FLY_RHO;
+  const rho2 = rho * rho;
+  if (u1 < 1e-12) {
+    // Zoom only.
+    const k = w1 < w0 ? -1 : 1;
+    return { S: Math.abs(Math.log(w1 / w0)) / rho, at: (s) => ({ u: 0, w: w0 * Math.exp(k * rho * s) }) };
+  }
+  const b = (wi: number, sign: number) => (w1 * w1 - w0 * w0 + sign * rho2 * rho2 * u1 * u1) / (2 * wi * rho2 * u1);
+  const r = (bi: number) => Math.log(-bi + Math.sqrt(bi * bi + 1));
+  const r0 = r(b(w0, 1));
+  const r1 = r(b(w1, -1));
+  return {
+    S: (r1 - r0) / rho,
+    at: (s) => ({
+      u: (w0 / rho2) * (Math.cosh(r0) * Math.tanh(rho * s + r0) - Math.sinh(r0)),
+      w: (w0 * Math.cosh(r0)) / Math.cosh(rho * s + r0),
+    }),
+  };
+}
 
 // Clicking a group zooms until it splits (spec 016, amendment 2). Marks
 // cluster by single linkage at CLUSTER_THRESHOLD_PX on screen, and near
@@ -168,6 +193,7 @@ const FLY_MAX_MS = 1400;
 // on the same point: no zoom ever splits it.
 const CLICK_SPLIT_MARGIN = 1.5;
 const SAME_POINT_RAD = 1e-7;
+const CONTEXT_SHARE = 0.35; // see photoR
 // A group that can't split still zooms in before it opens, to a regional
 // view: this many km across the shorter side of the canvas — about
 // Central America (Javi, 2026-11-02, after trying San Blas and Puerto
@@ -511,9 +537,10 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     // rotation (in log space, like the zoom back to the ceiling).
     fromR?: number;
     toR?: number;
-    midR?: number; // a flight: R dips to this half-way (log-space quadratic curve)
+    // A flight (flyTo): share of the way travelled and R, for the eased
+    // time; overrides the plain interpolation above.
+    path?: (eased: number) => { f: number; R: number };
     duration?: number; // RECENTER_MS unless set
-    inOut?: boolean; // ease-in-out instead of ease-out (flights)
   } | null>(null);
 
   // Last frame's projected marks/clusters — pointer handlers (hover,
@@ -785,16 +812,13 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     const recenter = recenterRef.current;
     if (recenter) {
       const t = Math.min(1, (now - recenter.startedAt) / (recenter.duration ?? RECENTER_MS));
-      const eased = recenter.inOut ? easeInOutCubic(t) : easeOutCubic(t);
-      lambda0Ref.current = recenter.fromLambda + shortestDelta(recenter.fromLambda, recenter.toLambda) * eased;
-      phi0Ref.current = recenter.fromPhi + (recenter.toPhi - recenter.fromPhi) * eased;
-      if (recenter.fromR !== undefined && recenter.toR !== undefined && recenter.midR !== undefined) {
-        // Quadratic in log R through from, to and, at the half-way point,
-        // midR exactly: control = 2 log(mid) - (log(from) + log(to)) / 2.
-        const a = Math.log(recenter.fromR);
-        const b = Math.log(recenter.toR);
-        const c = 2 * Math.log(recenter.midR) - (a + b) / 2;
-        RRef.current = Math.exp((1 - eased) * (1 - eased) * a + 2 * eased * (1 - eased) * c + eased * eased * b);
+      const eased = recenter.path ? easeInOutSine(t) : easeOutCubic(t);
+      const step = recenter.path ? recenter.path(eased) : null;
+      const f = step ? step.f : eased;
+      lambda0Ref.current = recenter.fromLambda + shortestDelta(recenter.fromLambda, recenter.toLambda) * f;
+      phi0Ref.current = recenter.fromPhi + (recenter.toPhi - recenter.fromPhi) * f;
+      if (step) {
+        RRef.current = step.R;
       } else if (recenter.fromR !== undefined && recenter.toR !== undefined) {
         RRef.current = recenter.fromR * Math.pow(recenter.toR / recenter.fromR, eased);
       }
@@ -1240,7 +1264,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     toPhi: number,
     onDone: () => void,
     toR?: number,
-    flight?: { midR: number; duration: number }
+    flight?: { path: (eased: number) => { f: number; R: number }; duration: number }
   ) {
     inertiaActiveRef.current = false;
     zoomBackRef.current = null;
@@ -1264,7 +1288,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       startedAt: nowMs(),
       onDone,
       ...(toR !== undefined ? { fromR: RRef.current, toR } : {}),
-      ...(flight ? { midR: flight.midR, duration: flight.duration, inOut: true } : {}),
+      ...(flight ?? {}),
     };
     requestFrame();
   }
@@ -1309,7 +1333,32 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     // The globe moves into the space the viewer will leave free in the
     // same motion as the rotation, not as a second step once it opens.
     setCenterShift(atlasViewerWidth(vp.width) / 2);
-    startRecenter(toLambda, toPhi, () => setViewer({ index: first }), photoR(first));
+    flyTo(toLambda, toPhi, photoR(first), () => setViewer({ index: first }));
+  }
+
+  // Rotate and zoom to (toLambda, toPhi) at toR along flyPath (see
+  // FLY_RHO); the tour's steps and the clicks that open the viewer.
+  function flyTo(toLambda: number, toPhi: number, toR: number, onDone: () => void) {
+    const vp = viewportSizeRef.current;
+    const span = Math.min(vp.width, vp.height);
+    const R = RRef.current;
+    const p0 = phi0Ref.current;
+    const cosD =
+      Math.sin(p0) * Math.sin(toPhi) + Math.cos(p0) * Math.cos(toPhi) * Math.cos(toLambda - lambda0Ref.current);
+    const u1 = Math.acos(Math.min(1, Math.max(-1, cosD)));
+    const w0 = span / R;
+    const w1 = span / toR;
+    const { S, at } = flyPath(u1, w0, w1);
+    const duration = Math.min(FLY_MAX_MS, Math.max(FLY_MIN_MS, S * FLY_MS_PER_S));
+    const minR = zoomBoundsRef.current.minR;
+    startRecenter(toLambda, toPhi, onDone, toR, {
+      duration,
+      path: (eased) => {
+        if (eased >= 1) return { f: 1, R: toR };
+        const { u, w } = at(S * eased);
+        return { f: u1 < 1e-12 ? 1 : Math.min(1, u / u1), R: Math.max(minR, span / w) };
+      },
+    });
   }
 
   // The zoom a photo is shown at, from the viewer (Javi, 2026-11-02: "en
@@ -1336,34 +1385,28 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       if (d < nearest) nearest = d;
     }
     const lng = lngDeg(mark.lng * DEG);
-    const separate = (CLUSTER_THRESHOLD_PX * CLICK_SPLIT_MARGIN) / nearest;
+    // A photo that shares its point with another can never stand alone;
+    // it is shown in context instead, with the nearest other place
+    // CONTEXT_SHARE of the canvas's shorter side away (Javi, 2026-11-02:
+    // Villaquiran "apenas tiene zoom cuando se podria enfocar un poco la
+    // peninsula").
+    const twin = marks.some((o) => o !== mark && o.lat === mark.lat && o.lng === mark.lng);
+    // Context never goes past the world mask's limit: deeper zoom, inside
+    // a zone, is only ever for separating photos.
+    const alone = (CLUSTER_THRESHOLD_PX * CLICK_SPLIT_MARGIN) / nearest;
+    const separate = twin
+      ? Math.max(alone, Math.min(WORLD_MAX_R, (CONTEXT_SHARE * Math.min(vp.width, vp.height)) / nearest))
+      : alone;
     const target = Math.max(regionR, Math.min(possibleMaxR(mark.lat, lng), separate));
     if (target > WORLD_MAX_R * LOCAL_PRELOAD_RATIO) requestZonesAt(mark.lat, lng);
     return target;
   }
 
-  // Takes the globe to the tour's photo `index`: a rotation when it is
-  // near, a flight when it is far (see FLY_NEAR_SHARE).
+  // Takes the globe to the tour's photo `index`, at that photo's zoom.
   function goToTourPhoto(index: number) {
     const mark = marks[index];
     if (!mark) return;
-    const vp = viewportSizeRef.current;
-    const span = Math.min(vp.width, vp.height);
-    const targetR = photoR(index);
-    const R = RRef.current;
-    const toLambda = mark.lng * DEG;
-    const toPhi = mark.lat * DEG;
-    const p0 = phi0Ref.current;
-    const cosD =
-      Math.sin(p0) * Math.sin(toPhi) + Math.cos(p0) * Math.cos(toPhi) * Math.cos(toLambda - lambda0Ref.current);
-    const d = Math.acos(Math.min(1, Math.max(-1, cosD)));
-    if (d * R <= FLY_NEAR_SHARE * span) {
-      startRecenter(toLambda, toPhi, () => {}, targetR);
-      return;
-    }
-    const midR = Math.max(zoomBoundsRef.current.minR, Math.min(R, targetR, (FLY_FIT_SHARE * span) / d));
-    const duration = RECENTER_MS + (FLY_MAX_MS - RECENTER_MS) * Math.min(1, d / (Math.PI / 2));
-    startRecenter(toLambda, toPhi, () => {}, targetR, { midR, duration });
+    flyTo(mark.lng * DEG, mark.lat * DEG, photoR(index), () => {});
   }
 
   function showTourPhoto(index: number) {

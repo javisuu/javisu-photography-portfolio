@@ -335,6 +335,20 @@ for (const route of routes) {
   await ctx.close();
   log(`  ${route}: ${JSON.stringify(m)}`);
   addInv(route, "sin barra de scroll", m.gutter === 0, `innerWidth - clientWidth = ${m.gutter}`);
+  if (route === "/atlas") {
+    // La tira de miniaturas del visor se desplaza, pero sin barra visible
+    // (Javi, 2026-11-02). Con --hide-scrollbars mediria siempre 0.
+    const { ctx: vctx, p: vp } = await sbOpen(route);
+    await vp.click("[data-atlas-tour]").catch(() => {});
+    await vp.waitForTimeout(800);
+    const strip = await vp.evaluate(() => {
+      const s = document.querySelector("[data-atlas-viewer-thumb]")?.parentElement;
+      return s ? { gutter: s.offsetHeight - s.clientHeight, scrolls: s.scrollWidth > s.clientWidth } : null;
+    }).catch(() => null);
+    await vctx.close();
+    log(`  /atlas, tira del visor: ${strip ? `barra ${strip.gutter} px · ${strip.scrolls ? "se desplaza" : "no se desplaza"}` : "sin visor"}`);
+    addInv(route, "tira del visor sin barra de scroll", !!strip && strip.gutter === 0, strip ? `offsetHeight - clientHeight = ${strip.gutter}` : "no se abrio el visor");
+  }
   if (route === "/" || isAlbum) {
     addInv(route, "proporcion de las fotos", m.photos > 0 && m.worst.dev < MAX_RATIO_DEVIATION,
       m.photos ? `${m.photos} fotos, desvio max ${m.worst.dev.toFixed(4)} (${m.worst.src})` : "ninguna foto medida");

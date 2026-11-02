@@ -108,6 +108,14 @@ body {
     animation: none;
   }
 }
+/* The viewer's thumbnail strip scrolls (it keeps the current photo
+   centred by itself), but shows no scrollbar (Javi, 2026-11-02). */
+.atlas-strip {
+  scrollbar-width: none;
+}
+.atlas-strip::-webkit-scrollbar {
+  display: none;
+}
 
 /* Wordmark hover target (src/motion/DecipherWordmark.tsx): pointer-events
    stays none by default — the <h1> it lives in is `fixed inset-0`,
