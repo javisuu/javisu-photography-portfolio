@@ -128,6 +128,28 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - **Capturas de comprobacion** (`next dev`, 1440x900, en el scratchpad de la sesion):
     - Grupo de Puerto Escondido: entra Centroamerica entera, y la marca queda en x = 460, el centro del espacio libre.
     - Foto suelta de Xilitla (`city`): el visor no muestra coordenadas
+## Recorrido (enmienda 3)
+
+- [x] **T13** · Un solo visor para todo el atlas: recorrido geografico, tira completa por lugares, vuelo del globo y boton de entrada
+  - Fichero(s): `src/lib/atlasTour.ts` (nuevo), `src/app/atlas/page.tsx`, `src/motion/Atlas.tsx`, `src/components/AtlasViewer.tsx`, `scripts/diagnostico.mjs`
+  - Comprobacion: CA4, CA5, CA7 (sobre todo el recorrido), CA14, CA15 y CA16
+  - **Hecho 2026-11-02.**
+    - **Recorrido** (`atlasTour`): lugares = ciudades. Para cada lugar de salida se calcula el vecino mas cercano y se mejora con 2-opt; gana el camino abierto mas corto. Empieza por el extremo que aparece antes en el orden de los albumes, y `stop` numera los lugares. Resultado: San Blas → Puerto Escondido → San Miguel de Allende → Xilitla → New York City → Porto do Son → Santiago → A Coruna → Villaquiran → San Sebastian → Biarritz. Son 12.152 km, frente a 24.644 km en el orden de los albumes.
+    - **Visor:** recorre las 31 fotos, con contador `NN / 31`. La tira deja 20 px entre lugares (6 px dentro de uno) y centra la actual desplazando solo la tira.
+    - **Globo:** "siguiente" y "anterior" llevan el globo a la foto. Si queda a menos del 35 % del lado corto del canvas, solo gira (y acerca a la vista regional si estaba mas lejos). Si no, vuela:
+      - se aleja a mitad de camino, en una curva cuadratica en log R que deja los dos extremos a la vista;
+      - aterriza en la vista regional;
+      - dura entre 600 y 1400 ms segun la distancia, con ease-in-out.
+    - **Entrada:** el boton "View All Photographs" junto a "Reset View" abre el visor en la primera foto. Pulsar una foto suelta, o un grupo que ya no se parte, lo abre en esa foto dentro del recorrido.
+    - La sonda gana `tour()`.
+  - `MSYS_NO_PATHCONV=1 node scripts/diagnostico.mjs --medir /atlas`: **25 de 25**, 0 errores de consola. Salida en `evidencia/2026-11-02_016-recorrido.txt`:
+    - **CA4:** 31 miniaturas, abre en la primera foto del grupo. **CA5:** las 31 fotos en orden y sin repetir.
+    - **CA14:** cada ciudad en un solo tramo, 12.152 km frente a 24.644.
+    - **CA15:** vuelo New York City → Porto do Son (5266 km). Termina a 0,00 px de la foto, con R 1551 (regional), y 0 frames > 50 ms (el peor, 33 ms).
+    - **CA16:** el boton abre en `america/08`, la primera foto del recorrido.
+  - **Efecto colateral:** el agrupado del globo es voraz y depende del orden de las marcas. Con el orden del recorrido, el grupo mas grande del encuadre por defecto pasa de 11 a 15 fotos (Espana y Francia juntas). CA2 y CA13 siguen en verde.
+  - **Capturas de comprobacion** (`next dev`, 1440x900, en el scratchpad de la sesion): con el visor en New York City (15/31), el grupo de 7 fotos queda en x = 460, el centro del espacio libre, y se ve el hueco entre lugares en la tira
+
 ## Cierre
 
 - [ ] `docs/atlas-data-sources.md` (OSM, ODbL, regenerar), `docs/design-spec-v2.md` §5 y changelog, y `CLAUDE.md` (linea del atlas, licencia)

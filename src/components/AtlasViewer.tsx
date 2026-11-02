@@ -1,23 +1,26 @@
 "use client";
 
-// The atlas's photo viewer (spec 016): opens beside the globe when a group
-// that can't split any further, or a single photo, is clicked — the globe
-// stays visible and usable on the left. Declarative: Atlas.tsx owns which
-// photos are open and which one is showing; this only renders them.
+// The atlas's photo viewer (spec 016): opens beside the globe — from the
+// "View All Photographs" control, or on a single photo or a group that
+// can't split any further — and walks the WHOLE archive in tour order
+// (amendment 3: places in geographic order, src/lib/atlasTour.ts). The
+// globe stays visible and usable on the left and follows each step.
+// Declarative: Atlas.tsx owns which photo is showing; this only renders.
 //
 // - The large photo is never cropped: natural aspect ratio, fit inside
 //   whatever height the panel leaves free (CA4).
 // - DMS coordinates only for `precision: "exact"` — a `city` photo's
 //   lat/lng is a centroid, not a place (CLAUDE.md, `place`; CA7).
-// - The strip shows only the open group's photos, in album order, all at
-//   one height with their own widths; the current one grows by `scale`
-//   (transform only). ‹ › and ← → step through it, wrapping; Esc closes.
+// - The strip shows every photo, in tour order, with a wider gap between
+//   places; all at one height with their own widths; the current one grows
+//   by `scale` (transform only) and is kept scrolled into view. ‹ › and
+//   ← → step through it, wrapping; Esc closes.
 // - Entrance: fade + 16 px slide in 200 ms (`.atlas-viewer` in
 //   globals.css); under reduced motion it is simply there (CA8).
 
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import type { AtlasMark } from "@/motion/Atlas";
 
 const VIEWER_MAX_W = 520;
@@ -25,6 +28,8 @@ const VIEWER_SHARE_OF_VW = 0.4;
 const VIEWER_MIN_W = 280; // phones: wider than 40 %, just so it doesn't break (spec 016, decision 3)
 const THUMB_H = 56;
 const THUMB_CURRENT_SCALE = 1.15;
+const THUMB_GAP = 6; // between photos of one place
+const PLACE_GAP = 20; // between places
 
 // The viewer's width for a given viewport width. Atlas.tsx uses the same
 // number to move the globe's centre into the space left free.
@@ -60,6 +65,20 @@ export default function AtlasViewer({
   const mark = marks[index];
   const many = marks.length > 1;
   const step = (d: number) => onIndex((index + d + marks.length) % marks.length);
+  const stripRef = useRef<HTMLDivElement>(null);
+
+  // Keep the current thumbnail centred in the strip (instantly the first
+  // time and under reduced motion). Only the strip scrolls, never the page.
+  const scrolledOnceRef = useRef(false);
+  useEffect(() => {
+    const strip = stripRef.current;
+    const thumb = strip?.querySelector<HTMLElement>('[aria-current="true"]');
+    if (!strip || !thumb) return;
+    const left = thumb.offsetLeft - (strip.clientWidth - thumb.offsetWidth) / 2;
+    const reduce = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    strip.scrollTo({ left, behavior: reduce || !scrolledOnceRef.current ? "auto" : "smooth" });
+    scrolledOnceRef.current = true;
+  }, [index]);
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -144,7 +163,7 @@ export default function AtlasViewer({
           >
             ‹
           </button>
-          <div className="flex min-w-0 flex-1 items-end gap-2 overflow-x-auto px-2 pb-1 pt-3">
+          <div ref={stripRef} className="relative flex min-w-0 flex-1 items-end overflow-x-auto px-2 pb-1 pt-3">
             {marks.map((m, i) => (
               <button
                 key={m.src}
@@ -155,6 +174,7 @@ export default function AtlasViewer({
                 aria-current={i === index ? "true" : undefined}
                 className="shrink-0 origin-bottom transition-[transform,opacity] duration-200 ease-out motion-reduce:transition-none"
                 style={{
+                  marginLeft: i === 0 ? 0 : m.stop !== marks[i - 1].stop ? PLACE_GAP : THUMB_GAP,
                   width: (THUMB_H * m.width) / m.height,
                   height: THUMB_H,
                   transform: i === index ? `scale(${THUMB_CURRENT_SCALE})` : undefined,

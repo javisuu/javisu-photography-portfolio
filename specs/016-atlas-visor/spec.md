@@ -128,3 +128,25 @@ Cambios en la spec:
 | CA13 | Seccion `atlas`: clic en el grupo mas grande del encuadre por defecto y espera a que acabe la animacion | Las fotos del grupo quedan repartidas en 2 o mas grupos, la media en pantalla de sus fotos queda a menos de 2 px del centro del canvas y no hay frames > 50 ms durante la animacion |
 
 **Ajuste a la enmienda 2 (Javi, 2026-11-02),** tras probarla: "con las de panama no funciona y con las de puerto escondido el zoom quizas es mas pequeno que en otras, no quiero algo agresivo pero si un zoom que englobe centro america". San Blas (las 2 fotos de Panama) y Puerto Escondido (3) tienen todas sus fotos en un mismo punto (centroide `city`), asi que no se podian partir y el clic solo giraba el globo. Ahora un grupo que no se puede partir tambien acerca antes de abrirse, hasta una vista regional: 2500 km en el lado corto del canvas (`CLICK_REGION_KM`; R ≈ 1550 a 1440x900). Si ya se esta mas cerca, no aleja.
+
+## Enmienda 3 (2026-11-02): un solo visor, un recorrido por todo el archivo
+
+- **Estado:** Decidida por Javi (2026-11-02): "usar un unico visor para todas las imagenes para dar asi 2 formas de navegar la pagina. Obviamente las fotos tendran que estar agrupadas por proximidad geografica. Un grafo al estilo hamiltoniano (es una broma)".
+- **Decisiones (respuestas a tres preguntas cerradas, 2026-11-02):**
+  1. **Tira:** todas las fotos, en el orden del recorrido, con un hueco entre lugares. La tira se desplaza para que la actual este siempre a la vista.
+  2. **El globo acompana:** si la foto siguiente esta cerca, el globo solo gira. Si esta lejos (de Mexico a Espana), se aleja a mitad del viaje y vuelve a acercarse al llegar, como un vuelo. Siempre termina en la vista regional de la enmienda 2.
+  3. **Entrada:** un boton en el atlas abre el visor en la primera foto del recorrido. Ademas, "el visor se despliega tambien si se hace click sobre una imagen, de forma que coincidira a medio recorrido": pulsar una foto suelta, o un grupo que ya no se puede partir, abre el visor en esa foto, dentro del recorrido completo.
+
+Cambios en la spec:
+- **El visor** deja de mostrar "solo las fotos del grupo abierto": recorre todo el archivo. El pie de foto, el enlace al album, las flechas y las teclas no cambian. Las flechas dan la vuelta al llegar al final.
+- **Recorrido:** un camino abierto que pasa una vez por cada lugar (ciudad). Se calcula al compilar en `src/app/atlas/page.tsx`: vecino mas cercano desde cada lugar mas 2-opt, y se queda el mas corto. Empieza por el extremo cuyo lugar aparece antes en el orden de los albumes. Dentro de un lugar, las fotos van en el orden del album.
+- **Clic en un grupo que se puede partir:** no cambia (acerca hasta partirlo, enmienda 2).
+- **CA4** pasa a decir: el visor se abre en la primera foto del grupo pulsado y la tira tiene una miniatura por cada foto del atlas.
+- **CA5** pasa a decir: N-1 veces "siguiente" desde la foto abierta pasa por todas las fotos del atlas, en el orden del recorrido y sin repetir.
+- **CA nuevos:**
+
+| # | Comando | Resultado esperado |
+|---|---|---|
+| CA14 | Seccion `atlas`: el recorrido que expone la sonda | Cada ciudad aparece en un solo tramo seguido, y el recorrido es mas corto que seguir las fotos en el orden de los albumes |
+| CA15 | Seccion `atlas`: "siguiente" desde la ultima foto de un lugar hacia el siguiente lugar del recorrido que este mas lejos | El centro de la vista acaba a menos de 2 px de la foto, R en la vista regional, y 0 frames > 50 ms durante el vuelo |
+| CA16 | Seccion `atlas`: el boton de entrada | Abre el visor en la primera foto del recorrido |

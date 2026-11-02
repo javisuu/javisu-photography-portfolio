@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { getOrderedAlbums, getPhotosByAlbum } from "@/data/photos";
+import { atlasTour } from "@/lib/atlasTour";
 import Atlas, { type AtlasMark } from "@/motion/Atlas";
 
 export const metadata: Metadata = {
@@ -15,10 +16,11 @@ export const metadata: Metadata = {
 
 export default function AtlasPage() {
   // Only photos with coordinates are plottable — everything else is
-  // simply omitted, no placeholder marks (per the atlas spec). In album
-  // order, then photo order: the globe's grouping keeps this order, and
-  // it is the order the viewer steps through a group in (spec 016).
-  const marks: AtlasMark[] = getOrderedAlbums().flatMap((album) =>
+  // simply omitted, no placeholder marks (per the atlas spec). Built in
+  // album order, then put in TOUR order (src/lib/atlasTour.ts): the order
+  // the viewer steps through the whole archive in, place by place, which
+  // the globe's grouping keeps too (spec 016, amendment 3).
+  const inAlbumOrder = getOrderedAlbums().flatMap((album) =>
     getPhotosByAlbum(album.slug)
       .map((p, albumPhotoIndex) => ({ p, albumPhotoIndex }))
       .filter(({ p }) => p.place.lat !== null && p.place.lng !== null)
@@ -39,6 +41,7 @@ export default function AtlasPage() {
         precision: p.place.precision,
       }))
   );
+  const marks: AtlasMark[] = atlasTour(inAlbumOrder);
 
   // Counts computed from the data, never hardcoded.
   const countryCount = new Set(marks.map((m) => m.country)).size;

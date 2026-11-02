@@ -37,6 +37,7 @@ export type AtlasMark = {
   lat: number;
   lng: number;
   precision: PlacePrecision;
+  stop: number; // index of its place along the tour (src/lib/atlasTour.ts)
 };
 
 // ---- Palette (matches the rest of the site — no colour, photos are
@@ -142,6 +143,21 @@ function shortestDelta(from: number, to: number): number {
 function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
+
+function easeInOutCubic(t: number): number {
+  return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+}
+
+// The viewer's tour (spec 016, amendment 3) moves the globe from photo to
+// photo. A step whose photo is already near the centre (within this share
+// of the canvas's shorter side at the current zoom) just rotates, zooming
+// in to the regional view if further out. A longer step FLIES: it pulls
+// out mid-way, far enough for both ends to fit on screen, and lands on the
+// regional view; it takes longer the further it goes, and eases in and
+// out, since a long flight that starts at full speed reads as a jolt.
+const FLY_NEAR_SHARE = 0.35;
+const FLY_FIT_SHARE = 0.6;
+const FLY_MAX_MS = 1400;
 
 // Clicking a group zooms until it splits (spec 016, amendment 2). Marks
 // cluster by single linkage at CLUSTER_THRESHOLD_PX on screen, and near
@@ -392,6 +408,7 @@ type AtlasProbe = {
   clusters: () => { x: number; y: number; opacity: number; srcs: string[] }[];
   latticeCount: () => { visited: number; drawn: number; ms: number }; // ms: time spent walking/painting the lattice
   localMasks: () => string[]; // files of the local masks loaded so far
+  tour: () => string[]; // every mark's src, in tour order (spec 016, amendment 3)
 };
 declare global {
   interface Window {
@@ -416,7 +433,9 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   const [hoveredCluster, setHoveredCluster] = useState<Cluster | null>(null);
   // The photo viewer (spec 016): which photos are open and which one shows.
   // Fixed once opened — if the group later splits under zoom, it stays.
-  const [viewer, setViewer] = useState<{ marks: AtlasMark[]; index: number } | null>(null);
+  // The viewer walks the whole archive in tour order (`marks` arrives in
+  // that order, spec 016 amendment 3); `index` is the photo showing.
+  const [viewer, setViewer] = useState<{ index: number } | null>(null);
   const reducedMotion = useSyncExternalStore(
     subscribeReducedMotion,
     getReducedMotionSnapshot,
@@ -489,6 +508,9 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     // rotation (in log space, like the zoom back to the ceiling).
     fromR?: number;
     toR?: number;
+    midR?: number; // a flight: R dips to this half-way (log-space quadratic curve)
+    duration?: number; // RECENTER_MS unless set
+    inOut?: boolean; // ease-in-out instead of ease-out (flights)
   } | null>(null);
 
   // Last frame's projected marks/clusters — pointer handlers (hover,
@@ -553,13 +575,14 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       clusters: () =>
         lastClustersRef.current.map((c) => ({ x: c.x, y: c.y, opacity: c.opacity, srcs: c.members.map((m) => m.mark.src) })),
       latticeCount: () => ({ ...lastLatticeRef.current }),
+      tour: () => marks.map((m) => m.src),
       localMasks: () => LOCAL_LEVELS.filter((_, i) => localMasksRef.current[i]).map((l) => l.file),
     };
     window.__atlas = probe;
     return () => {
       if (window.__atlas === probe) delete window.__atlas;
     };
-  }, []);
+  }, [marks]);
 
   // Measure the container once and on resize.
   useEffect(() => {
@@ -758,11 +781,18 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     // full nominal duration.
     const recenter = recenterRef.current;
     if (recenter) {
-      const t = Math.min(1, (now - recenter.startedAt) / RECENTER_MS);
-      const eased = easeOutCubic(t);
+      const t = Math.min(1, (now - recenter.startedAt) / (recenter.duration ?? RECENTER_MS));
+      const eased = recenter.inOut ? easeInOutCubic(t) : easeOutCubic(t);
       lambda0Ref.current = recenter.fromLambda + shortestDelta(recenter.fromLambda, recenter.toLambda) * eased;
       phi0Ref.current = recenter.fromPhi + (recenter.toPhi - recenter.fromPhi) * eased;
-      if (recenter.fromR !== undefined && recenter.toR !== undefined) {
+      if (recenter.fromR !== undefined && recenter.toR !== undefined && recenter.midR !== undefined) {
+        // Quadratic in log R through from, to and, at the half-way point,
+        // midR exactly: control = 2 log(mid) - (log(from) + log(to)) / 2.
+        const a = Math.log(recenter.fromR);
+        const b = Math.log(recenter.toR);
+        const c = 2 * Math.log(recenter.midR) - (a + b) / 2;
+        RRef.current = Math.exp((1 - eased) * (1 - eased) * a + 2 * eased * (1 - eased) * c + eased * eased * b);
+      } else if (recenter.fromR !== undefined && recenter.toR !== undefined) {
         RRef.current = recenter.fromR * Math.pow(recenter.toR / recenter.fromR, eased);
       }
       if (t >= 1) {
@@ -1202,7 +1232,13 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     }
   }
 
-  function startRecenter(toLambda: number, toPhi: number, onDone: () => void, toR?: number) {
+  function startRecenter(
+    toLambda: number,
+    toPhi: number,
+    onDone: () => void,
+    toR?: number,
+    flight?: { midR: number; duration: number }
+  ) {
     inertiaActiveRef.current = false;
     zoomBackRef.current = null;
     if (reducedMotionRef.current) {
@@ -1225,6 +1261,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       startedAt: nowMs(),
       onDone,
       ...(toR !== undefined ? { fromR: RRef.current, toR } : {}),
+      ...(flight ? { midR: flight.midR, duration: flight.duration, inOut: true } : {}),
     };
     requestFrame();
   }
@@ -1264,11 +1301,47 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     // longer jumps to its album (spec 016, decision 2; amendment 2).
     const vp = viewportSizeRef.current;
     const regionR = Math.min(vp.width, vp.height) / (CLICK_REGION_KM / EARTH_KM);
-    const open = cluster.members.map(({ mark }) => mark);
+    // Members come in tour order: the viewer opens on the first of them,
+    // inside the whole tour (spec 016, amendment 3).
+    const first = Math.min(...cluster.members.map(({ index }) => index));
     // The globe moves into the space the viewer will leave free in the
     // same motion as the rotation, not as a second step once it opens.
     setCenterShift(atlasViewerWidth(vp.width) / 2);
-    startRecenter(toLambda, toPhi, () => setViewer({ marks: open, index: 0 }), Math.min(currentMaxR(), Math.max(RRef.current, regionR)));
+    startRecenter(toLambda, toPhi, () => setViewer({ index: first }), Math.min(currentMaxR(), Math.max(RRef.current, regionR)));
+  }
+
+  // Takes the globe to the tour's photo `index`: a rotation when it is
+  // near, a flight when it is far (see FLY_NEAR_SHARE).
+  function goToTourPhoto(index: number) {
+    const mark = marks[index];
+    if (!mark) return;
+    const vp = viewportSizeRef.current;
+    const span = Math.min(vp.width, vp.height);
+    const regionR = Math.min(currentMaxR(), span / (CLICK_REGION_KM / EARTH_KM));
+    const R = RRef.current;
+    const toLambda = mark.lng * DEG;
+    const toPhi = mark.lat * DEG;
+    const p0 = phi0Ref.current;
+    const cosD =
+      Math.sin(p0) * Math.sin(toPhi) + Math.cos(p0) * Math.cos(toPhi) * Math.cos(toLambda - lambda0Ref.current);
+    const d = Math.acos(Math.min(1, Math.max(-1, cosD)));
+    if (d * R <= FLY_NEAR_SHARE * span) {
+      startRecenter(toLambda, toPhi, () => {}, R < regionR ? regionR : undefined);
+      return;
+    }
+    const midR = Math.max(zoomBoundsRef.current.minR, Math.min(R, regionR, (FLY_FIT_SHARE * span) / d));
+    const duration = RECENTER_MS + (FLY_MAX_MS - RECENTER_MS) * Math.min(1, d / (Math.PI / 2));
+    startRecenter(toLambda, toPhi, () => {}, regionR, { midR, duration });
+  }
+
+  function showTourPhoto(index: number) {
+    setViewer({ index });
+    goToTourPhoto(index);
+  }
+
+  function openTour() {
+    setCenterShift(atlasViewerWidth(viewportSizeRef.current.width) / 2);
+    showTourPhoto(0);
   }
 
   function setCenterShift(to: number) {
@@ -1361,13 +1434,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       {/* Photo viewer (spec 016) — replaces the old cluster list panel
           and the single photo's jump to its album. */}
       {viewer && (
-        <AtlasViewer
-          marks={viewer.marks}
-          index={viewer.index}
-          width={viewerW}
-          onIndex={(index) => setViewer((v) => (v ? { ...v, index } : v))}
-          onClose={() => setViewer(null)}
-        />
+        <AtlasViewer marks={marks} index={viewer.index} width={viewerW} onIndex={showTourPhoto} onClose={() => setViewer(null)} />
       )}
 
       {/* Legend + reset control. The OpenStreetMap credit is required by
@@ -1398,14 +1465,21 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         </span>
       </div>
 
-      <button
-        type="button"
-        onClick={resetToDefault}
+      <div
         style={viewer ? { right: viewerW + 24 } : undefined}
-        className="absolute bottom-4 right-4 text-[12px] uppercase tracking-[0.14em] text-[#666] hover:text-[#111] md:bottom-6 md:right-6"
+        className="absolute bottom-4 right-4 flex items-center gap-6 text-[12px] uppercase tracking-[0.14em] text-[#666] md:bottom-6 md:right-6"
       >
-        Reset View
-      </button>
+        {/* The tour's entrance (spec 016, amendment 3): the viewer on the
+            first photo of the whole archive, the globe flying to it. */}
+        {!viewer && marks.length > 0 && (
+          <button type="button" data-atlas-tour onClick={openTour} className="uppercase hover:text-[#111]">
+            View All Photographs
+          </button>
+        )}
+        <button type="button" onClick={resetToDefault} className="uppercase hover:text-[#111]">
+          Reset View
+        </button>
+      </div>
     </div>
   );
 }

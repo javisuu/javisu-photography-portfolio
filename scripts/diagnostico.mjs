@@ -1023,6 +1023,7 @@ const ATLAS_WHEEL_DELTA = -100;
 const ATLAS_WHEEL_MAX_STEPS = 400;
 const ATLAS_RECENTER_WAIT_MS = 1000;
 const ATLAS_OPEN_MAX_CLICKS = 8; // CA4: clics en el grupo hasta que se abre
+const ATLAS_FLIGHT_WAIT_MS = 1900; // FLY_MAX_MS (1400) + margen
 const DMS_RE = /\d+°\d+'\d+"/;
 function atlasPhotos() {
   // Una linea src y, mas abajo, su linea place (formato de src/data/photos.ts).
@@ -1273,30 +1274,35 @@ if (!only || only === "/atlas") {
       log(`  grupo elegido: R al abrirlo ${rr(Rg)} · ${g ? `${g.srcs.length} fotos (${g.srcs.map((s) => `${s.split("/").slice(-2).join("/")}${precisionOf[s] === "city" ? "·c" : ""}`).join(", ")})` : "ninguno"}`);
       const v = await viewerState(p);
       const panel = await p.evaluate(() => [...document.querySelectorAll("main span")].some((s) => /\d+ Photographs/.test(s.textContent) && s.closest("div.absolute")));
-      log(`  visor: ${v ? `abierto · foto ${v.src} · ${v.thumbs} miniaturas` : "no hay [data-atlas-viewer]"}${panel ? " · sigue saliendo el panel de lista" : ""}`);
+      // Desde la enmienda 3 el visor recorre todo el atlas, en el orden del recorrido.
+      const tour = (await probe(p, () => window.__atlas.tour?.() ?? null)) ?? [];
+      log(`  visor: ${v ? `abierto · foto ${v.src} · ${v.thumbs} miniaturas · recorrido de ${tour.length} fotos` : "no hay [data-atlas-viewer]"}${panel ? " · sigue saliendo el panel de lista" : ""}`);
       const fits = !!v?.photo && v.photo.box[0] >= 0 && v.photo.box[1] >= 0 && v.photo.box[2] <= v.vw + 0.5 && v.photo.box[3] <= v.vh + 0.5;
       addInv("atlas", "CA4 clic en grupo abre el visor, no la lista", !!v && !panel, v ? "sigue el panel de lista" : "sin [data-atlas-viewer]");
       addInv("atlas", "CA4 foto grande entera en el viewport, proporcion < 1 %", fits && v.photo.dev < MAX_RATIO_DEVIATION,
         v?.photo ? `caja ${v.photo.box.map(rr)}, desvio ${v.photo.dev.toFixed(4)}` : "sin foto medible");
-      addInv("atlas", "CA4 tira con una miniatura por foto del grupo", !!v && !!g && v.thumbs === g.srcs.length, `${v?.thumbs ?? 0} miniaturas, ${g?.srcs.length ?? 0} fotos`);
-      // CA5 y CA7: recorrer el grupo con la flecha siguiente.
-      if (v && g) {
+      addInv("atlas", "CA4 se abre en la primera foto del grupo pulsado", !!v && !!g && v.src === g.srcs[0], `abierto en ${v?.src}, primera del grupo ${g?.srcs[0]}`);
+      addInv("atlas", "CA4 tira con una miniatura por foto del atlas", !!v && tour.length > 0 && v.thumbs === tour.length, `${v?.thumbs ?? 0} miniaturas, ${tour.length} fotos`);
+      // CA5 y CA7: recorrer TODO el atlas con la flecha siguiente.
+      if (v && g && tour.length) {
+        const start = tour.indexOf(v.src);
+        const expected = tour.map((_, k) => tour[(start + k) % tour.length]);
         const seen = [v.src];
         const dmsBad = [];
         const check = (st) => { if (st && precisionOf[st.src] === "city" && DMS_RE.test(st.text)) dmsBad.push(st.src); };
         check(v);
-        for (let k = 1; k < g.srcs.length; k++) {
+        for (let k = 1; k < tour.length; k++) {
           await p.click("[data-atlas-viewer-next]").catch(() => {});
-          await p.waitForTimeout(300);
+          await p.waitForTimeout(250);
           const st = await viewerState(p);
           seen.push(st?.src ?? null);
           check(st);
         }
-        const inOrder = seen.length === g.srcs.length && seen.every((s, k) => s === g.srcs[k]);
-        log(`  recorrido con la flecha: ${seen.map((s) => (s ? s.split("/").slice(-2).join("/") : "—")).join(" → ")}`);
-        addInv("atlas", "CA5 la flecha pasa por todas las fotos del grupo, en orden, sin repetir", inOrder, `visto ${seen.join(", ")}`);
-        const hasCity = g.srcs.some((s) => precisionOf[s] === "city");
-        addInv("atlas", "CA7 sin coordenadas DMS en fotos city", hasCity && dmsBad.length === 0, hasCity ? `DMS en ${dmsBad.join(", ")}` : "el grupo no tiene fotos city");
+        const inOrder = seen.length === expected.length && seen.every((s, k) => s === expected[k]);
+        log(`  recorrido con la flecha (${seen.length} fotos): ${seen.map((s) => (s ? s.split("/").slice(-2).join("/") : "—")).join(" → ")}`);
+        addInv("atlas", "CA5 la flecha pasa por todas las fotos del atlas, en el orden del recorrido, sin repetir", inOrder, `visto ${seen.join(", ")}`);
+        const hasCity = seen.some((s) => precisionOf[s] === "city");
+        addInv("atlas", "CA7 sin coordenadas DMS en fotos city", hasCity && dmsBad.length === 0, hasCity ? `DMS en ${dmsBad.join(", ")}` : "el recorrido no tiene fotos city");
         // CA6: el globo sigue visible y responde a un arrastre.
         const cover = Math.max(0, Math.min(box.x + box.w, v.rect[2]) - Math.max(box.x, v.rect[0])) * Math.max(0, Math.min(box.y + box.h, v.rect[3]) - Math.max(box.y, v.rect[1])) / (box.w * box.h);
         const l0 = (await cssImpl(p))?.lambda0;
@@ -1311,8 +1317,67 @@ if (!only || only === "/atlas") {
         addInv("atlas", `CA6 visor tapa <= ${ATLAS_VIEWER_MAX_COVER * 100} % del canvas`, cover <= ATLAS_VIEWER_MAX_COVER, `${(cover * 100).toFixed(1)} %`);
         addInv("atlas", "CA6 el globo responde a un arrastre con el visor abierto", l0 !== undefined && l1 !== undefined && Math.abs(l1 - l0) > 1e-4, `lambda0 ${l0} → ${l1}`);
       } else {
-        for (const n of ["CA5 la flecha pasa por todas las fotos del grupo, en orden, sin repetir", "CA7 sin coordenadas DMS en fotos city", `CA6 visor tapa <= ${ATLAS_VIEWER_MAX_COVER * 100} % del canvas`, "CA6 el globo responde a un arrastre con el visor abierto"]) addInv("atlas", n, false, "sin visor");
+        for (const n of ["CA5 la flecha pasa por todas las fotos del atlas, en el orden del recorrido, sin repetir", "CA7 sin coordenadas DMS en fotos city", `CA6 visor tapa <= ${ATLAS_VIEWER_MAX_COVER * 100} % del canvas`, "CA6 el globo responde a un arrastre con el visor abierto"]) addInv("atlas", n, false, "sin visor");
       }
+    }
+    if (errs.length) log(`  errores: ${errs.join(" | ")}`);
+    await ctx.close();
+  }
+
+  // CA14 a CA16: el recorrido por todo el atlas (spec 016, enmienda 3).
+  {
+    const { ctx, p, errs, box } = await atlasPage();
+    const tour = box ? (await probe(p, () => window.__atlas.tour?.() ?? null)) ?? [] : [];
+    if (box && tour.length) {
+      const bySrc = Object.fromEntries(AP.map((x) => [x.src, x]));
+      const pts = tour.map((s) => bySrc[s]);
+      const cityOf = (x) => `${x.city}`;
+      // CA14: cada ciudad en un solo tramo, y mas corto que el orden de los albumes.
+      const runs = [];
+      for (const x of pts) if (!runs.length || runs[runs.length - 1] !== cityOf(x)) runs.push(cityOf(x));
+      const contiguous = new Set(runs).size === runs.length;
+      const len = (arr) => arr.slice(1).reduce((a, x, k) => a + angDist(arr[k], x), 0);
+      const albumOrder = AP.filter((x) => tour.includes(x.src));
+      const tourKm = len(pts) * 6371, albumKm = len(albumOrder) * 6371;
+      log(`  recorrido: ${runs.join(" → ")} · ${rr(tourKm)} km (en orden de albumes: ${rr(albumKm)} km)`);
+      addInv("atlas", "CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes", contiguous && tourKm < albumKm, `${contiguous ? "" : "ciudades partidas; "}${rr(tourKm)} km frente a ${rr(albumKm)} km`);
+      // CA16: el boton abre el visor en la primera foto del recorrido.
+      await p.click("[data-atlas-tour]").catch(() => {});
+      await p.waitForTimeout(ATLAS_FLIGHT_WAIT_MS);
+      const v0 = await viewerState(p);
+      log(`  boton de entrada: ${v0 ? `visor en ${v0.src}` : "no abre el visor"}`);
+      addInv("atlas", "CA16 el boton abre el visor en la primera foto del recorrido", v0?.src === tour[0], `visor en ${v0?.src ?? "—"}, primera ${tour[0]}`);
+      // CA15: el salto mas largo entre lugares seguidos del recorrido.
+      let far = -1, farD = 0;
+      for (let k = 0; k + 1 < pts.length; k++) {
+        const dd = angDist(pts[k], pts[k + 1]);
+        if (dd > farD) { farD = dd; far = k; }
+      }
+      if (v0 && far >= 0) {
+        for (let k = 0; k < far; k++) { await p.keyboard.press("ArrowRight"); await p.waitForTimeout(60); }
+        await p.waitForTimeout(ATLAS_FLIGHT_WAIT_MS);
+        const t0 = await p.evaluate(() => performance.now());
+        await p.keyboard.press("ArrowRight");
+        await p.waitForTimeout(ATLAS_FLIGHT_WAIT_MS);
+        const t1 = await p.evaluate(() => performance.now());
+        const st = await cssImpl(p);
+        const target = pts[far + 1];
+        const centre = { lat: (st.phi0 * 180) / Math.PI, lng: (st.lambda0 * 180) / Math.PI };
+        const offPx = angDist(centre, target) * st.R;
+        const regionR = Math.min(st.width, st.height) / (2500 / 6371);
+        const fr = (await p.evaluate(() => window.__atlasRec.frames)).filter((t) => t >= t0 && t <= t1);
+        const deltas = fr.slice(1).map((t, k) => t - fr[k]);
+        const long = deltas.slice(1).filter((d) => d > LONG_FRAME_MS).length;
+        const vNow = await viewerState(p);
+        log(`  vuelo ${pts[far].city} → ${target.city} (${rr(farD * 6371)} km): centro a ${offPx.toFixed(2)} px de la foto · R ${rr(st.R)} (regional ${rr(regionR)}) · frames > ${LONG_FRAME_MS} ms: ${long}, peor ${rr(Math.max(0, ...deltas.slice(1)))} ms · visor en ${vNow?.src}`);
+        addInv("atlas", "CA15 vuelo al lugar siguiente: centrado, en vista regional, sin frames > 50 ms",
+          offPx < 2 && Math.abs(st.R / regionR - 1) < 0.01 && long === 0 && vNow?.src === target.src,
+          `${offPx.toFixed(2)} px, R ${rr(st.R)} frente a ${rr(regionR)}, ${long} frames largos, visor en ${vNow?.src}`);
+      } else {
+        addInv("atlas", "CA15 vuelo al lugar siguiente: centrado, en vista regional, sin frames > 50 ms", false, "sin visor o sin recorrido");
+      }
+    } else {
+      for (const n of ["CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes", "CA16 el boton abre el visor en la primera foto del recorrido", "CA15 vuelo al lugar siguiente: centrado, en vista regional, sin frames > 50 ms"]) addInv("atlas", n, false, "la sonda no expone el recorrido");
     }
     if (errs.length) log(`  errores: ${errs.join(" | ")}`);
     await ctx.close();
