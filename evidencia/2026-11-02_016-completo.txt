@@ -1,0 +1,445 @@
+DIAGNOSTICO 2026-11-02 · feat/016-atlas-visor · 064b619 · 0 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+ok
+
+=== next dev en :3100 ===
+ok
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x33ac007bf400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x33ac007bf400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x33ac007bf400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x33ac007bf400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+  /albums: {"gutter":0,"scrollHeight":900,"vh":900,"photos":29,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F05.jpg&w=750&q=75","dev":0.0019999999999998908}}
+  ok   sin barra de scroll
+  /about: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /album/america: {"gutter":0,"scrollHeight":9663,"vh":900,"photos":10,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F04.jpg&w=1080&q=75","dev":0.001400917949551439},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 600
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+  /credits: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas, tira del visor: barra 0 px · se desplaza
+  ok   tira del visor sin barra de scroll
+
+=== llegada al album ===
+ms desde el clic (carga directa: desde el inicio de la navegacion) · 1 repeticion · cache vacia en cada una
+  1: carrusel → album → /album/america · 166 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 151 · <img> oculta 336 · primer fotograma con foto entera 353
+     secuencia .#####################################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: NEXT ALBUM → /album/norte · 163 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 153 · <img> oculta 416 · primer fotograma con foto entera 435
+     secuencia .##################################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: carga directa → /album/norte · 152 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 120 · <img> oculta 630 · primer fotograma con foto entera 649
+     secuencia ....####################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  reduced motion, carrusel → album → /album/america · 165 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 144 · <img> oculta 332 · primer fotograma con foto entera 344
+     secuencia .####################################################################################################################################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  sin WebGL (--disable-3d-apis, webgl no disponible), carga directa → /album/norte · opacity 1 a 599 ms · muestras a medio fundido 0 · al final opacity 1, visible
+  ok   WebGL desactivado de verdad
+  ok   foto 1 visible sin esperar a GL
+  /album/america: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/norte: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/sol: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/ny: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+
+=== scroll del album ===
+  rafaga en /album/america: 20 x 400 px cada 16 ms, en 1365 ms
+     recorrido 8000 px · al soltar la rueda iba por 7516 px (faltaban 484) · llega 440 ms despues de soltar
+     velocidad maxima 187 px/frame · normalizada 4.67 (curva GL a tope desde 1)
+  ok   la rafaga mueve la pagina
+  B10 /album/america → /album/norte: clic con la pagina moviendose 215 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/norte → /album/sol: clic con la pagina moviendose 216 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/sol → /album/ny: clic con la pagina moviendose 197 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+  B10 /album/ny → /album/america: clic con la pagina moviendose 167 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: 0 y 0 · max 0
+  ok   NEXT ALBUM empieza arriba
+
+=== textos del album ===
+  /album/america: 2 textos, 9 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 6: hueco 106.6 px, arriba 350 px, centro 0 px
+  ok   cita foto 6: sin solaparse y en el lado libre
+  ok   cita foto 6: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 6: no es la primera foto
+      hueco libre 64-557.2 px, desvio del centro 0 px
+  ok   cita foto 6: centrada en el hueco libre
+  ok   cita foto 6: foto entera y sin deformar
+  ok   cita foto 6: alineacion vertical
+  ok   cita foto 6: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+  /album/norte: 3 textos, 8 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 5: hueco 229.1 px, arriba 338 px, centro 0 px
+  ok   cita foto 5: sin solaparse y en el lado libre
+  ok   cita foto 5: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 5: no es la primera foto
+      hueco libre 637.8-1376 px, desvio del centro 0 px
+  ok   cita foto 5: centrada en el hueco libre
+  ok   cita foto 5: foto entera y sin deformar
+  ok   cita foto 5: alineacion vertical
+  ok   cita foto 5: escala de grises
+    cita foto 8: hueco 300.8 px, arriba 338 px, centro 0 px
+  ok   cita foto 8: sin solaparse y en el lado libre
+  ok   cita foto 8: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 8: no es la primera foto
+      hueco libre 494.3-1376 px, desvio del centro 0 px
+  ok   cita foto 8: centrada en el hueco libre
+  ok   cita foto 8: foto entera y sin deformar
+  ok   cita foto 8: alineacion vertical
+  ok   cita foto 8: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+  /album/sol: 3 textos, 7 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    beside foto 2: hueco 96 px, arriba 80 px, centro -222.1 px
+  ok   beside foto 2: sin solaparse y en el lado libre
+  ok   beside foto 2: foto vertical o cuadrada en fila desplazada
+  ok   beside foto 2: no es la primera foto
+  ok   beside foto 2: foto entera y sin deformar
+  ok   beside foto 2: alineacion vertical
+  ok   beside foto 2: escala de grises
+  ok   beside foto 2: firma
+    cita foto 3: hueco 229.1 px, arriba 350 px, centro 0 px
+  ok   cita foto 3: sin solaparse y en el lado libre
+  ok   cita foto 3: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 3: no es la primera foto
+      hueco libre 64-802.3 px, desvio del centro 0 px
+  ok   cita foto 3: centrada en el hueco libre
+  ok   cita foto 3: foto entera y sin deformar
+  ok   cita foto 3: alineacion vertical
+  ok   cita foto 3: escala de grises
+    cita foto 6: hueco 229.1 px, arriba 326 px, centro 0 px
+  ok   cita foto 6: sin solaparse y en el lado libre
+  ok   cita foto 6: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 6: no es la primera foto
+      hueco libre 64-802.3 px, desvio del centro 0 px
+  ok   cita foto 6: centrada en el hueco libre
+  ok   cita foto 6: foto entera y sin deformar
+  ok   cita foto 6: alineacion vertical
+  ok   cita foto 6: escala de grises
+  /album/ny: 1 textos, 7 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+  ok   #photo-2 centra la foto 3, despues del texto
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 1 repeticion · cache vacia en cada una
+  1: inicio 390 · participantes 7 · fase B 837 · rezagadas 1 · reposo 1570
+     frame del arranque 217 ms · despues: frames >50 ms 0, frame max 17 ms · long tasks 3 (285 ms) · [entrance] start x1
+     al monton: 487 521 554 620 704 770 837
+
+=== descifrado del wordmark ===
+  (a) carga directa en / · 36 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  (b) carga en /about, clic a / · 12 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (c) carga en /albums, clic a / · 14 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (d) / -> /about, resize alli, -> / · 12 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (e) reduced motion, carga en /about, clic a / · 0 muestras · h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== atlas ===
+  fotos: 31 · con coordenadas: 31 · exact: 25
+  sonda: R 256 · minR 195 · maxR 4563 · caja 1440x609
+  ok   sonda window.__atlas presente
+  par exact mas cercano (coordenadas distintas): /photos/norte/05.jpg y /photos/sol/01.jpg · San Sebastián · 40 m · separarlo a 14 px pide R ≈ 2241044
+  reticula en el encuadre por defecto: 8401 puntos recorridos · 3184 pintados
+  clics en el grupo del par durante el zoom: 15 fotos a R 362 → 11 fotos a R 653 → 8 fotos a R 3461 → 7 fotos a R 36538 → 4 fotos a R 130972 → 3 fotos a R 2720840
+  rueda hasta el maximo: 9 pasos · R final 3361566 · separacion del par 21.0 px
+  frames durante la rueda (sin los clics): 48 · > 50 ms despues del primero: 1 · peor 67 ms · reticula al maximo: 18489 recorridos, 9295 pintados
+  ok   CA2 par mas cercano separado (> 14 px) al zoom maximo
+  FALLA CA3 0 frames > 50 ms en la rueda hasta el maximo · 1 frames, peor 67 ms
+  clic en el grupo mas grande (15 fotos): R 256 → 362 · queda en 2 grupos (4+11) · media a 0.00 px del centro · frames > 50 ms: 0, peor 33 ms
+  ok   CA13 clic en un grupo: acerca hasta partirlo, centrado, sin frames > 50 ms
+  grupo elegido: R al abrirlo 2098 · 3 fotos (america/05.jpg·c, america/06.jpg·c, america/07.jpg·c)
+  visor: abierto · foto /photos/america/05.jpg · 31 miniaturas · recorrido de 31 fotos
+  ok   CA4 clic en grupo abre el visor, no la lista
+  ok   CA4 foto grande entera en el viewport, proporcion < 1 %
+  ok   CA4 se abre en la primera foto del grupo pulsado
+  ok   CA4 tira con una miniatura por foto del atlas
+  recorrido con la flecha (31 fotos): america/05.jpg → america/06.jpg → america/07.jpg → america/01.jpg → america/02.jpg → america/03.jpg → america/04.jpg → ny/01.jpg → ny/02.jpg → ny/03.jpg → ny/04.jpg → ny/05.jpg → ny/06.jpg → ny/07.jpg → norte/03.jpg → norte/04.jpg → norte/08.jpg → norte/07.jpg → sol/04.jpg → sol/06.jpg → sol/07.jpg → norte/01.jpg → norte/02.jpg → norte/05.jpg → sol/01.jpg → sol/02.jpg → sol/03.jpg → sol/05.jpg → norte/06.jpg → america/08.jpg → america/09.jpg
+  ok   CA5 la flecha pasa por todas las fotos del atlas, en el orden del recorrido, sin repetir
+  ok   CA7 sin coordenadas DMS en fotos city
+  globo con el visor abierto: tapado 35.0 % · lambda0 -0.0514 → -0.2482
+  ok   CA6 visor tapa <= 40 % del canvas
+  ok   CA6 el globo responde a un arrastre con el visor abierto
+  recorrido: San Blas → Puerto Escondido → San Miguel de Allende → Xilitla → New York City → Porto do Son → Santiago de Compostela → A Coruña → Villaquirán de la puebla → San Sebastián → Biarritz · 12152 km (en orden de albumes: 24644 km)
+  ok   CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes
+  boton de entrada: visor en /photos/america/08.jpg
+  ok   CA16 el boton abre el visor en la primera foto del recorrido
+  vuelo New York City → Porto do Son (5266 km): centro a 0.00 px de la foto · R 4563 · su marca: norte/03.jpg, norte/04.jpg · frames > 50 ms: 1, peor 67 ms · visor en /photos/norte/03.jpg
+  FALLA CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms · 0.00 px, marca /photos/norte/03.jpg, /photos/norte/04.jpg, 1 frames largos, visor en /photos/norte/03.jpg
+  pin: norte/03.jpg en (460, 304) · su marca en (460, 304)
+  ok   CA17 pin sobre la marca de la foto del visor
+  reduced motion: primera muestra del visor opacity 1 · transform none
+  ok   CA8 reduced motion: visor sin fundido ni desplazamiento
+  zonas: 2 (san-sebastian, new-york-city) · excluidas: San Miguel de Allende · parejas que necesitan zona: 39 · fuera de zona: 0
+  ok   CA10 toda pareja exact sin separar a R 4563 cae en una zona (salvo ciudades excluidas)
+  fuera de zona (encuadre por defecto): 23 pasos · R final 4563
+  ok   CA11 fuera de zona el zoom se para en R <= 4563
+  ok   CA12 cita de OpenStreetMap visible
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        ok
+consola      0 errores en 6 rutas
+invariantes  172 de 174
+entrada      arranque 217 ms · fase B 837 ms · reposo 1570 ms · frames >50 ms: 0
+
+FALLOS
+- atlas · CA3 0 frames > 50 ms en la rueda hasta el maximo · 1 frames, peor 67 ms
+- atlas · CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms · 0.00 px, marca /photos/norte/03.jpg, /photos/norte/04.jpg, 1 frames largos, visor en /photos/norte/03.jpg
+
