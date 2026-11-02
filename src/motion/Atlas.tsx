@@ -1382,16 +1382,32 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         </div>
       )}
 
-      {/* Legend + reset control. */}
-      <div className="pointer-events-none absolute bottom-4 left-4 flex items-center gap-2 text-[12px] text-[#666] md:bottom-6 md:left-6">
-        <svg width="10" height="10" aria-hidden>
-          <circle cx="5" cy="5" r="4" fill={COLOR_MARK} />
-        </svg>
-        <span>Exact location</span>
-        <svg width="10" height="10" aria-hidden className="ml-3">
-          <circle cx="5" cy="5" r="4" fill="none" stroke={COLOR_MARK} strokeWidth="1" />
-        </svg>
-        <span>Approximate (city)</span>
+      {/* Legend + reset control. The OpenStreetMap credit is required by
+          the ODbL for the local coastline masks (spec 016); it lives here,
+          with the legend, and only on the atlas (Javi, 2026-11-01). */}
+      <div className="pointer-events-none absolute bottom-4 left-4 flex flex-col gap-1.5 md:bottom-6 md:left-6">
+        <div className="flex items-center gap-2 text-[12px] text-[#666]">
+          <svg width="10" height="10" aria-hidden>
+            <circle cx="5" cy="5" r="4" fill={COLOR_MARK} />
+          </svg>
+          <span>Exact location</span>
+          <svg width="10" height="10" aria-hidden className="ml-3">
+            <circle cx="5" cy="5" r="4" fill="none" stroke={COLOR_MARK} strokeWidth="1" />
+          </svg>
+          <span>Approximate (city)</span>
+        </div>
+        <span className="text-[11px] text-[#A8A8A8]">
+          Map data ©{" "}
+          <a
+            href="https://www.openstreetmap.org/copyright"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="pointer-events-auto hover:text-[#666]"
+          >
+            OpenStreetMap
+          </a>{" "}
+          contributors
+        </span>
       </div>
 
       <button
