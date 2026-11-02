@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { getPhotosByAlbum, photos } from "@/data/photos";
+import { getOrderedAlbums, getPhotosByAlbum } from "@/data/photos";
 import Atlas, { type AtlasMark } from "@/motion/Atlas";
 
 export const metadata: Metadata = {
@@ -15,26 +15,30 @@ export const metadata: Metadata = {
 
 export default function AtlasPage() {
   // Only photos with coordinates are plottable — everything else is
-  // simply omitted, no placeholder marks (per the atlas spec).
-  const marks: AtlasMark[] = photos
-    .filter((p) => p.place.lat !== null && p.place.lng !== null)
-    .map((p) => {
-      const albumPhotos = getPhotosByAlbum(p.album);
-      const albumPhotoIndex = albumPhotos.findIndex((ap) => ap.src === p.src);
-      return {
+  // simply omitted, no placeholder marks (per the atlas spec). In album
+  // order, then photo order: the globe's grouping keeps this order, and
+  // it is the order the viewer steps through a group in (spec 016).
+  const marks: AtlasMark[] = getOrderedAlbums().flatMap((album) =>
+    getPhotosByAlbum(album.slug)
+      .map((p, albumPhotoIndex) => ({ p, albumPhotoIndex }))
+      .filter(({ p }) => p.place.lat !== null && p.place.lng !== null)
+      .map(({ p, albumPhotoIndex }) => ({
         src: p.src,
         width: p.width,
         height: p.height,
         title: p.title,
         album: p.album,
+        albumTitle: album.title,
         albumPhotoIndex,
+        order: p.order,
+        capture: p.capture,
         city: p.place.city,
         country: p.place.country,
         lat: p.place.lat as number,
         lng: p.place.lng as number,
         precision: p.place.precision,
-      };
-    });
+      }))
+  );
 
   // Counts computed from the data, never hardcoded.
   const countryCount = new Set(marks.map((m) => m.country)).size;

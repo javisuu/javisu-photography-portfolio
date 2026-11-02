@@ -19,7 +19,7 @@
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
-import type { PlacePrecision } from "@/data/photos";
+import type { CaptureData, PlacePrecision } from "@/data/photos";
 import atlasZones from "@/data/atlas-zones.json";
 
 export type AtlasMark = {
@@ -28,7 +28,10 @@ export type AtlasMark = {
   height: number;
   title: string;
   album: string;
+  albumTitle: string;
   albumPhotoIndex: number;
+  order: number; // the photo's order inside its album
+  capture: CaptureData;
   city: string;
   country: string;
   lat: number;
