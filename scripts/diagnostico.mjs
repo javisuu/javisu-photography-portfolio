@@ -1022,6 +1022,7 @@ const ATLAS_VIEWER_MAX_COVER = 0.4; // CA6, fijado en plan.md
 const ATLAS_WHEEL_DELTA = -100;
 const ATLAS_WHEEL_MAX_STEPS = 400;
 const ATLAS_RECENTER_WAIT_MS = 1000;
+const ATLAS_OPEN_MAX_CLICKS = 8; // CA4: clics en el grupo hasta que se abre
 const DMS_RE = /\d+°\d+'\d+"/;
 function atlasPhotos() {
   // Una linea src y, mas abajo, su linea place (formato de src/data/photos.ts).
@@ -1193,12 +1194,60 @@ if (!only || only === "/atlas") {
     await ctx.close();
   }
 
-  // CA4 a CA7: el grupo mas grande con alguna foto city (si no hay, el mas grande).
+  // CA13: clic en el grupo mas grande del encuadre por defecto (spec 016, enmienda 2).
+  {
+    const { ctx, p, errs, box } = await atlasPage();
+    if (box && (await cssImpl(p))) {
+      const cl0 = (await probe(p, () => window.__atlas.clusters())) ?? [];
+      const g = cl0.filter((x) => x.srcs.length > 1 && x.opacity > 0).sort((a, b) => b.srcs.length - a.srcs.length)[0];
+      const R0 = (await cssImpl(p))?.R;
+      const t0 = await p.evaluate(() => performance.now());
+      if (g) await p.mouse.click(box.x + g.x, box.y + g.y);
+      await p.waitForTimeout(ATLAS_RECENTER_WAIT_MS);
+      const t1 = await p.evaluate(() => performance.now());
+      const st = await cssImpl(p);
+      const cl1 = (await probe(p, () => window.__atlas.clusters())) ?? [];
+      const parts = g ? cl1.filter((c) => c.srcs.some((s) => g.srcs.includes(s))) : [];
+      const n = parts.reduce((a, c) => a + c.srcs.length, 0);
+      const mx = n ? parts.reduce((a, c) => a + c.x * c.srcs.length, 0) / n : NaN;
+      const my = n ? parts.reduce((a, c) => a + c.y * c.srcs.length, 0) / n : NaN;
+      const off = Math.hypot(mx - (st?.width ?? 0) / 2, my - (st?.height ?? 0) / 2);
+      const fr = (await p.evaluate(() => window.__atlasRec.frames)).filter((t) => t >= t0 && t <= t1);
+      const deltas = fr.slice(1).map((t, k) => t - fr[k]);
+      const long = deltas.slice(1).filter((d) => d > LONG_FRAME_MS).length;
+      const panel = await p.evaluate(() => !!document.querySelector("[data-atlas-viewer]") || [...document.querySelectorAll("main span")].some((s) => /\d+ Photographs/.test(s.textContent) && s.closest("div.absolute")));
+      log(`  clic en el grupo mas grande (${g?.srcs.length ?? 0} fotos): R ${rr(R0)} → ${rr(st?.R)} · queda en ${parts.length} grupos (${parts.map((c) => c.srcs.length).join("+")}) · media a ${off.toFixed(2)} px del centro · frames > ${LONG_FRAME_MS} ms: ${long}, peor ${rr(Math.max(0, ...deltas.slice(1)))} ms${panel ? " · se abrio el visor o la lista" : ""}`);
+      addInv("atlas", "CA13 clic en un grupo: acerca hasta partirlo, centrado, sin frames > 50 ms", !!g && parts.length >= 2 && off < 2 && long === 0 && !panel,
+        `${parts.length} grupos, ${off.toFixed(2)} px del centro, ${long} frames largos${panel ? ", se abrio el visor o la lista" : ""}`);
+    }
+    if (errs.length) log(`  errores: ${errs.join(" | ")}`);
+    await ctx.close();
+  }
+
+  // CA4 a CA7: un grupo que acabe en fotos que no se pueden partir (mismo
+  // punto), con una foto city si la hay. Desde la enmienda 2 el clic en un
+  // grupo acerca hasta partirlo, asi que se sigue pulsando el grupo de esa
+  // foto hasta que se abre.
   const precisionOf = Object.fromEntries(AP.map((x) => [x.src, x.precision]));
+  const coordOf = Object.fromEntries(AP.map((x) => [x.src, `${x.lat},${x.lng}`]));
+  const twinIn = (g) => g.srcs.filter((s) => g.srcs.some((t) => t !== s && coordOf[t] === coordOf[s]));
   const pickGroup = (cl) => {
-    const groups = cl.filter((x) => x.srcs.length > 1).sort((a, b) => b.srcs.length - a.srcs.length);
-    return groups.find((x) => x.srcs.some((s) => precisionOf[s] === "city")) ?? groups[0];
+    const groups = cl.filter((x) => x.srcs.length > 1 && x.opacity > 0).sort((a, b) => b.srcs.length - a.srcs.length);
+    return groups.find((x) => twinIn(x).some((s) => precisionOf[s] === "city")) ?? groups.find((x) => twinIn(x).length) ?? groups[0];
   };
+  const groupOpen = (p) => p.evaluate(() => !!document.querySelector("[data-atlas-viewer]") || [...document.querySelectorAll("main span")].some((s) => /\d+ Photographs/.test(s.textContent) && s.closest("div.absolute"))).catch(() => false);
+  async function openGroup(p, box) {
+    let g = await clickCluster(p, box, pickGroup);
+    if (!g) return null;
+    const twins = twinIn(g);
+    const anchor = twins.find((s) => precisionOf[s] === "city") ?? twins[0] ?? g.srcs[0];
+    for (let k = 0; k < ATLAS_OPEN_MAX_CLICKS && !(await groupOpen(p)); k++) {
+      const next = await clickCluster(p, box, (cl) => cl.find((x) => x.srcs.length > 1 && x.srcs.includes(anchor)));
+      if (!next) break;
+      g = next;
+    }
+    return g;
+  }
   const viewerState = (p) => p.evaluate(() => {
     const v = document.querySelector("[data-atlas-viewer]");
     if (!v) return null;
@@ -1219,7 +1268,7 @@ if (!only || only === "/atlas") {
   {
     const { ctx, p, errs, box } = await atlasPage();
     if (box && (await cssImpl(p))) {
-      const g = await clickCluster(p, box, pickGroup);
+      const g = await openGroup(p, box);
       log(`  grupo elegido: ${g ? `${g.srcs.length} fotos (${g.srcs.map((s) => `${s.split("/").slice(-2).join("/")}${precisionOf[s] === "city" ? "·c" : ""}`).join(", ")})` : "ninguno"}`);
       const v = await viewerState(p);
       const panel = await p.evaluate(() => [...document.querySelectorAll("main span")].some((s) => /\d+ Photographs/.test(s.textContent) && s.closest("div.absolute")));
@@ -1272,7 +1321,7 @@ if (!only || only === "/atlas") {
   {
     const { ctx, p, errs, box } = await atlasPage({ reducedMotion: "reduce" });
     if (box && (await cssImpl(p))) {
-      await clickCluster(p, box, pickGroup);
+      await openGroup(p, box);
       const first = await p.evaluate(() => window.__atlasRec.viewer[0] ?? null);
       const flat = first && +first[1] === 1 && (first[2] === "none" || first[2] === "matrix(1, 0, 0, 1, 0, 0)");
       log(`  reduced motion: primera muestra del visor ${first ? `opacity ${first[1]} · transform ${first[2]}` : "—"}`);
@@ -1285,16 +1334,20 @@ if (!only || only === "/atlas") {
   // CA10: toda pareja exact distinta que no se separa a R = 4563 cae en una zona.
   {
     const zonesUrl = new URL("../src/data/atlas-zones.json", import.meta.url);
-    const zones = existsSync(zonesUrl) ? JSON.parse(readFileSync(zonesUrl, "utf8")).zones ?? [] : null;
+    const zonesJson = existsSync(zonesUrl) ? JSON.parse(readFileSync(zonesUrl, "utf8")) : null;
+    const zones = zonesJson ? zonesJson.zones ?? [] : null;
+    // Ciudades sin zona por decision de Javi (spec 016, enmienda 2): se quedan agrupadas.
+    const excluded = zonesJson?.excludedCities ?? [];
     const inBox = (pt, b) => pt.lat >= b[0] && pt.lng >= b[1] && pt.lat <= b[2] && pt.lng <= b[3];
     const need = [];
     for (let i = 0; i < exact.length; i++) for (let j = i + 1; j < exact.length; j++) {
       const a = angDist(exact[i], exact[j]);
+      if (excluded.includes(exact[i].city) || excluded.includes(exact[j].city)) continue;
       if (a > 1e-9 && a * ATLAS_WORLD_MAX_R < ATLAS_CLUSTER_PX * ATLAS_ZONE_MARGIN) need.push([exact[i], exact[j]]);
     }
     const out = zones === null ? need : need.filter(([a, b]) => !zones.some((z) => inBox(a, z.bbox) && inBox(b, z.bbox)));
-    log(`  zonas: ${zones === null ? "no existe src/data/atlas-zones.json" : `${zones.length} (${zones.map((z) => z.name).join(", ")})`} · parejas que necesitan zona: ${need.length} · fuera de zona: ${out.length}`);
-    addInv("atlas", "CA10 toda pareja exact sin separar a R 4563 cae en una zona", out.length === 0, `${out.length} parejas fuera${zones === null ? " (sin atlas-zones.json)" : ""}`);
+    log(`  zonas: ${zones === null ? "no existe src/data/atlas-zones.json" : `${zones.length} (${zones.map((z) => z.name).join(", ")})${excluded.length ? ` · excluidas: ${excluded.join(", ")}` : ""}`} · parejas que necesitan zona: ${need.length} · fuera de zona: ${out.length}`);
+    addInv("atlas", "CA10 toda pareja exact sin separar a R 4563 cae en una zona (salvo ciudades excluidas)", out.length === 0, `${out.length} parejas fuera${zones === null ? " (sin atlas-zones.json)" : ""}`);
   }
 
   // CA11 y CA12: zoom con el centro fuera de toda zona, y la cita de OSM.

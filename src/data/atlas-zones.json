@@ -1,44 +1,10 @@
 {
   "source": "OpenStreetMap land polygons (osmdata.openstreetmap.de), © OpenStreetMap contributors, ODbL",
   "worldMaxR": 4563,
+  "excludedCities": [
+    "San Miguel de Allende"
+  ],
   "zones": [
-    {
-      "name": "san-miguel-de-allende",
-      "city": "San Miguel de Allende",
-      "bbox": [
-        20.908692,
-        -100.745785,
-        20.915019,
-        -100.742615
-      ],
-      "needR": 590809,
-      "levels": [
-        {
-          "file": "/atlas/local/san-miguel-de-allende-0.png",
-          "bbox": [
-            19.113212,
-            -102.669673,
-            22.710499,
-            -98.818727
-          ],
-          "w": 1024,
-          "h": 1024,
-          "maxR": 228337
-        },
-        {
-          "file": "/atlas/local/san-miguel-de-allende-1.png",
-          "bbox": [
-            20.731991,
-            -100.936747,
-            21.09172,
-            -100.551653
-          ],
-          "w": 1024,
-          "h": 1024,
-          "maxR": 2283366
-        }
-      ]
-    },
     {
       "name": "san-sebastian",
       "city": "San Sebastián",

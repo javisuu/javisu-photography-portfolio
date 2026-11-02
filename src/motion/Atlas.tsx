@@ -150,6 +150,34 @@ function easeOutCubic(t: number): number {
   return 1 - Math.pow(1 - t, 3);
 }
 
+// Clicking a group zooms until it splits (spec 016, amendment 2). Marks
+// cluster by single linkage at CLUSTER_THRESHOLD_PX on screen, and near
+// the centre of the view on-screen distance is R x angular distance, so
+// a group splits once R x (its largest minimum-spanning-tree edge) passes
+// the threshold. The target is CLICK_SPLIT_MARGIN times that, so the
+// split is clear rather than borderline. Infinity when every member sits
+// on the same point: no zoom ever splits it.
+const CLICK_SPLIT_MARGIN = 1.5;
+function splitR(points: { lat: number; lng: number }[]): number {
+  const n = points.length;
+  const v = points.map(({ lat, lng }) => [Math.cos(lat * DEG) * Math.cos(lng * DEG), Math.cos(lat * DEG) * Math.sin(lng * DEG), Math.sin(lat * DEG)]);
+  const ang = (a: number, b: number) =>
+    Math.acos(Math.min(1, Math.max(-1, v[a][0] * v[b][0] + v[a][1] * v[b][1] + v[a][2] * v[b][2])));
+  // Prim's algorithm; n is a handful of photos.
+  const inTree = new Array(n).fill(false);
+  const best = new Array(n).fill(Infinity);
+  best[0] = 0;
+  let maxEdge = 0;
+  for (let step = 0; step < n; step++) {
+    let u = -1;
+    for (let i = 0; i < n; i++) if (!inTree[i] && (u === -1 || best[i] < best[u])) u = i;
+    inTree[u] = true;
+    maxEdge = Math.max(maxEdge, best[u]);
+    for (let i = 0; i < n; i++) if (!inTree[i]) best[i] = Math.min(best[i], ang(u, i));
+  }
+  return maxEdge > 0 ? (CLUSTER_THRESHOLD_PX * CLICK_SPLIT_MARGIN) / maxEdge : Infinity;
+}
+
 // ---- Land mask ----------------------------------------------------
 // public/atlas/land-mask.png: a monochrome equirectangular raster
 // (white = land) generated at build time by
@@ -448,6 +476,10 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     toPhi: number;
     startedAt: number;
     onDone: () => void;
+    // Set by a click on a group: R eases from fromR to toR alongside the
+    // rotation (in log space, like the zoom back to the ceiling).
+    fromR?: number;
+    toR?: number;
   } | null>(null);
 
   // Last frame's projected marks/clusters — pointer handlers (hover,
@@ -571,6 +603,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       const { minR } = zoomBoundsRef.current;
       const factor = Math.pow(1.0015, -e.deltaY);
       zoomBackRef.current = null;
+      if (recenterRef.current?.toR !== undefined) recenterRef.current = null; // the wheel takes over the zoom
       RRef.current = Math.min(currentMaxR(), Math.max(minR, RRef.current * factor));
       scheduleIdleDrift();
       requestFrame();
@@ -670,8 +703,18 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   // before R reaches WORLD_MAX_R, where the ceiling would stop it.
   function maybeLoadLocal(R: number) {
     if (R < WORLD_MAX_R * LOCAL_PRELOAD_RATIO) return;
-    const lat = phi0Ref.current / DEG;
-    const lng = lngDeg(lambda0Ref.current);
+    requestZonesAt(phi0Ref.current / DEG, lngDeg(lambda0Ref.current));
+  }
+
+  // The highest ceiling this point can ever have: the finest level of any
+  // zone that covers it, loaded or not; WORLD_MAX_R outside every zone.
+  function possibleMaxR(lat: number, lng: number): number {
+    let limit = WORLD_MAX_R;
+    for (const l of LOCAL_LEVELS) if (l.capR > limit && inLevel(l, lat, lng)) limit = l.capR;
+    return limit;
+  }
+
+  function requestZonesAt(lat: number, lng: number) {
     atlasZones.zones.forEach((z, zone) => {
       if (zonesRequestedRef.current.has(zone)) return;
       const [s, w, n, e] = z.levels[0].bbox;
@@ -710,6 +753,9 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       const eased = easeOutCubic(t);
       lambda0Ref.current = recenter.fromLambda + shortestDelta(recenter.fromLambda, recenter.toLambda) * eased;
       phi0Ref.current = recenter.fromPhi + (recenter.toPhi - recenter.fromPhi) * eased;
+      if (recenter.fromR !== undefined && recenter.toR !== undefined) {
+        RRef.current = recenter.fromR * Math.pow(recenter.toR / recenter.fromR, eased);
+      }
       if (t >= 1) {
         recenterRef.current = null;
         recenter.onDone();
@@ -739,7 +785,10 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     // The centre may have just left a zone (or a finer level of one):
     // R eases back to the new ceiling with the recenter's curve, or jumps
     // there under reduced motion. Re-entering mid-way cancels it.
-    const limit = currentMaxR();
+    // Not while a click is zooming in: its target was checked against the
+    // ceiling the destination can have (possibleMaxR), and the masks that
+    // raise it were requested at the click, possibly still arriving.
+    const limit = recenterRef.current?.toR !== undefined ? Infinity : currentMaxR();
     let back = zoomBackRef.current;
     if (back && back.from <= limit) back = zoomBackRef.current = null;
     if (!back && RRef.current > limit) {
@@ -1134,9 +1183,11 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     }
   }
 
-  function startRecenter(toLambda: number, toPhi: number, onDone: () => void) {
+  function startRecenter(toLambda: number, toPhi: number, onDone: () => void, toR?: number) {
     inertiaActiveRef.current = false;
+    zoomBackRef.current = null;
     if (reducedMotionRef.current) {
+      if (toR !== undefined) RRef.current = toR;
       // Jump straight to the target and call onDone in this same
       // (event-handler) call — no point looping the rAF tick for a
       // full RECENTER_MS just to redraw the same, already-final frame
@@ -1154,6 +1205,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       toPhi,
       startedAt: nowMs(),
       onDone,
+      ...(toR !== undefined ? { fromR: RRef.current, toR } : {}),
     };
     requestFrame();
   }
@@ -1177,6 +1229,17 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     const toPhi = Math.atan2(sz, Math.hypot(sx, sy));
 
     if (cluster.members.length > 1) {
+      // A group that can still split zooms in until it does (spec 016,
+      // amendment 2); one that can't — every photo on one point, or the
+      // split needing more zoom than this place can ever have — opens.
+      const targetR = splitR(cluster.members.map(({ mark }) => mark));
+      const lat = toPhi / DEG;
+      const lng = lngDeg(toLambda);
+      if (targetR <= possibleMaxR(lat, lng)) {
+        requestZonesAt(lat, lng);
+        startRecenter(toLambda, toPhi, () => {}, Math.max(RRef.current, targetR));
+        return;
+      }
       startRecenter(toLambda, toPhi, () => {
         setClusterPanel({ members: cluster.members, x: cluster.x, y: cluster.y });
       });

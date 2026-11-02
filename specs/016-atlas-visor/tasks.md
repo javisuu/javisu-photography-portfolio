@@ -78,6 +78,17 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     3. Cada fila se limita a su semiesfera visible, y se saltan los puntos fuera del canvas. En el encuadre por defecto se recorren 8401 puntos (antes 15.617) para los mismos 3184 pintados (`:51`).
   - **Mismo dibujo:** comparado pixel a pixel con HEAD en los tres estados de T3 (en el tercero, 2 pasos de rueda en vez de 12, porque HEAD no pasa de 974), salen 1, 5 y 0 pixeles distintos, todos en el borde del disco y como mucho de 13/255: los puntos semitransparentes se pintan ahora despues de los opacos. Salida en la conversacion
   - La sonda gana `localMasks()` y `latticeCount().ms` (coste de la ultima pasada de la reticula)
+- [x] **T7b** · Enmienda 2: el clic en un grupo acerca hasta partirlo, y San Miguel de Allende se queda sin zona
+  - Fichero(s): `src/motion/Atlas.tsx`, `scripts/generate-atlas-local-masks.mjs`, `src/data/atlas-zones.json`, `public/atlas/local/`, `scripts/diagnostico.mjs`
+  - Comprobacion: CA13, CA10 con la ciudad excluida y CA2, CA3 y CA11 en verde
+  - **Hecho 2026-11-02.** Javi probo T5 a T7 en su maquina ("El resto esta genial") y decidio las dos cosas de la enmienda 2 de `spec.md`.
+    - **San Miguel de Allende:** `EXCLUDED_CITIES` en el script de zonas. Al regenerar salen 2 zonas y 5 mascaras: se borran las 2 de San Miguel, y las de San Sebastian y Nueva York salen identicas, sin cambios en git. `atlas-zones.json` gana `excludedCities`, que CA10 acepta.
+    - **Clic en un grupo:** `splitR()` calcula el objetivo, 1,5 x 14 px / (mayor arista del arbol minimo de sus fotos). Si es alcanzable en ese sitio (`possibleMaxR`: la zona mas fina que lo cubre, cargada o no), el globo gira y acerca a la vez, y en ese mismo clic se piden las mascaras de la zona. Si no, se abre el grupo: hoy el panel de lista, en T12 el visor. Durante el zoom del clic no actua la vuelta al techo. La rueda lo cancela. Con reduced motion salta al final.
+    - `MSYS_NO_PATHCONV=1 node scripts/diagnostico.mjs --medir /atlas`: 12 de 21, 0 errores de consola. Salida en `evidencia/2026-11-02_016-clic.txt`:
+      - **CA13:** el grupo de 11 fotos pasa de R 256 a 653 y se parte en 8 + 3. La media queda a 0,00 px del centro, sin frames > 50 ms (peor 17 ms).
+      - **CA2:** sigue pasando, ahora con 28 pasos de rueda en vez de 67, porque los clics acercan.
+      - **CA3, CA10 y CA11** siguen en verde.
+    - **CA4 y CA8** pulsan ahora el grupo de una foto con coordenadas repetidas hasta que se abre (`openGroup`). Eligen Puerto Escondido, 3 fotos `city` en un mismo punto, que se abre al primer clic.
 - [ ] **T8** · Cita de OpenStreetMap junto a la leyenda, solo en el atlas (`/credits` no se toca, decision de Javi)
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: CA12

@@ -42,6 +42,11 @@ const LEVEL_PX = 1024;
 const FIRST_LEVEL_KM = 400;
 const LEVEL_SHRINK = 10;
 const MIN_LEVEL_OVER_EXTENT = 2; // the finest level is at least twice the zone's own extent
+// Cities that get no zone even though their exact photos don't separate on
+// the world mask: their photos stay grouped, zoom stops at WORLD_MAX_R, and
+// the group opens in the viewer (Javi, spec 016 amendment 2, 2026-11-02).
+// Written to atlas-zones.json too, so the diagnostic's CA10 accepts them.
+const EXCLUDED_CITIES = ["San Miguel de Allende"];
 
 if (!existsSync(SHP) || !existsSync(SHX)) {
   console.log(`Missing ${path.relative(ROOT, SHP)} — see the header of this script for how to fetch it.`);
@@ -71,7 +76,7 @@ function angDist(a, b) {
 const slug = (s) => s.normalize("NFD").replace(/[̀-ͯ]/g, "").toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "");
 
 // ---- Zones: exact coordinates that don't separate on the world mask ----
-const photos = readPhotos().filter((p) => p.precision === "exact");
+const photos = readPhotos().filter((p) => p.precision === "exact" && !EXCLUDED_CITIES.includes(p.city));
 const coords = [...new Map(photos.map((p) => [`${p.lat},${p.lng}`, p])).values()];
 const linkRad = (CLUSTER_PX * SEPARATION_MARGIN) / WORLD_MAX_R;
 const parent = coords.map((_, i) => i);
@@ -165,7 +170,7 @@ console.log(`Read ${nRecords} records, parsed ${parsed} in ${Date.now() - t0}ms`
 // ---- Rasterize every level ----
 rmSync(OUT_DIR, { recursive: true, force: true });
 mkdirSync(OUT_DIR, { recursive: true });
-const json = { source: "OpenStreetMap land polygons (osmdata.openstreetmap.de), © OpenStreetMap contributors, ODbL", worldMaxR: WORLD_MAX_R, zones: [] };
+const json = { source: "OpenStreetMap land polygons (osmdata.openstreetmap.de), © OpenStreetMap contributors, ODbL", worldMaxR: WORLD_MAX_R, excludedCities: EXCLUDED_CITIES, zones: [] };
 for (const z of zones) {
   const levels = [];
   for (let l = 0; l < z.levels.length; l++) {

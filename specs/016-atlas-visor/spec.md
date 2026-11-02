@@ -106,3 +106,23 @@ Cambios en la spec:
 | CA10 | Seccion `atlas`: toda pareja de coordenadas `exact` distintas que no se separa a R = 4563 px cae dentro de una zona de `src/data/atlas-zones.json` | 0 parejas fuera de zona (avisa si alguien anade fotos y no regenera las zonas) |
 | CA11 | Seccion `atlas`: con el centro fuera de toda zona, rueda de zoom hasta el tope | R final ≤ 4563 px |
 | CA12 | `/atlas` en reposo | El texto "OpenStreetMap" esta en el DOM y es visible |
+
+## Enmienda 2 (2026-11-02): el clic acerca, y San Miguel sin zoom profundo
+
+- **Estado:** Decidida por Javi (2026-11-02), tras probar el zoom de T5 a T7 en su maquina: "El resto esta genial".
+- **Que dijo:** "san miguel de allende no me interesa que este con tanto zoom", y esperaba que al pulsar un grupo desde lejos ("espana con 13") el globo "se enfocara mas sobre espana", "y asi con el resto".
+- **Decisiones (respuestas a dos preguntas cerradas, 2026-11-02):**
+  1. **Clic en un grupo: acercar y luego visor.** El globo gira hacia el grupo y hace zoom hasta que el grupo se parte. Cuando el grupo ya no se puede partir, el clic abre el visor. Hay dos casos: todas sus fotos estan en el mismo punto, o el zoom necesario pasa del techo posible en ese sitio.
+  2. **San Miguel de Allende, siempre agrupada.** Se quita su zona: no tiene mapa local y su zoom se para en 4563 px, como fuera de zona. Sus 3 fotos `exact` (a 226 m) se ven como un grupo que se abre en el visor.
+
+Cambios en la spec:
+- **Fuera de alcance** deja de incluir el clic: el modelo de navegacion (rotacion sin paneo, inercia, deriva, rueda y pellizco) no cambia, pero el clic en un grupo ahora tambien acerca. Es la unica forma de zoom que no es rueda ni pellizco, y siempre va hacia el centro del grupo.
+- **Zoom del clic:** objetivo R = 21 / (mayor salto angular del arbol minimo que une las fotos del grupo), es decir 1,5 veces el umbral de agrupado de 14 px. Si ese R pasa del techo posible en el centro del grupo (la zona mas fina que lo cubre, cargada o no, o 4563 px), el grupo no se puede partir y se abre el visor sin zoom. El giro y el zoom van juntos, con la curva del recentrado; el zoom se interpola en escala logaritmica.
+- **Zonas:** `scripts/generate-atlas-local-masks.mjs` gana una lista de ciudades excluidas (`EXCLUDED_CITIES`), que se escribe tambien en `src/data/atlas-zones.json` (`excludedCities`).
+- **CA4** pasa a decir: clic en un grupo que **no se puede partir** abre el visor.
+- **CA10** pasa a decir: toda pareja `exact` distinta que no se separa a 4563 px cae en una zona, **salvo las de una ciudad de `excludedCities`**.
+- **CA nuevo:**
+
+| # | Comando | Resultado esperado |
+|---|---|---|
+| CA13 | Seccion `atlas`: clic en el grupo mas grande del encuadre por defecto y espera a que acabe la animacion | Las fotos del grupo quedan repartidas en 2 o mas grupos, la media en pantalla de sus fotos queda a menos de 2 px del centro del canvas y no hay frames > 50 ms durante la animacion |
