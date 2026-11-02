@@ -200,8 +200,16 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - **Los 2 fallos son un solo frame de 67 ms cada uno,** en CA3 (`:403`) y en CA15 (`:423`). Ocurrieron al final de una ejecucion larga que antes paso por todas las rutas.
   - **Repetida dos veces la seccion `atlas` sola, salio 27 de 27 en las dos,** con el peor frame en 17 y 33 ms. Salidas en `evidencia/2026-11-02_016-atlas-repeticion-1.txt` y `-2.txt` (`:56`, `:77-78` y `:94`). En las seis ejecuciones de la seccion durante el dia tampoco fallo.
   - Se anota como frame suelto de la maquina, sin aflojar el criterio. Esta en la linea de lo medido en T7: HEAD tenia picos parecidos en Chromium headless con raster por software. Si vuelve a salir contra produccion, se investiga.
-- [ ] Contra produccion despues del push de Javi: `evidencia/AAAA-MM-DD_016-produccion.txt`
+- [x] Contra produccion despues del push de Javi: `evidencia/AAAA-MM-DD_016-produccion.txt`
+  - **Hecho 2026-11-02, contra la preview de Vercel de la rama**, no contra produccion (decision de Javi: la rama aun no esta en `main`). Preview: `javisu-photography-portfolio-4r3me0wzd-javisuus-projects.vercel.app`, commit `5352ce8`, con todo el codigo de la spec.
+  - **Acceso:** la preview esta protegida con login de Vercel. El diagnostico gana `VERCEL_BYPASS`, el secreto de "Protection Bypass for Automation", que solo vive en el entorno de quien lo lanza (`scripts/diagnostico.mjs:40-53`). Javi lo lanzo desde su PowerShell.
+    - Dos fallos por el camino. El primero, `fetch failed`, sin causa visible: ahora se muestra `e.cause`. El segundo, "redirect count exceeded": la cabecera `x-vercel-set-bypass-cookie` hacia que Vercel redirigiera para poner una cookie que el `fetch` de Node no guarda. Se quito.
+  - **Resultado: 116 de 116 invariantes**, 0 errores de consola en 6 rutas. Salida en `evidencia/2026-11-02_016-preview.txt`:
+    - Seccion `atlas` en `:318-357`, con todo en verde: CA2, CA3 (peor 17 ms), CA4 a CA8 y CA10 a CA17.
+    - Son menos invariantes que en local (174) porque contra una URL el diagnostico salta lo que solo tiene sentido con `next dev`.
+    - Los acentos y separadores salen mal codificados, porque PowerShell decodifico la salida de Node con la pagina de codigos de la consola. Los numeros y los ok/FALLA se leen bien.
+  - **Fuera de esta spec:** la entrada del landing dio 3 frames > 50 ms (max 67 ms, `:287`). Es una cifra informativa, no una invariante. Se apunta para quien mida el landing despues.
 - [x] CA9: Javi lo prueba en su maquina y en el movil (testimonio aqui)
   - **En su maquina (2026-11-02):** lo fue probando en cada paso. Sobre el zoom: "El resto esta genial". Sobre el recorrido: "Me gusta". Sobre el pin y el conjunto, antes de cerrar: "Me gusta". Las cosas que no le convencieron las corrigieron las enmiendas 2 y 3 y sus ajustes.
   - **El movil queda para la spec multidispositivo,** por decision de Javi (2026-11-02: "deja el movil para la spec multidispositivo"). El plan ya remitia alli como encaja el visor en vertical (decision 3).
-- [ ] Estado de `spec.md` → Implementada
+- [x] Estado de `spec.md` → Implementada (2026-11-02)

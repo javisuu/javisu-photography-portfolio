@@ -1,6 +1,6 @@
 # Spec 016 · Atlas: mas zoom y visor de fotos
 
-- **Estado:** Aprobada (Javi, 2026-11-01: "OK ambos revisados")
+- **Estado:** Implementada (2026-11-02). Aprobada por Javi el 2026-11-01 ("OK ambos revisados"); enmiendas 1 a 3 decididas por el. El movil queda para la spec multidispositivo (CA9). Verificacion en `tasks.md`, seccion Cierre
 - **Fecha:** 2026-10-31
 - **Requiere decision de Javi:** Si (motivo: diseno nuevo del atlas, que cambia `docs/design-spec-v2.md` §5). No toca ninguna de las cuatro zonas sensibles
 
