@@ -46,15 +46,38 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     2. **Rasterizador por lineas de barrido** (`scripts/lib/land-raster.mjs`), no la comprobacion punto a punto del script del mundo, que con los vertices de OSM seria demasiado lenta. Usa la misma formula y la misma comparacion (`lng < x`), por eso la mascara del mundo sale identica.
     3. **Paridad por poligono.** La primera pasada pintaba lineas de mar en los bordes de las teselas de 1°: los poligonos partidos de OSM se solapan un poco en esos bordes, y una regla par/impar global cuenta el solape dos veces. Ahora la paridad es por poligono y se unen los poligonos. Antes del arreglo San Miguel daba 99,9 % de tierra (una fila de mar entera, la 771); despues, 100 %.
   - La GeoJSON de Natural Earth se descargo para comprobar el hash y se borro despues, como dice la cabecera del script
-- [ ] **T5** · Deriva y umbral de inercia escalados por `min(1, 974 / R)`
+- [x] **T5** · Deriva y umbral de inercia escalados por `min(1, 974 / R)`
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: con R ≤ 974, la deriva medida con la sonda (lambda0 en 2 s) es igual a la de la linea base. Con R forzado alto se mueve menos de 1 px/frame en pantalla
-- [ ] **T6** · Mascaras locales en el dibujo: carga perezosa, mascara mas fina por punto y fundido de 200 ms al cargar (sin fundido con reduced motion)
+  - **Hecho 2026-11-02.** `navScale(R)` y `NAV_SCALE_REF_R = 974`, aplicados a la deriva y a los dos usos de `INERTIA_STOP_RAD`. Medido con la sonda en `evidencia/2026-11-02_016-deriva-y-vuelta.txt`:
+    - R 256 (encuadre por defecto): 1,5018 °/s, igual que los 1,5 °/s de `IDLE_DRIFT_DEG_PER_SEC` (`:4`).
+    - R 4563: 0,32 °/s, 22,9 px/s en pantalla, 0,38 px/frame (`:6`).
+    - R 228.337 (San Sebastian): 17,7 px/s, 0,30 px/frame (`:11`). En pantalla la velocidad queda en el orden de la de R 974, como pide el plan
+- [x] **T6** · Mascaras locales en el dibujo: carga perezosa, mascara mas fina por punto y fundido de 200 ms al cargar (sin fundido con reduced motion)
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: sin cambiar aun el limite, ningun PNG local se pide en red (no se pasa de 4563). Forzando la carga, 0 errores de consola
-- [ ] **T7** · `maxR` por posicion (limite de la mascara mas fina que cubre el centro, tope del R necesario de la zona), con vuelta al limite al salir de una zona. `ZOOM_MAX_MULT` se retira
+  - **Hecho 2026-11-02, junto con T7** (la carga solo se puede provocar con el limite nuevo; por eso no hubo "forzar" aparte). Medido en `evidencia/2026-11-02_016-deriva-y-vuelta.txt`:
+    - Rueda hasta el techo con el centro fuera de toda zona: R 4563 y **ningun PNG local pedido** (`:5`).
+    - Centro en San Sebastian: se piden sus 3 niveles, del mas basto al mas fino (`:9`), y ninguno de las otras zonas. 0 errores de consola (`:7`, `:15`).
+  - **Desviaciones del plan:**
+    1. **La carga empieza a R ≥ 0,5 × 4563**, no "al pasar de 4563": el techo solo sube cuando hay un nivel cargado que cubre el centro (si no, se dibujarian los escalones de 20 km de la mascara del mundo), asi que esperar a pasar de 4563 era circular.
+    2. **Ademas del fundido de 200 ms al llegar, una rampa por R** (de 0,5 a 0,6 × 4563): por debajo se dibuja la mascara del mundo como siempre, y cruzar ese R en cualquier sentido nunca hace saltar puntos. Es un fundido cruzado (los puntos que siguen siendo tierra no parpadean), no un fundido desde vacio.
+    3. **Decodificacion con `fetch` + `createImageBitmap`**, fuera del hilo principal; en el hilo solo queda el `getImageData`.
+- [x] **T7** · `maxR` por posicion (limite de la mascara mas fina que cubre el centro, tope del R necesario de la zona), con vuelta al limite al salir de una zona. `ZOOM_MAX_MULT` se retira
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: seccion `atlas`, CA2 (par de 40 m de San Sebastian a mas de 14 px), CA3 (0 frames > 50 ms durante la rueda hasta el maximo), CA10 (0 parejas fuera de zona) y CA11 (R ≤ 4563 fuera de zona). Salida en `evidencia/AAAA-MM-DD_016-zoom.txt`
+  - **Hecho 2026-11-02.** `currentMaxR()` (nivel cargado mas fino bajo el centro, tope `needR`; 4563 fuera), vuelta al techo en `tick` con la curva del recentrado (interpolada en escala logaritmica; al instante con reduced motion), `ZOOM_MAX_MULT` retirado. `MSYS_NO_PATHCONV=1 node scripts/diagnostico.mjs --medir /atlas`: 11 de 20 (antes 9), 0 errores de consola, buffer del canvas = caja x dpr. Salida: `evidencia/2026-11-02_016-zoom.txt`:
+    - **CA2:** R final 3.361.566 y el par de 40 m a 21,0 px (`:53`). Grupos pulsados por el camino: 11 → 8 → 7 → 4 → 3 fotos (`:52`).
+    - **CA3:** 0 frames > 50 ms en 243 frames de rueda, el peor de 33 ms (`:54`).
+    - **CA10:** 0 parejas fuera de zona (`:69`). **CA11:** R 4563 fuera de zona (`:71`).
+    - **Vuelta al techo:** desde R 59.254 arrastrando hacia el mar, R vuelve a 4563 en 583 ms (`evidencia/2026-11-02_016-deriva-y-vuelta.txt:14`).
+  - **CA2 cambia de procedimiento en el diagnostico** (`zoomFollowing`): un grupo se recentra en la media de sus fotos. La del grupo de 11 cae a unos 60 km de San Sebastian, y al hacer zoom hacia el centro el par salia de la pantalla en R 228.337 (techo del nivel de 400 km). Ahora se hace lo que haria un visitante: rodar y, cada vez que el grupo del par se parte, pulsar el subgrupo. Solo se pulsan grupos: un primer intento pulso una foto suelta, que hoy navega al album, y la medida acabo en otra pagina. **CA3 descuenta los frames de cada clic** (recentrado y panel de lista, que en T12 se sustituye por el visor, con sus propias medidas CA4 a CA8).
+  - **Coste de dibujo.** Con el recorrido de clics, CA3 dio 1 a 3 frames de 67 ms. HEAD tiene los mismos picos en el mismo tramo de zoom (hasta 62 ms dibujando la reticula a R ≈ 630 en el encuadre por defecto, medido hoy), que T3 no vio porque medio con el globo centrado en San Sebastian. Un perfil de CPU mostro que el coste era pintar, no calcular. Se hicieron tres cambios:
+    1. Los puntos opacos van en un solo trazado y se rellenan una vez; los del borde del disco (alfa < 1) siguen punto a punto.
+    2. La proyeccion va en linea, con la trigonometria de fila fuera del bucle.
+    3. Cada fila se limita a su semiesfera visible, y se saltan los puntos fuera del canvas. En el encuadre por defecto se recorren 8401 puntos (antes 15.617) para los mismos 3184 pintados (`:51`).
+  - **Mismo dibujo:** comparado pixel a pixel con HEAD en los tres estados de T3 (en el tercero, 2 pasos de rueda en vez de 12, porque HEAD no pasa de 974), salen 1, 5 y 0 pixeles distintos, todos en el borde del disco y como mucho de 13/255: los puntos semitransparentes se pintan ahora despues de los opacos. Salida en la conversacion
+  - La sonda gana `localMasks()` y `latticeCount().ms` (coste de la ultima pasada de la reticula)
 - [ ] **T8** · Cita de OpenStreetMap junto a la leyenda, solo en el atlas (`/credits` no se toca, decision de Javi)
   - Fichero(s): `src/motion/Atlas.tsx`
   - Comprobacion: CA12

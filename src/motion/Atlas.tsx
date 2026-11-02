@@ -20,6 +20,7 @@ import Image from "next/image";
 import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useRef, useState, useSyncExternalStore } from "react";
 import type { PlacePrecision } from "@/data/photos";
+import atlasZones from "@/data/atlas-zones.json";
 
 export type AtlasMark = {
   src: string;
@@ -52,19 +53,37 @@ const LATTICE_REBUILD_RATIO = 0.15; // rebuild once R has drifted this far from 
 const LIMB_FADE_START = 0.15; // cosc below this fades linearly to 0
 const PHI0_CLAMP_DEG = 70;
 const ZOOM_MIN_MULT = 0.32; // * min(vw, vh)
-const ZOOM_MAX_MULT = 1.6;
+// The zoom ceiling is no longer a viewport multiple (spec 016): it is
+// where the land mask under the CENTRE of the view stops resolving — see
+// currentMaxR(). WORLD_MAX_R is the world mask's own limit (2048 px at 14
+// screen px per mask pixel, scripts/generate-atlas-local-masks.mjs).
+const WORLD_MAX_R = atlasZones.worldMaxR;
+const LOCAL_PRELOAD_RATIO = 0.5; // a zone's masks load once R passes this share of WORLD_MAX_R with the centre in it
+const LOCAL_BLEND_RATIO = 0.1; // ...and blend in over the next 10 % of WORLD_MAX_R, so crossing that R never pops
+const MASK_FADE_MS = 200; // a local mask that just arrived fades in over this
 const DEFAULT_LAMBDA0_DEG = -46;
 const DEFAULT_PHI0_DEG = 26;
 const INERTIA_FRICTION = 0.94;
 const INERTIA_STOP_RAD = 0.0002;
 const IDLE_DRIFT_DELAY_MS = 4000;
 const IDLE_DRIFT_DEG_PER_SEC = 1.5;
+// Drift and the inertia stop threshold are ANGULAR, so on screen they
+// grow with R: at the deep zooms of spec 016 (R in the millions) 1.5°/s
+// would be tens of thousands of px/s. Both scale by min(1, REF / R),
+// REF being the largest R the atlas reached before spec 016 (1.6 x 609,
+// the canvas height at 1440x900): up to there nothing changes, past it
+// the on-screen speed stays what it was at that zoom.
+const NAV_SCALE_REF_R = 974;
+function navScale(R: number): number {
+  return R > NAV_SCALE_REF_R ? NAV_SCALE_REF_R / R : 1;
+}
 const CLUSTER_THRESHOLD_PX = 14;
 const DOT_RADIUS_PX = 1.1;
 const MARK_RADIUS_PX = 4;
 const MARK_HOVER_RADIUS_PX = 5.5;
 const MARK_HIT_RADIUS_PX = 10; // generous — easier to point at than to see
 const RECENTER_MS = 600;
+const ZOOM_BACK_MS = RECENTER_MS; // R easing back to the ceiling after the centre leaves a zone
 const CLICK_MOVE_THRESHOLD_PX = 4;
 
 const DEG = Math.PI / 180;
@@ -145,6 +164,81 @@ function sampleLand(mask: LandMask, lat: number, lng: number): boolean {
   const x = Math.min(mask.w - 1, Math.max(0, Math.floor(((lng + 180) / 360) * mask.w)));
   const y = Math.min(mask.h - 1, Math.max(0, Math.floor(((90 - lat) / 180) * mask.h)));
   return mask.data[y * mask.w + x] > 127;
+}
+
+// Grayscale image -> LandMask (red channel; the masks are monochrome).
+function packMask(source: CanvasImageSource, w: number, h: number): LandMask | null {
+  const off = document.createElement("canvas");
+  off.width = w;
+  off.height = h;
+  const octx = off.getContext("2d", { willReadFrequently: true });
+  if (!octx) return null;
+  octx.drawImage(source, 0, 0);
+  const { data } = octx.getImageData(0, 0, w, h);
+  const packed = new Uint8Array(w * h);
+  for (let i = 0; i < packed.length; i++) packed[i] = data[i * 4];
+  return { data: packed, w, h };
+}
+
+// ---- Local masks (spec 016) -------------------------------------------
+// src/data/atlas-zones.json, written by scripts/generate-atlas-local-masks.mjs
+// from OpenStreetMap's coastline: for each ZONE (exact-located photos too
+// close together to separate on the world mask) a small pyramid of square
+// equirectangular masks, finer and smaller level after level. Flattened
+// here, finest first, so "the finest mask that covers a point" is the
+// first one in the list that contains it.
+type LocalLevel = {
+  file: string;
+  s: number;
+  w: number;
+  n: number;
+  e: number;
+  capR: number; // the zoom ceiling with the centre in this level: its resolution limit, capped at the zone's need
+};
+const LOCAL_LEVELS: LocalLevel[] = atlasZones.zones
+  .flatMap((z) =>
+    z.levels.map((l) => ({
+      file: l.file,
+      s: l.bbox[0],
+      w: l.bbox[1],
+      n: l.bbox[2],
+      e: l.bbox[3],
+      capR: Math.min(l.maxR, z.needR),
+    }))
+  )
+  .sort((a, b) => a.e - a.w - (b.e - b.w));
+
+type LoadedMask = LandMask & { loadedAt: number };
+
+function inLevel(l: LocalLevel, lat: number, lng: number): boolean {
+  return lat >= l.s && lat < l.n && lng >= l.w && lng < l.e;
+}
+
+function sampleLocal(mask: LandMask, l: LocalLevel, lat: number, lng: number): boolean {
+  const x = Math.min(mask.w - 1, Math.max(0, Math.floor(((lng - l.w) / (l.e - l.w)) * mask.w)));
+  const y = Math.min(mask.h - 1, Math.max(0, Math.floor(((l.n - lat) / (l.n - l.s)) * mask.h)));
+  return mask.data[y * mask.w + x] > 127;
+}
+
+// Longitude in degrees, wrapped to [-180, 180) — lambda0 itself is never
+// wrapped (drag and drift just keep adding to it).
+function lngDeg(lambda: number): number {
+  let d = (lambda / DEG) % 360;
+  if (d >= 180) d -= 360;
+  if (d < -180) d += 360;
+  return d;
+}
+
+// fetch + createImageBitmap rather than an <img>: the PNG decode happens
+// off the main thread, so a level arriving mid-zoom costs one getImageData
+// and nothing else.
+async function decodeMask(src: string): Promise<LandMask | null> {
+  const res = await fetch(src);
+  if (!res.ok) return null;
+  const bitmap = await createImageBitmap(await res.blob());
+  const mask = packMask(bitmap, bitmap.width, bitmap.height);
+  bitmap.close();
+  return mask;
 }
 
 // ---- Dot lattice ----------------------------------------------------
@@ -269,7 +363,8 @@ type Cluster = { members: { mark: AtlasMark; index: number }[]; x: number; y: nu
 type AtlasProbe = {
   state: () => { R: number; lambda0: number; phi0: number; minR: number; maxR: number; width: number; height: number };
   clusters: () => { x: number; y: number; opacity: number; srcs: string[] }[];
-  latticeCount: () => { visited: number; drawn: number };
+  latticeCount: () => { visited: number; drawn: number; ms: number }; // ms: time spent walking/painting the lattice
+  localMasks: () => string[]; // files of the local masks loaded so far
 };
 declare global {
   interface Window {
@@ -311,6 +406,10 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   const RRef = useRef(0);
 
   const maskRef = useRef<LandMask | null>(null);
+  // One slot per LOCAL_LEVELS entry, null until loaded; zones already asked for.
+  const localMasksRef = useRef<(LoadedMask | null)[]>(LOCAL_LEVELS.map(() => null));
+  const zonesRequestedRef = useRef(new Set<number>());
+  const aliveRef = useRef(true);
   // R the current angular step was derived from, and that step.
   const latticeRef = useRef<{ R: number; delta: number } | null>(null);
 
@@ -337,6 +436,11 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   const pinchStartRRef = useRef(0);
 
   // Recenter-on-click animation.
+  // R easing back down to the ceiling (see tick). Interpolated in log
+  // space: zoom reads as a ratio, and a linear ease from millions of px
+  // down to thousands would spend almost all of it invisibly.
+  const zoomBackRef = useRef<{ from: number; to: number; startedAt: number } | null>(null);
+
   const recenterRef = useRef<{
     fromLambda: number;
     fromPhi: number;
@@ -351,8 +455,8 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   // themselves, so hit-testing is always consistent with what's
   // actually on screen.
   const lastClustersRef = useRef<Cluster[]>([]);
-  // Lattice points walked and dots painted in the last pass — probe only.
-  const lastLatticeRef = useRef({ visited: 0, drawn: 0 });
+  // Lattice points walked and dots painted in the last pass, and its cost — probe only.
+  const lastLatticeRef = useRef({ visited: 0, drawn: 0, ms: 0 });
 
   const reducedMotionRef = useRef(reducedMotion);
   useEffect(() => {
@@ -383,7 +487,9 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   // produced the "canvas stuck at its 300x150 HTML default" symptom, not
   // a missing resize implementation (one already existed below).
   useEffect(() => {
+    aliveRef.current = true;
     return () => {
+      aliveRef.current = false;
       if (rafRef.current !== null) {
         cancelAnimationFrame(rafRef.current);
         rafRef.current = null;
@@ -399,13 +505,14 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         lambda0: lambda0Ref.current,
         phi0: phi0Ref.current,
         minR: zoomBoundsRef.current.minR,
-        maxR: zoomBoundsRef.current.maxR,
+        maxR: currentMaxR(),
         width: viewportSizeRef.current.width,
         height: viewportSizeRef.current.height,
       }),
       clusters: () =>
         lastClustersRef.current.map((c) => ({ x: c.x, y: c.y, opacity: c.opacity, srcs: c.members.map((m) => m.mark.src) })),
       latticeCount: () => ({ ...lastLatticeRef.current }),
+      localMasks: () => LOCAL_LEVELS.filter((_, i) => localMasksRef.current[i]).map((l) => l.file),
     };
     window.__atlas = probe;
     return () => {
@@ -442,7 +549,6 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   }, [viewportSize]);
 
   const minR = useMemo(() => ZOOM_MIN_MULT * Math.min(viewportSize.width, viewportSize.height), [viewportSize]);
-  const maxR = useMemo(() => ZOOM_MAX_MULT * Math.min(viewportSize.width, viewportSize.height), [viewportSize]);
 
   // React's JSX onWheel is registered as a passive listener, and
   // passive listeners can't call preventDefault — it throws ("Unable to
@@ -451,19 +557,21 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   // stop the page from doing anything else with the gesture), so this
   // has to be a real addEventListener with { passive: false }. The
   // effect attaches once; a "latest" ref is what keeps it seeing
-  // current min/max without needing to re-attach on every resize.
-  const zoomBoundsRef = useRef({ minR, maxR });
+  // the current minimum without needing to re-attach on every resize
+  // (the maximum is read live, from currentMaxR()).
+  const zoomBoundsRef = useRef({ minR });
   useEffect(() => {
-    zoomBoundsRef.current = { minR, maxR };
+    zoomBoundsRef.current = { minR };
   });
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
     function onWheel(e: WheelEvent) {
       e.preventDefault();
-      const { minR, maxR } = zoomBoundsRef.current;
+      const { minR } = zoomBoundsRef.current;
       const factor = Math.pow(1.0015, -e.deltaY);
-      RRef.current = Math.min(maxR, Math.max(minR, RRef.current * factor));
+      zoomBackRef.current = null;
+      RRef.current = Math.min(currentMaxR(), Math.max(minR, RRef.current * factor));
       scheduleIdleDrift();
       requestFrame();
     }
@@ -474,11 +582,10 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
 
   // Seed R the first time the viewport is known (default framing: whole
   // globe comfortably inside the shorter dimension); on every LATER
-  // resize, re-clamp the user's current R into the new [minR, maxR]
-  // bounds instead — minR/maxR are themselves derived from viewportSize,
-  // so a window shrink can otherwise leave R sitting above the new
-  // maxR indefinitely (nothing else re-checks it until the next wheel/
-  // pinch). Clamping, not reseeding, preserves whatever zoom level the
+  // resize, re-clamp the user's current R into [minR, currentMaxR()]
+  // instead — minR is derived from viewportSize, so a window change can
+  // otherwise leave R outside it indefinitely (nothing else re-checks it
+  // until the next wheel/pinch). Clamping, not reseeding, preserves whatever zoom level the
   // visitor actually chose across a resize. draw()'s own R-drift check
   // (LATTICE_REBUILD_RATIO) picks up the corrected R on the very next
   // frame and resamples the lattice if it moved enough to matter.
@@ -487,11 +594,11 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     if (RRef.current === 0) {
       RRef.current = Math.min(viewportSize.width, viewportSize.height) * 0.42;
     } else {
-      RRef.current = Math.min(maxR, Math.max(minR, RRef.current));
+      RRef.current = Math.min(currentMaxR(), Math.max(minR, RRef.current));
     }
     requestFrame();
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [viewportSize, minR, maxR]);
+  }, [viewportSize, minR]);
 
   // Load + decode the land mask once. Until it's ready the globe still
   // renders — background, marks if any — just without dots yet; a 22KB
@@ -502,16 +609,9 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     const img = new window.Image();
     img.onload = () => {
       if (cancelled) return;
-      const off = document.createElement("canvas");
-      off.width = img.naturalWidth;
-      off.height = img.naturalHeight;
-      const octx = off.getContext("2d", { willReadFrequently: true });
-      if (!octx) return;
-      octx.drawImage(img, 0, 0);
-      const { data } = octx.getImageData(0, 0, off.width, off.height);
-      const packed = new Uint8Array(off.width * off.height);
-      for (let i = 0; i < packed.length; i++) packed[i] = data[i * 4]; // red channel; mask is grayscale
-      maskRef.current = { data: packed, w: off.width, h: off.height };
+      const mask = packMask(img, img.naturalWidth, img.naturalHeight);
+      if (!mask) return;
+      maskRef.current = mask;
       requestFrame();
     };
     img.src = "/atlas/land-mask.png";
@@ -550,6 +650,46 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     }, IDLE_DRIFT_DELAY_MS);
   }
 
+  // The zoom ceiling at the current centre: the resolution limit of the
+  // finest LOADED local level containing it (capped at its zone's need),
+  // or WORLD_MAX_R outside every zone. Only loaded levels count — zooming
+  // past what is on hand would draw the world mask's 20 km steps.
+  function currentMaxR(): number {
+    const lat = phi0Ref.current / DEG;
+    const lng = lngDeg(lambda0Ref.current);
+    let limit = WORLD_MAX_R;
+    LOCAL_LEVELS.forEach((l, i) => {
+      if (l.capR > limit && localMasksRef.current[i] && inLevel(l, lat, lng)) limit = l.capR;
+    });
+    return limit;
+  }
+
+  // Lazy load: a zone's levels are fetched, coarsest first, the first time
+  // R passes LOCAL_PRELOAD_RATIO x WORLD_MAX_R with the centre inside its
+  // outermost level — early enough that the first level is normally in
+  // before R reaches WORLD_MAX_R, where the ceiling would stop it.
+  function maybeLoadLocal(R: number) {
+    if (R < WORLD_MAX_R * LOCAL_PRELOAD_RATIO) return;
+    const lat = phi0Ref.current / DEG;
+    const lng = lngDeg(lambda0Ref.current);
+    atlasZones.zones.forEach((z, zone) => {
+      if (zonesRequestedRef.current.has(zone)) return;
+      const [s, w, n, e] = z.levels[0].bbox;
+      if (lat < s || lat >= n || lng < w || lng >= e) return;
+      zonesRequestedRef.current.add(zone);
+      void (async () => {
+        for (const level of z.levels) {
+          const i = LOCAL_LEVELS.findIndex((l) => l.file === level.file);
+          const mask = await decodeMask(level.file).catch(() => null);
+          if (!aliveRef.current) return;
+          if (!mask) continue; // the world mask keeps drawing there, and the ceiling stays where it was
+          localMasksRef.current[i] = { ...mask, loadedAt: nowMs() };
+          requestFrame();
+        }
+      })();
+    });
+  }
+
   function tick(now: number) {
     rafRef.current = null;
     const dtMs = Math.min(64, now - lastFrameAtRef.current); // clamp so a tab-switch stall can't fling the globe
@@ -581,7 +721,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       phi0Ref.current = clampPhi0(phi0Ref.current + velocityRef.current.phi);
       velocityRef.current.lambda *= INERTIA_FRICTION;
       velocityRef.current.phi *= INERTIA_FRICTION;
-      if (Math.hypot(velocityRef.current.lambda, velocityRef.current.phi) < INERTIA_STOP_RAD) {
+      if (Math.hypot(velocityRef.current.lambda, velocityRef.current.phi) < INERTIA_STOP_RAD * navScale(RRef.current)) {
         inertiaActiveRef.current = false;
       } else {
         stillActive = true;
@@ -592,11 +732,29 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       // this loop only runs at all while SOMETHING is active, so a
       // "has 4s passed?" check inside it can never fire once the loop
       // has already gone idle (which is exactly when it needs to).
-      lambda0Ref.current += IDLE_DRIFT_DEG_PER_SEC * DEG * (dtMs / 1000);
+      lambda0Ref.current += IDLE_DRIFT_DEG_PER_SEC * DEG * navScale(RRef.current) * (dtMs / 1000);
       stillActive = true;
     }
 
-    draw();
+    // The centre may have just left a zone (or a finer level of one):
+    // R eases back to the new ceiling with the recenter's curve, or jumps
+    // there under reduced motion. Re-entering mid-way cancels it.
+    const limit = currentMaxR();
+    let back = zoomBackRef.current;
+    if (back && back.from <= limit) back = zoomBackRef.current = null;
+    if (!back && RRef.current > limit) {
+      if (reducedMotionRef.current) RRef.current = limit;
+      else back = zoomBackRef.current = { from: RRef.current, to: limit, startedAt: now };
+    }
+    if (back) {
+      back.to = limit;
+      const t = Math.min(1, (now - back.startedAt) / ZOOM_BACK_MS);
+      RRef.current = back.from * Math.pow(back.to / back.from, easeOutCubic(t));
+      if (t >= 1) zoomBackRef.current = null;
+      else stillActive = true;
+    }
+
+    if (draw()) stillActive = true;
 
     if (stillActive) {
       rafRef.current = requestAnimationFrame(tick);
@@ -608,11 +766,13 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     return Math.min(limit, Math.max(-limit, phi0));
   }
 
-  function draw() {
+  // Returns true while a local mask is still fading in (the caller keeps
+  // the loop running for it).
+  function draw(): boolean {
     const canvas = canvasRef.current;
     const ctx = canvas?.getContext("2d");
     const vp = viewportSizeRef.current;
-    if (!canvas || !ctx || vp.width === 0) return;
+    if (!canvas || !ctx || vp.width === 0) return false;
 
     const dpr = window.devicePixelRatio || 1;
     const w = vp.width;
@@ -628,7 +788,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     ctx.fillRect(0, 0, w, h);
 
     const R = RRef.current;
-    if (R === 0) return;
+    if (R === 0) return false;
     const cx = w / 2;
     const cy = h / 2;
     const lambda0 = lambda0Ref.current;
@@ -639,6 +799,8 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
     // stays pinned to TARGET_PX at every zoom level instead of degrading
     // as R grows, and between re-derivations the dots stay put.
     const mask = maskRef.current;
+    let fading = false;
+    const latticeStart = nowMs();
     if (mask) {
       const cached = latticeRef.current;
       if (!cached || Math.abs(R - cached.R) / cached.R > LATTICE_REBUILD_RATIO) {
@@ -648,40 +810,116 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       const latMin = LAT_MIN_DEG * DEG;
       const latMax = LAT_MAX_DEG * DEG;
       const range = visibleRange(lambda0, phi0, R, cx, cy, w, h);
+
+      // Local levels that are loaded and overlap the view, finest first,
+      // each with its blend weight: 0 below LOCAL_PRELOAD_RATIO, ramping
+      // to 1 over LOCAL_BLEND_RATIO, and also ramping in over
+      // MASK_FADE_MS after it arrives (at once under reduced motion).
+      maybeLoadLocal(R);
+      const zoomWeight = Math.min(1, Math.max(0, (R / WORLD_MAX_R - LOCAL_PRELOAD_RATIO) / LOCAL_BLEND_RATIO));
+      const active: { level: LocalLevel; mask: LoadedMask; weight: number }[] = [];
+      if (zoomWeight > 0) {
+        const now = nowMs();
+        const pad = delta / DEG;
+        const latLo = range.phiLo / DEG - pad;
+        const latHi = range.phiHi / DEG + pad;
+        const lngLo = lngDeg(lambda0 + range.dlLo) - pad;
+        const lngHi = lngLo + (range.dlHi - range.dlLo) / DEG + 2 * pad;
+        LOCAL_LEVELS.forEach((level, i) => {
+          const local = localMasksRef.current[i];
+          if (!local || level.n < latLo || level.s > latHi) return;
+          const lngHit = range.allLongitudes || [0, 360, -360].some((k) => level.w + k <= lngHi && level.e + k >= lngLo);
+          if (!lngHit) return;
+          const fade = reducedMotionRef.current ? 1 : Math.min(1, (now - local.loadedAt) / MASK_FADE_MS);
+          if (fade < 1) fading = true;
+          active.push({ level, mask: local, weight: zoomWeight * fade });
+        });
+      }
+      // 0..1: how much land is at (lat, lng) — the finest covering mask,
+      // cross-faded with the next coarser one while its weight is < 1.
+      // `row` is the subset of `active` whose latitudes contain the row.
+      const landAt = (row: typeof active, lat: number, lng: number, from: number): number => {
+        for (let a = from; a < row.length; a++) {
+          const { level, mask: local, weight } = row[a];
+          if (!inLevel(level, lat, lng)) continue;
+          const cur = sampleLocal(local, level, lat, lng) ? 1 : 0;
+          if (weight >= 1) return cur;
+          const prev = landAt(row, lat, lng, a + 1);
+          return prev + (cur - prev) * weight;
+        }
+        return sampleLand(mask, lat, lng) ? 1 : 0;
+      };
       const kLo = Math.max(0, Math.ceil((range.phiLo - delta - latMin) / delta));
       const kHi = Math.floor((Math.min(latMax, range.phiHi + delta) - latMin) / delta);
       ctx.fillStyle = COLOR_DOT;
       const r = DOT_RADIUS_PX;
       let drawn = 0;
       let visited = 0;
+      // project() inlined, with everything that is constant per frame or
+      // per row hoisted out of the inner loop — same formulas, same
+      // values. Painting was the real cost, not the maths: one fillRect
+      // per dot is one draw call each (measured up to ~60 ms for ~15k
+      // dots, on HEAD as much as here, 2026-11-02). Fully opaque dots now
+      // go into ONE path filled once; only the limb band (alpha < 1) is
+      // still painted dot by dot. Dots off the canvas are skipped.
+      const sinPhi0 = Math.sin(phi0);
+      const cosPhi0 = Math.cos(phi0);
+      const limbDots: number[] = []; // x, y, alpha triples
+      const cull = r + 2; // the buffer is rounded up from the CSS box (608.5 -> 609 px at 1440x900)
+      ctx.beginPath();
       for (let k = kLo; k <= kHi; k++) {
         const phi = latMin + k * delta;
         if (phi > latMax) break;
+        const latDeg = phi / DEG;
+        const sinPhi = Math.sin(phi);
+        const cosPhi = Math.cos(phi);
+        const row = active.length ? active.filter((a) => latDeg >= a.level.s && latDeg < a.level.n) : active;
         const lngStep = delta / Math.cos(phi);
         // Columns in a row: lambda = -PI + j·lngStep while lambda < PI.
         const n = Math.ceil((Math.PI * 2) / lngStep - 1e-9);
+        // The row's front-hemisphere half-width: cosc >= 0 exactly when
+        // cos(dl) >= -tan(phi)·tan(phi0). Intersected with the view's
+        // longitude range, it keeps the walk off the far side of the
+        // globe, which the view's lat/lng box alone does not (measured:
+        // 37k points walked at R ≈ 630 for ~18k that can show).
+        const t = -Math.tan(phi) * Math.tan(phi0);
+        if (t >= 1) continue;
+        const half = t <= -1 ? Math.PI : Math.acos(t);
+        const dlLo = range.allLongitudes ? -half : Math.max(range.dlLo, -half);
+        const dlHi = range.allLongitudes ? half : Math.min(range.dlHi, half);
         let jLo = 0;
         let jHi = n - 1;
-        if (!range.allLongitudes && range.dlHi - range.dlLo + 2 * lngStep < Math.PI * 2) {
-          jLo = Math.ceil((lambda0 + range.dlLo - lngStep + Math.PI) / lngStep);
-          jHi = Math.floor((lambda0 + range.dlHi + lngStep + Math.PI) / lngStep);
+        if (dlHi - dlLo + 2 * lngStep < Math.PI * 2) {
+          jLo = Math.ceil((lambda0 + dlLo - lngStep + Math.PI) / lngStep);
+          jHi = Math.floor((lambda0 + dlHi + lngStep + Math.PI) / lngStep);
         }
         for (let j = jLo; j <= jHi; j++) {
           const jn = ((j % n) + n) % n;
           const lambda = -Math.PI + jn * lngStep;
           visited++;
-          if (!sampleLand(mask, phi / DEG, lambda / DEG)) continue;
-          const p = project(lambda, phi, lambda0, phi0, R, cx, cy);
-          if (!p) continue;
-          const op = limbOpacity(p.cosc);
+          const land = row.length ? landAt(row, latDeg, lambda / DEG, 0) : sampleLand(mask, latDeg, lambda / DEG) ? 1 : 0;
+          if (land <= 0) continue;
+          const dl = lambda - lambda0;
+          const cosDl = Math.cos(dl);
+          const cosc = sinPhi0 * sinPhi + cosPhi0 * cosPhi * cosDl;
+          if (cosc < 0) continue;
+          const op = limbOpacity(cosc) * land;
           if (op <= 0) continue;
-          ctx.globalAlpha = op;
-          ctx.fillRect(p.x - r, p.y - r, r * 2, r * 2);
+          const x = cx + R * cosPhi * Math.sin(dl);
+          const y = cy - R * (cosPhi0 * sinPhi - sinPhi0 * cosPhi * cosDl);
+          if (x < -cull || x > w + cull || y < -cull || y > h + cull) continue;
+          if (op >= 1) ctx.rect(x - r, y - r, r * 2, r * 2);
+          else limbDots.push(x, y, op);
           drawn++;
         }
       }
+      ctx.fill();
+      for (let i = 0; i < limbDots.length; i += 3) {
+        ctx.globalAlpha = limbDots[i + 2];
+        ctx.fillRect(limbDots[i] - r, limbDots[i + 1] - r, r * 2, r * 2);
+      }
       ctx.globalAlpha = 1;
-      lastLatticeRef.current = { visited, drawn };
+      lastLatticeRef.current = { visited, drawn, ms: nowMs() - latticeStart };
     }
 
     // Photo marks — projected the same way, clustered by ON-SCREEN
@@ -762,6 +1000,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       }
     }
     ctx.globalAlpha = 1;
+    return fading;
   }
 
   // The hovered cluster's key needs to be readable from inside draw()
@@ -830,7 +1069,8 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       const pts = Array.from(pointersRef.current.values());
       const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
       const newR = (pinchStartRRef.current * dist) / pinchStartDistRef.current;
-      RRef.current = Math.min(maxR, Math.max(minR, newR));
+      zoomBackRef.current = null;
+      RRef.current = Math.min(currentMaxR(), Math.max(minR, newR));
       scheduleIdleDrift();
       requestFrame();
       return;
@@ -887,7 +1127,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         // -velocity because lambda0 -= velocity each inertia frame,
         // matching the live-drag sign convention above.
         const speed = Math.hypot(velocityRef.current.lambda, velocityRef.current.phi);
-        inertiaActiveRef.current = speed >= INERTIA_STOP_RAD;
+        inertiaActiveRef.current = speed >= INERTIA_STOP_RAD * navScale(RRef.current);
       }
       scheduleIdleDrift();
       requestFrame();

@@ -1118,6 +1118,47 @@ if (!only || only === "/atlas") {
     const deltas = inWin.slice(1).map((t, k) => t - inWin[k]);
     return { R: last, steps, frames: inWin.length, long: deltas.slice(1).filter((d) => d > LONG_FRAME_MS).length, worst: Math.max(0, ...deltas.slice(1)) };
   }
+  async function zoomFollowing(p, box, src) {
+    const t0 = await p.evaluate(() => performance.now());
+    const clicks = [];
+    const clickGroup = async () => {
+      // Solo grupos: el clic en una foto suelta navega a su album (o, con el
+      // visor, lo abre), y la medida dejaria de ser la del globo.
+      const tc = await p.evaluate(() => performance.now());
+      const c = await clickCluster(p, box, (cl) => cl.find((x) => x.srcs.length > 1 && x.srcs.includes(src) && x.x >= 0 && x.y >= 0 && x.x <= box.w && x.y <= box.h));
+      if (!c) return null;
+      // El clic en un grupo abre el panel de lista (o el visor): se cierra para seguir.
+      await p.keyboard.press("Escape");
+      await p.evaluate(() => [...document.querySelectorAll('main button[aria-label="Close"]')].forEach((b) => b.click())).catch(() => {});
+      await p.mouse.move(box.x + box.w * 0.25, box.y + box.h / 2);
+      const t1 = await p.evaluate(() => performance.now());
+      clicks.push({ n: c.srcs.length, R: (await probe(p, () => window.__atlas.state().R)) ?? 0, t0: tc, t1 });
+      return c;
+    };
+    let group = await clickGroup();
+    let last = -1, same = 0, steps = 0;
+    while (same < 3 && steps < ATLAS_WHEEL_MAX_STEPS) {
+      await p.mouse.wheel(0, ATLAS_WHEEL_DELTA);
+      steps++;
+      const R = (await probe(p, () => window.__atlas?.state().R)) ?? -1;
+      same = Math.abs(R - last) < 1e-6 ? same + 1 : 0;
+      last = R;
+      const cur = ((await probe(p, () => window.__atlas.clusters())) ?? []).find((x) => x.srcs.includes(src));
+      if (group && cur && cur.srcs.length < group.srcs.length) {
+        const c = await clickGroup();
+        if (c) { group = c; same = 0; }
+      }
+    }
+    await p.waitForTimeout(300);
+    const t1 = await p.evaluate(() => performance.now());
+    const fr = await p.evaluate(() => window.__atlasRec.frames);
+    // CA3 mide el zoom del globo: se descartan los frames de cada clic (el
+    // recentrado y el panel o el visor que abre, que tienen su propia medida).
+    const inWin = fr.filter((t) => t >= t0 && t <= t1);
+    const inClick = (a, b) => clicks.some((c) => b >= c.t0 && a <= c.t1);
+    const deltas = inWin.slice(1).map((t, k) => (inClick(inWin[k], t) ? null : t - inWin[k])).filter((d) => d !== null);
+    return { R: last, steps, clicks, frames: deltas.length, long: deltas.slice(1).filter((d) => d > LONG_FRAME_MS).length, worst: Math.max(0, ...deltas.slice(1)) };
+  }
   const cssImpl = async (p) => probe(p, () => window.__atlas?.state() ?? null);
 
   // CA2 y CA3: clic en el grupo del par, rueda hasta el maximo.
@@ -1130,17 +1171,21 @@ if (!only || only === "/atlas") {
       log(`  par exact mas cercano (coordenadas distintas): ${pair.p.src} y ${pair.q.src} · ${pair.p.city} · ${rr(pair.a * 6371000)} m · separarlo a ${ATLAS_CLUSTER_PX} px pide R ≈ ${rr(ATLAS_CLUSTER_PX / pair.a)}`);
       const lc0 = await probe(p, () => window.__atlas.latticeCount());
       log(`  reticula en el encuadre por defecto: ${lc0?.visited} puntos recorridos · ${lc0?.drawn} pintados`);
-      const c = await clickCluster(p, box, (cl) => cl.find((x) => x.srcs.includes(pair.p.src)));
-      log(`  clic en el grupo de ${pair.p.src}: ${c ? `${c.srcs.length} fotos en (${rr(c.x)}, ${rr(c.y)})` : "no encontrado"}`);
-      const z = await zoomToMax(p, box);
+      // El zoom va hacia el centro del globo y el techo depende del nivel de
+      // mascara bajo el centro (spec 016). Un grupo se recentra en la media
+      // de sus fotos, que puede caer lejos del par, asi que se hace lo que
+      // haria un visitante: rodar y, cada vez que el grupo del par se parte,
+      // pulsar el subgrupo que lo contiene (lo recentra) y seguir rodando.
+      const z = await zoomFollowing(p, box, pair.p.src);
       const cl = (await probe(p, () => window.__atlas.clusters())) ?? [];
       const cp = cl.find((x) => x.srcs.includes(pair.p.src));
       const cq = cl.find((x) => x.srcs.includes(pair.q.src));
       const apart = !!cp && !!cq && cp !== cq && !cp.srcs.includes(pair.q.src);
+      log(`  clics en el grupo del par durante el zoom: ${z.clicks.map((c) => `${c.n} fotos a R ${rr(c.R)}`).join(" → ")}`);
       const sep = apart ? Math.hypot(cp.x - cq.x, cp.y - cq.y) : pair.a * z.R;
       const lc1 = await probe(p, () => window.__atlas.latticeCount());
       log(`  rueda hasta el maximo: ${z.steps} pasos · R final ${rr(z.R)} · separacion del par ${sep.toFixed(1)} px${apart ? "" : " (estimada: siguen agrupadas)"}`);
-      log(`  frames durante la rueda: ${z.frames} · > ${LONG_FRAME_MS} ms despues del primero: ${z.long} · peor ${rr(z.worst)} ms · reticula al maximo: ${lc1?.visited} recorridos, ${lc1?.drawn} pintados`);
+      log(`  frames durante la rueda (sin los clics): ${z.frames} · > ${LONG_FRAME_MS} ms despues del primero: ${z.long} · peor ${rr(z.worst)} ms · reticula al maximo: ${lc1?.visited} recorridos, ${lc1?.drawn} pintados`);
       addInv("atlas", `CA2 par mas cercano separado (> ${ATLAS_CLUSTER_PX} px) al zoom maximo`, apart && sep > ATLAS_CLUSTER_PX, `R ${rr(z.R)}, separacion ${sep.toFixed(1)} px`);
       addInv("atlas", `CA3 0 frames > ${LONG_FRAME_MS} ms en la rueda hasta el maximo`, z.long === 0, `${z.long} frames, peor ${rr(z.worst)} ms`);
     }
