@@ -187,6 +187,14 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - Design spec §5: masa de tierra, leyenda con la cita, zoom con techo por posicion, clic, un punto nuevo para el visor y el recorrido, y una entrada en el changelog.
     - `CLAUDE.md`: la linea del atlas y la invariante de la tira del visor
 - [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/AAAA-MM-DD_016-completo.txt` (CA1)
+  - **Ejecutado 2026-11-02, casi en verde.** Salida en `evidencia/2026-11-02_016-completo.txt`. Resumen en `:434-444`:
+    - tsc, lint y build ok, y 0 errores de consola en 6 rutas.
+    - **172 de 174** invariantes, incluida la tira del visor sin barra (`:215`).
+  - **Los 2 fallos son un solo frame de 67 ms cada uno,** en CA3 (`:403`) y en CA15 (`:423`). Ocurrieron al final de una ejecucion larga que antes paso por todas las rutas.
+  - **Repetida dos veces la seccion `atlas` sola, salio 27 de 27 en las dos,** con el peor frame en 17 y 33 ms. Salidas en `evidencia/2026-11-02_016-atlas-repeticion-1.txt` y `-2.txt` (`:56`, `:77-78` y `:94`). En las seis ejecuciones de la seccion durante el dia tampoco fallo.
+  - Se anota como frame suelto de la maquina, sin aflojar el criterio. Esta en la linea de lo medido en T7: HEAD tenia picos parecidos en Chromium headless con raster por software. Si vuelve a salir contra produccion, se investiga.
 - [ ] Contra produccion despues del push de Javi: `evidencia/AAAA-MM-DD_016-produccion.txt`
-- [ ] CA9: Javi lo prueba en su maquina y en el movil (testimonio aqui)
+- [x] CA9: Javi lo prueba en su maquina y en el movil (testimonio aqui)
+  - **En su maquina (2026-11-02):** lo fue probando en cada paso. Sobre el zoom: "El resto esta genial". Sobre el recorrido: "Me gusta". Sobre el pin y el conjunto, antes de cerrar: "Me gusta". Las cosas que no le convencieron las corrigieron las enmiendas 2 y 3 y sus ajustes.
+  - **El movil queda para la spec multidispositivo,** por decision de Javi (2026-11-02: "deja el movil para la spec multidispositivo"). El plan ya remitia alli como encaja el visor en vertical (decision 3).
 - [ ] Estado de `spec.md` → Implementada
