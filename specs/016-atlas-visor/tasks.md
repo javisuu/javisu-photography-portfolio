@@ -190,7 +190,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - **Hecho 2026-11-02, despues del cierre.** El push `b5991fe..d453944` hizo fallar el workflow `mirror`, segun Javi. Su segunda defensa falla con cualquier imagen que quede en la historia filtrada, salvo `land-mask.png` y `grano.png`. Las 7 mascaras de `public/atlas/local/` (las 5 de hoy y las 2 borradas de San Miguel) la disparaban.
   - **Fallo del agente:** al fusionar se dijo que las mascaras "no son fotos" y no necesitaban tocar el espejo. Es cierto para `--path`, pero no se miro esa comprobacion.
   - **Cambio:** una excepcion con forma fija, `^public/atlas/local/[a-z0-9-]*-[0-9]\.png$`. Una foto o un nombre con otra forma en esa carpeta sigue bloqueando. `CLAUDE.md` avisa ahora de esa lista.
-  - **Simulado en local:** sobre `git log main`, sin `public/photos/` ni `docs/referencias/`, quedan esas 7 mascaras mas `land-mask.png` y `grano.png`, y con la excepcion nueva la comprobacion no encuentra nada. Salida en la conversacion. Que el run del workflow salga en verde tras el push: SIN VERIFICAR hasta que Javi lo mire.
+  - **Simulado en local:** sobre `git log main`, sin `public/photos/` ni `docs/referencias/`, quedan esas 7 mascaras mas `land-mask.png` y `grano.png`, y con la excepcion nueva la comprobacion no encuentra nada. Salida en la conversacion. **Verificado:** tras el push `d453944..5b3ff2f`, el run del workflow `mirror` salio en verde, segun Javi (2026-11-02, "ya esta en verde"; sin captura). Que la cabeza del espejo sea `5b3ff2f` filtrado: SIN VERIFICAR (no se comparo el hash).
 
 ## Cierre
 

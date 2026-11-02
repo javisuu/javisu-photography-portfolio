@@ -155,7 +155,7 @@ FALLOS
 - Por que la peor pasada de produccion del carrusel a CPU×4 tiene 3 y 4 frames >50 ms en los dos primeros escenarios con scroll, cuando local no tiene ninguno (`evidencia/2026-10-28_012-produccion-cpu4.txt`, frente a `evidencia/2026-10-28_012-local-cpu4.txt`).
 - Que las comprobaciones de E1 a E4 de la spec 012 se hicieran, aunque sus casillas sigan sin marcar.
 - Que la cache de `/_next/image` vaciada en cada despliegue sea la causa de los tirones de la primera pasada tras el push del 2026-11-01.
-- Que el espejo haya llegado a `4915ec1` filtrado tras los push del 2026-11-01, y a `b5991fe` tras el del 2026-11-02.
+- Que el espejo haya llegado a `4915ec1` filtrado tras los push del 2026-11-01. El 2026-11-02, el push de `b5991fe` hizo fallar el workflow `mirror` por las mascaras del atlas. Con la excepcion de `5b3ff2f` (spec 016, T16), el run salio en verde segun Javi. Que la cabeza del espejo sea `5b3ff2f` filtrado: sin comparar el hash.
 - Que el dominio publico sirva la spec 016 (`b5991fe`). Solo se midio la preview de la rama.
 - Las costuras entre las mascaras locales de OSM y la del mundo: Javi no las ha senalado, pero no se han revisado expresamente (`docs/atlas-data-sources.md`, "Known limit").
 - Que Safari oculte la barra con `html::-webkit-scrollbar` (spec 009). Javi no tiene Safari; Chrome y Firefox, si (testimonio de Javi).
