@@ -1390,8 +1390,14 @@ if (!only || only === "/atlas") {
         addInv("atlas", "CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms",
           offPx < 2 && alone && long === 0 && vNow?.src === target.src,
           `${offPx.toFixed(2)} px, marca ${own?.srcs.join(", ") ?? "—"}, ${long} frames largos, visor en ${vNow?.src}`);
+        // CA17: el pin del globo esta sobre la marca de la foto del visor.
+        const pin = await probe(p, () => window.__atlas.pin?.() ?? null);
+        const pinOk = !!pin && !!own && pin.src === vNow?.src && Math.hypot(pin.x - own.x, pin.y - own.y) < 0.5;
+        log(`  pin: ${pin ? `${pin.src.split("/").slice(-2).join("/")} en (${rr(pin.x)}, ${rr(pin.y)}) · su marca en (${rr(own?.x)}, ${rr(own?.y)})` : "no hay pin"}`);
+        addInv("atlas", "CA17 pin sobre la marca de la foto del visor", pinOk, pin ? `pin de ${pin.src} en (${rr(pin.x)}, ${rr(pin.y)}), visor en ${vNow?.src}` : "sin pin");
       } else {
         addInv("atlas", "CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms", false, "sin visor o sin recorrido");
+        addInv("atlas", "CA17 pin sobre la marca de la foto del visor", false, "sin visor o sin recorrido");
       }
     } else {
       for (const n of ["CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes", "CA16 el boton abre el visor en la primera foto del recorrido", "CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms"]) addInv("atlas", n, false, "la sonda no expone el recorrido");

@@ -170,6 +170,14 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - Villaquiran: R 4563, el norte de la peninsula de Galicia al Pais Vasco (captura en el scratchpad).
       - Puerto Escondido: 2098. Nueva York y San Sebastian, igual que antes.
     - Seccion `atlas`: **26 de 26**, 0 errores de consola. Salida en `evidencia/2026-11-02_016-vuelo.txt` (barra de la tira en `:45-46`, vuelo en `:77-78`)
+- [x] **T14** · Pin de la foto actual en el globo (ajuste final a la enmienda 3)
+  - Fichero(s): `src/motion/Atlas.tsx`, `scripts/diagnostico.mjs`
+  - Comprobacion: CA17
+  - **Hecho 2026-11-02.**
+    - Se pinta en `draw()`, despues de las marcas, sobre el grupo que contiene `marks[viewer.index]`. Su opacidad sigue la del borde del disco.
+    - `pinTargetRef` guarda la foto actual y cuando cambio, para la caida. La sonda gana `pin()`.
+    - La primera version (cabeza de 6 px) se confundia con una marca vecina en Nueva York (captura en el scratchpad). Paso a una cabeza de 7,5 px, un tallo de 19 px y un contorno de 2 px del color del fondo.
+    - Seccion `atlas`: **27 de 27**, 0 errores de consola. CA17: el pin de norte/03 esta en (460, 304), la misma posicion que su marca. Salida en `evidencia/2026-11-02_016-pin.txt`
 
 ## Cierre
 

@@ -87,6 +87,17 @@ const MARK_RADIUS_PX = 4;
 const MARK_HOVER_RADIUS_PX = 5.5;
 const MARK_HIT_RADIUS_PX = 10; // generous — easier to point at than to see
 const RECENTER_MS = 600;
+// The pin over the mark of the photo the viewer is showing (Javi,
+// 2026-11-02: "una correspondencia entre la foto actual del visor y la
+// foto actual del mapa"). A teardrop in the mark colour, its tip just
+// above the mark; on each change of photo it drops in and fades in.
+const PIN_HEAD_R = 7.5;
+const PIN_TIP_GAP = 2; // between the tip and the top of the mark
+const PIN_STEM = 19; // head centre to tip
+const PIN_DOT_R = 2.8;
+const PIN_OUTLINE = 2; // background-coloured, so it reads apart from marks right beside it
+const PIN_DROP_PX = 8;
+const PIN_IN_MS = 220;
 const ZOOM_BACK_MS = RECENTER_MS; // R easing back to the ceiling after the centre leaves a zone
 const CLICK_MOVE_THRESHOLD_PX = 4;
 
@@ -438,6 +449,7 @@ type AtlasProbe = {
   latticeCount: () => { visited: number; drawn: number; ms: number }; // ms: time spent walking/painting the lattice
   localMasks: () => string[]; // files of the local masks loaded so far
   tour: () => string[]; // every mark's src, in tour order (spec 016, amendment 3)
+  pin: () => { src: string; x: number; y: number } | null; // the current photo's pin, last frame
 };
 declare global {
   interface Window {
@@ -550,6 +562,10 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   const lastClustersRef = useRef<Cluster[]>([]);
   // Lattice points walked and dots painted in the last pass, and its cost — probe only.
   const lastLatticeRef = useRef({ visited: 0, drawn: 0, ms: 0 });
+  // The viewer's current photo, read by draw() for the pin, and when it
+  // last changed (the pin's drop-in); and where the pin was last drawn.
+  const pinTargetRef = useRef<{ index: number; since: number } | null>(null);
+  const lastPinRef = useRef<{ src: string; x: number; y: number } | null>(null);
 
   const reducedMotionRef = useRef(reducedMotion);
   useEffect(() => {
@@ -606,6 +622,7 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
         lastClustersRef.current.map((c) => ({ x: c.x, y: c.y, opacity: c.opacity, srcs: c.members.map((m) => m.mark.src) })),
       latticeCount: () => ({ ...lastLatticeRef.current }),
       tour: () => marks.map((m) => m.src),
+      pin: () => (lastPinRef.current ? { ...lastPinRef.current } : null),
       localMasks: () => LOCAL_LEVELS.filter((_, i) => localMasksRef.current[i]).map((l) => l.file),
     };
     window.__atlas = probe;
@@ -1123,6 +1140,39 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
       }
     }
     ctx.globalAlpha = 1;
+
+    // The current photo's pin, over whichever mark holds it.
+    lastPinRef.current = null;
+    const pinTarget = pinTargetRef.current;
+    const pinMark = pinTarget ? marks[pinTarget.index] : undefined;
+    const pinCluster = pinMark ? clusters.find((c) => c.members.some(({ mark }) => mark.src === pinMark.src)) : undefined;
+    if (pinTarget && pinMark && pinCluster && pinCluster.opacity > 0) {
+      const t = reducedMotionRef.current ? 1 : Math.min(1, (nowMs() - pinTarget.since) / PIN_IN_MS);
+      if (t < 1) fading = true;
+      const markR = pinCluster.members.length > 1 ? MARK_RADIUS_PX + 2 : MARK_RADIUS_PX;
+      const tipX = pinCluster.x;
+      const tipY = pinCluster.y - markR - PIN_TIP_GAP - PIN_DROP_PX * (1 - easeOutCubic(t));
+      const headY = tipY - PIN_STEM;
+      // Teardrop: the head circle and its two tangents down to the tip.
+      const a = Math.acos(PIN_HEAD_R / PIN_STEM);
+      ctx.globalAlpha = pinCluster.opacity * t;
+      ctx.fillStyle = COLOR_MARK;
+      ctx.beginPath();
+      ctx.moveTo(tipX, tipY);
+      ctx.arc(tipX, headY, PIN_HEAD_R, Math.PI / 2 - a, Math.PI / 2 + a, true);
+      ctx.closePath();
+      ctx.strokeStyle = COLOR_BG;
+      ctx.lineWidth = PIN_OUTLINE * 2;
+      ctx.lineJoin = "round";
+      ctx.stroke();
+      ctx.fill();
+      ctx.fillStyle = COLOR_BG;
+      ctx.beginPath();
+      ctx.arc(tipX, headY, PIN_DOT_R, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.globalAlpha = 1;
+      lastPinRef.current = { src: pinMark.src, x: tipX, y: pinCluster.y };
+    }
     return fading;
   }
 
@@ -1438,6 +1488,12 @@ export default function Atlas({ marks }: { marks: AtlasMark[] }) {
   }
 
   const viewerOpen = viewer !== null;
+  const viewerIndex = viewer?.index ?? null;
+  useEffect(() => {
+    pinTargetRef.current = viewerIndex === null ? null : { index: viewerIndex, since: nowMs() };
+    requestFrame();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [viewerIndex]);
   const viewerW = atlasViewerWidth(viewportSize.width);
   useEffect(() => {
     setCenterShift(viewerOpen ? viewerW / 2 : 0);

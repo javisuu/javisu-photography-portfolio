@@ -157,3 +157,9 @@ Cambios en la spec:
 - **Vuelo:** pasa a la curva de zoom y desplazamiento de van Wijk y Nuij (2003), con rho = 1: velocidad percibida constante y alejamiento solo el que el viaje necesita. La duracion sale de la longitud del camino, entre 600 y 1800 ms, con arranque y llegada suaves. La usan todos los pasos del recorrido y los clics que abren el visor.
 - **Fotos que comparten punto** (Villaquiran, Puerto Escondido, San Blas, Porto do Son, pares de NY y San Sebastian): no pueden quedar solas, asi que se muestran en contexto. El lugar distinto mas cercano queda a un 35 % del lado corto del canvas, sin pasar del limite de la mascara del mundo (4563) y sin bajar de la vista regional. Si hace falta mas zoom para separarlas de sus vecinas, manda la separacion.
 - **Barra de la tira:** la regla CSS que la ocultaba no se habia llegado a escribir en `globals.css` (fallo del agente). Ahora esta, y la seccion `barra de scroll` del diagnostico la vigila.
+
+**Ajuste final a la enmienda 3 (Javi, 2026-11-02):** "una correspondencia entre la foto actual del visor y la foto actual del mapa. Hacer ver al usuario que la foto que esta viendo esta seleccionada. Un pin por ejemplo de ubicacion?". Con el visor abierto, un pin de ubicacion (gota en `#111`, con un punto del color del fondo y un contorno del fondo de 2 px) se clava sobre la marca que contiene la foto actual. En cada cambio de foto cae 8 px mientras aparece, en 220 ms; con reduced motion aparece sin animacion. No se puede pulsar.
+
+| # | Comando | Resultado esperado |
+|---|---|---|
+| CA17 | Seccion `atlas`: despues de un vuelo del recorrido | El pin esta sobre la marca que contiene la foto del visor |
