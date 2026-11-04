@@ -22,6 +22,7 @@
 import { useEffect, useRef, useSyncExternalStore, type RefObject } from "react";
 import { Renderer, Camera, Transform, Plane, Program, Mesh, Texture } from "ogl";
 import type Lenis from "lenis";
+import { glDiagReset, glDiagUpdate } from "./glDiag";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 function subscribeReducedMotion(callback: () => void) {
@@ -98,6 +99,14 @@ type PendingUpload = { texture: Texture; bitmap: ImageBitmap; index: number };
 // on all of them at once (see the persistent-scene rationale below).
 const UPLOADS_PER_FRAME = 2;
 
+// Spec 018: how long a photo's decode (createImageBitmap) may take before
+// the whole page falls back to its DOM <img>s. Counts only while the tab is
+// visible, and only the decode — never the paced upload, which a paused
+// (inactive) instance legitimately holds back. Desktop decodes take ~28ms
+// (CLAUDE.md, spec 007), so this only ever fires on a decode that is
+// effectively broken.
+const DECODE_TIMEOUT_MS = 1500;
+
 export type GLSurfaceProps = {
   /** Elements this surface mirrors — read fresh via getBoundingClientRect()
    * every frame. Whatever already moves them (scroll, CSS transforms,
@@ -159,6 +168,9 @@ export type GLSurfaceProps = {
   /** How many of `nodes` (from the front) must be texture-ready before
    * `onTexturesReady` fires. Defaults to all of them. */
   readyNodeCount?: number;
+  /** Name this instance reports under in the ?diag panel and
+   * window.__glDiag (spec 018). */
+  diagName?: string;
 };
 
 export default function GLSurface({
@@ -173,6 +185,7 @@ export default function GLSurface({
   onAvailabilityChange,
   onTexturesReady,
   readyNodeCount,
+  diagName = "gl",
 }: GLSurfaceProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   // prefers-reduced-motion pins the bend to 0 (flat) — it does NOT fall
@@ -206,12 +219,39 @@ export default function GLSurface({
     if (active) resumeRef.current?.();
   }, [active]);
 
+  // Spec 018: once this instance has fallen back to the DOM it stays there
+  // until a full reload (Javi's decision 4) — even if the setup effect
+  // below re-runs or the browser restores the context.
+  const fallenRef = useRef<string | null>(null);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
 
     let raf = 0;
     let detachResize: (() => void) | undefined;
+    // Spec 018: state for the ?diag panel. Recording only — nothing here
+    // changes what gets painted.
+    glDiagReset(diagName);
+    // Set once a renderer exists — see fail() below.
+    let fail: (reason: string) => void = () => {};
+    const onContextLost = () => {
+      glDiagUpdate(diagName, { perdido: true });
+      // No preventDefault(): the browser won't hand the context back, and
+      // the page stays on its DOM photos until reload (decision 4).
+      fail("contexto WebGL perdido");
+    };
+    canvas.addEventListener("webglcontextlost", onContextLost);
+    const decodeTimers = new Map<number, number>();
+    const pendingDecodes = new Set<number>();
+    let onVisibility: (() => void) | undefined;
+
+    if (fallenRef.current) {
+      canvas.style.visibility = "hidden";
+      glDiagUpdate(diagName, { fallo: fallenRef.current });
+      onAvailabilityChange?.(false);
+      return () => canvas.removeEventListener("webglcontextlost", onContextLost);
+    }
 
     try {
       const renderer = new Renderer({
@@ -224,6 +264,60 @@ export default function GLSurface({
       });
       const gl = renderer.gl;
       if (!gl) throw new Error("WebGL context unavailable");
+      glDiagUpdate(diagName, {
+        contexto: renderer.isWebgl2 ? "webgl2" : "webgl",
+        maxTextura: gl.getParameter(gl.MAX_TEXTURE_SIZE) as number,
+      });
+
+      // Spec 018: the one way out. Something that would otherwise leave a
+      // mirrored photo hidden in the DOM and unpainted on the canvas (a
+      // blank page — what Safari on iOS showed) sends the WHOLE page back
+      // to its DOM <img>s instead (Javi's decision 1), for good. The
+      // normal path never calls this, so nothing changes when nothing
+      // fails.
+      fail = (reason: string) => {
+        if (fallenRef.current) return;
+        fallenRef.current = reason;
+        cancelAnimationFrame(raf);
+        raf = 0;
+        resumeRef.current = null;
+        for (const t of decodeTimers.values()) window.clearTimeout(t);
+        decodeTimers.clear();
+        try {
+          if (!gl.isContextLost()) {
+            gl.clearColor(0, 0, 0, 0);
+            gl.clear(gl.COLOR_BUFFER_BIT);
+          }
+        } catch {
+          // Nothing left to clear.
+        }
+        canvas.style.visibility = "hidden";
+        console.error(`[GLSurface] ${reason}: falling back to the DOM photos until reload`);
+        glDiagUpdate(diagName, { fallo: reason });
+        onAvailabilityChange?.(false);
+      };
+
+      // Decode watchdog: armed only while the tab is visible, re-armed in
+      // full when it comes back, so a background tab never trips it.
+      const armDecodeTimer = (i: number) => {
+        if (document.visibilityState !== "visible" || decodeTimers.has(i)) return;
+        decodeTimers.set(i, window.setTimeout(
+          () => fail(`decodificacion de la foto ${i} sin terminar en ${DECODE_TIMEOUT_MS} ms`),
+          DECODE_TIMEOUT_MS
+        ));
+      };
+      const settleDecode = (i: number) => {
+        pendingDecodes.delete(i);
+        const t = decodeTimers.get(i);
+        if (t !== undefined) window.clearTimeout(t);
+        decodeTimers.delete(i);
+      };
+      onVisibility = () => {
+        for (const t of decodeTimers.values()) window.clearTimeout(t);
+        decodeTimers.clear();
+        if (document.visibilityState === "visible") pendingDecodes.forEach(armDecodeTimer);
+      };
+      document.addEventListener("visibilitychange", onVisibility);
 
       const camera = new Camera(gl);
       const scene = new Transform();
@@ -286,11 +380,27 @@ export default function GLSurface({
             // doesn't get that same implicit flip from the browser, so
             // without this every photo rendered upside down once
             // decoding moved off the <img> path.
+            if (fallenRef.current) return;
+            pendingDecodes.add(i);
+            armDecodeTimer(i);
             createImageBitmap(node!, { imageOrientation: "flipY" })
-              .then((bitmap) => uploadQueue.push({ texture, bitmap, index: i }))
+              .then((bitmap) => {
+                settleDecode(i);
+                if (fallenRef.current) {
+                  bitmap.close();
+                  return;
+                }
+                uploadQueue.push({ texture, bitmap, index: i });
+              })
               .catch((err) => {
+                settleDecode(i);
                 console.error("[GLSurface] createImageBitmap failed:", err);
+                glDiagUpdate(diagName, (d) => ({
+                  fallosDecodificacion: d.fallosDecodificacion + 1,
+                  ultimoError: `createImageBitmap: ${String(err).slice(0, 120)}`,
+                }));
                 markReady(i); // don't block the reveal forever on one bad image
+                fail(`createImageBitmap rechazado (foto ${i})`);
               });
           }
           if (node.complete) decode();
@@ -342,6 +452,12 @@ export default function GLSurface({
           return { node, mesh, index: i };
         })
         .filter((p): p is PlaneRef => p !== null);
+      const firstProgram = planes[0]?.mesh.program;
+      const programLinked = firstProgram ? !!gl.getProgramParameter(firstProgram.program, gl.LINK_STATUS) : null;
+      glDiagUpdate(diagName, { total: planes.length, programa: programLinked });
+      // The shaders are GLSL 300 es: on a WebGL1 context (ogl's fallback)
+      // they never link and every plane would paint nothing.
+      if (programLinked === false) fail("programa de shaders sin enlazar");
 
       // Nothing to wait for — fire immediately rather than never.
       if (criticalTotal === 0) {
@@ -358,7 +474,7 @@ export default function GLSurface({
         // renderer/scene/textures are untouched — [active] flipping back
         // true just calls resumeRef.current() to restart this chain,
         // nothing to rebuild.
-        if (!activeRef.current) {
+        if (!activeRef.current || fallenRef.current) {
           raf = 0;
           return;
         }
@@ -375,7 +491,22 @@ export default function GLSurface({
           // Texture.update() calls under the hood) accepts it directly —
           // this is a type-defs gap, not a runtime restriction.
           pending.texture.image = pending.bitmap as unknown as HTMLImageElement;
+          // Spec 018: upload now rather than at the next draw, and check
+          // the GPU took it (e.g. GL_OUT_OF_MEMORY on a phone). Earlier
+          // errors are drained first so only this upload's own count.
+          for (let k = 0; k < 8 && gl.getError() !== gl.NO_ERROR; k++);
+          pending.texture.update();
+          const uploadError = gl.getError();
+          if (uploadError !== gl.NO_ERROR && !gl.isContextLost()) {
+            fail(`subida de textura con error GL 0x${uploadError.toString(16)} (foto ${pending.index})`);
+            return;
+          }
           markReady(pending.index);
+          const { width: bw, height: bh } = pending.bitmap;
+          glDiagUpdate(diagName, (d) => ({
+            subidas: d.subidas + 1,
+            texturaMayor: !d.texturaMayor || bw * bh > d.texturaMayor[0] * d.texturaMayor[1] ? [bw, bh] : d.texturaMayor,
+          }));
         }
 
         try {
@@ -428,25 +559,31 @@ export default function GLSurface({
           // Caught here (not the outer catch) so a bad frame doesn't
           // silently end the rAF chain — log and keep looping.
           console.error("[GLSurface] render loop error:", err);
+          glDiagUpdate(diagName, { ultimoError: `render: ${String(err).slice(0, 120)}` });
         }
         raf = requestAnimationFrame(update);
       }
       // Lets the [active]-watching effect restart this chain later
       // without reaching into this closure any other way.
       resumeRef.current = () => {
-        if (raf === 0) raf = requestAnimationFrame(update);
+        if (raf === 0 && !fallenRef.current) raf = requestAnimationFrame(update);
       };
       raf = requestAnimationFrame(update);
 
       onAvailabilityChange?.(true);
     } catch (err) {
       console.error("[GLSurface] WebGL unavailable, staying on CSS:", err);
+      glDiagUpdate(diagName, { contexto: "ninguno", fallo: "sin contexto WebGL", ultimoError: String(err).slice(0, 120) });
       onAvailabilityChange?.(false);
     }
 
     return () => {
       resumeRef.current = null;
       cancelAnimationFrame(raf);
+      canvas.removeEventListener("webglcontextlost", onContextLost);
+      if (onVisibility) document.removeEventListener("visibilitychange", onVisibility);
+      for (const t of decodeTimers.values()) window.clearTimeout(t);
+      decodeTimers.clear();
       detachResize?.();
     };
     // Deliberately NOT depending on `active`/`reducedMotion` (read via
@@ -456,7 +593,7 @@ export default function GLSurface({
     // tear down and rebuild the whole scene (destroying every texture)
     // to change what amounts to a flag.
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [nodes, lenisRef, renderOrderRef, bendDepth, bendRadiusMultiplier, velocityNormalize, onAvailabilityChange, readyNodeCount]);
+  }, [nodes, lenisRef, renderOrderRef, bendDepth, bendRadiusMultiplier, velocityNormalize, onAvailabilityChange, readyNodeCount, diagName]);
 
   return <canvas ref={canvasRef} className={className ?? "pointer-events-none fixed inset-0"} />;
 }

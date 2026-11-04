@@ -893,7 +893,11 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
                   width={item.photo.width}
                   height={item.photo.height}
                   className="block h-auto w-full"
-                  sizes={`${item.placement.w}vw`}
+                  // Spec 018: below 900px globals.css widens each photo to
+                  // min(w * 2.4, 85)vw, so ask for that width there — asking
+                  // for w vw fetched an image ~2.4x too narrow on phones.
+                  // At 900px and up the value is exactly the old one.
+                  sizes={`(max-width: 899px) ${+Math.min(item.placement.w * 2.4, 85).toFixed(2)}vw, ${item.placement.w}vw`}
                   // Every copy-0 photo needs to actually be fetching from
                   // the start for its own decode (see whenImageReady) to
                   // ever resolve — next/image lazy-loads everything but
@@ -939,6 +943,7 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         active={active}
         renderOrderRef={renderOrderRef}
         onAvailabilityChange={setGlStatus}
+        diagName="landing"
         className="pointer-events-none fixed inset-0 z-10"
       />
 

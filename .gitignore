@@ -58,3 +58,6 @@ next-env.d.ts
 
 # build inputs of scripts/generate-atlas-local-masks.mjs (OSM land polygons, ~1 GB; spec 016)
 /atlas-source/
+
+# Spec 018: capturas de pantalla con fotos de Javi. Nunca al repo (el espejo es publico).
+evidencia/*-capturas-*/*.png

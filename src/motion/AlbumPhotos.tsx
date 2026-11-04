@@ -242,6 +242,7 @@ export default function AlbumPhotos({
         bendDepth={ALBUM_BEND_DEPTH}
         bendRadiusMultiplier={ALBUM_BEND_RADIUS_MULTIPLIER}
         onAvailabilityChange={handleAvailability}
+        diagName="album"
         readyNodeCount={1}
         onTexturesReady={reveal}
         className="pointer-events-none fixed inset-0 z-0"

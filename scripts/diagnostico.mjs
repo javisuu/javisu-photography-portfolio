@@ -17,6 +17,8 @@
 import { spawn, execSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
 import { parseDeviceArgs, contextFor, deviceLabel, CTX_ESCRITORIO, touchSwipe, touchPinch, applyCpu, frameRecorder, frameStats } from "./lib/dispositivo.mjs";
+import { parseCapturasArgs, guardarPng, guardarJson, leerJson, compararPng } from "./lib/capturas.mjs";
+import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
 
 const PORT = 3100;
 // localhost, no 127.0.0.1: next dev solo admite los origenes localhost y
@@ -29,6 +31,10 @@ const args = process.argv.slice(2);
 // --fluidez-atlas. Sin ellos, escritorio en Chromium, como siempre.
 const DEV = parseDeviceArgs(args);
 if (DEV.error) { console.log(DEV.error); process.exit(2); }
+// Capturas de escritorio (spec 018, CA10): --capturas-guardar <dir> o
+// --capturas-comparar <dir>.
+const CAP = parseCapturasArgs(args);
+if (CAP?.error) { console.log(CAP.error); process.exit(2); }
 const deviceMode = DEV.dispositivo !== null;
 // Contexto de navegador de todas las secciones. En escritorio, el de siempre:
 // 1440x900 a dpr 1, sin tactil (spec 017, T1: antes eran 10 literales). Con
@@ -1916,6 +1922,191 @@ if (!deviceMode && (!only || only === "/atlas")) {
     addInv("atlas", "CA12 cita de OpenStreetMap visible", osm, "no esta en el texto visible de /atlas");
     if (errs.length) log(`  errores: ${errs.join(" | ")}`);
     await ctx.close();
+  }
+}
+
+// ---------- GLSurface cuando falla (spec 018) ----------
+// En Safari real las fotos de GLSurface no se pintan (M9) y la emulacion no
+// lo reproduce: se fuerza el fallo. CA3: createImageBitmap rechaza siempre.
+// CA4: se pierde el contexto WebGL con la pagina ya cargada. En los dos casos
+// tienen que verse las mismas fotos que sin fallo, en / y en el primer album.
+// CA5: el panel ?diag. CA9: la resolucion que pide el landing en movil.
+if (!only) {
+  const album = routes.find((r) => r.startsWith("/album/"));
+  const decoder = await browser.newPage();
+  // Errores de consola de un contexto, sin los [GLSurface] que el fallo
+  // forzado provoca a proposito.
+  function consola(p) {
+    const errs = [];
+    p.on("console", (m) => { if (m.type() === "error" && !noise(m.text()) && !m.text().startsWith("Failed to load resource") && !m.text().includes("[GLSurface]")) errs.push(m.text().slice(0, 160)); });
+    p.on("pageerror", (e) => errs.push(`pageerror: ${e.message.slice(0, 160)}`));
+    return errs;
+  }
+  async function vistasPorAltura(p, scope, alturas) {
+    const r = [];
+    for (const k of alturas) {
+      await p.evaluate((k) => window.scrollTo(0, k * innerHeight), k).catch(() => {});
+      await p.waitForTimeout(LANDING_SCROLL_SETTLE_MS);
+      r.push(await fotosVistas(p, decoder, scope));
+    }
+    return r;
+  }
+  const casos = [["/", "landing", [0, 1]], ...(album ? [[album, "main", [0, 1, 2]]] : [])];
+
+  // Referencia sin fallo, en el mismo navegador y contexto.
+  const normal = {};
+  for (const [route, scope, alturas] of casos) {
+    const ctx = await browser.newContext({ ...CTX });
+    const p = await ctx.newPage();
+    await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(SETTLE_MS);
+    normal[route] = await vistasPorAltura(p, scope, alturas);
+    await ctx.close();
+  }
+
+  rule("fallo de textura forzado");
+  for (const [route, scope, alturas] of casos) {
+    const ctx = await browser.newContext({ ...CTX });
+    await ctx.addInitScript(CREATE_IMAGE_BITMAP_RECHAZA);
+    const p = await ctx.newPage();
+    const errs = consola(p);
+    await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(SETTLE_MS + ESPERA_RED_MS);
+    const forz = await vistasPorAltura(p, scope, alturas);
+    await ctx.close();
+    forz.forEach((st, j) => log(`  ${route} · ${alturas[j]} alturas · sin fallo se ven ${normal[route][j].seen} · con fallo: ${lineaVistas(st)}`));
+    const peor = forz.map((st, j) => normal[route][j].seen - st.seen);
+    addInv(route, "CA3 con createImageBitmap fallando se ven las mismas fotos", normal[route].some((s) => s.seen > 0) && peor.every((d) => d <= 0),
+      `se ven ${forz.map((s) => s.seen).join("/")} frente a ${normal[route].map((s) => s.seen).join("/")} sin fallo`);
+    addInv(route, "CA3 sin errores de consola salvo [GLSurface]", errs.length === 0, errs.slice(0, 3).join(" | "));
+  }
+
+  rule("contexto perdido forzado");
+  for (const [route, scope, alturas] of casos) {
+    const ctx = await browser.newContext({ ...CTX });
+    const p = await ctx.newPage();
+    const errs = consola(p);
+    await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(SETTLE_MS);
+    const n = await p.evaluate(perderContextos).catch(() => 0);
+    await p.waitForTimeout(ESPERA_RED_MS);
+    const perd = await vistasPorAltura(p, scope, alturas);
+    perd.forEach((st, j) => log(`  ${route} · ${n} contextos perdidos · ${alturas[j]} alturas · sin fallo se ven ${normal[route][j].seen} · tras perderlo: ${lineaVistas(st)}`));
+    const peor = perd.map((st, j) => normal[route][j].seen - st.seen);
+    addInv(route, "CA4 con el contexto perdido se ven las mismas fotos", n > 0 && normal[route].some((s) => s.seen > 0) && peor.every((d) => d <= 0),
+      `${n} contextos perdidos · se ven ${perd.map((s) => s.seen).join("/")} frente a ${normal[route].map((s) => s.seen).join("/")} sin fallo`);
+    // Desde el album, vuelta a / en navegacion blanda: el landing persistente
+    // tambien perdio su contexto y tiene que verse en DOM.
+    if (route === album) {
+      await p.evaluate(() => window.scrollTo(0, 0)).catch(() => {});
+      // El primer enlace a / que se ve: el landing oculto tiene los suyos.
+      const link = (await p.evaluateHandle(() => [...document.querySelectorAll('a[href="/"]')]
+        .find((a) => a.offsetParent !== null && a.getBoundingClientRect().width > 0) ?? null).catch(() => null))?.asElement() ?? null;
+      if (link) {
+        await link.click().catch(() => {});
+        await p.waitForURL((u) => new URL(u).pathname === "/", { timeout: 10000 }).catch(() => {});
+        await p.waitForTimeout(SETTLE_MS);
+        const st = await fotosVistas(p, decoder, "landing");
+        log(`  ${album} → / en navegacion blanda tras perder el contexto: ${lineaVistas(st)} · sin fallo se ven ${normal["/"][0].seen}`);
+        addInv("/", "CA4 vuelta a / tras perder el contexto en un album se ven las fotos", st.seen >= normal["/"][0].seen && st.seen > 0,
+          `se ven ${st.seen} frente a ${normal["/"][0].seen}`);
+      } else {
+        addInv("/", "CA4 vuelta a / tras perder el contexto en un album se ven las fotos", false, "no hay enlace a / en el album");
+      }
+    }
+    addInv(route, "CA4 sin errores de consola salvo [GLSurface]", errs.length === 0, errs.slice(0, 3).join(" | "));
+    await ctx.close();
+  }
+  await decoder.close();
+
+  rule("panel diag");
+  for (const route of ["/", ...(album ? [album] : [])]) {
+    const ctx = await browser.newContext({ ...CTX });
+    const p = await ctx.newPage();
+    // Con --cpu, la CPU limitada: el reloj de 1,5 s de la decodificacion no
+    // debe saltar en un movil lento (riesgo 1 del plan).
+    const cpuOn = await applyCpu(ctx, p, DEV).catch(() => false);
+    if (cpuOn) log(`  ${route}?diag con cpu x${DEV.cpu}`);
+    await p.goto(`${BASE}${route}?diag`, { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(SETTLE_MS);
+    const d = await p.evaluate(() => {
+      const el = document.querySelector("[data-gl-diag]");
+      const vis = !!el && getComputedStyle(el).display !== "none" && getComputedStyle(el).visibility !== "hidden" && el.getBoundingClientRect().width > 0;
+      return { vis, text: el?.innerText ?? "", reg: window.__glDiag ?? null };
+    }).catch((e) => ({ vis: false, text: "", reg: null, evalError: e.message }));
+    await ctx.close();
+    log(`  ${route}?diag · panel ${d.vis ? "visible" : "no visible"}${d.evalError ? ` · ${d.evalError}` : ""}`);
+    if (d.text) d.text.split("\n").forEach((l) => log(`    ${l}`));
+    const campos = ["contexto", "perdido", "texturas", "fallos", "error"].filter((c) => !d.text.toLowerCase().includes(c));
+    addInv(route, "CA5 panel ?diag visible con sus campos", d.vis && campos.length === 0, d.vis ? `faltan: ${campos.join(", ")}` : "no hay [data-gl-diag] visible");
+    const caidas = Object.values(d.reg ?? {}).filter((x) => x?.fallo);
+    addInv(route, "CA4 sin fallo forzado GLSurface no cae al DOM", !!d.reg && caidas.length === 0,
+      d.reg ? caidas.map((x) => `${x.nombre}: ${x.fallo}`).join(" | ") : "no hay window.__glDiag");
+  }
+  let conPanel = 0;
+  for (const route of routes) {
+    const ctx = await browser.newContext({ ...CTX });
+    const p = await ctx.newPage();
+    await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(1000);
+    conPanel += await p.evaluate(() => document.querySelectorAll("[data-gl-diag]").length).catch(() => 0);
+    await ctx.close();
+  }
+  log(`  sin ?diag: ${conPanel} paneles en ${routes.length} rutas`);
+  addInv("todas", "CA5 sin ?diag no hay panel", conPanel === 0, `${conPanel} paneles`);
+
+  if (deviceMode) {
+    rule("calidad del landing");
+    const ctx = await browser.newContext({ ...CTX });
+    const p = await ctx.newPage();
+    await p.goto(BASE + "/", { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(SETTLE_MS);
+    const q = await p.evaluate(calidadLanding).catch(() => []);
+    await ctx.close();
+    q.forEach((x) => log(`  ${x.src} · pide w=${x.w} · caja ${x.caja} px · resolucion ${x.ratio}`));
+    const bajas = q.filter((x) => x.ratio === null || x.ratio < 1);
+    addInv("/", "CA9 cada foto del landing pide al menos su ancho por min(dpr, 2)", q.length > 0 && bajas.length === 0,
+      q.length ? `${bajas.length} de ${q.length} por debajo de 1,0 (peor ${Math.min(...q.map((x) => x.ratio ?? 0))})` : "ninguna foto medida");
+  }
+}
+
+// ---------- capturas de escritorio ----------
+// Spec 018, CA10 y CA9 (parte de escritorio). Un arreglo para movil no puede
+// cambiar el escritorio (Javi, 2026-11-04). Captura de /, el primer album y
+// /atlas en reposo, cada una en un contexto nuevo; el atlas con reduced
+// motion, para que no arranque la deriva a los 4 s. Y el currentSrc de cada
+// foto del landing: CA9 cambia sizes solo por debajo de 900 px.
+const CAP_SETTLE_MS = 5000;
+if (CAP && !deviceMode && !only) {
+  rule(`capturas de escritorio (${CAP.modo})`);
+  const album = routes.find((r) => r.startsWith("/album/"));
+  const capRoutes = [["landing", "/", {}], ...(album ? [["album", album, {}]] : []), ["atlas", "/atlas", { reducedMotion: "reduce" }]];
+  for (const [name, route, opts] of capRoutes) {
+    const ctx = await browser.newContext({ ...CTX, ...opts });
+    const p = await ctx.newPage();
+    await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(CAP_SETTLE_MS);
+    const shot = await p.screenshot({ type: "png" }).catch(() => null);
+    if (name === "landing") {
+      const srcs = await p.evaluate(() => [...document.querySelectorAll(".landing-photo img")].map((img) => img.currentSrc)).catch(() => null);
+      if (CAP.modo === "guardar") { guardarJson(CAP.dir, "landing-currentSrc", srcs); log(`  landing: ${srcs?.length ?? 0} currentSrc guardados`); }
+      else {
+        const ref = leerJson(CAP.dir, "landing-currentSrc");
+        // El origen cambia con el puerto o con --url: se compara la ruta.
+        const strip = (s) => (s ?? "").replace(/^https?:\/\/[^/]+/, "");
+        const distintos = ref && srcs ? srcs.filter((s, i) => strip(s) !== strip(ref[i])).length + Math.abs(srcs.length - ref.length) : null;
+        log(`  landing: currentSrc ${distintos === null ? "sin referencia" : `${distintos} distintos de ${srcs.length}`}`);
+        addInv("escritorio", "currentSrc del landing igual a la referencia", distintos === 0, distintos === null ? "sin referencia o sin medida" : `${distintos} distintos`);
+      }
+    }
+    await ctx.close();
+    if (!shot) { log(`  ${name}: sin captura`); continue; }
+    if (CAP.modo === "guardar") { guardarPng(CAP.dir, name, shot); log(`  ${name} (${route}): guardada`); continue; }
+    const r = await compararPng(CAP.dir, name, shot);
+    if (r.error) { log(`  ${name}: ${r.error}`); addInv("escritorio", `captura de ${name} igual a la referencia`, false, r.error); continue; }
+    guardarPng(CAP.dir, `${name}-actual`, shot);
+    log(`  ${name} (${route}): ${r.real} px distintos en mas de 1 nivel · ${r.diff} con cualquier diferencia · diferencia maxima ${r.maxDelta} · de ${r.total}${r.bbox ? ` · caja ${r.bbox.join(",")}` : ""}`);
+    addInv("escritorio", `captura de ${name} igual a la referencia (ruido de 1 nivel aparte)`, r.real === 0, `${r.real} px distintos en mas de 1 nivel, diferencia maxima ${r.maxDelta}, caja ${r.bbox?.join(",")}`);
   }
 }
 

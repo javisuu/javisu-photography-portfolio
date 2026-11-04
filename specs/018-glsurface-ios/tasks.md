@@ -1,0 +1,87 @@
+# Tareas 018 · GLSurface en Safari de iOS
+
+- **Plan:** `plan.md` (aprobado el 2026-11-04: "En principio veo que el plan está bien")
+
+Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin errores y tiene su comprobacion. T1 y T2 no tocan `src/`: fijan la referencia de `main` antes de cambiar nada.
+
+- [x] **T1** · Capturas de escritorio y `currentSrc` de referencia
+  - Fichero(s): `scripts/lib/capturas.mjs` (crear), `scripts/diagnostico.mjs` (`--capturas-guardar`, `--capturas-comparar`, `currentSrc` del landing)
+  - Comprobacion:
+    - dos pasadas sobre el arbol de hoy, igual a `main`, con `--capturas-guardar`, y la segunda comparada con la primera: 0 px de ruido, o se anota cuanto hay;
+    - sin flags, 174 de 174 como en `evidencia/2026-11-04_diagnostico_cierre-017.txt`.
+  - Resultado (2026-11-04, `src/` igual a `main` `ed57ac5`):
+    - **Referencia:** `evidencia/2026-11-04_018-capturas-main/`, con `landing.png`, `album.png` (`/album/america`), `atlas.png` y `landing-currentSrc.json` (30 fotos). Los PNG muestran las fotos de Javi y no van al repo, por decision de Javi del 2026-11-04 (el espejo es publico): se quedan en su disco, con `evidencia/*-capturas-*/*.png` en `.gitignore`. Solo el `.json` esta en git. La salida es `evidencia/2026-11-04_018-main.txt`.
+    - **Ruido:** 0 px distintos de 1 296 000 en las tres capturas, y 0 `currentSrc` distintos de 30 (`evidencia/2026-11-04_018-main-ruido.txt:434-442`). CA10 puede exigir 0 px, sin tolerancia.
+    - **Invariantes de referencia:** 169 de 174 y 176 de 178 (con las 4 nuevas de comparar). Ningun fallo es del sitio:
+      - **B11 (del harness):** "NEXT ALBUM empieza arriba". Falla con `—` a los 500 ms porque la maquina iba lenta, pero a los 1500 ms `scrollY` es 0: 4 de 4 en la primera pasada y 2 de 4 en la segunda.
+      - **B12:** el frame intermitente del atlas, CA3, 67 ms.
+      - **Maquina lenta:** el arranque de la entrada fue de 550 y 417 ms, frente a los 200 ms del cierre de la spec 017. Las comparaciones de T3 en adelante se hacen contra estas dos pasadas.
+- [x] **T2** · Secciones nuevas del diagnostico: "fallo de textura forzado", "contexto perdido forzado", "panel diag" y "calidad del landing"
+  - Fichero(s): `scripts/diagnostico.mjs`, `scripts/lib/fallos-gl.mjs` (crear)
+  - Comprobacion: sobre el arbol de hoy, las dos de fallo forzado dan FALLA. Ese es el rojo: demuestra que el fallo de iOS se reproduce forzado en la emulacion. "Panel diag" da FALLA porque aun no existe. "Calidad del landing" con `--dispositivo iphone` da sus cifras de hoy, por debajo de 1,0.
+  - Resultado (2026-11-04, `src/` igual a `main`), rojo como se esperaba (`evidencia/2026-11-04_018-t2-escritorio.txt`, `evidencia/2026-11-04_018-t2-iphone.txt`):
+    - **CA3, fallo de textura forzado:** en escritorio, `/` pasa de 7 fotos visibles sin fallo a 0 con fallo, y el album de 1/2/1 a 0/0/0. En iPhone, `/` pasa de 7/7 a 1/0 y el album de 1/1/1 a 0/0/0. Las 30 `<img>` del landing siguen ocultas y el canvas no pinta: es el sintoma de Javi.
+    - **CA4, contexto perdido:** lo mismo, 0 fotos visibles en `/` y en el album, en escritorio y en iPhone.
+    - **Comprobacion que no discrimina:** "vuelta a `/` tras perder el contexto en un album" ya da `ok` en el rojo. El landing vuelve a pintar con GL tras la navegacion blanda (7 de 7, pintada 1,00). Causa SIN VERIFICAR: quiza el canvas del landing se vuelve a crear. Se queda como guardia de regresion; no prueba la red.
+    - **CA5:** sin panel ni `window.__glDiag`, FALLA. Sin `?diag` no hay panel en ninguna de las 6 rutas.
+    - **CA9 en iPhone:** 7 de 7 fotos piden menos de lo que pintan, con una resolucion de 0,66 a 0,93 (por ejemplo `norte/03`: `w=384` para una caja de 290 px a dpr 2).
+    - **Consola:** 0 errores fuera de `[GLSurface]` en todos los casos forzados.
+    - **CA10, ruido:** la captura del atlas difirio en 1440 px sin tocar `src/`. Es la ultima fila, a 249 en vez de 250: un nivel. `compararPng` cuenta ahora los pixeles que difieren en mas de 1 nivel (`RUIDO_NIVELES`, `scripts/lib/capturas.mjs`) e informa tambien del total y de la diferencia maxima.
+    - **Escritorio:** 182 de 192 invariantes. Los 10 fallos son los 8 rojos esperados, la fila de ruido del atlas y B12 (CA15, 1 frame).
+- [x] **T3** · Registro `glDiag`, panel `?diag` y `diagName` en las dos instancias, sin cambiar el comportamiento
+  - Fichero(s): `src/motion/glDiag.ts`, `src/components/GLDiagPanel.tsx`, `src/app/layout.tsx`, `src/motion/GLSurface.tsx` (solo escribe en el registro), `src/motion/LandingComposition.tsx`, `src/motion/AlbumPhotos.tsx` (`diagName`)
+  - Comprobacion: CA5 en `ok`; CA1; CA10 a 0 px frente a T1; tsc y lint limpios.
+  - Resultado (2026-11-04, `evidencia/2026-11-04_018-t3-escritorio.txt`):
+    - **CA5 `ok`.** Con `?diag` el panel se ve en `/` y en el album, con contexto, perdido, programa, texturas, mayor y maximo de la GPU, fallos y ultimo error. Sin `?diag`, 0 paneles en 6 rutas.
+    - **CA10 `ok`.** 0 px distintos, sin diferencia alguna, en las tres capturas; los `currentSrc` del landing, 0 distintos de 30.
+    - **El panel aporta otro dato.** En un album, el landing oculto marca "texturas 0 de 30": esta en pausa (`active`) y no sube nada. Confirma la decision del plan de que el reloj de T4 mida solo la decodificacion.
+    - **Invariantes:** 184 de 192. Fallan los 4 rojos de CA3/CA4, que arregla T4, y los 4 de B11 (maquina lenta, entrada con arranque de 433 ms).
+- [x] **T4** · La red: `fallar(motivo)`, `webglcontextlost`, rechazo y reloj de 1,5 s de la decodificacion, y `getError` tras subir
+  - Fichero(s): `src/motion/GLSurface.tsx`
+  - Comprobacion: CA3 y CA4 en `ok`, en escritorio y con `--dispositivo iphone`; CA1; CA8; CA10 a 0 px; en `__glDiag` de escritorio, ningun `fallar`.
+  - **Un disparador mas que en el plan:** si el programa de shaders no enlaza, tambien cae al DOM. Los shaders son GLSL 300 es, y en un contexto WebGL1 (el de reserva de `ogl`) nunca enlazan: hoy eso es una pagina en blanco.
+  - Ademas, `fallenRef` hace que la caida dure hasta recargar aunque el efecto se vuelva a ejecutar (decision 4).
+  - Resultado (2026-11-04, `evidencia/2026-11-04_018-t4-escritorio.txt`, `evidencia/2026-11-04_018-t4-iphone.txt`):
+    - **CA3 `ok`:**
+      - en escritorio, con `createImageBitmap` fallando, `/` 7/7 y el album 1/2/1, iguales que sin fallo;
+      - en iPhone, `/` 7/7 y el album 1/1/1;
+      - 0 `<img>` ocultas y 0 errores fuera de `[GLSurface]`.
+    - **CA4 `ok`:** con el contexto perdido, lo mismo en las dos rutas y en los dos modos. La vuelta a `/` en navegacion blanda: 7 de 7.
+    - **Sin caidas sin motivo:** en escritorio `GLSurface` no cae al DOM ni en `/` ni en el album ("caida al DOM: no" en las dos instancias).
+    - **CA10 `ok`:** 0 px distintos, sin diferencia alguna, en las tres capturas; los `currentSrc`, 0 distintos de 30.
+    - **CA8 `ok`:** arranque 233 ms, reposo 1577 ms, 0 frames > 50 ms.
+    - **Escritorio, CA1:** 192 de 192.
+    - **iPhone:** 59 de 61. Solo falla M4 (`america/01.jpg`, como en `main`) y CA9, que es T5.
+- [x] **T5** · `sizes` del landing con media query por debajo de 900 px
+  - Fichero(s): `src/motion/LandingComposition.tsx`
+  - Comprobacion: CA9 en `iphone` e `ipad-mini`, en vertical y en horizontal; `currentSrc` de escritorio igual que en T1; CA10 a 0 px.
+  - Resultado (2026-11-04):
+    - **Escritorio, CA1 y CA10 `ok`:** 192 de 192; 0 `currentSrc` distintos de 30 y 0 px en las tres capturas (`evidencia/2026-11-04_018-t5-escritorio.txt:486-501`).
+    - **CA9 `ok` en las cuatro pasadas:**
+      - `iphone`: 63 de 63 (`evidencia/2026-11-04_018-t5-iphone.txt`);
+      - `iphone-h`: CA9 ok, con resolucion de 1,52 a 1,9 (`evidencia/2026-11-04_018-t5-iphone-h-2.txt:454-460`);
+      - `ipad-mini`: 63 de 63, de 1,02 a 1,16 (`evidencia/2026-11-04_018-t5-ipad-mini-2.txt:337-352`);
+      - `ipad-mini-h`: 63 de 63 (`evidencia/2026-11-04_018-t5-ipad-mini-h.txt`).
+    - **Primera pasada de `ipad-mini`, en rojo y no repetido:** el primer `goto` de cada ruta agoto los 30 s, con 27 peticiones del `next dev` colgadas 60 s, y `norte/03.jpg` (`w=1200`, un ancho que hasta ahora ninguna pasada habia pedido) no cargo (`evidencia/2026-11-04_018-t5-ipad-mini.txt:28-75,440`). La repeticion dio 63 de 63, con `norte/03.jpg` en 1,05. Causa SIN VERIFICAR: el optimizador de imagenes del servidor de desarrollo generando anchos nuevos por primera vez. En produccion las imagenes las sirve Vercel.
+    - **Arreglo del harness:** CA3 y CA4 exigian fotos visibles en la altura 0. En `iphone-h` el titulo del album llena la primera pantalla (0/1/1 tambien sin fallo), y daban FALLA con las mismas cifras. Ahora basta con que se vean fotos en alguna altura (`scripts/diagnostico.mjs:1979,1996`). En la repeticion, CA3 y CA4 `ok`.
+    - **`iphone-h`, 62 de 63:** el unico fallo, "fotos enteras en el viewport, 22 de 30 fuera", ya estaba en la linea base de la spec 017 (`evidencia/2026-11-03_017-linea-base-chromium-iphone-h.txt:319`). Es de la spec `landing-movil`.
+- [x] **T6** · Pasadas de dispositivo, y CPU x4 leyendo `__glDiag`
+  - Fichero(s): ninguno (medicion)
+  - Comprobacion: CA2 en `iphone` e `ipad-mini`. Con `--cpu 4`, se anota si `fallar` salta por el reloj (riesgo 1).
+  - Resultado (2026-11-04):
+    - **CA2:** `iphone` 63 de 63, con el landing a 7, 7, 5, 6 fotos vistas por altura, igual que el 7,7,5,6 de la spec (`evidencia/2026-11-04_018-t5-iphone.txt:348`); `ipad-mini` 63 de 63 en la repeticion de T5, a 7, 7, 7, 7 (`evidencia/2026-11-04_018-t5-ipad-mini-2.txt:354`).
+    - **Riesgo 1, sin falsos disparos:** con CPU x4, "caida al DOM: no" en las dos instancias, en `/?diag` y en el album, en `iphone` (`evidencia/2026-11-04_018-t6-iphone-cpu4.txt:303-328`, 63 de 63) y en `ipad-mini` (`evidencia/2026-11-04_018-t6-ipad-mini-cpu4.txt:405-430`).
+    - **El resto de la pasada `ipad-mini-cpu4`:** dio el mismo rojo del servidor de desarrollo que la primera de T5 (55 de 63). No afecta a la lectura de `__glDiag`.
+- [ ] **T7** · Preview de Vercel: Javi abre `/?diag` y un album con `?diag` en su iPhone 13 y su iPad mini 5
+  - Fichero(s): `tasks.md` (testimonio), con las capturas de Javi en `evidencia/`
+  - Comprobacion: CA6. Si la causa es una de las cuatro, la red ya la cubre. Si no, va una enmienda (decision 6).
+- [ ] **T8** · Javi prueba sin `?diag`
+  - Fichero(s): `tasks.md` (testimonio)
+  - Comprobacion: CA7.
+
+## Cierre
+
+- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/` (con el `npm run dev` de Javi parado)
+- [ ] Criterios de aceptacion de la spec ejecutados
+- [ ] `CLAUDE.md` (`GLSurface`: la red y `?diag`) y `docs/design-spec-v2.md` (Motion inventory #1: la vuelta al DOM ya no es solo "sin contexto") actualizados
+- [ ] Estado de `spec.md` → Implementada
