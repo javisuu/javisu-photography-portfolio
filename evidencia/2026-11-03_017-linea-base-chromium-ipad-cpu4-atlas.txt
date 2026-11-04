@@ -1,0 +1,81 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+dispositivo: ipad (iPad Pro 11) · chromium · cpu x4
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  ipad (iPad Pro 11) · chromium · cpu x4
+  medido: 834x1194 · dpr 2 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 834x1194 · dpr 2 · hasTouch true
+  user agent: Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta /atlas ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1668,
+      1816
+    ],
+    "css": [
+      834,
+      908
+    ],
+    "expected": [
+      1668,
+      1816
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+
+=== visor del atlas ===
+  toque 1: grupo de 7 (/photos/ny/01.jpg, ...) en 292,637
+  toque 2: marca sola (/photos/ny/07.jpg) en 402,762
+  visor: caja 500,0,334,1194 (x, y, ancho, alto) · viewport 834x1194 · scrollWidth 834 / clientWidth 834
+  ok   tocar una marca abre el visor
+  ok   visor dentro del viewport
+  ok   visor sin scroll horizontal
+
+=== fluidez del atlas ===
+  canvas 1668x1816 (dpr 2) · entrada tactil (CDP) · cpu x4
+  arrastre 2 s: 259 frames · mediana 16.7 ms · p95 33.4 ms · max 66.6 ms · >50 ms: 2
+  pellizco 1 s: 125 frames · mediana 16.8 ms · p95 33.4 ms · max 33.4 ms · >50 ms: 0
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  ipad (iPad Pro 11) · chromium · cpu x4
+consola      0 errores en 1 rutas
+invariantes  12 de 12
+atlas        arrastre 2 s: mediana 16.7 · p95 33.4 · >50 ms 2 · pellizco 1 s: mediana 16.8 · p95 33.4 · >50 ms 0
+

@@ -1,0 +1,111 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+dispositivo: escritorio 1440x900 · chromium · cpu x4
+
+=== next dev en :3100 ===
+ok
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x578400407600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x578400407600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x578400407600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x578400407600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 599
+  ok   scroll con rueda
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una · cpu x4
+  1: inicio 2486 · participantes 7 · fase B 3022 · rezagadas 1 · reposo 3755
+     frame del arranque 1217 ms · despues: frames >50 ms 1, frame max 67 ms · long tasks 6 (1839 ms) · [entrance] start x1
+     al monton: 2672 2772 2772 2772 2872 2955 3022
+  2: inicio 2443 · participantes 7 · fase B 2996 · rezagadas 1 · reposo 3746
+     frame del arranque 1150 ms · despues: frames >50 ms 7, frame max 83 ms · long tasks 6 (1859 ms) · [entrance] start x1
+     al monton: 2629 2746 2746 2796 2829 2912 2996
+  3: inicio 2481 · participantes 7 · fase B 3018 · rezagadas 1 · reposo 3785
+     frame del arranque 1167 ms · despues: frames >50 ms 2, frame max 67 ms · long tasks 6 (1819 ms) · [entrance] start x1
+     al monton: 2668 2735 2735 2835 2868 2968 3018
+  fase B      mediana 3018 · max 3022
+  reposo      mediana 3755 · max 3785
+  frames >50 mediana 2 · max 7
+  frame max   mediana 67 · max 83
+  arranque    mediana 1167 · max 1217
+
+=== descifrado del wordmark ===
+  (a) carga directa en / · 24 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  (b) carga en /about, clic a / · 25 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (c) carga en /albums, clic a / · 24 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (d) / -> /about, resize alli, -> / · 25 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (e) reduced motion, carga en /about, clic a / · 0 muestras · h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  escritorio 1440x900 · chromium · cpu x4
+consola      0 errores en 1 rutas
+invariantes  28 de 28
+entrada      arranque 1167 ms · fase B 3018 ms · reposo 3755 ms · frames >50 ms: 2 (medianas de 3)
+

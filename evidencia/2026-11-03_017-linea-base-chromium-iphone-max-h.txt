@@ -1,0 +1,431 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+omitido (--skip-build)
+
+dispositivo: iphone-max horizontal (iPhone 15 Pro Max) · chromium
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  iphone-max horizontal (iPhone 15 Pro Max) · chromium
+  medido: 814x380 · dpr 3 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 814x380 · dpr 3 · hasTouch true
+  user agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+{
+  "vw": 814,
+  "vh": 380,
+  "dpr": 3,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 814,
+  "clientWidth": 814,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1628,
+      760
+    ],
+    "css": [
+      814,
+      380
+    ],
+    "expected": [
+      1628,
+      760
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x17ec00af4800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x17ec00af4800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x17ec00af4800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x17ec00af4800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 814,
+  "vh": 380,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 814,
+  "clientWidth": 814,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/albums
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 814,
+  "vh": 380,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 814,
+  "clientWidth": 814,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/about
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 814,
+  "vh": 380,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 814,
+  "clientWidth": 814,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1628,
+      760
+    ],
+    "css": [
+      814,
+      380
+    ],
+    "expected": [
+      1628,
+      760
+    ]
+  }
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=1200&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/album/america
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 814,
+  "vh": 380,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 814,
+  "clientWidth": 814,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/credits
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 814,
+  "vh": 380,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 814,
+  "clientWidth": 814,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      2442,
+      286
+    ],
+    "css": [
+      814,
+      95
+    ],
+    "expected": [
+      2442,
+      285
+    ]
+  }
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 30 fotos medidas a 814x380
+    america/05.jpg · caja 547x410 · NO CABE · desvio 0.0006 (0.23 px)
+    america/06.jpg · caja 430x402 · NO CABE · desvio 0.0015 (0.59 px)
+    america/08.jpg · caja 469x393 · NO CABE · desvio 0.0037 (1.47 px)
+    norte/01.jpg · caja 332x443 · NO CABE · desvio 0.0004 (0.19 px)
+    norte/02.jpg · caja 293x450 · NO CABE · desvio 0.0024 (1.06 px)
+    norte/03.jpg · caja 606x173 · cabe · desvio 0.0115 (1.98 px)
+    ny/01.jpg · caja 586x440 · NO CABE · desvio 0.0009 (0.38 px)
+    ny/02.jpg · caja 293x391 · NO CABE · desvio 0.0041 (1.6 px)
+    sol/03.jpg · caja 430x573 · NO CABE · desvio 0.0024 (1.37 px)
+    sol/05.jpg · caja 313x417 · NO CABE · desvio 0.0015 (0.63 px)
+    sol/07.jpg · caja 293x391 · NO CABE · desvio 0.0041 (1.6 px)
+    america/05.jpg · caja 547x410 · NO CABE · desvio 0.0006 (0.23 px)
+    america/06.jpg · caja 430x402 · NO CABE · desvio 0.0015 (0.59 px)
+    america/08.jpg · caja 469x393 · NO CABE · desvio 0.0037 (1.47 px)
+    norte/01.jpg · caja 332x443 · NO CABE · desvio 0.0004 (0.19 px)
+    norte/02.jpg · caja 293x450 · NO CABE · desvio 0.0024 (1.06 px)
+    norte/03.jpg · caja 606x173 · cabe · desvio 0.0115 (1.98 px)
+    ny/01.jpg · caja 586x440 · NO CABE · desvio 0.0009 (0.38 px)
+    ny/02.jpg · caja 293x391 · NO CABE · desvio 0.0041 (1.6 px)
+    sol/03.jpg · caja 430x573 · NO CABE · desvio 0.0024 (1.37 px)
+    sol/05.jpg · caja 313x417 · NO CABE · desvio 0.0015 (0.63 px)
+    sol/07.jpg · caja 293x391 · NO CABE · desvio 0.0041 (1.6 px)
+  FALLA fotos enteras en el viewport, proporcion < 1 % o <= 1 px · 22 de 30 fuera
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 814x380 · <img> ocultas por GL 30 · intersecan 7 · se ven 6
+    #1 america/03.jpg · caja 602,51,430,322 · opacity 1 · pintada 0.99
+    #2 america/05.jpg · caja 49,27,547,410 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 65,181,332,443 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 342,281,293,450 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 537,201,606,173 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 212,365,293,391 · opacity 1 · pintada —
+    #13 sol/05.jpg · caja 635,308,313,417 · opacity 1 · pintada 1.00
+  1 alturas · scrollY 380 · 814x380 · <img> ocultas por GL 30 · intersecan 11 · se ven 9
+    #1 america/03.jpg · caja 602,-309,430,322 · opacity 1 · pintada —
+    #2 america/05.jpg · caja 49,-331,547,410 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 98,289,469,352 · opacity 1 · pintada 0.99
+    #6 norte/01.jpg · caja 65,-173,332,443 · opacity 1 · pintada 0.98
+    #7 norte/02.jpg · caja 342,-99,293,450 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 537,-164,606,173 · opacity 1 · pintada —
+    #9 norte/06.jpg · caja 586,300,508,381 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 212,-15,293,391 · opacity 1 · pintada 0.96
+    #12 sol/03.jpg · caja 49,106,430,573 · opacity 1 · pintada 0.96
+    #13 sol/05.jpg · caja 635,-48,313,417 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 358,258,293,391 · opacity 1 · pintada 1.00
+  2 alturas · scrollY 760 · 814x380 · <img> ocultas por GL 30 · intersecan 9 · se ven 8
+    #0 america/01.jpg · caja 570,133,313,234 · opacity 1 · pintada 1.00
+    #3 america/06.jpg · caja 554,260,430,402 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 317,230,469,393 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 98,-91,469,352 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 586,-58,508,381 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 33,82,586,440 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 49,-274,430,573 · opacity 1 · pintada 1.00
+    #13 sol/05.jpg · caja 635,-405,313,417 · opacity 1 · pintada —
+    #14 sol/07.jpg · caja 358,-122,293,391 · opacity 1 · pintada 1.00
+  3 alturas · scrollY 1140 · 814x380 · <img> ocultas por GL 30 · intersecan 9 · se ven 8
+    #0 america/01.jpg · caja 570,-229,313,234 · opacity 1 · pintada —
+    #3 america/06.jpg · caja 554,-103,430,402 · opacity 1 · pintada 0.99
+    #4 america/08.jpg · caja 317,-131,469,393 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 33,-272,586,440 · opacity 1 · pintada 1.00
+    #16 america/03.jpg · caja 602,123,430,322 · opacity 1 · pintada 0.99
+    #17 america/05.jpg · caja 49,99,547,410 · opacity 1 · pintada 1.00
+    #21 norte/01.jpg · caja 65,252,332,443 · opacity 1 · pintada 1.00
+    #22 norte/02.jpg · caja 342,357,293,450 · opacity 1 · pintada 1.00
+    #23 norte/03.jpg · caja 537,274,606,173 · opacity 1 · pintada 1.00
+  fotos que se ven por altura (0, 1, 2, 3): 6, 9, 8, 8
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== visor del atlas ===
+  toque 1: grupo de 7 (/photos/ny/01.jpg, ...) en 393,321
+  toque 2: marca sola (/photos/ny/07.jpg) en 392,354
+  visor: caja 488,0,326,380 (x, y, ancho, alto) · viewport 814x380 · scrollWidth 814 / clientWidth 814
+  ok   tocar una marca abre el visor
+  ok   visor dentro del viewport
+  ok   visor sin scroll horizontal
+
+=== gestos ===
+  / deslizar hacia arriba: scrollY 0 -> 175
+  ok   scroll tactil
+  /album/america deslizar hacia arriba: scrollY 0 -> 175
+  ok   scroll tactil
+  /albums deslizar a la izquierda: album abierto 01 -> 04
+  ok   deslizar cambia de album
+  /atlas arrastrar 120 px: lambda0 -0.803 -> -18.872 (esperado ~-9.411, sin inercia)
+  ok   arrastre tactil
+  /atlas pellizcar 80 -> 220 px: R 40 -> 110 (min 31, max 4563)
+  ok   pellizco tactil
+  / deslizar hacia arriba (reduced motion): scrollY 0 -> 175
+  ok   scroll tactil (reduced motion)
+  /album/america deslizar hacia arriba (reduced motion): scrollY 0 -> 175
+  ok   scroll tactil (reduced motion)
+  /albums deslizar a la izquierda (reduced motion): album abierto 01 -> 04
+  ok   deslizar cambia de album (reduced motion)
+  /atlas arrastrar 120 px (reduced motion): lambda0 -0.803 -> -18.872 (esperado ~-9.411, sin inercia)
+  ok   arrastre tactil (reduced motion)
+  /atlas pellizcar 80 -> 220 px (reduced motion): R 40 -> 110 (min 31, max 4563)
+  ok   pellizco tactil (reduced motion)
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 446 · participantes 7 · fase B 892 · rezagadas 1 · reposo 1625
+     frame del arranque 283 ms · despues: frames >50 ms 0, frame max 17 ms · long tasks 3 (363 ms) · [entrance] start x1
+     al monton: 542 575 592 675 758 825 892
+  2: inicio 435 · participantes 7 · fase B 878 · rezagadas 1 · reposo 1611
+     frame del arranque 283 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 3 (359 ms) · [entrance] start x1
+     al monton: 528 578 594 678 744 811 878
+  3: inicio 446 · participantes 7 · fase B 894 · rezagadas 1 · reposo 1627
+     frame del arranque 283 ms · despues: frames >50 ms 0, frame max 33 ms · long tasks 3 (368 ms) · [entrance] start x1
+     al monton: 544 577 627 677 761 827 894
+  fase B      mediana 892 · max 894
+  reposo      mediana 1625 · max 1627
+  frames >50 mediana 0 · max 0
+  frame max   mediana 33 · max 33
+  arranque    mediana 283 · max 283
+
+=== fluidez del atlas ===
+  canvas 2442x286 (dpr 3) · entrada tactil (CDP) · cpu x1
+  arrastre 2 s: 275 frames · mediana 16.7 ms · p95 16.7 ms · max 16.8 ms · >50 ms: 0
+  pellizco 1 s: 126 frames · mediana 16.7 ms · p95 16.8 ms · max 16.8 ms · >50 ms: 0
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        omitido
+dispositivo  iphone-max horizontal (iPhone 15 Pro Max) · chromium
+consola      0 errores en 6 rutas
+invariantes  47 de 48
+entrada      arranque 283 ms · fase B 892 ms · reposo 1625 ms · frames >50 ms: 0 (medianas de 3)
+atlas        arrastre 2 s: mediana 16.7 · p95 16.7 · >50 ms 0 · pellizco 1 s: mediana 16.7 · p95 16.8 · >50 ms 0
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 6, 9, 8, 8
+
+FALLOS
+- / · fotos enteras en el viewport, proporcion < 1 % o <= 1 px · 22 de 30 fuera
+

@@ -1,0 +1,177 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+dispositivo: iphone-max horizontal (iPhone 15 Pro Max) · chromium · cpu x4
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  iphone-max horizontal (iPhone 15 Pro Max) · chromium · cpu x4
+  medido: 814x380 · dpr 3 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 814x380 · dpr 3 · hasTouch true
+  user agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+{
+  "vw": 814,
+  "vh": 380,
+  "dpr": 3,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 814,
+  "clientWidth": 814,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1628,
+      760
+    ],
+    "css": [
+      814,
+      380
+    ],
+    "expected": [
+      1628,
+      760
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x5c3400be2800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x5c3400be2800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x5c3400be2800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 30 fotos medidas a 814x380
+    america/05.jpg · caja 547x410 · NO CABE · desvio 0.0006 (0.23 px)
+    america/06.jpg · caja 430x402 · NO CABE · desvio 0.0015 (0.59 px)
+    america/08.jpg · caja 469x393 · NO CABE · desvio 0.0037 (1.47 px)
+    norte/01.jpg · caja 332x443 · NO CABE · desvio 0.0004 (0.19 px)
+    norte/02.jpg · caja 293x450 · NO CABE · desvio 0.0024 (1.06 px)
+    norte/03.jpg · caja 606x173 · cabe · desvio 0.0115 (1.98 px)
+    ny/01.jpg · caja 586x440 · NO CABE · desvio 0.0009 (0.38 px)
+    ny/02.jpg · caja 293x391 · NO CABE · desvio 0.0041 (1.6 px)
+    sol/03.jpg · caja 430x573 · NO CABE · desvio 0.0024 (1.37 px)
+    sol/05.jpg · caja 313x417 · NO CABE · desvio 0.0015 (0.63 px)
+    sol/07.jpg · caja 293x391 · NO CABE · desvio 0.0041 (1.6 px)
+    america/05.jpg · caja 547x410 · NO CABE · desvio 0.0006 (0.23 px)
+    america/06.jpg · caja 430x402 · NO CABE · desvio 0.0015 (0.59 px)
+    america/08.jpg · caja 469x393 · NO CABE · desvio 0.0037 (1.47 px)
+    norte/01.jpg · caja 332x443 · NO CABE · desvio 0.0004 (0.19 px)
+    norte/02.jpg · caja 293x450 · NO CABE · desvio 0.0024 (1.06 px)
+    norte/03.jpg · caja 606x173 · cabe · desvio 0.0115 (1.98 px)
+    ny/01.jpg · caja 586x440 · NO CABE · desvio 0.0009 (0.38 px)
+    ny/02.jpg · caja 293x391 · NO CABE · desvio 0.0041 (1.6 px)
+    sol/03.jpg · caja 430x573 · NO CABE · desvio 0.0024 (1.37 px)
+    sol/05.jpg · caja 313x417 · NO CABE · desvio 0.0015 (0.63 px)
+    sol/07.jpg · caja 293x391 · NO CABE · desvio 0.0041 (1.6 px)
+  FALLA fotos enteras en el viewport, proporcion < 1 % o <= 1 px · 22 de 30 fuera
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 814x380 · <img> ocultas por GL 30 · intersecan 7 · se ven 6
+    #1 america/03.jpg · caja 602,51,430,322 · opacity 1 · pintada 0.99
+    #2 america/05.jpg · caja 49,27,547,410 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 65,181,332,443 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 342,281,293,450 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 537,201,606,173 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 212,365,293,391 · opacity 1 · pintada —
+    #13 sol/05.jpg · caja 635,308,313,417 · opacity 1 · pintada 1.00
+  1 alturas · scrollY 380 · 814x380 · <img> ocultas por GL 30 · intersecan 11 · se ven 9
+    #1 america/03.jpg · caja 602,-309,430,322 · opacity 1 · pintada —
+    #2 america/05.jpg · caja 49,-331,547,410 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 98,289,469,352 · opacity 1 · pintada 0.99
+    #6 norte/01.jpg · caja 65,-173,332,443 · opacity 1 · pintada 0.98
+    #7 norte/02.jpg · caja 342,-99,293,450 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 537,-164,606,173 · opacity 1 · pintada —
+    #9 norte/06.jpg · caja 586,300,508,381 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 212,-15,293,391 · opacity 1 · pintada 0.96
+    #12 sol/03.jpg · caja 49,106,430,573 · opacity 1 · pintada 0.96
+    #13 sol/05.jpg · caja 635,-48,313,417 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 358,258,293,391 · opacity 1 · pintada 1.00
+  2 alturas · scrollY 760 · 814x380 · <img> ocultas por GL 30 · intersecan 9 · se ven 8
+    #0 america/01.jpg · caja 570,133,313,234 · opacity 1 · pintada 1.00
+    #3 america/06.jpg · caja 554,260,430,402 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 317,230,469,393 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 98,-91,469,352 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 586,-58,508,381 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 33,82,586,440 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 49,-274,430,573 · opacity 1 · pintada 1.00
+    #13 sol/05.jpg · caja 635,-405,313,417 · opacity 1 · pintada —
+    #14 sol/07.jpg · caja 358,-122,293,391 · opacity 1 · pintada 1.00
+  3 alturas · scrollY 1140 · 814x380 · <img> ocultas por GL 30 · intersecan 9 · se ven 8
+    #0 america/01.jpg · caja 570,-229,313,234 · opacity 1 · pintada —
+    #3 america/06.jpg · caja 554,-103,430,402 · opacity 1 · pintada 0.99
+    #4 america/08.jpg · caja 317,-131,469,393 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 33,-272,586,440 · opacity 1 · pintada 1.00
+    #16 america/03.jpg · caja 602,123,430,322 · opacity 1 · pintada 0.99
+    #17 america/05.jpg · caja 49,99,547,410 · opacity 1 · pintada 1.00
+    #21 norte/01.jpg · caja 65,252,332,443 · opacity 1 · pintada 1.00
+    #22 norte/02.jpg · caja 342,357,293,450 · opacity 1 · pintada 1.00
+    #23 norte/03.jpg · caja 537,274,606,173 · opacity 1 · pintada 1.00
+  fotos que se ven por altura (0, 1, 2, 3): 6, 9, 8, 8
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una · cpu x4
+  1: inicio 15530 · participantes 7 · fase B — · rezagadas 6 · reposo —
+     frame del arranque 5733 ms · despues: frames >50 ms 0, frame max 0 ms · long tasks 17 (8530 ms) · [entrance] start x1
+     al monton: 16237
+  2: inicio 13536 · participantes 7 · fase B 14627 · rezagadas 3 · reposo —
+     frame del arranque 4550 ms · despues: frames >50 ms 5, frame max 183 ms · long tasks 23 (7386 ms) · [entrance] start x1
+     al monton: 14344 14477 14477 14477 14627 14627 14627
+  3: inicio 11155 · participantes 7 · fase B 12367 · rezagadas 6 · reposo 12917
+     frame del arranque 3883 ms · despues: frames >50 ms 6, frame max 333 ms · long tasks 15 (6952 ms) · [entrance] start x1
+     al monton: 11867 12367 12367 12367 12367 12367 12367
+  fase B      mediana 12367 · max 14627
+  reposo      mediana 12917 · max 12917
+  frames >50 mediana 5 · max 6
+  frame max   mediana 183 · max 333
+  arranque    mediana 4550 · max 5733
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  iphone-max horizontal (iPhone 15 Pro Max) · chromium · cpu x4
+consola      0 errores en 1 rutas
+invariantes  12 de 13
+entrada      arranque 4550 ms · fase B 12367 ms · reposo 12917 ms · frames >50 ms: 5 (medianas de 3)
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 6, 9, 8, 8
+
+FALLOS
+- / · fotos enteras en el viewport, proporcion < 1 % o <= 1 px · 22 de 30 fuera
+

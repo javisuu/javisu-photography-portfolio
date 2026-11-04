@@ -1,0 +1,310 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+omitido (--skip-build)
+
+dispositivo: ipad (iPad Pro 11) · chromium
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  ipad (iPad Pro 11) · chromium
+  medido: 834x1194 · dpr 2 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 834x1194 · dpr 2 · hasTouch true
+  user agent: Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1668,
+      2388
+    ],
+    "css": [
+      834,
+      1194
+    ],
+    "expected": [
+      1668,
+      2388
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x218400423800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x218400423800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x218400423800]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1668,
+      2388
+    ],
+    "css": [
+      834,
+      1194
+    ],
+    "expected": [
+      1668,
+      2388
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1668,
+      1816
+    ],
+    "css": [
+      834,
+      908
+    ],
+    "expected": [
+      1668,
+      1816
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 30 fotos medidas a 834x1194
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #1 america/03.jpg · caja 617,180,440,330 · opacity 1 · pintada 1.00
+    #2 america/05.jpg · caja 50,111,560,420 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 67,603,340,454 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 350,884,300,462 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 550,639,620,176 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 217,1146,300,400 · opacity 1 · pintada 1.00
+    #13 sol/05.jpg · caja 651,997,320,427 · opacity 1 · pintada 1.00
+  1 alturas · scrollY 1194 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #5 america/09.jpg · caja 100,907,480,360 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 350,-310,300,462 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 600,968,520,390 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 217,-48,300,400 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 50,334,440,587 · opacity 1 · pintada 0.98
+    #13 sol/05.jpg · caja 651,-123,320,427 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 367,812,300,401 · opacity 1 · pintada 1.00
+  2 alturas · scrollY 2388 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #0 america/01.jpg · caja 584,431,320,240 · opacity 1 · pintada 1.00
+    #3 america/06.jpg · caja 567,838,440,412 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 325,745,480,403 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 100,-287,480,360 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 600,-158,520,390 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 33,291,600,450 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 367,-382,300,401 · opacity 1 · pintada 1.00
+  3 alturas · scrollY 3582 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 6
+    #3 america/06.jpg · caja 567,-302,440,412 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 325,-388,480,403 · opacity 1 · pintada —
+    #16 america/03.jpg · caja 617,407,440,330 · opacity 1 · pintada 1.00
+    #17 america/05.jpg · caja 50,337,560,420 · opacity 1 · pintada 1.00
+    #21 norte/01.jpg · caja 67,826,340,454 · opacity 1 · pintada 1.00
+    #22 norte/02.jpg · caja 350,1122,300,462 · opacity 1 · pintada 1.00
+    #23 norte/03.jpg · caja 550,868,620,176 · opacity 1 · pintada 1.00
+  fotos que se ven por altura (0, 1, 2, 3): 7, 7, 7, 6
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== visor del atlas ===
+  toque 1: grupo de 7 (/photos/ny/01.jpg, ...) en 292,637
+  toque 2: marca sola (/photos/ny/07.jpg) en 402,762
+  visor: caja 500,0,334,1194 (x, y, ancho, alto) · viewport 834x1194 · scrollWidth 834 / clientWidth 834
+  ok   tocar una marca abre el visor
+  ok   visor dentro del viewport
+  ok   visor sin scroll horizontal
+
+=== gestos ===
+  / deslizar hacia arriba: scrollY 0 -> 582
+  ok   scroll tactil
+  /album/america deslizar hacia arriba: scrollY 0 -> 582
+  ok   scroll tactil
+  /albums deslizar a la izquierda: album abierto 01 -> 01
+  FALLA deslizar cambia de album · 01 -> 01
+  /atlas arrastrar 120 px: lambda0 -0.803 -> -2.898 (esperado ~-1.076, sin inercia)
+  ok   arrastre tactil
+  /atlas pellizcar 80 -> 220 px: R 350 -> 963 (min 267, max 4563)
+  ok   pellizco tactil
+  / deslizar hacia arriba (reduced motion): scrollY 0 -> 582
+  ok   scroll tactil (reduced motion)
+  /album/america deslizar hacia arriba (reduced motion): scrollY 0 -> 582
+  ok   scroll tactil (reduced motion)
+  /albums deslizar a la izquierda (reduced motion): album abierto 01 -> 01
+  FALLA deslizar cambia de album (reduced motion) · 01 -> 01
+  /atlas arrastrar 120 px (reduced motion): lambda0 -0.803 -> -2.869 (esperado ~-1.076, sin inercia)
+  ok   arrastre tactil (reduced motion)
+  /atlas pellizcar 80 -> 220 px (reduced motion): R 350 -> 963 (min 267, max 4563)
+  ok   pellizco tactil (reduced motion)
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 385 · participantes 7 · fase B 900 · rezagadas 1 · reposo 1634
+     frame del arranque 250 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 3 (329 ms) · [entrance] start x1
+     al monton: 517 600 600 667 734 800 900
+  2: inicio 402 · participantes 7 · fase B 913 · rezagadas 1 · reposo 1663
+     frame del arranque 250 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 3 (327 ms) · [entrance] start x1
+     al monton: 530 596 629 663 746 813 913
+  3: inicio 414 · participantes 7 · fase B 910 · rezagadas 1 · reposo 1660
+     frame del arranque 250 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 3 (329 ms) · [entrance] start x1
+     al monton: 543 627 660 693 777 843 910
+  fase B      mediana 910 · max 913
+  reposo      mediana 1660 · max 1663
+  frames >50 mediana 0 · max 0
+  frame max   mediana 50 · max 50
+  arranque    mediana 250 · max 250
+
+=== fluidez del atlas ===
+  canvas 1668x1816 (dpr 2) · entrada tactil (CDP) · cpu x1
+  arrastre 2 s: 259 frames · mediana 16.7 ms · p95 16.8 ms · max 16.8 ms · >50 ms: 0
+  pellizco 1 s: 126 frames · mediana 16.7 ms · p95 16.7 ms · max 16.8 ms · >50 ms: 0
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        omitido
+dispositivo  ipad (iPad Pro 11) · chromium
+consola      0 errores en 6 rutas
+invariantes  46 de 48
+entrada      arranque 250 ms · fase B 910 ms · reposo 1660 ms · frames >50 ms: 0 (medianas de 3)
+atlas        arrastre 2 s: mediana 16.7 · p95 16.8 · >50 ms 0 · pellizco 1 s: mediana 16.7 · p95 16.7 · >50 ms 0
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 7, 7, 7, 6
+
+FALLOS
+- /albums · deslizar cambia de album · 01 -> 01
+- /albums · deslizar cambia de album (reduced motion) · 01 -> 01
+

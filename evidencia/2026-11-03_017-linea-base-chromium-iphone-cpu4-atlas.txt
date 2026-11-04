@@ -1,0 +1,81 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+dispositivo: iphone (iPhone 13) · chromium · cpu x4
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  iphone (iPhone 13) · chromium · cpu x4
+  medido: 390x664 · dpr 3 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 390x664 · dpr 3 · hasTouch true
+  user agent: Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta /atlas ===
+{
+  "vw": 390,
+  "vh": 664,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 390,
+  "clientWidth": 390,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1170,
+      1299
+    ],
+    "css": [
+      390,
+      433
+    ],
+    "expected": [
+      1170,
+      1299
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+
+=== visor del atlas ===
+  toque 1: grupo de 7 (/photos/ny/01.jpg, ...) en 137,399
+  toque 2: marca sola (/photos/ny/07.jpg) en 180,469
+  visor: caja 110,0,280,664 (x, y, ancho, alto) · viewport 390x664 · scrollWidth 390 / clientWidth 390
+  ok   tocar una marca abre el visor
+  ok   visor dentro del viewport
+  ok   visor sin scroll horizontal
+
+=== fluidez del atlas ===
+  canvas 1170x1299 (dpr 3) · entrada tactil (CDP) · cpu x4
+  arrastre 2 s: 319 frames · mediana 16.7 ms · p95 50 ms · max 83.4 ms · >50 ms: 8
+  pellizco 1 s: 140 frames · mediana 16.7 ms · p95 33.4 ms · max 116.7 ms · >50 ms: 4
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  iphone (iPhone 13) · chromium · cpu x4
+consola      0 errores en 1 rutas
+invariantes  12 de 12
+atlas        arrastre 2 s: mediana 16.7 · p95 50 · >50 ms 8 · pellizco 1 s: mediana 16.7 · p95 33.4 · >50 ms 4
+

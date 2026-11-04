@@ -16,6 +16,7 @@
 
 import { spawn, execSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
+import { parseDeviceArgs, contextFor, deviceLabel, CTX_ESCRITORIO, touchSwipe, touchPinch, applyCpu, frameRecorder, frameStats } from "./lib/dispositivo.mjs";
 
 const PORT = 3100;
 // localhost, no 127.0.0.1: next dev solo admite los origenes localhost y
@@ -24,6 +25,15 @@ const PORT = 3100;
 // block-cross-site-dev.js), con lo que el cliente nunca se hidrata.
 const SETTLE_MS = 3500;
 const args = process.argv.slice(2);
+// Modo dispositivo (spec 017): --dispositivo, --horizontal, --motor, --cpu,
+// --fluidez-atlas. Sin ellos, escritorio en Chromium, como siempre.
+const DEV = parseDeviceArgs(args);
+if (DEV.error) { console.log(DEV.error); process.exit(2); }
+const deviceMode = DEV.dispositivo !== null;
+// Contexto de navegador de todas las secciones. En escritorio, el de siempre:
+// 1440x900 a dpr 1, sin tactil (spec 017, T1: antes eran 10 literales). Con
+// --dispositivo, el perfil de Playwright; se fija al importar Playwright.
+let CTX = { ...CTX_ESCRITORIO };
 // --url: una web ya desplegada. Se valida antes de abrir nada.
 const urlArg = args.includes("--url") ? args[args.indexOf("--url") + 1] ?? "" : null;
 let remote = null;
@@ -56,8 +66,12 @@ if (BYPASS && !/^[!-~]+$/.test(BYPASS_SECRET)) {
   console.log(`VERCEL_BYPASS tiene caracteres que no caben en una cabecera HTTP (${BYPASS_SECRET.length} caracteres). Copialo de nuevo de Vercel.`);
   process.exit(2);
 }
-async function launchBrowser(opts) {
-  const b = await chromium.launch(opts);
+async function launchBrowser(opts = {}) {
+  // Los flags de linea de comandos (--hide-scrollbars, --disable-3d-apis) son
+  // de Chromium: WebKit no los entiende.
+  const launchOpts = { ...opts };
+  if (DEV.motor !== "chromium") { delete launchOpts.args; delete launchOpts.ignoreDefaultArgs; }
+  const b = await engine.launch(launchOpts);
   if (BYPASS) {
     const newContext = b.newContext.bind(b);
     const newPage = b.newPage.bind(b);
@@ -132,13 +146,18 @@ if (!skipStatic) {
 }
 
 // ---------- navegador ----------
-let chromium;
-try { ({ chromium } = await import("playwright")); }
-catch {
-  log("\nFALTA PLAYWRIGHT. Instala con:");
-  log("  npm i -D playwright && npx playwright install chromium");
+let engine;
+try {
+  const pw = await import("playwright");
+  engine = pw[DEV.motor];
+  CTX = contextFor(pw.devices, DEV);
+}
+catch (e) {
+  log(`\nFALTA PLAYWRIGHT O SU PERFIL (${e.message}). Instala con:`);
+  log(`  npm i -D playwright && npx playwright install ${DEV.motor}`);
   process.exit(2);
 }
+if (deviceMode || DEV.motor !== "chromium" || DEV.cpu > 1) log(`\ndispositivo: ${deviceLabel(DEV)}`);
 
 let killDev = () => {};
 if (remote) {
@@ -202,7 +221,7 @@ const IGNORE = [/_next\/hmr/i, /websocket/i, /favicon/i, /Download the React Dev
 const noise = (t) => IGNORE.some((re) => re.test(t));
 
 const browser = await launchBrowser();
-const page = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+const page = await browser.newPage({ ...CTX });
 const msgs = [];
 page.on("console", (m) => {
   if (!["error", "warning"].includes(m.type()) || noise(m.text())) return;
@@ -216,6 +235,19 @@ page.on("pageerror", (e) => msgs.push({ type: "error", text: `pageerror: ${e.mes
 page.on("response", (r) => {
   if (r.status() >= 400 && !noise(r.url())) msgs.push({ type: "error", text: `[http ${r.status()}] ${r.url()}` });
 });
+// Peticiones sin terminar: si un goto agota el tiempo esperando "load", dice
+// cual lo retiene (spec 017: en WebKit, la primera pasada agoto los 30 s en
+// las 6 rutas y no se pudo reproducir aislando cada una).
+const pendingReqs = new Map();
+page.on("request", (r) => pendingReqs.set(r, Date.now()));
+page.on("requestfinished", (r) => pendingReqs.delete(r));
+page.on("requestfailed", (r) => pendingReqs.delete(r));
+function logPending() {
+  const now = Date.now();
+  const list = [...pendingReqs].filter(([r]) => !noise(r.url()));
+  log(`  peticiones pendientes: ${list.length}`);
+  list.slice(0, 12).forEach(([r, t]) => log(`    ${r.method()} ${r.url().slice(0, 160)} · hace ${now - t} ms`));
+}
 
 // rutas
 let routes = only ? [only] : ["/", "/albums", "/about", "/credits", "/atlas"];
@@ -232,11 +264,38 @@ function addInv(route, name, ok, detail) {
   results.invariants.push({ route, name, ok, detail });
   log(`  ${ok ? "ok  " : "FALLA"} ${name}${ok ? "" : ` · ${detail}`}`);
 }
+function omitida(name) { rule(name); log("omitido (--dispositivo)"); }
+
+// ---------- cabecera dispositivo ----------
+// Spec 017, CA2. Lo que mide el navegador, no lo que se le pidio. El tactil
+// se lee con ontouchstart y pointer: coarse: en WebKit emulado
+// navigator.maxTouchPoints da 0 aunque el contexto tenga hasTouch.
+if (deviceMode) {
+  rule("cabecera dispositivo");
+  await page.goto(BASE + "/", { waitUntil: "load" }).catch(() => {});
+  const hd = await page.evaluate(() => ({
+    w: innerWidth, h: innerHeight, dpr: devicePixelRatio,
+    touch: "ontouchstart" in window,
+    coarse: matchMedia("(pointer: coarse)").matches,
+    hover: matchMedia("(hover: hover)").matches,
+    ua: navigator.userAgent,
+  })).catch((e) => ({ evalError: e.message }));
+  log(`  ${deviceLabel(DEV)}`);
+  log(`  medido: ${hd.w}x${hd.h} · dpr ${hd.dpr} · ontouchstart ${hd.touch} · pointer: coarse ${hd.coarse} · hover: hover ${hd.hover}`);
+  log(`  pedido: ${CTX.viewport.width}x${CTX.viewport.height} · dpr ${CTX.deviceScaleFactor} · hasTouch ${!!CTX.hasTouch}`);
+  log(`  user agent: ${hd.ua}`);
+  addInv("dispositivo", "viewport = perfil", hd.w === CTX.viewport.width && hd.h === CTX.viewport.height,
+    `${hd.w}x${hd.h} vs ${CTX.viewport.width}x${CTX.viewport.height}`);
+  addInv("dispositivo", "dpr = perfil", Math.abs(hd.dpr - CTX.deviceScaleFactor) < 0.01, `${hd.dpr} vs ${CTX.deviceScaleFactor}`);
+  addInv("dispositivo", "tactil (ontouchstart)", hd.touch === true, `ontouchstart ${hd.touch}`);
+  addInv("dispositivo", "sin hover: hover", hd.hover === false, `hover: hover ${hd.hover}`);
+  log("  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas");
+}
 
 for (const route of routes) {
   rule(`ruta ${route}`);
   msgs.length = 0;
-  await page.goto(BASE + route, { waitUntil: "load" }).catch((e) => msgs.push({ type: "error", text: `goto: ${e.message}` }));
+  await page.goto(BASE + route, { waitUntil: "load" }).catch((e) => { msgs.push({ type: "error", text: `goto: ${e.message}` }); logPending(); });
   await page.waitForTimeout(SETTLE_MS);
 
   const m = await page.evaluate(() => {
@@ -323,10 +382,59 @@ for (const route of routes) {
 const SCROLL_STEP_PX = 600;
 const SCROLL_WAIT_MS = 1000;
 const MAX_RATIO_DEVIATION = 0.01;
+if (deviceMode) {
+  omitida("barra de scroll");
+  // ---------- fotos enteras (dispositivo) ----------
+  // Spec 017, CA5. Regla dura: cada foto cabe entera en el viewport y
+  // conserva su proporcion. En / y en TODOS los albumes (no solo el primero).
+  // Cuenta tambien las <img> ocultas tras GLSurface: su caja es la que
+  // GLSurface copia para pintar cada plano.
+  rule("fotos enteras");
+  // La lista sale de src/data/photos.ts, la fuente unica: el carrusel solo
+  // enlaza el album abierto.
+  let albumRoutes = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^s*slug: "([^"]+)",$/gm)].map((x) => `/album/${x[1]}`);
+  if (only) albumRoutes = only.startsWith("/album/") ? [only] : [];
+  const fitRoutes = [...(!only || only === "/" ? ["/"] : []), ...albumRoutes];
+  for (const route of fitRoutes) {
+    const ctx = await browser.newContext({ ...CTX });
+    const p = await ctx.newPage();
+    await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(SETTLE_MS);
+    const m = await p.evaluate(() => {
+      const main = [...document.querySelectorAll("main")].filter((el) => getComputedStyle(el).display !== "none")[0];
+      const out = { vw: innerWidth, vh: innerHeight, photos: 0, bad: [] };
+      for (const img of main?.querySelectorAll("img") ?? []) {
+        // Proporcion natural: la del fichero si ya cargo; si no (carga
+        // diferida aun sin pedir), la de los atributos width/height que
+        // next/image escribe desde src/data/photos.ts.
+        const nw = img.naturalWidth || +img.getAttribute("width");
+        const nh = img.naturalHeight || +img.getAttribute("height");
+        if (!(nw > 0 && nh > 0)) continue;
+        const b = img.getBoundingClientRect();
+        if (b.width < 1 || b.height < 1) continue;
+        out.photos++;
+        const dev = Math.abs(b.width / b.height / (nw / nh) - 1);
+        // Redondeo: la caja se ajusta a pixeles, y en una foto de ~110 px de
+        // alto 1 px ya es un 1 %. Deformada solo si pasa del 1 % Y el alto
+        // difiere en mas de 1 px del que daria su ancho.
+        const pxErr = Math.abs(b.height - b.width * nh / nw);
+        const fits = b.width <= innerWidth + 1 && b.height <= innerHeight + 1;
+        if (!fits || (dev >= 0.01 && pxErr > 1)) out.bad.push({ src: (img.currentSrc || img.src).split("url=").pop().split("&")[0].split("%2F").slice(-2).join("/").slice(0, 60),
+          box: [Math.round(b.width), Math.round(b.height)], dev: +dev.toFixed(4), pxErr: +pxErr.toFixed(2), fits });
+      }
+      return out;
+    }).catch((e) => ({ evalError: e.message, photos: 0, bad: [] }));
+    await ctx.close();
+    log(`  ${route}: ${m.photos} fotos medidas a ${m.vw}x${m.vh}${m.evalError ? ` · ${m.evalError}` : ""}`);
+    m.bad.forEach((b) => log(`    ${b.src} · caja ${b.box.join("x")} · ${b.fits ? "cabe" : "NO CABE"} · desvio ${b.dev} (${b.pxErr} px)`));
+    addInv(route, "fotos enteras en el viewport, proporcion < 1 % o <= 1 px", m.photos > 0 && m.bad.length === 0,
+      m.photos ? `${m.bad.length} de ${m.photos} fuera` : "ninguna foto medida");
+  }
+} else {
 rule("barra de scroll");
 const sbBrowser = await launchBrowser({ ignoreDefaultArgs: ["--hide-scrollbars"] });
 async function sbOpen(route, ctxOpts = {}) {
-  const ctx = await sbBrowser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...ctxOpts });
+  const ctx = await sbBrowser.newContext({ ...CTX, ...ctxOpts });
   const p = await ctx.newPage();
   await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
   await p.waitForTimeout(SETTLE_MS);
@@ -403,6 +511,241 @@ for (const route of routes) {
   }
 }
 await sbBrowser.close();
+}
+
+// ---------- fotos del landing ----------
+// Spec 017, CA4. "En la version movil ni se ve ninguna foto de la landing"
+// (Javi, 2026-11-03). Por cada .landing-photo con su <img> en el primer
+// viewport y tras desplazar 1, 2 y 3 alturas: caja, opacidad efectiva (el
+// producto de la del <img> y sus ancestros hasta el <main>), si interseca el
+// viewport y si el canvas GL pinta algo en su caja. Esto ultimo se lee de
+// una captura (scale: "css", vale en Chromium y WebKit): fraccion de pixeles
+// distintos del fondo #FAFAFA en el interior de la caja recortada al
+// viewport. El wordmark blanco con difference y los rotulos tambien pintan,
+// asi que la cifra se da tal cual y "pintada" pide al menos
+// LANDING_PAINTED_MIN de la caja. Corre en modo dispositivo, o en escritorio
+// con --fotos-landing para contrastar contra lo que ya se ve alli.
+const LANDING_PAINTED_MIN = 0.3;
+// Mismos valores que ARRIVAL_BG/_TOL/_INSET_PX de "llegada al album", que se
+// declaran mas abajo y aqui aun no existen.
+const LANDING_BG = [250, 250, 250];
+const LANDING_BG_TOL = 2;
+const LANDING_INSET_PX = 8;
+const LANDING_SCROLL_SETTLE_MS = 1200;
+if ((deviceMode || args.includes("--fotos-landing")) && (!only || only === "/")) {
+  rule("fotos del landing");
+  const ctx = await browser.newContext({ ...CTX });
+  const p = await ctx.newPage();
+  const decoder = await browser.newPage();
+  await p.goto(BASE + "/", { waitUntil: "load" }).catch(() => {});
+  await p.waitForTimeout(SETTLE_MS);
+  for (const k of [0, 1, 2, 3]) {
+    await p.evaluate((k) => window.scrollTo(0, k * innerHeight), k).catch(() => {});
+    await p.waitForTimeout(LANDING_SCROLL_SETTLE_MS);
+    const st = await p.evaluate(() => {
+      const main = [...document.querySelectorAll("main")].filter((el) => getComputedStyle(el).display !== "none")[0];
+      const out = { scrollY: Math.round(scrollY), vw: innerWidth, vh: innerHeight, glHidden: 0, photos: [] };
+      [...document.querySelectorAll(".landing-photo")].forEach((wrap, i) => {
+        const img = wrap.querySelector("img");
+        if (!img) return;
+        let op = 1;
+        for (let el = img; el && el !== main?.parentElement; el = el.parentElement) op *= +getComputedStyle(el).opacity;
+        if (getComputedStyle(img).visibility === "hidden") out.glHidden++;
+        const b = img.getBoundingClientRect();
+        const box = { l: Math.max(0, b.left), t: Math.max(0, b.top), r: Math.min(innerWidth, b.right), b: Math.min(innerHeight, b.bottom) };
+        const inter = box.r - box.l > 1 && box.b - box.t > 1;
+        if (!inter) return;
+        out.photos.push({ i, src: (img.currentSrc || img.src).split("url=").pop().split("&")[0].split("%2F").slice(-2).join("/").slice(0, 50),
+          box: [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)], clip: box, opacity: +op.toFixed(3) });
+      });
+      return out;
+    }).catch((e) => ({ evalError: e.message, photos: [] }));
+    const shot = await p.screenshot({ scale: "css", type: "png" }).catch(() => null);
+    if (shot && st.photos.length) {
+      const fr = await decoder.evaluate(async ({ data, boxes, bg, tol, inset }) => {
+        const img = new Image();
+        img.src = `data:image/png;base64,${data}`;
+        await img.decode();
+        const c = document.createElement("canvas");
+        c.width = img.width; c.height = img.height;
+        const g = c.getContext("2d");
+        g.drawImage(img, 0, 0);
+        return boxes.map((bx) => {
+          const l = Math.round(bx.l + inset), t = Math.round(bx.t + inset);
+          const w = Math.round(bx.r - bx.l - 2 * inset), h = Math.round(bx.b - bx.t - 2 * inset);
+          if (w < 2 || h < 2) return null;
+          const d = g.getImageData(l, t, w, h).data;
+          let diff = 0;
+          for (let j = 0; j < d.length; j += 4)
+            if (Math.abs(d[j] - bg[0]) > tol || Math.abs(d[j + 1] - bg[1]) > tol || Math.abs(d[j + 2] - bg[2]) > tol) diff++;
+          return diff / (w * h);
+        });
+      }, { data: shot.toString("base64"), boxes: st.photos.map((ph) => ph.clip), bg: LANDING_BG, tol: LANDING_BG_TOL, inset: LANDING_INSET_PX }).catch(() => null);
+      st.photos.forEach((ph, j) => { ph.painted = fr ? fr[j] : null; });
+    }
+    const seen = st.photos.filter((ph) => ph.opacity > 0.5 && ph.painted !== null && ph.painted !== undefined && ph.painted >= LANDING_PAINTED_MIN);
+    log(`  ${k} alturas · scrollY ${st.scrollY} · ${st.vw}x${st.vh} · <img> ocultas por GL ${st.glHidden} · intersecan ${st.photos.length} · se ven ${seen.length}${st.evalError ? ` · ${st.evalError}` : ""}`);
+    st.photos.forEach((ph) => log(`    #${ph.i} ${ph.src} · caja ${ph.box.join(",")} · opacity ${ph.opacity} · pintada ${ph.painted == null ? "—" : ph.painted.toFixed(2)}`));
+    results.landingSeen = results.landingSeen ?? [];
+    results.landingSeen.push(seen.length);
+  }
+  await decoder.close();
+  await ctx.close();
+  log(`  fotos que se ven por altura (0, 1, 2, 3): ${results.landingSeen.join(", ")}`);
+  addInv("/", "se ve al menos una foto del landing en el primer viewport", results.landingSeen[0] > 0, `${results.landingSeen[0]} fotos`);
+}
+
+// ---------- visor del atlas ----------
+// Spec 017, CA7 (decision 3 de la spec 016: en vertical "solo tiene que no
+// romper"). Toca una marca de una sola foto con page.touchscreen.tap (vale en
+// los dos motores con hasTouch), espera al vuelo y mide la caja del visor.
+const VIEWER_MAX_TAPS = 6;
+const VIEWER_OPEN_WAIT_MS = 2500; // el clic vuela antes de abrir (FLY_MAX_MS 1400-1800, spec 016) + margen
+if (deviceMode && (!only || only === "/atlas")) {
+  rule("visor del atlas");
+  const ctx = await browser.newContext({ ...CTX });
+  const p = await ctx.newPage();
+  await p.goto(BASE + "/atlas", { waitUntil: "load" }).catch(() => {});
+  await p.waitForTimeout(SETTLE_MS);
+  // A zoom inicial en un movil todas las fotos pueden ir agrupadas: tocar un
+  // grupo acerca hasta separarlo (spec 016), y uno que no se separa abre el
+  // visor. Se toca la marca sola mas cercana al centro, o si no hay, el grupo
+  // mas cercano, hasta VIEWER_MAX_TAPS veces o hasta que el visor abra.
+  const pick = () => p.evaluate(() => {
+    const main = [...document.querySelectorAll("main")].find((el) => getComputedStyle(el).display !== "none");
+    const c = main?.querySelector("canvas")?.getBoundingClientRect();
+    const all = (window.__atlas?.clusters() ?? []).filter((k) => k.opacity > 0.9);
+    if (!c || !all.length) return null;
+    const cx = c.width / 2, cy = c.height / 2;
+    const near = (a, b) => Math.hypot(a.x - cx, a.y - cy) - Math.hypot(b.x - cx, b.y - cy);
+    const single = all.filter((k) => k.srcs.length === 1).sort(near)[0];
+    const k = single ?? all.sort(near)[0];
+    return { x: c.left + k.x, y: c.top + k.y, srcs: k.srcs, single: !!single };
+  }).catch(() => null);
+  const viewerOpen = () => p.evaluate(() => !!document.querySelector(".atlas-viewer")).catch(() => false);
+  let target = null;
+  for (let tap = 1; tap <= VIEWER_MAX_TAPS && !(await viewerOpen()); tap++) {
+    target = await pick();
+    if (!target) break;
+    log(`  toque ${tap}: ${target.single ? "marca sola" : `grupo de ${target.srcs.length}`} (${target.srcs[0]}${target.srcs.length > 1 ? ", ..." : ""}) en ${Math.round(target.x)},${Math.round(target.y)}`);
+    await p.touchscreen.tap(target.x, target.y).catch((e) => log(`  tap: ${e.message}`));
+    await p.waitForTimeout(VIEWER_OPEN_WAIT_MS);
+  }
+  if (!target) {
+    log("  sin marcas visibles (o sin sonda __atlas)");
+    addInv("/atlas", "tocar una marca abre el visor", false, "sin marcas");
+  } else {
+    const v = await p.evaluate(() => {
+      const el = document.querySelector(".atlas-viewer");
+      if (!el) return null;
+      const b = el.getBoundingClientRect();
+      return { box: [Math.round(b.left), Math.round(b.top), Math.round(b.width), Math.round(b.height)], right: Math.round(b.right), bottom: Math.round(b.bottom),
+        vw: innerWidth, vh: innerHeight, scrollWidth: document.documentElement.scrollWidth, clientWidth: document.documentElement.clientWidth };
+    }).catch(() => null);
+    log(v ? `  visor: caja ${v.box.join(",")} (x, y, ancho, alto) · viewport ${v.vw}x${v.vh} · scrollWidth ${v.scrollWidth} / clientWidth ${v.clientWidth}` : "  visor: no se abrio");
+    addInv("/atlas", "tocar una marca abre el visor", !!v, v ? "" : "no hay .atlas-viewer");
+    if (v) {
+      addInv("/atlas", "visor dentro del viewport", v.box[0] >= 0 && v.box[1] >= 0 && v.right <= v.vw + 1 && v.bottom <= v.vh + 1, `caja ${v.box.join(",")} vs ${v.vw}x${v.vh}`);
+      addInv("/atlas", "visor sin scroll horizontal", v.scrollWidth <= v.clientWidth + 1, `${v.scrollWidth} > ${v.clientWidth}`);
+    }
+  }
+  await ctx.close();
+}
+
+// ---------- gestos ----------
+// Spec 017, CA6. Toques reales por CDP (scripts/lib/dispositivo.mjs), con y
+// sin movimiento reducido: deslizar en vertical en / y en un album (scroll
+// nativo; Lenis no sincroniza el tactil), en horizontal en /albums, y
+// arrastrar y pellizcar en /atlas. Cada gesto imprime antes y despues. En
+// WebKit no hay CDP y un PointerEvent sintetico no puede capturar el
+// puntero: todo sale NO MEDIBLE, que no cuenta como aprobado.
+const GESTURE_SETTLE_MS = 1500;
+const ATLAS_DRAG_PX = 120;
+if (deviceMode && !only) {
+  rule("gestos");
+  results.noMedible = results.noMedible ?? [];
+  if (DEV.motor !== "chromium") {
+    for (const g of ["deslizar / (scroll)", "deslizar album (scroll)", "deslizar /albums", "arrastrar /atlas", "pellizcar /atlas"]) {
+      log(`  NO MEDIBLE ${g} · ${DEV.motor}: sin CDP para toques reales, y un PointerEvent sintetico no puede capturar el puntero`);
+      results.noMedible.push(`gestos · ${g}`);
+    }
+  } else {
+    const firstAlbum = `/album/${[...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)][0][1]}`;
+    for (const reduced of [false, true]) {
+      const label = reduced ? " (reduced motion)" : "";
+      const open = async (route) => {
+        const ctx = await browser.newContext({ ...CTX, ...(reduced ? { reducedMotion: "reduce" } : {}) });
+        const p = await ctx.newPage();
+        await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+        await p.waitForTimeout(SETTLE_MS);
+        return { ctx, p, cdp: await ctx.newCDPSession(p) };
+      };
+      const vw = CTX.viewport.width, vh = CTX.viewport.height;
+      // scroll vertical
+      for (const route of ["/", firstAlbum]) {
+        const { ctx, p, cdp } = await open(route);
+        const before = await p.evaluate(() => scrollY).catch(() => null);
+        await touchSwipe(cdp, { x: vw / 2, y: vh * 0.75 }, { x: vw / 2, y: vh * 0.25 });
+        await p.waitForTimeout(GESTURE_SETTLE_MS);
+        const after = await p.evaluate(() => scrollY).catch(() => null);
+        await ctx.close();
+        log(`  ${route} deslizar hacia arriba${label}: scrollY ${before} -> ${after}`);
+        addInv(route, `scroll tactil${label}`, before !== null && after !== null && after > before, `scrollY ${before} -> ${after}`);
+      }
+      // carrusel: el contador "NN — NN" del album abierto
+      {
+        const { ctx, p, cdp } = await open("/albums");
+        const counter = () => p.evaluate(() => {
+          const el = [...document.querySelectorAll(".tabular-nums")].find((e) => /^\d\d\s*\d\d$/.test(e.textContent.trim()));
+          return el ? el.querySelector("span")?.textContent ?? null : null;
+        }).catch(() => null);
+        const before = await counter();
+        await touchSwipe(cdp, { x: vw * 0.8, y: vh / 2 }, { x: vw * 0.2, y: vh / 2 });
+        await p.waitForTimeout(GESTURE_SETTLE_MS);
+        const after = await counter();
+        await ctx.close();
+        log(`  /albums deslizar a la izquierda${label}: album abierto ${before} -> ${after}`);
+        addInv("/albums", `deslizar cambia de album${label}`, before !== null && after !== null && after !== before, `${before} -> ${after}`);
+      }
+      // atlas: arrastre (lambda0) y pellizco (R)
+      {
+        const { ctx, p, cdp } = await open("/atlas");
+        const state = () => p.evaluate(() => window.__atlas?.state() ?? null).catch(() => null);
+        const box = await p.evaluate(() => {
+          // El <main> visible: el primero del documento es el del landing,
+          // oculto, y su canvas mide 0x0.
+          const main = [...document.querySelectorAll("main")].find((el) => getComputedStyle(el).display !== "none");
+          const c = main?.querySelector("canvas")?.getBoundingClientRect();
+          return c && c.width > 0 ? { x: c.left + c.width / 2, y: c.top + c.height / 2 } : null;
+        }).catch(() => null);
+        const s0 = await state();
+        if (!s0 || !box) {
+          log(`  /atlas${label}: sin sonda __atlas o sin canvas`);
+          addInv("/atlas", `arrastre tactil${label}`, false, "sin sonda");
+          addInv("/atlas", `pellizco tactil${label}`, false, "sin sonda");
+        } else {
+          await touchSwipe(cdp, { x: box.x - ATLAS_DRAG_PX / 2, y: box.y }, { x: box.x + ATLAS_DRAG_PX / 2, y: box.y });
+          await p.waitForTimeout(300);
+          const s1 = await state();
+          // dx -> lambda0 -= dx·(pi/R) (design spec §5). La deriva en reposo
+          // tambien mueve lambda0, pero mucho menos que esto.
+          const expected = -ATLAS_DRAG_PX * Math.PI / s0.R;
+          const dl = s1.lambda0 - s0.lambda0;
+          log(`  /atlas arrastrar ${ATLAS_DRAG_PX} px${label}: lambda0 ${s0.lambda0.toFixed(3)} -> ${s1.lambda0.toFixed(3)} (esperado ~${expected.toFixed(3)}, sin inercia)`);
+          addInv("/atlas", `arrastre tactil${label}`, Math.sign(dl) === Math.sign(expected) && Math.abs(dl) >= Math.abs(expected) / 2, `delta ${dl.toFixed(3)} vs ~${expected.toFixed(3)}`);
+          await p.waitForTimeout(GESTURE_SETTLE_MS);
+          const s2 = await state();
+          await touchPinch(cdp, box, 80, 220);
+          await p.waitForTimeout(300);
+          const s3 = await state();
+          log(`  /atlas pellizcar 80 -> 220 px${label}: R ${s2.R.toFixed(0)} -> ${s3.R.toFixed(0)} (min ${s2.minR.toFixed(0)}, max ${s2.maxR.toFixed(0)})`);
+          addInv("/atlas", `pellizco tactil${label}`, s3.R > s2.R || s2.R >= s2.maxR - 1, `R ${s2.R.toFixed(0)} -> ${s3.R.toFixed(0)}`);
+        }
+        await ctx.close();
+      }
+    }
+  }
+}
 
 // ---------- llegada al album ----------
 // Spec 013. Al llegar a /album/<slug>, GLSurface oculta las <img> en cuanto
@@ -438,7 +781,7 @@ function arrivalSampler() {
   };
   requestAnimationFrame(tick);
 }
-if (!only || only.startsWith("/album/")) {
+if (!deviceMode && (!only || only.startsWith("/album/"))) {
   rule("llegada al album");
   const slugs = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
   const direct = only ?? `/album/${slugs[1] ?? slugs[0]}`;
@@ -479,7 +822,7 @@ if (!only || only.startsWith("/album/")) {
   }
   async function arrivalRun({ kind, reduced = false, noGl = false }) {
     const br = noGl ? await launchBrowser({ args: ["--disable-3d-apis"] }) : browser;
-    const ctx = await br.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...(reduced ? { reducedMotion: "reduce" } : {}) });
+    const ctx = await br.newContext({ ...CTX, ...(reduced ? { reducedMotion: "reduce" } : {}) });
     const p = await ctx.newPage();
     const errs = [];
     p.on("pageerror", (e) => errs.push(e.message));
@@ -580,7 +923,7 @@ if (!only || only.startsWith("/album/")) {
   addInv("llegada (sin WebGL)", "foto 1 visible sin esperar a GL", !!last && last.op >= 1 && last.vis === "visible" && ngMid === 0,
     last ? `opacity ${last.op}, ${last.vis}, ${ngMid} muestras a medio fundido` : "sin muestras");
   // Prioridad de carga: la foto 1 eager y fetchpriority high, el resto lazy.
-  const ap = await browser.newPage({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  const ap = await browser.newPage({ ...CTX });
   for (const slug of only ? [only.slice("/album/".length)] : slugs) {
     await ap.goto(`${BASE}/album/${slug}`, { waitUntil: "load" }).catch(() => {});
     const a = await ap.evaluate(() => {
@@ -618,12 +961,12 @@ function scrollSampler() {
   };
   requestAnimationFrame(tick);
 }
-if (!only || only.startsWith("/album/")) {
+if (!deviceMode && (!only || only.startsWith("/album/"))) {
   rule("scroll del album");
   const slugs = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
   const burstRoute = only ?? `/album/${slugs[0]}`;
   async function scrollPage(route, ctxOpts = {}) {
-    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...ctxOpts });
+    const ctx = await browser.newContext({ ...CTX, ...ctxOpts });
     const p = await ctx.newPage();
     const errs = [];
     p.on("pageerror", (e) => errs.push(e.message));
@@ -703,9 +1046,9 @@ const QUOTE_CENTER_MAX_PX = 24;
 // Enmienda 1 de la spec 010: hasta 1,1 de ancho por alto cuenta como cuadrada.
 const NEAR_SQUARE_MAX_RATIO = 1.1;
 const SIGNATURE = "JAVIER SUÁREZ SUQUÍA";
-if (!only || only.startsWith("/album/")) {
+if (!deviceMode && (!only || only.startsWith("/album/"))) {
   rule("textos del album");
-  const txCtx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+  const txCtx = await browser.newContext({ ...CTX });
   const tp = await txCtx.newPage();
   // /albums solo enlaza la diapositiva abierta del carrusel: la lista de
   // albumes sale de src/data/photos.ts, que es la fuente unica.
@@ -806,7 +1149,7 @@ if (!only || only.startsWith("/album/")) {
     // del atlas tiene que seguir centrando la foto N+1, no el texto.
     const target = m.texts.find((t) => t.kind === "between")?.nextIdx;
     if (Number.isInteger(target)) {
-      const lc = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, reducedMotion: "reduce" });
+      const lc = await browser.newContext({ ...CTX, reducedMotion: "reduce" });
       const lp = await lc.newPage();
       await lp.goto(`${BASE}${route}#photo-${target}`, { waitUntil: "load" }).catch(() => {});
       await lp.waitForTimeout(SETTLE_MS);
@@ -917,12 +1260,20 @@ function analyse(rec) {
   };
 }
 
-if (!only || only === "/") {
+// Con --cpu N en WebKit no hay CDP: la entrada no se mide, para no hacer
+// pasar una cifra a CPU x1 por una a CPU xN (spec 017, T8).
+const cpuUnavailable = DEV.cpu > 1 && DEV.motor !== "chromium";
+if (cpuUnavailable && (!only || only === "/")) {
   rule("entrada /");
-  log(`ms desde el inicio de la navegacion · ${reps} repeticion${reps > 1 ? "es" : ""} · cache vacia en cada una`);
+  log(`  NO MEDIBLE · --cpu ${DEV.cpu} en ${DEV.motor}: sin CDP para limitar la CPU`);
+  (results.noMedible ??= []).push(`entrada / con cpu x${DEV.cpu}`);
+} else if (!only || only === "/") {
+  rule("entrada /");
+  log(`ms desde el inicio de la navegacion · ${reps} repeticion${reps > 1 ? "es" : ""} · cache vacia en cada una${DEV.cpu > 1 ? ` · cpu x${DEV.cpu}` : ""}`);
   for (let k = 1; k <= reps; k++) {
-    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1 });
+    const ctx = await browser.newContext({ ...CTX });
     const p = await ctx.newPage();
+    await applyCpu(ctx, p, DEV);
     const errs = [];
     p.on("pageerror", (e) => errs.push(e.message));
     await p.addInitScript(sampler, { maxMs: ENTRANCE_MAX_MS, holdMs: ENTRANCE_REST_HOLD_MS });
@@ -952,6 +1303,82 @@ if (!only || only === "/") {
   }
 }
 
+// ---------- fluidez del atlas ----------
+// Spec 017, CA9. "Me parecio ir un poco menos fluido" (Javi, 2026-11-03).
+// Duracion de los frames (rAF) durante ATLAS_DRAG_MS de arrastre continuo y
+// durante un pellizco (en escritorio, rueda). En modo dispositivo con
+// Chromium, toques reales por CDP; en escritorio y en WebKit, raton (un
+// puntero real, que si puede capturarse). Solo con --fluidez-atlas.
+const ATLAS_DRAG_MS = 2000;
+const ATLAS_FRAME_STEP_MS = 16;
+if (args.includes("--fluidez-atlas") && (!only || only === "/atlas")) {
+  rule("fluidez del atlas");
+  if (cpuUnavailable) {
+    log(`  NO MEDIBLE · --cpu ${DEV.cpu} en ${DEV.motor}: sin CDP para limitar la CPU`);
+    (results.noMedible ??= []).push(`fluidez del atlas con cpu x${DEV.cpu}`);
+  } else {
+    const ctx = await browser.newContext({ ...CTX });
+    const p = await ctx.newPage();
+    await p.goto(BASE + "/atlas", { waitUntil: "load" }).catch(() => {});
+    await p.waitForTimeout(SETTLE_MS);
+    const cpuOn = await applyCpu(ctx, p, DEV);
+    const info = await p.evaluate(() => {
+      const main = [...document.querySelectorAll("main")].find((el) => getComputedStyle(el).display !== "none");
+      const cv = main?.querySelector("canvas");
+      const b = cv?.getBoundingClientRect();
+      return b && b.width > 0 ? { x: b.left + b.width / 2, y: b.top + b.height / 2, w: b.width, buffer: [cv.width, cv.height], dpr: devicePixelRatio } : null;
+    }).catch(() => null);
+    const touch = deviceMode && DEV.motor === "chromium";
+    const cdp = touch ? await ctx.newCDPSession(p) : null;
+    if (!info) log("  sin canvas del atlas");
+    else {
+      log(`  canvas ${info.buffer.join("x")} (dpr ${info.dpr}) · entrada ${touch ? "tactil (CDP)" : "raton"} · cpu x${cpuOn ? DEV.cpu : 1}`);
+      const measure = async (name, act) => {
+        await p.evaluate(frameRecorder);
+        // Un gesto que el motor no admite no tumba el diagnostico (dejaria
+        // next dev huerfano en :3100): sale NO MEDIBLE.
+        try { await act(); }
+        catch (e) {
+          await p.evaluate(() => { window.__framesOn = false; }).catch(() => {});
+          log(`  NO MEDIBLE ${name} · ${e.message.split(/\r?\n/)[0]}`);
+          (results.noMedible ??= []).push(`fluidez del atlas · ${name}`);
+          return;
+        }
+        const stamps = await p.evaluate(() => { window.__framesOn = false; return window.__frames; }).catch(() => []);
+        const st = frameStats(stamps, LONG_FRAME_MS);
+        log(st ? `  ${name}: ${st.frames} frames · mediana ${st.median} ms · p95 ${st.p95} ms · max ${st.max} ms · >${LONG_FRAME_MS} ms: ${st.long}` : `  ${name}: sin frames`);
+        (results.atlasFluency ??= []).push({ name, ...st });
+      };
+      const steps = Math.round(ATLAS_DRAG_MS / ATLAS_FRAME_STEP_MS);
+      const amp = Math.min(info.w * 0.3, 150);
+      // Ida y vuelta horizontal durante ATLAS_DRAG_MS.
+      const path = (i) => info.x + amp * Math.sin((i / steps) * 2 * Math.PI);
+      await measure("arrastre 2 s", async () => {
+        if (touch) {
+          const pt = (x) => [{ x: Math.round(x), y: Math.round(info.y), id: 1 }];
+          await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: pt(path(0)) });
+          for (let i = 1; i <= steps; i++) { await p.waitForTimeout(ATLAS_FRAME_STEP_MS); await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: pt(path(i)) }); }
+          await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+        } else {
+          await p.mouse.move(path(0), info.y); await p.mouse.down();
+          for (let i = 1; i <= steps; i++) { await p.waitForTimeout(ATLAS_FRAME_STEP_MS); await p.mouse.move(path(i), info.y); }
+          await p.mouse.up();
+        }
+      });
+      await p.waitForTimeout(1500);
+      // WebKit movil no admite mouse.wheel ni hay CDP para el pellizco.
+      if (deviceMode && !touch) {
+        log(`  NO MEDIBLE pellizco · ${DEV.motor}: sin CDP para toques reales, y mouse.wheel no existe en WebKit movil`);
+        (results.noMedible ??= []).push("fluidez del atlas · pellizco");
+      } else await measure(touch ? "pellizco 1 s" : "rueda 1 s", async () => {
+        if (touch) await touchPinch(cdp, info, 80, 260, { steps: 60, stepMs: ATLAS_FRAME_STEP_MS });
+        else { await p.mouse.move(info.x, info.y); for (let i = 0; i < 60; i++) { await p.mouse.wheel(0, -40); await p.waitForTimeout(ATLAS_FRAME_STEP_MS); } }
+      });
+    }
+    await ctx.close();
+  }
+}
+
 // ---------- descifrado del wordmark ----------
 // Spec 014. Fuera de / el landing sigue montado con display: none, y todo lo
 // que mida ahi da 0: si el wordmark guarda esos anchos, al entrar en / las
@@ -972,7 +1399,7 @@ function decipherSampler() {
   };
   requestAnimationFrame(tick);
 }
-if (!only || only === "/") {
+if (!deviceMode && (!only || only === "/")) {
   rule("descifrado del wordmark");
   const visibleLink = (p, href) => p.locator(`main:visible a[href="${href}"]`).first();
   const waitDecipher = (p) => p.waitForFunction(
@@ -987,7 +1414,7 @@ if (!only || only === "/") {
     await p.waitForURL(BASE + "/");
   }
   async function decipherRun({ start, reduced = false, steps = softToLanding }) {
-    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...(reduced ? { reducedMotion: "reduce" } : {}) });
+    const ctx = await browser.newContext({ ...CTX, ...(reduced ? { reducedMotion: "reduce" } : {}) });
     const p = await ctx.newPage();
     const errs = [];
     p.on("pageerror", (e) => errs.push(e.message));
@@ -1106,7 +1533,7 @@ function atlasSampler() {
   };
   requestAnimationFrame(tick);
 }
-if (!only || only === "/atlas") {
+if (!deviceMode && (!only || only === "/atlas")) {
   rule("atlas");
   const AP = atlasPhotos();
   const withCoords = AP.filter((p) => p.lat !== null && p.lng !== null);
@@ -1121,7 +1548,7 @@ if (!only || only === "/atlas") {
   }
   const rr = (v) => Math.round(v);
   async function atlasPage(ctxOpts = {}) {
-    const ctx = await browser.newContext({ viewport: { width: 1440, height: 900 }, deviceScaleFactor: 1, ...ctxOpts });
+    const ctx = await browser.newContext({ ...CTX, ...ctxOpts });
     const p = await ctx.newPage();
     const errs = [];
     p.on("pageerror", (e) => errs.push(e.message));
@@ -1502,6 +1929,7 @@ rule("RESUMEN");
 log(`tsc          ${skipStatic ? "omitido" : results.tsc === 0 ? "ok" : `${results.tsc} errores`}`);
 log(`lint         ${skipStatic ? "omitido" : results.lint === "ok" || results.lint === "" ? "ok" : String(results.lint).split("\n").pop()}`);
 log(`build        ${skipStatic ? "omitido" : results.build}`);
+if (deviceMode || DEV.motor !== "chromium" || DEV.cpu > 1) log(`dispositivo  ${deviceLabel(DEV)}`);
 log(`consola      ${totalConsole} errores en ${Object.keys(results.console).length} rutas`);
 log(`invariantes  ${results.invariants.length - failed.length} de ${results.invariants.length}`);
 if (results.entrance.length) {
@@ -1511,6 +1939,9 @@ if (results.entrance.length) {
   };
   log(`entrada      arranque ${med("startFrame")} ms · fase B ${med("phaseB")} ms · reposo ${med("rest")} ms · frames >${LONG_FRAME_MS} ms: ${med("longFrames")}${results.entrance.length > 1 ? ` (medianas de ${results.entrance.length})` : ""}`);
 }
+if (results.atlasFluency) log(`atlas        ${results.atlasFluency.map((a) => `${a.name}: mediana ${a.median} · p95 ${a.p95} · >${LONG_FRAME_MS} ms ${a.long}`).join(" · ")}`);
+if (results.landingSeen) log(`landing      fotos que se ven en 0, 1, 2 y 3 alturas: ${results.landingSeen.join(", ")}`);
+if (results.noMedible?.length) { log("\nNO MEDIBLE (no cuenta como aprobado)"); results.noMedible.forEach((n) => log(`- ${n}`)); }
 if (failed.length) { log("\nFALLOS"); failed.forEach((f) => log(`- ${f.route} · ${f.name} · ${f.detail}`)); }
 log("");
 const lintFailed = !skipStatic && results.lint !== "ok" && results.lint !== "";

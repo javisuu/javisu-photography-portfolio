@@ -50,6 +50,40 @@ El primer diagnostico del dia (`evidencia/2026-10-11_diagnostico.txt`, 17 de 27)
 - Habia tres invariantes mal medidos.
 - El `next dev` del harness se quedaba vivo en Windows.
 
+## Linea base multidispositivo (spec 017)
+
+Medida el 2026-11-03 en `feat/017-version-multidispositivo`. Se mide con `scripts/diagnostico.mjs --dispositivo <iphone|iphone-max|ipad-mini|ipad> [--horizontal] --motor <chromium|webkit> [--cpu 4] [--fluidez-atlas]` (`specs/017-version-multidispositivo/`). Son 16 combinaciones, mas CPU x4 en Chromium y escritorio de referencia. Las salidas, `evidencia/2026-11-03_017-*.txt`, las copia Javi a mano desde el scratchpad.
+
+**Como leerla:**
+- **Chromium da las cifras.** Los toques son reales (CDP), y los tiempos son estables entre pasadas.
+- **WebKit, solo maquetacion.** Es el WebKit de Windows y no es Safari de iOS: pinta el WebGL lento, con el frame de arranque de la entrada a ~2,2 s frente a ~0,2 s en Chromium (`evidencia/2026-11-03_017-linea-base-webkit-iphone.txt:296`). No puede simular gestos (salen `NO MEDIBLE`), y sus fallos de tiempo (wordmark `""`, fotos aun a `opacity < 1`, canvas del atlas a 300x150) pueden ser de lentitud y no del sitio: SIN VERIFICAR. Lo contrasta la prueba en el iPhone 13 y el iPad mini de Javi (CA12).
+
+**Hallazgos, por pagina:**
+
+| # | Pagina | Hallazgo | Donde | Evidencia |
+|---|---|---|---|---|
+| M1 | Landing | En horizontal, 11 fotos (22 de 30 con las dos copias) no caben en el alto del viewport. Ejemplo: `sol/03` a 396x528 en un viewport de 750x342. Rompe la regla dura "every photo fits within one viewport height". Causa probable: por debajo de 900 px de ancho, la foto mide `min(w·2,4, 85vw)` y nada limita su alto (`src/app/globals.css:61-65`) | iPhone y iPhone Max en horizontal, los dos motores | `evidencia/2026-11-03_017-linea-base-chromium-iphone-h.txt:305,319` |
+| M2 | Landing | En emulacion SI se ven fotos: el canvas pinta 7 en el primer viewport, como en escritorio. "No se ve ninguna foto" (Javi, 2026-11-03) no se reproduce, asi que el fallo esta en el Safari real | todos | `evidencia/2026-11-03_017-linea-base-chromium-iphone.txt:243` |
+| M3 | Landing | Entrada con CPU x4: frame de arranque de 2,4-4,5 s y reposo a 9-14 s en los iPhone (escritorio a CPU x4: 1,2 s y 3,8 s). En casi todas las repeticiones, 6 de los 7 participantes llegan al monton en el mismo frame: el espaciado de la spec 008 no se nota | iPhone, iPhone Max, iPad mini (Chromium, CPU x4) | `evidencia/2026-11-03_017-linea-base-chromium-iphone-cpu4-entrada.txt:107,127`, `evidencia/2026-11-03_017-entrada-escritorio-cpu4.txt:62,110` |
+| M4 | Landing | Fotos pequeñas deformadas entre 1,2 y 2,2 px, por encima de la tolerancia (enmienda 1 de la spec 017). Ejemplo: `norte/03` a 320x91 | todos | `evidencia/2026-11-03_017-linea-base-chromium-iphone-max.txt:206` |
+| M5 | Atlas | El canvas no limita el dpr: 1170x1299 en el iPhone (dpr 3). Con CPU x4, el arrastre da 60 frames > 50 ms en el iPad mini en vertical y 24 en el iPhone Max. En escritorio con CPU x4, 0. En horizontal, con una caja mas pequeña, 0 en todos. Lo que pesa es la superficie del buffer (caja × dpr²), no la CPU sola | iPhone, iPhone Max, iPad mini en vertical | `evidencia/2026-11-03_017-linea-base-chromium-iphone.txt:294`, `evidencia/2026-11-03_017-linea-base-chromium-ipad-mini-cpu4-atlas.txt:70`, `evidencia/2026-11-03_017-fluidez-atlas-escritorio-cpu4.txt:52` |
+| M6 | Atlas | El visor ocupa 280 de 390 px en el iPhone en vertical y deja 110 px de globo. No rompe (CA7), pero es la decision 3 de la spec 016, aun por diseñar | iPhone en vertical | `evidencia/2026-11-03_017-linea-base-chromium-iphone.txt:249` |
+| M7 | Atlas | En WebKit, el buffer del canvas se queda en 300x150 (por defecto) en 3 de 8 pasadas: el mismo sintoma que B3. SIN VERIFICAR si es lentitud del harness o un fallo real en Safari | WebKit | `evidencia/2026-11-03_017-linea-base-webkit-iphone.txt:205`, `evidencia/2026-11-03_017-linea-base-webkit-ipad.txt:204` |
+| M8 | Carrusel | En el iPad Pro 11 (834 px), en vertical y en horizontal, deslizar no cambia de album (01 -> 01). En el iPad mini (768 px) si cambia (01 -> 03). SIN VERIFICAR si es el sitio o la longitud del gesto del harness | iPad, Chromium | `evidencia/2026-11-03_017-linea-base-chromium-ipad.txt:257`, `evidencia/2026-11-03_017-linea-base-chromium-ipad-mini.txt:259` |
+
+**Lo que pasa en todas las combinaciones de Chromium:**
+- **Invariantes por ruta:** consola sin errores, un solo `<main>` visible, sin scroll horizontal, blend sin ancestros que lo rompan, wordmark `SUQUIA`, buffers de canvas correctos.
+- **Albumes:** los 4 con sus fotos enteras y sin deformar.
+- **Gestos:** scroll tactil en `/` y en los albumes; arrastre y pellizco en el atlas.
+- **Visor del atlas:** dentro del viewport.
+- **Atlas a CPU x1:** mediana de 16,7 ms y 0 frames > 50 ms.
+
+**Specs de arreglo propuestas, en orden** (el landing primero, por decision de Javi del 2026-11-03):
+1. **`landing-movil`** (M1, M2, M4). Limitar el alto de las fotos en pantallas bajas y, con la prueba en el iPhone real (CA12), encontrar por que no se ven. Si la causa esta en `GLSurface` (texturas, `createImageBitmap`): **Requiere decision de Javi: Si**.
+2. **`entrada-movil`** (M3). Es el candidato 2 de B7, sacar la inicializacion de WebGL del frame de arranque, y toca `GLSurface`: **Requiere decision de Javi: Si**. Puede ir junto a la 1 si comparten causa.
+3. **`atlas-movil`** (M5, M6, M7). Limitar el dpr del canvas del atlas (como `GLSurface`, a 2), diseñar el visor en vertical y comprobar el buffer en Safari.
+4. **`carrusel-tactil`** (M8). Primero confirmar con un gesto mas largo, y en el iPad de Javi, que es del sitio. Toca el carrusel, que esta cerrado: **Requiere decision de Javi: Si**.
+
 ## Entregables
 
 | # | Entregable | Estado | Evidencia |

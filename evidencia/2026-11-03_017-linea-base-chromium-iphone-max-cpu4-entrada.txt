@@ -1,0 +1,132 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+dispositivo: iphone-max (iPhone 15 Pro Max) · chromium · cpu x4
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  iphone-max (iPhone 15 Pro Max) · chromium · cpu x4
+  medido: 430x739 · dpr 3 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 430x739 · dpr 3 · hasTouch true
+  user agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+{
+  "vw": 430,
+  "vh": 739,
+  "dpr": 3,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 430,
+  "clientWidth": 430,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      860,
+      1478
+    ],
+    "css": [
+      430,
+      739
+    ],
+    "expected": [
+      860,
+      1478
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x1ddc0041e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x1ddc0041e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x1ddc0041e400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 30 fotos medidas a 430x739
+    norte/03.jpg · caja 320x91 · cabe · desvio 0.0217 (1.97 px)
+    norte/03.jpg · caja 320x91 · cabe · desvio 0.0217 (1.97 px)
+  FALLA fotos enteras en el viewport, proporcion < 1 % o <= 1 px · 2 de 30 fuera
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 430x739 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #1 america/03.jpg · caja 318,112,227,170 · opacity 1 · pintada 1.00
+    #2 america/05.jpg · caja 26,70,289,217 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 34,375,175,234 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 181,547,155,238 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 284,395,320,91 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 112,709,155,206 · opacity 1 · pintada 1.00
+    #13 sol/05.jpg · caja 335,618,165,220 · opacity 1 · pintada 1.00
+  1 alturas · scrollY 739 · 430x739 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #5 america/09.jpg · caja 52,562,248,186 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 181,-192,155,238 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 310,600,268,201 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 112,-30,155,206 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 26,207,227,303 · opacity 1 · pintada 0.98
+    #13 sol/05.jpg · caja 335,-75,165,220 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 189,503,155,207 · opacity 1 · pintada 1.00
+  2 alturas · scrollY 1478 · 430x739 · <img> ocultas por GL 30 · intersecan 6 · se ven 5
+    #0 america/01.jpg · caja 301,267,165,124 · opacity 1 · pintada 1.00
+    #3 america/06.jpg · caja 292,519,227,212 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 168,462,248,208 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 52,-177,248,186 · opacity 1 · pintada —
+    #9 norte/06.jpg · caja 310,-97,268,201 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 17,182,310,232 · opacity 1 · pintada 1.00
+  3 alturas · scrollY 2217 · 430x739 · <img> ocultas por GL 30 · intersecan 6 · se ven 6
+    #3 america/06.jpg · caja 292,-186,227,212 · opacity 1 · pintada 1.00
+    #16 america/03.jpg · caja 318,252,227,170 · opacity 1 · pintada 1.00
+    #17 america/05.jpg · caja 26,209,289,217 · opacity 1 · pintada 1.00
+    #21 norte/01.jpg · caja 34,512,175,234 · opacity 1 · pintada 1.00
+    #22 norte/02.jpg · caja 181,695,155,238 · opacity 1 · pintada 1.00
+    #23 norte/03.jpg · caja 284,537,320,91 · opacity 1 · pintada 1.00
+  fotos que se ven por altura (0, 1, 2, 3): 7, 7, 5, 6
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una · cpu x4
+  1: inicio 7665 · participantes 7 · fase B 8632 · rezagadas 6 · reposo 9366
+     frame del arranque 2417 ms · despues: frames >50 ms 11, frame max 283 ms · long tasks 22 (5450 ms) · [entrance] start x1
+     al monton: 8199 8632 8632 8632 8632 8632 8632
+  2: inicio 8578 · participantes 7 · fase B 9628 · rezagadas 0 · reposo 10344
+     frame del arranque 2733 ms · despues: frames >50 ms 7, frame max 267 ms · long tasks 17 (5237 ms) · [entrance] start x1
+     al monton: 9161 9361 9361 9361 9361 9361 9361
+  3: inicio 7522 · participantes 7 · fase B 8671 · rezagadas 0 · reposo 9254
+     frame del arranque 1967 ms · despues: frames >50 ms 10, frame max 317 ms · long tasks 22 (4313 ms) · [entrance] start x1
+     al monton: 8121 8571 8571 8571 8571 8571 8571
+  fase B      mediana 8671 · max 9628
+  reposo      mediana 9366 · max 10344
+  frames >50 mediana 10 · max 11
+  frame max   mediana 283 · max 317
+  arranque    mediana 2417 · max 2733
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  iphone-max (iPhone 15 Pro Max) · chromium · cpu x4
+consola      0 errores en 1 rutas
+invariantes  12 de 13
+entrada      arranque 2417 ms · fase B 8671 ms · reposo 9366 ms · frames >50 ms: 10 (medianas de 3)
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 7, 7, 5, 6
+
+FALLOS
+- / · fotos enteras en el viewport, proporcion < 1 % o <= 1 px · 2 de 30 fuera
+

@@ -1,0 +1,308 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+omitido (--skip-build)
+
+dispositivo: ipad (iPad Pro 11) · webkit
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  ipad (iPad Pro 11) · webkit
+  medido: 834x1194 · dpr 2 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 834x1194 · dpr 2 · hasTouch true
+  user agent: Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 7,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1668,
+      2388
+    ],
+    "css": [
+      834,
+      1194
+    ],
+    "expected": [
+      1668,
+      2388
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  FALLA ninguna landing-photo invisible en reposo · 7 de 30 con opacity < 1
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it wasn't preloaded for nothing.
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=750&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it wasn't preloaded for nothing.
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=750&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it wasn't preloaded for nothing.
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it wasn't preloaded for nothing.
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=1920&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it wasn't preloaded for nothing.
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it wasn't preloaded for nothing.
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1668,
+      2388
+    ],
+    "css": [
+      834,
+      1194
+    ],
+    "expected": [
+      1668,
+      2388
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it wasn't preloaded for nothing.
+    [warning] The resource http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it wasn't preloaded for nothing.
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      300,
+      150
+    ],
+    "css": [
+      834,
+      908
+    ],
+    "expected": [
+      1668,
+      1816
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  FALLA buffer del canvas = caja * dpr · buffer 300,150 vs esperado 1668,1816
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 30 fotos medidas a 834x1194
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #1 america/03.jpg · caja 617,180,440,330 · opacity 1 · pintada 1.00
+    #2 america/05.jpg · caja 50,111,560,420 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 67,603,340,454 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 350,884,300,462 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 550,639,620,176 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 217,1146,300,400 · opacity 1 · pintada 1.00
+    #13 sol/05.jpg · caja 651,997,320,427 · opacity 1 · pintada 1.00
+  1 alturas · scrollY 1194 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #5 america/09.jpg · caja 100,907,480,360 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 350,-310,300,462 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 600,968,520,390 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 217,-48,300,400 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 50,334,440,587 · opacity 1 · pintada 0.98
+    #13 sol/05.jpg · caja 651,-123,320,427 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 367,812,300,401 · opacity 1 · pintada 1.00
+  2 alturas · scrollY 2388 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #0 america/01.jpg · caja 584,431,320,240 · opacity 1 · pintada 1.00
+    #3 america/06.jpg · caja 567,838,440,412 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 325,745,480,403 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 100,-287,480,360 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 600,-158,520,390 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 33,291,600,450 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 367,-382,300,401 · opacity 1 · pintada 0.98
+  3 alturas · scrollY 3582 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 1
+    #3 america/06.jpg · caja 567,-302,440,412 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 325,-388,480,403 · opacity 1 · pintada —
+    #16 america/03.jpg · caja 617,407,440,330 · opacity 1 · pintada 0.02
+    #17 america/05.jpg · caja 50,337,560,420 · opacity 1 · pintada 0.06
+    #21 norte/01.jpg · caja 67,826,340,454 · opacity 1 · pintada 0.00
+    #22 norte/02.jpg · caja 350,1122,300,462 · opacity 1 · pintada 0.00
+    #23 norte/03.jpg · caja 550,868,620,176 · opacity 1 · pintada 0.00
+  fotos que se ven por altura (0, 1, 2, 3): 7, 7, 7, 1
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== visor del atlas ===
+  toque 1: grupo de 7 (/photos/ny/01.jpg, ...) en 292,637
+  toque 2: marca sola (/photos/ny/07.jpg) en 402,762
+  visor: caja 500,0,334,1194 (x, y, ancho, alto) · viewport 834x1194 · scrollWidth 834 / clientWidth 834
+  ok   tocar una marca abre el visor
+  ok   visor dentro del viewport
+  ok   visor sin scroll horizontal
+
+=== gestos ===
+  NO MEDIBLE deslizar / (scroll) · webkit: sin CDP para toques reales, y un PointerEvent sintetico no puede capturar el puntero
+  NO MEDIBLE deslizar album (scroll) · webkit: sin CDP para toques reales, y un PointerEvent sintetico no puede capturar el puntero
+  NO MEDIBLE deslizar /albums · webkit: sin CDP para toques reales, y un PointerEvent sintetico no puede capturar el puntero
+  NO MEDIBLE arrastrar /atlas · webkit: sin CDP para toques reales, y un PointerEvent sintetico no puede capturar el puntero
+  NO MEDIBLE pellizcar /atlas · webkit: sin CDP para toques reales, y un PointerEvent sintetico no puede capturar el puntero
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una
+  1: inicio 2925 · participantes 7 · fase B 3736 · rezagadas 1 · reposo 4404
+     frame del arranque 2065 ms · despues: frames >50 ms 7, frame max 297 ms · long tasks 0 (0 ms) · [entrance] start x1
+     al monton: 3210 3386 3386 3386 3554 3554 3736
+  2: inicio 3580 · participantes 7 · fase B 4389 · rezagadas 3 · reposo 5073
+     frame del arranque 2363 ms · despues: frames >50 ms 7, frame max 319 ms · long tasks 0 (0 ms) · [entrance] start x1
+     al monton: 3868 4187 4187 4187 4389 4389 4389
+  3: inicio 3354 · participantes 7 · fase B 4194 · rezagadas 2 · reposo 5061
+     frame del arranque 2263 ms · despues: frames >50 ms 7, frame max 314 ms · long tasks 0 (0 ms) · [entrance] start x1
+     al monton: 3825 4002 4002 4002 4002 4194 4194
+  fase B      mediana 4194 · max 4389
+  reposo      mediana 5061 · max 5073
+  frames >50 mediana 7 · max 7
+  frame max   mediana 314 · max 319
+  arranque    mediana 2263 · max 2363
+
+=== fluidez del atlas ===
+  canvas 1668x1816 (dpr 2) · entrada raton · cpu x1
+  arrastre 2 s: 61 frames · mediana 75 ms · p95 102 ms · max 117 ms · >50 ms: 60
+  NO MEDIBLE pellizco · webkit: sin CDP para toques reales, y mouse.wheel no existe en WebKit movil
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        omitido
+dispositivo  ipad (iPad Pro 11) · webkit
+consola      0 errores en 6 rutas
+invariantes  36 de 38
+entrada      arranque 2263 ms · fase B 4194 ms · reposo 5061 ms · frames >50 ms: 7 (medianas de 3)
+atlas        arrastre 2 s: mediana 75 · p95 102 · >50 ms 60
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 7, 7, 7, 1
+
+NO MEDIBLE (no cuenta como aprobado)
+- gestos · deslizar / (scroll)
+- gestos · deslizar album (scroll)
+- gestos · deslizar /albums
+- gestos · arrastrar /atlas
+- gestos · pellizcar /atlas
+- fluidez del atlas · pellizco
+
+FALLOS
+- / · ninguna landing-photo invisible en reposo · 7 de 30 con opacity < 1
+- /atlas · buffer del canvas = caja * dpr · buffer 300,150 vs esperado 1668,1816
+

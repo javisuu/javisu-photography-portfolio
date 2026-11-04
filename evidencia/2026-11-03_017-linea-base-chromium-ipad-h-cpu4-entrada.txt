@@ -1,0 +1,128 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+dispositivo: ipad horizontal (iPad Pro 11) · chromium · cpu x4
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  ipad horizontal (iPad Pro 11) · chromium · cpu x4
+  medido: 1194x834 · dpr 2 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 1194x834 · dpr 2 · hasTouch true
+  user agent: Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+{
+  "vw": 1194,
+  "vh": 834,
+  "dpr": 2,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1194,
+  "clientWidth": 1194,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      2388,
+      1668
+    ],
+    "css": [
+      1194,
+      834
+    ],
+    "expected": [
+      2388,
+      1668
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x601c00b9f000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x601c00b9f000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x601c00b9f000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x601c00b9f000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 30 fotos medidas a 1194x834
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 1194x834 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #1 america/03.jpg · caja 884,126,263,197 · opacity 1 · pintada 0.95
+    #2 america/05.jpg · caja 72,79,334,251 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 96,423,203,271 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 501,617,179,275 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 788,446,370,106 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 310,801,179,239 · opacity 1 · pintada 1.00
+    #13 sol/05.jpg · caja 931,698,191,255 · opacity 1 · pintada 1.00
+  1 alturas · scrollY 834 · 1194x834 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #5 america/09.jpg · caja 143,634,287,215 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 501,-217,179,275 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 860,677,310,233 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 310,-33,179,239 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 72,234,263,350 · opacity 1 · pintada 0.98
+    #13 sol/05.jpg · caja 931,-85,191,255 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 525,567,179,239 · opacity 1 · pintada 1.00
+  2 alturas · scrollY 1668 · 1194x834 · <img> ocultas por GL 30 · intersecan 6 · se ven 5
+    #0 america/01.jpg · caja 836,302,191,143 · opacity 1 · pintada 1.00
+    #3 america/06.jpg · caja 812,586,263,245 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 466,521,287,240 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 143,-200,287,215 · opacity 1 · pintada —
+    #9 norte/06.jpg · caja 860,-110,310,233 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 48,205,358,269 · opacity 1 · pintada 1.00
+  3 alturas · scrollY 2502 · 1194x834 · <img> ocultas por GL 30 · intersecan 6 · se ven 6
+    #3 america/06.jpg · caja 812,-210,263,245 · opacity 1 · pintada 1.00
+    #16 america/03.jpg · caja 884,285,263,197 · opacity 1 · pintada 0.95
+    #17 america/05.jpg · caja 72,236,334,251 · opacity 1 · pintada 1.00
+    #21 norte/01.jpg · caja 96,578,203,271 · opacity 1 · pintada 1.00
+    #22 norte/02.jpg · caja 501,784,179,275 · opacity 1 · pintada 1.00
+    #23 norte/03.jpg · caja 788,606,370,106 · opacity 1 · pintada 1.00
+  fotos que se ven por altura (0, 1, 2, 3): 7, 7, 5, 6
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una · cpu x4
+  1: inicio 3393 · participantes 7 · fase B 4185 · rezagadas 1 · reposo 4919
+     frame del arranque 2100 ms · despues: frames >50 ms 11, frame max 150 ms · long tasks 17 (3860 ms) · [entrance] start x1
+     al monton: 3685 3935 3935 3935 3935 3935 4185
+  2: inicio 3106 · participantes 7 · fase B 3886 · rezagadas 1 · reposo 4603
+     frame del arranque 1967 ms · despues: frames >50 ms 11, frame max 150 ms · long tasks 18 (3718 ms) · [entrance] start x1
+     al monton: 3386 3669 3669 3669 3769 3769 3886
+  3: inicio 3389 · participantes 7 · fase B 4166 · rezagadas 1 · reposo 4882
+     frame del arranque 2117 ms · despues: frames >50 ms 11, frame max 133 ms · long tasks 18 (3861 ms) · [entrance] start x1
+     al monton: 3682 3933 3933 3933 3933 4066 4166
+  fase B      mediana 4166 · max 4185
+  reposo      mediana 4882 · max 4919
+  frames >50 mediana 11 · max 11
+  frame max   mediana 150 · max 150
+  arranque    mediana 2100 · max 2117
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  ipad horizontal (iPad Pro 11) · chromium · cpu x4
+consola      0 errores en 1 rutas
+invariantes  13 de 13
+entrada      arranque 2100 ms · fase B 4166 ms · reposo 4882 ms · frames >50 ms: 11 (medianas de 3)
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 7, 7, 5, 6
+

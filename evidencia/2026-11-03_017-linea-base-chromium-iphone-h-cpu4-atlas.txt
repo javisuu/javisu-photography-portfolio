@@ -1,0 +1,96 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+dispositivo: iphone horizontal (iPhone 13) · chromium · cpu x4
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  iphone horizontal (iPhone 13) · chromium · cpu x4
+  medido: 750x342 · dpr 3 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 750x342 · dpr 3 · hasTouch true
+  user agent: Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta /atlas ===
+{
+  "vw": 750,
+  "vh": 342,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 750,
+  "clientWidth": 750,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      2250,
+      332
+    ],
+    "css": [
+      750,
+      111
+    ],
+    "expected": [
+      2250,
+      333
+    ]
+  }
+}
+  consola:
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=256&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+    [warning] The resource http://localhost:3100/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=384&q=75 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. · http://localhost:3100/atlas
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+
+=== visor del atlas ===
+  toque 1: grupo de 7 (/photos/ny/01.jpg, ...) en 358,273
+  toque 2: marca sola (/photos/ny/07.jpg) en 360,309
+  visor: caja 450,0,300,342 (x, y, ancho, alto) · viewport 750x342 · scrollWidth 750 / clientWidth 750
+  ok   tocar una marca abre el visor
+  ok   visor dentro del viewport
+  ok   visor sin scroll horizontal
+
+=== fluidez del atlas ===
+  canvas 2250x332 (dpr 3) · entrada tactil (CDP) · cpu x4
+  arrastre 2 s: 300 frames · mediana 16.7 ms · p95 16.8 ms · max 33.4 ms · >50 ms: 0
+  pellizco 1 s: 148 frames · mediana 16.7 ms · p95 16.8 ms · max 33.4 ms · >50 ms: 0
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  iphone horizontal (iPhone 13) · chromium · cpu x4
+consola      0 errores en 1 rutas
+invariantes  12 de 12
+atlas        arrastre 2 s: mediana 16.7 · p95 16.8 · >50 ms 0 · pellizco 1 s: mediana 16.7 · p95 16.8 · >50 ms 0
+

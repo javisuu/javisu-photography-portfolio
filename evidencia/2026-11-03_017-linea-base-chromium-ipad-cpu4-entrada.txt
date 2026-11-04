@@ -1,0 +1,129 @@
+DIAGNOSTICO 2026-11-03 · feat/017-version-multidispositivo · 400d1bc · 3 ficheros sin commit
+
+dispositivo: ipad (iPad Pro 11) · chromium · cpu x4
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  ipad (iPad Pro 11) · chromium · cpu x4
+  medido: 834x1194 · dpr 2 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 834x1194 · dpr 2 · hasTouch true
+  user agent: Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1668,
+      2388
+    ],
+    "css": [
+      834,
+      1194
+    ],
+    "expected": [
+      1668,
+      2388
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x753c00a74a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x753c00a74a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x753c00a74a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 30 fotos medidas a 834x1194
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #1 america/03.jpg · caja 617,180,440,330 · opacity 1 · pintada 1.00
+    #2 america/05.jpg · caja 50,111,560,420 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 67,603,340,454 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 350,884,300,462 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 550,639,620,176 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 217,1146,300,400 · opacity 1 · pintada 1.00
+    #13 sol/05.jpg · caja 651,997,320,427 · opacity 1 · pintada 1.00
+  1 alturas · scrollY 1194 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #5 america/09.jpg · caja 100,907,480,360 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 350,-310,300,462 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 600,968,520,390 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 217,-48,300,400 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 50,334,440,587 · opacity 1 · pintada 0.98
+    #13 sol/05.jpg · caja 651,-123,320,427 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 367,812,300,401 · opacity 1 · pintada 1.00
+  2 alturas · scrollY 2388 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 7
+    #0 america/01.jpg · caja 584,431,320,240 · opacity 1 · pintada 1.00
+    #3 america/06.jpg · caja 567,838,440,412 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 325,745,480,403 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 100,-287,480,360 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 600,-158,520,390 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 33,291,600,450 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 367,-382,300,401 · opacity 1 · pintada 1.00
+  3 alturas · scrollY 3582 · 834x1194 · <img> ocultas por GL 30 · intersecan 7 · se ven 6
+    #3 america/06.jpg · caja 567,-302,440,412 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 325,-388,480,403 · opacity 1 · pintada —
+    #16 america/03.jpg · caja 617,407,440,330 · opacity 1 · pintada 1.00
+    #17 america/05.jpg · caja 50,337,560,420 · opacity 1 · pintada 1.00
+    #21 norte/01.jpg · caja 67,826,340,454 · opacity 1 · pintada 1.00
+    #22 norte/02.jpg · caja 350,1122,300,462 · opacity 1 · pintada 1.00
+    #23 norte/03.jpg · caja 550,868,620,176 · opacity 1 · pintada 1.00
+  fotos que se ven por altura (0, 1, 2, 3): 7, 7, 7, 6
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 3 repeticiones · cache vacia en cada una · cpu x4
+  1: inicio 2268 · participantes 7 · fase B 2962 · rezagadas 2 · reposo 3762
+     frame del arranque 1350 ms · despues: frames >50 ms 11, frame max 133 ms · long tasks 16 (2910 ms) · [entrance] start x1
+     al monton: 2596 2862 2862 2862 2862 2962 2962
+  2: inicio 2646 · participantes 7 · fase B 3288 · rezagadas 1 · reposo 4072
+     frame del arranque 1617 ms · despues: frames >50 ms 12, frame max 133 ms · long tasks 16 (3196 ms) · [entrance] start x1
+     al monton: 2872 3122 3122 3122 3222 3222 3288
+  3: inicio 2725 · participantes 7 · fase B 3483 · rezagadas 1 · reposo 4266
+     frame del arranque 1733 ms · despues: frames >50 ms 11, frame max 133 ms · long tasks 15 (3290 ms) · [entrance] start x1
+     al monton: 3033 3266 3266 3266 3266 3366 3483
+  fase B      mediana 3288 · max 3483
+  reposo      mediana 4072 · max 4266
+  frames >50 mediana 11 · max 12
+  frame max   mediana 133 · max 133
+  arranque    mediana 1617 · max 1733
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  ipad (iPad Pro 11) · chromium · cpu x4
+consola      0 errores en 1 rutas
+invariantes  13 de 13
+entrada      arranque 1617 ms · fase B 3288 ms · reposo 4072 ms · frames >50 ms: 11 (medianas de 3)
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 7, 7, 7, 6
+
