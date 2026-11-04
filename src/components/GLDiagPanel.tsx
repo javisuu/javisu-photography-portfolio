@@ -6,16 +6,10 @@
 // que no se pintan las fotos.
 
 import { useEffect, useState, useSyncExternalStore } from "react";
-import { glDiagSnapshot, type GLDiagState } from "@/motion/glDiag";
+import { glDiagActivo, glDiagSnapshot, type GLDiagState } from "@/motion/glDiag";
 
 const noSubscribe = () => () => {};
-// Se decide una vez por carga: una navegacion blanda quita ?diag de la URL
-// y el panel debe seguir.
-let diagAlCargar: boolean | null = null;
-function conDiag() {
-  if (diagAlCargar === null) diagAlCargar = new URLSearchParams(window.location.search).has("diag");
-  return diagAlCargar;
-}
+const conDiag = glDiagActivo;
 
 function linea(s: GLDiagState) {
   const tex = s.texturaMayor ? `${s.texturaMayor[0]}x${s.texturaMayor[1]}` : "—";
@@ -25,6 +19,9 @@ function linea(s: GLDiagState) {
     `texturas ${s.subidas} de ${s.total} · mayor ${tex} · max GPU ${s.maxTextura ?? "—"}`,
     `fallos de decodificacion ${s.fallosDecodificacion} · caida al DOM: ${s.fallo ?? "no"}`,
     `ultimo error: ${s.ultimoError ?? "—"}`,
+    `bitmaps vacios ${s.bitmapsVacios} de ${s.bitmapsMuestreados} · texturas vacias ${s.texturasVacias} de ${s.texturasMuestreadas}`,
+    `pintados ${s.pintados ? `${s.pintados.pintados} de ${s.pintados.muestra} visibles` : "—"}`,
+    s.capa ?? "canvas —",
   ].join("\n");
 }
 

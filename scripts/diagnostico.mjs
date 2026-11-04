@@ -2039,6 +2039,14 @@ if (!only) {
     if (d.text) d.text.split("\n").forEach((l) => log(`    ${l}`));
     const campos = ["contexto", "perdido", "texturas", "fallos", "error"].filter((c) => !d.text.toLowerCase().includes(c));
     addInv(route, "CA5 panel ?diag visible con sus campos", d.vis && campos.length === 0, d.vis ? `faltan: ${campos.join(", ")}` : "no hay [data-gl-diag] visible");
+    // Enmienda 1: las muestras de ?diag. En emulacion todo pinta, asi que
+    // aqui tienen que salir limpias; en el iPhone de Javi dicen la causa.
+    const inst = d.reg?.[route === "/" ? "landing" : "album"];
+    const pint = inst?.pintados;
+    addInv(route, "E1 muestras ?diag: sin bitmaps ni texturas vacios y cada foto visible pintada",
+      !!inst && inst.bitmapsMuestreados > 0 && inst.bitmapsVacios === 0 && inst.texturasMuestreadas > 0 && inst.texturasVacias === 0
+        && !!pint && pint.muestra > 0 && pint.pintados === pint.muestra && !!inst.capa,
+      inst ? `bitmaps ${inst.bitmapsVacios}/${inst.bitmapsMuestreados} · texturas ${inst.texturasVacias}/${inst.texturasMuestreadas} · pintados ${pint ? `${pint.pintados}/${pint.muestra}` : "—"}` : "sin instancia");
     const caidas = Object.values(d.reg ?? {}).filter((x) => x?.fallo);
     addInv(route, "CA4 sin fallo forzado GLSurface no cae al DOM", !!d.reg && caidas.length === 0,
       d.reg ? caidas.map((x) => `${x.nombre}: ${x.fallo}`).join(" | ") : "no hay window.__glDiag");

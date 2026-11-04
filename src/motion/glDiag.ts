@@ -23,6 +23,17 @@ export type GLDiagState = {
   /** Motivo por el que la pagina volvio a las fotos del DOM, o null. */
   fallo: string | null;
   ultimoError: string | null;
+  // Enmienda 1 (solo con ?diag, ver glDiagMuestras.ts):
+  /** Bitmaps de createImageBitmap muestreados, y cuantos salian transparentes. */
+  bitmapsMuestreados: number;
+  bitmapsVacios: number;
+  /** Texturas leidas de la GPU tras subirlas, y cuantas estaban transparentes. */
+  texturasMuestreadas: number;
+  texturasVacias: number;
+  /** Ultima lectura del buffer pintado en el centro de las fotos visibles. */
+  pintados: { muestra: number; pintados: number } | null;
+  /** Caja del canvas frente a la ventana (texto de varias lineas). */
+  capa: string | null;
 };
 
 const registro: Record<string, GLDiagState> = {};
@@ -40,6 +51,12 @@ function vacio(nombre: string): GLDiagState {
     maxTextura: null,
     fallo: null,
     ultimoError: null,
+    bitmapsMuestreados: 0,
+    bitmapsVacios: 0,
+    texturasMuestreadas: 0,
+    texturasVacias: 0,
+    pintados: null,
+    capa: null,
   };
 }
 
@@ -53,6 +70,16 @@ export function glDiagUpdate(nombre: string, cambio: Partial<GLDiagState> | ((s:
   const actual = registro[nombre] ?? vacio(nombre);
   registro[nombre] = { ...actual, ...(typeof cambio === "function" ? cambio(actual) : cambio) };
   publicar();
+}
+
+// Se decide una vez por carga: una navegacion blanda quita ?diag de la URL
+// y el diagnostico debe seguir.
+let diagAlCargar: boolean | null = null;
+/** ?diag en la URL de la primera carga. Sin el, nada de la enmienda 1 corre. */
+export function glDiagActivo(): boolean {
+  if (typeof window === "undefined") return false;
+  if (diagAlCargar === null) diagAlCargar = new URLSearchParams(window.location.search).has("diag");
+  return diagAlCargar;
 }
 
 export function glDiagSnapshot(): GLDiagState[] {

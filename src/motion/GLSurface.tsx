@@ -22,7 +22,8 @@
 import { useEffect, useRef, useSyncExternalStore, type RefObject } from "react";
 import { Renderer, Camera, Transform, Plane, Program, Mesh, Texture } from "ogl";
 import type Lenis from "lenis";
-import { glDiagReset, glDiagUpdate } from "./glDiag";
+import { glDiagActivo, glDiagReset, glDiagUpdate } from "./glDiag";
+import { bitmapVacio, capa, pintadosEn, texturaVacia } from "./glDiagMuestras";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 function subscribeReducedMotion(callback: () => void) {
@@ -233,6 +234,13 @@ export default function GLSurface({
     // Spec 018: state for the ?diag panel. Recording only — nothing here
     // changes what gets painted.
     glDiagReset(diagName);
+    // Spec 018, amendment 1: measurement only, and only with ?diag in the
+    // URL. Without it none of the sampling below runs.
+    const diag = glDiagActivo();
+    let diagFrame = 0;
+    // A decode from a torn-down run of this effect (StrictMode's discarded
+    // first mount in dev) must not count in the fresh registry.
+    let diagVivo = true;
     // Set once a renderer exists — see fail() below.
     let fail: (reason: string) => void = () => {};
     const onContextLost = () => {
@@ -390,6 +398,14 @@ export default function GLSurface({
                   bitmap.close();
                   return;
                 }
+                if (diag && diagVivo) {
+                  const vacio = bitmapVacio(bitmap);
+                  if (vacio !== null)
+                    glDiagUpdate(diagName, (d) => ({
+                      bitmapsMuestreados: d.bitmapsMuestreados + 1,
+                      bitmapsVacios: d.bitmapsVacios + (vacio ? 1 : 0),
+                    }));
+                }
                 uploadQueue.push({ texture, bitmap, index: i });
               })
               .catch((err) => {
@@ -503,6 +519,14 @@ export default function GLSurface({
           }
           markReady(pending.index);
           const { width: bw, height: bh } = pending.bitmap;
+          if (diag) {
+            const vacia = texturaVacia(gl, (o) => renderer.bindFramebuffer(o), pending.texture.texture, bw, bh);
+            if (vacia !== null)
+              glDiagUpdate(diagName, (d) => ({
+                texturasMuestreadas: d.texturasMuestreadas + 1,
+                texturasVacias: d.texturasVacias + (vacia ? 1 : 0),
+              }));
+          }
           glDiagUpdate(diagName, (d) => ({
             subidas: d.subidas + 1,
             texturaMayor: !d.texturaMayor || bw * bh > d.texturaMayor[0] * d.texturaMayor[1] ? [bw, bh] : d.texturaMayor,
@@ -555,6 +579,21 @@ export default function GLSurface({
           }
 
           renderer.render({ scene, camera, sort: true });
+          // Read right after render, same frame: the drawing buffer is
+          // only guaranteed until this task ends. Twice a second at most.
+          if (diag && ++diagFrame % 30 === 0) {
+            glDiagUpdate(diagName, {
+              pintados: pintadosEn(
+                gl,
+                renderer.dpr,
+                planes.map(({ node, mesh }) => ({
+                  rect: node.getBoundingClientRect(),
+                  opacidad: mesh.program.uniforms.uOpacity.value as number,
+                }))
+              ),
+              capa: capa(renderer.gl.canvas),
+            });
+          }
         } catch (err) {
           // Caught here (not the outer catch) so a bad frame doesn't
           // silently end the rAF chain — log and keep looping.
@@ -578,6 +617,7 @@ export default function GLSurface({
     }
 
     return () => {
+      diagVivo = false;
       resumeRef.current = null;
       cancelAnimationFrame(raf);
       canvas.removeEventListener("webglcontextlost", onContextLost);

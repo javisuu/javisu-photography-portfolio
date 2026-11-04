@@ -93,6 +93,29 @@ Hay un matiz de diseño para Javi (pregunta 1): si la vuelta al DOM es por foto,
 5. **El panel `?diag` se queda** en el codigo, solo con el parametro.
 6. **La causa de fondo, si es memoria, se decide con la medida de CA6 delante**, como enmienda.
 
+## Enmienda 1 (aprobada por Javi el 2026-11-04: "ok"): medir por que iOS no pinta
+
+**Hecho nuevo (T7):** en el iPhone 13 y el iPad mini, con `?diag`, el contexto es webgl2, el programa enlaza, las texturas se suben sin error GL ("texturas 8 de 8" en el album), no hay fallos de decodificacion, y aun asi no se ve ninguna foto, o solo algunas mal colocadas. Ninguno de los cinco disparadores de la red salta, asi que la pagina se queda con las `<img>` ocultas. La causa no es ninguna de las cubiertas (decision 6).
+
+**Que cambia:** solo medicion, y solo con `?diag` en la URL (`glDiagActivo`, `src/motion/glDiag.ts`). Sin el parametro `GLSurface` no ejecuta nada nuevo. El panel añade:
+- **bitmaps vacios N de M:** cada bitmap de `createImageBitmap` reducido a 8x8 en un canvas 2D; vacio si todo es transparente;
+- **texturas vacias N de M:** cada textura recien subida, leida de la GPU por un framebuffer en 9 puntos;
+- **pintados N de M visibles:** el buffer recien pintado, leido en el centro de cada foto visible, dos veces por segundo;
+- **canvas:** su caja CSS y su buffer, la ventana y el `visualViewport`, y su `display`, `visibility`, opacidad y z-index.
+
+**Lectura prevista:**
+- bitmaps vacios: la conversion `<img>` → `ImageBitmap` de WebKit falla en silencio;
+- bitmaps llenos y texturas vacias: falla la subida;
+- todo lleno y pintados N de N, pero Javi no ve nada: el canvas pinta y no se compone o queda tapado;
+- pintados por debajo de N o la caja del canvas distinta de la ventana: las fotos se dibujan fuera de su sitio.
+
+El arreglo se decide con esa lectura delante, en una enmienda 2.
+
+**Criterios:**
+- **CE1:** con `?diag`, en escritorio y `--dispositivo iphone`, la invariante "E1 muestras ?diag" en `ok` en `/` y en el album (en emulacion todo pinta).
+- **CE2:** CA1 y CA10 siguen como en T5: sin `?diag` el escritorio es identico (192 de 192 mas la nueva, capturas a 0 px).
+- **CE3:** Javi abre la preview con `?diag` en su iPhone y su iPad mini y envia el panel.
+
 ## Preguntas abiertas (originales, respondidas arriba)
 
 1. **¿La vuelta al DOM es por foto o de toda la pagina?**

@@ -75,6 +75,20 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 - [ ] **T7** · Preview de Vercel: Javi abre `/?diag` y un album con `?diag` en su iPhone 13 y su iPad mini 5
   - Fichero(s): `tasks.md` (testimonio), con las capturas de Javi en `evidencia/`
   - Comprobacion: CA6. Si la causa es una de las cuatro, la red ya la cubre. Si no, va una enmienda (decision 6).
+  - Testimonio de Javi (2026-11-04, preview de `0e5bff5`, Safari y Chrome de iOS, los dos con WebKit):
+    - **iPhone 13, `/` sin `?diag`:** ninguna foto, como antes.
+    - **iPhone 13, `/?diag`:** aparecen algunas fotos, no todas, mal colocadas y casi todas cortadas. Panel: dpr 3, contexto webgl2, perdido no, programa ok, fallos de decodificacion 0, caida al DOM no, ultimo error "—".
+    - **iPhone 13, album con `?diag`:** texturas 8 de 8 y ninguna foto.
+    - **iPad mini 5:** lo mismo con dpr 2, va a tirones, y ninguna foto en los albumes.
+    - **Lectura:** ninguno de los cinco disparadores salta. El contexto se crea, los shaders enlazan, las texturas se suben sin error GL, y aun asi el canvas no pinta (o pinta solo algunas). La causa no es ninguna de las cubiertas: va a enmienda (decision 6). CA6 queda en FALLA.
+- [ ] **E1** · Enmienda 1: muestras de `?diag` (bitmaps, texturas, pintado y caja del canvas)
+  - Fichero(s): `src/motion/glDiagMuestras.ts` (crear), `src/motion/glDiag.ts`, `src/components/GLDiagPanel.tsx`, `src/motion/GLSurface.tsx` (solo con `?diag`), `scripts/diagnostico.mjs` (invariante E1)
+  - Comprobacion: CE1 y CE2 en escritorio y `iphone`; despues CE3 con Javi.
+  - Resultado de CE1 y CE2 (2026-11-04):
+    - **CE1 `ok`.** En escritorio, `/` da bitmaps vacios 0 de 22, texturas vacias 0 de 22 y pintados 5 de 5; el album, 0 de 9, 0 de 9 y 1 de 1. El canvas mide lo mismo que la ventana (`evidencia/2026-11-04_018-e1-escritorio-2.txt:466-496`). En `iphone` tambien en `ok`: pintados 4 de 4, canvas 390x664 con buffer 780x1328 (`evidencia/2026-11-04_018-e1-iphone.txt`, 65 de 65).
+    - **Doble cuenta corregida.** La primera pasada contaba 44 bitmaps para 22 texturas. El montaje que React descarta en desarrollo (StrictMode) seguia escribiendo en el registro. `diagVivo` lo corta al desmontar, y solo afecta a la cuenta con `?diag`.
+    - **CE2 `ok`.** Las tres capturas a 0 px y los `currentSrc`, 0 distintos de 30. Entrada: arranque 233 ms, reposo 1602 ms, 0 frames largos. Sin `?diag`, 0 paneles.
+    - **Escritorio, 193 de 194.** El unico fallo, "sin hueco en blanco" en NEXT ALBUM → `/album/norte`, dio 3 fotogramas en blanco. La foto 1 tardo 1633 ms en cargar, por encima del tope de 1,5 s del album (spec 013). En la pasada anterior del mismo arbol paso, igual que en T4 y T5. Lo atribuyo a la maquina lenta, aunque es SIN VERIFICAR. Sin `?diag`, el cambio solo añade dos variables que no se leen.
 - [ ] **T8** · Javi prueba sin `?diag`
   - Fichero(s): `tasks.md` (testimonio)
   - Comprobacion: CA7.
