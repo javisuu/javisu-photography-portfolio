@@ -90,13 +90,30 @@ Pasos atomicos, en orden. Ninguno toca `src/`, asi que el sitio carga igual que 
   - Fichero(s): `docs/ESTADO.md`
   - Comprobacion: `grep -n "017" docs/ESTADO.md` (CA11)
   - **Hecho 2026-11-03.** Seccion "Linea base multidispositivo (spec 017)" en `docs/ESTADO.md`: 8 hallazgos (M1 a M8) con su evidencia y 4 specs de arreglo en orden, el landing primero. El resto de `docs/ESTADO.md` lo pone al dia `/cerrar-sesion`
-- [ ] **T11** · Preview de Vercel: el diagnostico con `--url` y `--dispositivo iphone`, y Javi lo prueba en su iPhone 13 y su iPad mini 5
+- [x] **T11** · Preview de Vercel: el diagnostico con `--url` y `--dispositivo iphone`, y Javi lo prueba en su iPhone 13 y su iPad mini 5
   - Fichero(s): `tasks.md` (testimonio)
   - Comprobacion: CA12, CA13
+  - CA13 en produccion (2026-11-04): `--url https://javisu-photography-portfolio.vercel.app --dispositivo iphone` corre sin tsc, lint ni build (omitidos), 0 errores de consola en 6 rutas, invariantes 47 de 48. El unico fallo es el mismo que en local, `america/01.jpg` desviada 1.21 px (M4). Landing 7, 7, 5, 6 fotos visibles, igual que en local. `evidencia/2026-11-04_017-produccion-iphone.txt` (Javi la copia del scratchpad)
+  - CA13 en la preview `javisu-photography-portfolio-d5v5j2kzv-javisuus-projects.vercel.app`: pendiente. Esta protegida con login (302) y la lanza Javi con `VERCEL_BYPASS`
+  - CA12, testimonio de Javi en su iPhone 13, Safari, preview `d5v5j2kzv` (2026-11-04):
+    - Landing en vertical: no se ven las fotos. Se ven los numeros de cada foto (03, 02, 09, 07), el wordmark, el descriptor, el contador 09 / 15 y la navegacion. Solo se ve una foto, la de los caballos arriba, "y su calidad no es nada buena" (captura en la conversacion; Javi no la ha guardado en `evidencia/`).
+    - Landing en horizontal: igual. La unica foto que se ve ocupa casi toda la pantalla y el wordmark SUQUIA crece mucho.
+    - Carrusel: "ni las imagenes se ven completas", pero el deslizamiento funciona.
+    - Album: "tampoco consigue imprimir las imagenes".
+    - Lo que dice la emulacion: Chromium y WebKit ven 7 fotos pintadas en la primera pantalla (`evidencia/2026-11-03_017-linea-base-chromium-iphone.txt:213`, `evidencia/2026-11-03_017-linea-base-webkit-iphone.txt:219`), y produccion da lo mismo. La emulacion no reproduce el fallo de Safari real.
+    - Hilo comun: el landing y el album pintan con `GLSurface` y el carrusel no. `GLSurface` no escucha `webglcontextlost` (grep vacio en `src/motion/GLSurface.tsx`). Causa SIN VERIFICAR.
+    - Atlas: "va bien". El globo se ve y responde (no usa `GLSurface`, pinta en un canvas 2D, `src/motion/Atlas.tsx:913`). Javi confirma M6: con el visor abierto, el globo y el visor "no se complementan" y pide revisar el diseño del atlas en movil.
+    - Sin Mac a mano: no hay Web Inspector de Safari para ver la consola del iPhone.
+  - CA12, testimonio de Javi en su iPad mini 5, Safari, preview `d5v5j2kzv` (2026-11-04):
+    - Landing y album: las fotos no se pintan, igual que en el iPhone.
+    - Atlas: "muy bien", pero no cabe en la pantalla: hay que hacer un poco de scroll para llegar abajo.
+    - Carrusel: "bien", fluido, pero tampoco cabe entero.
+    - La emulacion del iPad Mini (768x1024, el alto entero, sin barra del navegador descontada: `scripts/lib/dispositivo.mjs:7-8`) no ve ese scroll. Causa SIN VERIFICAR: alturas en `vh` frente al alto real con la barra de Safari.
+  - CA12 cumplido: Javi probo en sus dos dispositivos y su testimonio esta arriba. CA13 cumplido en produccion; en la preview no se midio, porque esta protegida y el testimonio real la sustituye.
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/` (con el `npm run dev` de Javi parado)
-- [ ] Criterios de aceptacion de la spec ejecutados
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md` actualizados si cambio algo documentado
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/` (con el `npm run dev` de Javi parado): tsc, lint y build ok, 0 errores en 6 rutas, invariantes 174 de 174 (`evidencia/2026-11-04_diagnostico_cierre-017.txt`, la copia Javi)
+- [x] Criterios de aceptacion de la spec ejecutados: CA1 a CA11 en T1-T10, CA12 y CA13 en T11
+- [x] `CLAUDE.md` actualizado (modo dispositivo, y que la emulacion no reproduce Safari real). `docs/design-spec-v2.md` sin cambios: no cambio nada del diseño
+- [x] Estado de `spec.md` → Implementada

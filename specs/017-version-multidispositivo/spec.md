@@ -1,6 +1,6 @@
 # Spec 017 · Version multidispositivo: medir iPhone e iPad
 
-- **Estado:** Aprobada por Javi el 2026-11-03 ("aprobado"), con las preguntas 1 a 8 respondidas
+- **Estado:** Implementada el 2026-11-04. Aprobada por Javi el 2026-11-03 ("aprobado"), con las preguntas 1 a 8 respondidas
 - **Fecha:** 2026-11-03
 - **Requiere decision de Javi:** No para esta spec, que solo mide y no toca `src/`. Las specs de arreglo que salgan de ella si pueden necesitarla: el landing en movil roza el scroll infinito y `GLSurface`, y el candidato 2 de B7 es `GLSurface` (`docs/ESTADO.md`, "Proximos pasos", paso 1)
 
