@@ -3,29 +3,10 @@
 // de esto. Distinguen tres causas de "texturas subidas pero no se ve nada"
 // en Safari de iOS: el bitmap ya sale vacio, la textura queda vacia en la
 // GPU, o el canvas pinta pero no se ve (o no esta donde la pantalla).
+// El muestreo del bitmap vive en bitmapVacio.ts: desde la enmienda 2 corre
+// siempre, no solo con ?diag.
 
 type GL = WebGLRenderingContext | WebGL2RenderingContext;
-
-let lienzo: HTMLCanvasElement | null = null;
-
-/** El bitmap tal como sale de createImageBitmap, reducido a 8x8 en un canvas
- * 2D: true si los 64 pixeles son transparentes. */
-export function bitmapVacio(bitmap: ImageBitmap): boolean | null {
-  try {
-    lienzo ??= document.createElement("canvas");
-    lienzo.width = 8;
-    lienzo.height = 8;
-    const ctx = lienzo.getContext("2d", { willReadFrequently: true });
-    if (!ctx) return null;
-    ctx.clearRect(0, 0, 8, 8);
-    ctx.drawImage(bitmap, 0, 0, 8, 8);
-    const px = ctx.getImageData(0, 0, 8, 8).data;
-    for (let i = 3; i < px.length; i += 4) if (px[i] > 0) return false;
-    return true;
-  } catch {
-    return null;
-  }
-}
 
 /** La textura ya subida, leida de la GPU por un framebuffer en una rejilla de
  * 3x3: true si los 9 puntos son transparentes. Deja el framebuffer de la

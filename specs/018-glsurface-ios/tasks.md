@@ -84,11 +84,29 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 - [ ] **E1** · Enmienda 1: muestras de `?diag` (bitmaps, texturas, pintado y caja del canvas)
   - Fichero(s): `src/motion/glDiagMuestras.ts` (crear), `src/motion/glDiag.ts`, `src/components/GLDiagPanel.tsx`, `src/motion/GLSurface.tsx` (solo con `?diag`), `scripts/diagnostico.mjs` (invariante E1)
   - Comprobacion: CE1 y CE2 en escritorio y `iphone`; despues CE3 con Javi.
+  - **CE3, capturas de Javi** (2026-11-04, iPhone 13, preview de `c195f79`, `c3913di0r`). Las capturas del iPad son de la preview anterior (`d5v5j2kzv`) y no traen las lineas nuevas.
+    - **`/?diag`, carga 1:** el landing marca bitmaps vacios 8 de 16 y texturas vacias 8 de 16, con pintados 2 de 2.
+    - **`/?diag`, carga 2:** el landing marca bitmaps vacios 17 de 22 y texturas vacias 17 de 22, con pintados 1 de 2.
+    - **`/album/america?diag`:** el album marca bitmaps vacios 3 de 3 y texturas vacias 3 de 3, con pintados 0 de 1. El landing oculto marca bitmaps vacios 6 de 15.
+    - **Caja del canvas:** en todas, el canvas mide lo mismo que la ventana y que el `visualViewport` (390x645 o 390x753, buffer x2), con display `block`, `visible` y opacidad 1.
+    - **Causa:** en WebKit de iOS, `createImageBitmap(<img>, { imageOrientation: "flipY" })` devuelve sin error un bitmap transparente para buena parte de las fotos, y siempre para las del album. La textura sale vacia porque el bitmap ya lo esta: la subida, el canvas y la composicion estan bien. Las fotos que si se ven son las de bitmap lleno, y por eso aparecen solo algunas. Por que unas salen llenas y otras no es SIN VERIFICAR; quiza WebKit no ha decodificado aun una `<img>` que esta oculta con `visibility: hidden`.
   - Resultado de CE1 y CE2 (2026-11-04):
     - **CE1 `ok`.** En escritorio, `/` da bitmaps vacios 0 de 22, texturas vacias 0 de 22 y pintados 5 de 5; el album, 0 de 9, 0 de 9 y 1 de 1. El canvas mide lo mismo que la ventana (`evidencia/2026-11-04_018-e1-escritorio-2.txt:466-496`). En `iphone` tambien en `ok`: pintados 4 de 4, canvas 390x664 con buffer 780x1328 (`evidencia/2026-11-04_018-e1-iphone.txt`, 65 de 65).
     - **Doble cuenta corregida.** La primera pasada contaba 44 bitmaps para 22 texturas. El montaje que React descarta en desarrollo (StrictMode) seguia escribiendo en el registro. `diagVivo` lo corta al desmontar, y solo afecta a la cuenta con `?diag`.
     - **CE2 `ok`.** Las tres capturas a 0 px y los `currentSrc`, 0 distintos de 30. Entrada: arranque 233 ms, reposo 1602 ms, 0 frames largos. Sin `?diag`, 0 paneles.
     - **Escritorio, 193 de 194.** El unico fallo, "sin hueco en blanco" en NEXT ALBUM → `/album/norte`, dio 3 fotogramas en blanco. La foto 1 tardo 1633 ms en cargar, por encima del tope de 1,5 s del album (spec 013). En la pasada anterior del mismo arbol paso, igual que en T4 y T5. Lo atribuyo a la maquina lenta, aunque es SIN VERIFICAR. Sin `?diag`, el cambio solo añade dos variables que no se leen.
+- [ ] **E2** · Enmienda 2: reintento desde el fichero cuando el bitmap sale vacio
+  - Fichero(s): `src/motion/bitmapVacio.ts` (crear), `src/motion/GLSurface.tsx`, `src/motion/glDiag.ts`, `src/motion/glDiagMuestras.ts`, `src/components/GLDiagPanel.tsx` (`rescatados`), `scripts/lib/fallos-gl.mjs` y `scripts/diagnostico.mjs` ("bitmap vacio forzado")
+  - Comprobacion: CE4, CE5 y CE6 en escritorio y `iphone`; despues CE7 con Javi.
+  - Resultado de CE4 a CE6 (2026-11-04, `evidencia/2026-11-04_018-e2-escritorio.txt`, `evidencia/2026-11-04_018-e2-iphone.txt`):
+    - **CE4 `ok`.** Con el bitmap transparente forzado desde la `<img>`, `/` da 7/7 fotos vistas y el album 1/2/1, iguales que sin fallo. Hay 22 y 9 rescatados, y ninguna caida al DOM. En `iphone` igual: 7/7 y 1/1/1.
+    - **CE5 `ok`.** Con el bitmap transparente tambien desde el `Blob`, la pagina cae al DOM ("bitmap vacio tambien desde el fichero (foto 0)") y se ven las mismas fotos. No hay errores de consola fuera de `[GLSurface]`.
+    - **CE6, capturas y `currentSrc` `ok`.** Las tres capturas a 0 px y 0 `currentSrc` distintos. En escritorio, 202 de 206: los 4 fallos son B11. En `iphone`, 77 de 77.
+    - **CE6, entrada: inconclusa por la maquina, no por la muestra.** La pasada completa dio arranque 483 ms y 9 frames largos. Con `--medir /`, tres veces seguidas, dio 267 a 300 ms y 0 frames. Una A/B sin la muestra no sirvio, porque la maquina se cargo justo entonces:
+      - sin muestra: 683 a 917 ms;
+      - con muestra, despues: 733 a 1067 ms.
+
+      El coste de la muestra se midio aparte, en Chromium, sobre 30 fotos reales a 1080 px: mediana 0,10 ms, maximo 0,60 ms y 4 ms en total (`bench-muestra.mjs` del scratchpad). No explica la variacion. CA8 se repite en el diagnostico de cierre, con la maquina en reposo.
 - [ ] **T8** · Javi prueba sin `?diag`
   - Fichero(s): `tasks.md` (testimonio)
   - Comprobacion: CA7.

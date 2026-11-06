@@ -116,6 +116,22 @@ El arreglo se decide con esa lectura delante, en una enmienda 2.
 - **CE2:** CA1 y CA10 siguen como en T5: sin `?diag` el escritorio es identico (192 de 192 mas la nueva, capturas a 0 px).
 - **CE3:** Javi abre la preview con `?diag` en su iPhone y su iPad mini y envia el panel.
 
+## Enmienda 2 (aprobada por Javi el 2026-11-04: "Reintento desde fichero"): rescatar el bitmap vacio
+
+**Hecho nuevo (CE3, `tasks.md` E1):** en el iPhone 13, `createImageBitmap(<img>)` devuelve sin error bitmaps transparentes: 8 de 16 y 17 de 22 en el landing, y 3 de 3 en el album. Las texturas salen vacias por eso. El canvas, su caja y la composicion estan bien.
+
+**Que cambia en `GLSurface`:**
+- Cada bitmap se muestrea siempre, no solo con `?diag`: 16x16 px del centro reducidos a 8x8 (`src/motion/bitmapVacio.ts`).
+- Si sale transparente, se cierra y la foto se vuelve a crear desde el fichero: `fetch(currentSrc, { cache: "force-cache" })` → `Blob` → `createImageBitmap(blob, { imageOrientation: "flipY" })`. Es el camino del atlas, que pinta en iOS. El reintento tiene su propio reloj de 1,5 s.
+- Si el reintento sale vacio o falla, la pagina entera vuelve al DOM (decision 1).
+- En escritorio el primer bitmap nunca sale vacio. El reintento no se ejecuta, y el unico añadido es la muestra.
+
+**Criterios:**
+- **CE4:** con `createImageBitmap` forzado a devolver transparente desde una `<img>`, en `/` y en el album se ven las mismas fotos que sin fallo, con `rescatados` > 0 y sin caida al DOM. Se comprueba en escritorio y con `--dispositivo iphone`, en "bitmap vacio forzado".
+- **CE5:** con el bitmap transparente tambien desde el `Blob`, `GLSurface` cae al DOM y se ven las mismas fotos.
+- **CE6:** CA1, CA8 y CA10 sin cambios. Las tres capturas de escritorio a 0 px, la entrada en su tiempo y 0 frames largos.
+- **CE7:** Javi, en su iPhone y su iPad mini, ve las fotos del landing y de los albumes. Con `?diag`, `rescatados` es mayor que 0 y no hay caida al DOM.
+
 ## Preguntas abiertas (originales, respondidas arriba)
 
 1. **¿La vuelta al DOM es por foto o de toda la pagina?**

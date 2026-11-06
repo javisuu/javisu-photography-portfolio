@@ -34,6 +34,8 @@ export type GLDiagState = {
   pintados: { muestra: number; pintados: number } | null;
   /** Caja del canvas frente a la ventana (texto de varias lineas). */
   capa: string | null;
+  // Enmienda 2: bitmaps vacios recuperados creandolos desde el fichero.
+  rescatados: number;
 };
 
 const registro: Record<string, GLDiagState> = {};
@@ -57,6 +59,7 @@ function vacio(nombre: string): GLDiagState {
     texturasVacias: 0,
     pintados: null,
     capa: null,
+    rescatados: 0,
   };
 }
 

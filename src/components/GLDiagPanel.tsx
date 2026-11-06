@@ -19,7 +19,7 @@ function linea(s: GLDiagState) {
     `texturas ${s.subidas} de ${s.total} · mayor ${tex} · max GPU ${s.maxTextura ?? "—"}`,
     `fallos de decodificacion ${s.fallosDecodificacion} · caida al DOM: ${s.fallo ?? "no"}`,
     `ultimo error: ${s.ultimoError ?? "—"}`,
-    `bitmaps vacios ${s.bitmapsVacios} de ${s.bitmapsMuestreados} · texturas vacias ${s.texturasVacias} de ${s.texturasMuestreadas}`,
+    `bitmaps vacios ${s.bitmapsVacios} de ${s.bitmapsMuestreados} · rescatados ${s.rescatados} · texturas vacias ${s.texturasVacias} de ${s.texturasMuestreadas}`,
     `pintados ${s.pintados ? `${s.pintados.pintados} de ${s.pintados.muestra} visibles` : "—"}`,
     s.capa ?? "canvas —",
   ].join("\n");

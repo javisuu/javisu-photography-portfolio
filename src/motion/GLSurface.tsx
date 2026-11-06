@@ -23,7 +23,8 @@ import { useEffect, useRef, useSyncExternalStore, type RefObject } from "react";
 import { Renderer, Camera, Transform, Plane, Program, Mesh, Texture } from "ogl";
 import type Lenis from "lenis";
 import { glDiagActivo, glDiagReset, glDiagUpdate } from "./glDiag";
-import { bitmapVacio, capa, pintadosEn, texturaVacia } from "./glDiagMuestras";
+import { bitmapVacio } from "./bitmapVacio";
+import { capa, pintadosEn, texturaVacia } from "./glDiagMuestras";
 
 const REDUCED_MOTION_QUERY = "(prefers-reduced-motion: reduce)";
 function subscribeReducedMotion(callback: () => void) {
@@ -391,22 +392,66 @@ export default function GLSurface({
             if (fallenRef.current) return;
             pendingDecodes.add(i);
             armDecodeTimer(i);
+            const queue = (bitmap: ImageBitmap) => {
+              settleDecode(i);
+              if (fallenRef.current) {
+                bitmap.close();
+                return;
+              }
+              uploadQueue.push({ texture, bitmap, index: i });
+            };
             createImageBitmap(node!, { imageOrientation: "flipY" })
               .then((bitmap) => {
-                settleDecode(i);
                 if (fallenRef.current) {
+                  settleDecode(i);
                   bitmap.close();
                   return;
                 }
-                if (diag && diagVivo) {
-                  const vacio = bitmapVacio(bitmap);
-                  if (vacio !== null)
-                    glDiagUpdate(diagName, (d) => ({
-                      bitmapsMuestreados: d.bitmapsMuestreados + 1,
-                      bitmapsVacios: d.bitmapsVacios + (vacio ? 1 : 0),
-                    }));
+                // Spec 018, amendment 2: WebKit on iOS hands back a fully
+                // transparent bitmap from an <img> for many photos, with no
+                // error. Desktop never does, so there the check costs one
+                // tiny sample and nothing else runs.
+                const vacio = bitmapVacio(bitmap);
+                if (diag && diagVivo && vacio !== null)
+                  glDiagUpdate(diagName, (d) => ({
+                    bitmapsMuestreados: d.bitmapsMuestreados + 1,
+                    bitmapsVacios: d.bitmapsVacios + (vacio ? 1 : 0),
+                  }));
+                if (vacio !== true) {
+                  queue(bitmap);
+                  return;
                 }
-                uploadQueue.push({ texture, bitmap, index: i });
+                // Retry from the downloaded file, the way the atlas builds
+                // its bitmaps (from a Blob), which paints on iOS. Fresh
+                // watchdog for the retry; still empty means DOM fallback.
+                bitmap.close();
+                settleDecode(i);
+                pendingDecodes.add(i);
+                armDecodeTimer(i);
+                fetch(node!.currentSrc || node!.src, { cache: "force-cache" })
+                  .then((res) => {
+                    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+                    return res.blob();
+                  })
+                  .then((blob) => createImageBitmap(blob, { imageOrientation: "flipY" }))
+                  .then((rescue) => {
+                    if (bitmapVacio(rescue) === true) {
+                      rescue.close();
+                      settleDecode(i);
+                      markReady(i);
+                      fail(`bitmap vacio tambien desde el fichero (foto ${i})`);
+                      return;
+                    }
+                    if (diagVivo) glDiagUpdate(diagName, (d) => ({ rescatados: d.rescatados + 1 }));
+                    queue(rescue);
+                  })
+                  .catch((err) => {
+                    settleDecode(i);
+                    console.error("[GLSurface] retry from file failed:", err);
+                    glDiagUpdate(diagName, { ultimoError: `reintento: ${String(err).slice(0, 120)}` });
+                    markReady(i);
+                    fail(`reintento desde el fichero rechazado (foto ${i})`);
+                  });
               })
               .catch((err) => {
                 settleDecode(i);

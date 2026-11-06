@@ -20,6 +20,27 @@ export const CREATE_IMAGE_BITMAP_RECHAZA = () => {
   window.createImageBitmap = () => Promise.reject(new Error("createImageBitmap forzado a fallar por el diagnostico"));
 };
 
+// Enmienda 2: lo que hace WebKit de iOS. Desde una <img>, createImageBitmap
+// devuelve un bitmap transparente del mismo tamaño, sin error. Desde un Blob
+// (el reintento de GLSurface) funciona normal.
+export const CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG = () => {
+  const orig = window.createImageBitmap.bind(window);
+  window.createImageBitmap = (src, ...rest) =>
+    src instanceof HTMLImageElement
+      ? orig(new ImageData(Math.max(1, src.naturalWidth), Math.max(1, src.naturalHeight)))
+      : orig(src, ...rest);
+};
+
+// Enmienda 2: vacio tambien desde el Blob. GLSurface tiene que caer al DOM.
+export const CREATE_IMAGE_BITMAP_VACIO_SIEMPRE = () => {
+  const orig = window.createImageBitmap.bind(window);
+  window.createImageBitmap = (src) => {
+    const w = src instanceof HTMLImageElement ? src.naturalWidth : 64;
+    const h = src instanceof HTMLImageElement ? src.naturalHeight : 64;
+    return orig(new ImageData(Math.max(1, w), Math.max(1, h)));
+  };
+};
+
 // Fotos que se ven en el viewport actual. scope "landing": las .landing-photo;
 // "main": todas las <img> del <main> visible de al menos FOTO_MIN_PX.
 export async function fotosVistas(p, decoder, scope) {

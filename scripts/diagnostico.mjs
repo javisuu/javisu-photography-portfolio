@@ -18,7 +18,7 @@ import { spawn, execSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
 import { parseDeviceArgs, contextFor, deviceLabel, CTX_ESCRITORIO, touchSwipe, touchPinch, applyCpu, frameRecorder, frameStats } from "./lib/dispositivo.mjs";
 import { parseCapturasArgs, guardarPng, guardarJson, leerJson, compararPng } from "./lib/capturas.mjs";
-import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
+import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG, CREATE_IMAGE_BITMAP_VACIO_SIEMPRE, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
 
 const PORT = 3100;
 // localhost, no 127.0.0.1: next dev solo admite los origenes localhost y
@@ -1979,6 +1979,35 @@ if (!only) {
     addInv(route, "CA3 con createImageBitmap fallando se ven las mismas fotos", normal[route].some((s) => s.seen > 0) && peor.every((d) => d <= 0),
       `se ven ${forz.map((s) => s.seen).join("/")} frente a ${normal[route].map((s) => s.seen).join("/")} sin fallo`);
     addInv(route, "CA3 sin errores de consola salvo [GLSurface]", errs.length === 0, errs.slice(0, 3).join(" | "));
+  }
+
+  // Enmienda 2: el bitmap transparente de iOS, forzado. Con el reintento
+  // desde el fichero se ven las mismas fotos y GLSurface no cae al DOM; si
+  // tambien el reintento sale vacio, cae al DOM y se ven igual.
+  rule("bitmap vacio forzado");
+  for (const [modo, script, rescate] of [["desde la <img>", CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG, true], ["siempre", CREATE_IMAGE_BITMAP_VACIO_SIEMPRE, false]]) {
+    for (const [route, scope, alturas] of casos) {
+      const ctx = await browser.newContext({ ...CTX });
+      await ctx.addInitScript(script);
+      const p = await ctx.newPage();
+      const errs = consola(p);
+      await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
+      await p.waitForTimeout(SETTLE_MS + ESPERA_RED_MS);
+      const reg = await p.evaluate(() => window.__glDiag ?? null).catch(() => null);
+      const forz = await vistasPorAltura(p, scope, alturas);
+      await ctx.close();
+      const inst = reg?.[route === "/" ? "landing" : "album"];
+      forz.forEach((st, j) => log(`  ${modo} · ${route} · ${alturas[j]} alturas · sin fallo se ven ${normal[route][j].seen} · forzado: ${lineaVistas(st)}`));
+      log(`  ${modo} · ${route} · rescatados ${inst?.rescatados ?? "—"} · caida al DOM: ${inst?.fallo ?? "no"}`);
+      const peor = forz.map((st, j) => normal[route][j].seen - st.seen);
+      addInv(route, `E2 bitmap vacio ${modo}: se ven las mismas fotos`, normal[route].some((s) => s.seen > 0) && peor.every((d) => d <= 0),
+        `se ven ${forz.map((s) => s.seen).join("/")} frente a ${normal[route].map((s) => s.seen).join("/")} sin fallo`);
+      addInv(route, rescate ? `E2 bitmap vacio ${modo}: rescatado sin caer al DOM` : `E2 bitmap vacio ${modo}: cae al DOM`,
+        rescate ? !!inst && inst.rescatados > 0 && !inst.fallo : !!inst?.fallo,
+        inst ? `rescatados ${inst.rescatados} · caida ${inst.fallo ?? "no"}` : "sin __glDiag");
+      const ajenos = errs.filter((e) => !e.includes("[GLSurface]"));
+      addInv(route, `E2 bitmap vacio ${modo}: sin errores de consola salvo [GLSurface]`, ajenos.length === 0, ajenos.slice(0, 3).join(" | "));
+    }
   }
 
   rule("contexto perdido forzado");
