@@ -81,7 +81,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **iPhone 13, album con `?diag`:** texturas 8 de 8 y ninguna foto.
     - **iPad mini 5:** lo mismo con dpr 2, va a tirones, y ninguna foto en los albumes.
     - **Lectura:** ninguno de los cinco disparadores salta. El contexto se crea, los shaders enlazan, las texturas se suben sin error GL, y aun asi el canvas no pinta (o pinta solo algunas). La causa no es ninguna de las cubiertas: va a enmienda (decision 6). CA6 queda en FALLA.
-- [ ] **E1** · Enmienda 1: muestras de `?diag` (bitmaps, texturas, pintado y caja del canvas)
+- [x] **E1** · Enmienda 1: muestras de `?diag` (bitmaps, texturas, pintado y caja del canvas)
   - Fichero(s): `src/motion/glDiagMuestras.ts` (crear), `src/motion/glDiag.ts`, `src/components/GLDiagPanel.tsx`, `src/motion/GLSurface.tsx` (solo con `?diag`), `scripts/diagnostico.mjs` (invariante E1)
   - Comprobacion: CE1 y CE2 en escritorio y `iphone`; despues CE3 con Javi.
   - **CE3, capturas de Javi** (2026-11-04, iPhone 13, preview de `c195f79`, `c3913di0r`). Las capturas del iPad son de la preview anterior (`d5v5j2kzv`) y no traen las lineas nuevas.
@@ -95,7 +95,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **Doble cuenta corregida.** La primera pasada contaba 44 bitmaps para 22 texturas. El montaje que React descarta en desarrollo (StrictMode) seguia escribiendo en el registro. `diagVivo` lo corta al desmontar, y solo afecta a la cuenta con `?diag`.
     - **CE2 `ok`.** Las tres capturas a 0 px y los `currentSrc`, 0 distintos de 30. Entrada: arranque 233 ms, reposo 1602 ms, 0 frames largos. Sin `?diag`, 0 paneles.
     - **Escritorio, 193 de 194.** El unico fallo, "sin hueco en blanco" en NEXT ALBUM → `/album/norte`, dio 3 fotogramas en blanco. La foto 1 tardo 1633 ms en cargar, por encima del tope de 1,5 s del album (spec 013). En la pasada anterior del mismo arbol paso, igual que en T4 y T5. Lo atribuyo a la maquina lenta, aunque es SIN VERIFICAR. Sin `?diag`, el cambio solo añade dos variables que no se leen.
-- [ ] **E2** · Enmienda 2: reintento desde el fichero cuando el bitmap sale vacio
+- [x] **E2** · Enmienda 2: reintento desde el fichero cuando el bitmap sale vacio
   - Fichero(s): `src/motion/bitmapVacio.ts` (crear), `src/motion/GLSurface.tsx`, `src/motion/glDiag.ts`, `src/motion/glDiagMuestras.ts`, `src/components/GLDiagPanel.tsx` (`rescatados`), `scripts/lib/fallos-gl.mjs` y `scripts/diagnostico.mjs` ("bitmap vacio forzado")
   - Comprobacion: CE4, CE5 y CE6 en escritorio y `iphone`; despues CE7 con Javi.
   - Resultado de CE4 a CE6 (2026-11-04, `evidencia/2026-11-04_018-e2-escritorio.txt`, `evidencia/2026-11-04_018-e2-iphone.txt`):
@@ -107,13 +107,25 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - con muestra, despues: 733 a 1067 ms.
 
       El coste de la muestra se midio aparte, en Chromium, sobre 30 fotos reales a 1080 px: mediana 0,10 ms, maximo 0,60 ms y 4 ms en total (`bench-muestra.mjs` del scratchpad). No explica la variacion. CA8 se repite en el diagnostico de cierre, con la maquina en reposo.
-- [ ] **T8** · Javi prueba sin `?diag`
+  - **CE7 `ok`**, testimonio de Javi (2026-11-06, preview de `3c4ea50`): "se ven las fotos". Panel de `?diag`: bitmaps vacios 19 de 22, rescatados 19, texturas vacias 0, pintados 2 de 2 visibles. El reintento desde el fichero rescata todos los bitmaps vacios. Javi no dijo en que dispositivo ni que ruta se ve en esa captura, ni la linea "caida al DOM". Con 19 rescatados y 0 texturas vacias, la pagina no cayo al DOM.
+- [x] **T8** · Javi prueba sin `?diag`
   - Fichero(s): `tasks.md` (testimonio)
   - Comprobacion: CA7.
+  - Resultado (2026-11-06, testimonio de Javi, preview de `3c4ea50`): "se ven las fotos". M9 queda resuelto. Javi senala tres cosas fuera del alcance de esta spec, que pasan a las specs moviles:
+    - **Diseno:** "el diseno fijo de desktop propone que haya que planificar algo para movil". Va a `landing-movil`.
+    - **Rendimiento:** "se ve mal de rendimiento". Va a `entrada-movil` (M3, candidato 2 de B7). Que la muestra o el reintento de esta spec lo empeoren: SIN VERIFICAR.
+    - **Vibracion en el album:** "en las paginas de albumes individuales las imagenes como que vibran si se baja muy suave". Es un defecto nuevo, M11. Causa SIN VERIFICAR. No se habia podido ver antes, porque hasta esta spec las fotos no se pintaban en iOS.
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` en verde, salida guardada en `evidencia/` (con el `npm run dev` de Javi parado)
-- [ ] Criterios de aceptacion de la spec ejecutados
-- [ ] `CLAUDE.md` (`GLSurface`: la red y `?diag`) y `docs/design-spec-v2.md` (Motion inventory #1: la vuelta al DOM ya no es solo "sin contexto") actualizados
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` (2026-11-06, `3c4ea50` + docs, sin `npm run dev`): tsc, lint y build ok, 0 errores de consola en 6 rutas, **198 de 202**. Los 4 fallos son B11 (`—` a los 500 ms, `scrollY` 0 y max 0 a los 1500 ms en los 4 albumes), del harness. Salida: `evidencia/2026-11-06_diagnostico_cierre-018.txt:529-541` (copiada por Javi desde el scratchpad)
+- [x] Criterios de aceptacion de la spec ejecutados:
+  - **CA1:** 192 de 192 en T4 y T5; en el cierre, solo B11.
+  - **CA2, CA3, CA4, CA5 y CA9:** `ok` (T4 a T6).
+  - **CA6:** FALLA, resuelto por las enmiendas 1 y 2.
+  - **CA7:** `ok` por testimonio (T8).
+  - **CA8:** `ok` en el cierre, con arranque 217 ms, reposo 1563 ms y 0 frames > 50 ms. Cierra lo que E2 dejo inconcluso.
+  - **CA10:** `ok` (E2, CE6).
+  - **CE1 a CE7:** `ok`.
+- [x] `CLAUDE.md` (`GLSurface`: la red, el reintento, `?diag` y M9 resuelto) y `docs/design-spec-v2.md` (Motion inventory #1) actualizados. Tambien se corrige el comentario de `src/motion/GLSurface.tsx` sobre `UPLOADS_PER_FRAME`, que decia que la decodificacion nunca toca el hilo principal. `CLAUDE.md` lo dejaba para la siguiente spec que tocara `GLSurface`. Solo es un comentario, y tsc y lint siguen limpios
+- [x] Estado de `spec.md` → Implementada

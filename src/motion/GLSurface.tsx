@@ -95,8 +95,10 @@ type PlaneRef = { node: HTMLImageElement; mesh: Mesh; index: number };
 type PendingUpload = { texture: Texture; bitmap: ImageBitmap; index: number };
 
 // Uploading is the expensive part (a synchronous gl.texImage2D per
-// texture) — decoding is offloaded to createImageBitmap() so it never
-// touches the main thread, but the upload itself still has to. Pacing it
+// texture). Decoding goes through createImageBitmap(), but from an <img>
+// source that decode is NOT off the main thread (measured at 28ms per
+// start frame since spec 007, CLAUDE.md); only the spec 018 retry, from a
+// Blob, decodes off-thread. The upload is always on it. Pacing it
 // to a couple of textures per frame keeps any single frame from blocking
 // on all of them at once (see the persistent-scene rationale below).
 const UPLOADS_PER_FRAME = 2;

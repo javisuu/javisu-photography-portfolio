@@ -1,6 +1,6 @@
 # Spec 018 · GLSurface en Safari de iOS
 
-- **Estado:** Aprobada por Javi el 2026-11-04 ("Apruebo")
+- **Estado:** Implementada (2026-11-06). Aprobada por Javi el 2026-11-04 ("Apruebo"). CA6 quedo en FALLA y se resolvio por las enmiendas 1 y 2 (decision 6); CA7 y CE7 `ok` por testimonio de Javi (`tasks.md`, E2 y T8)
 - **Fecha:** 2026-11-04
 - **Requiere decision de Javi:** Si (motivo: GLSurface). Cambia que hace `GLSurface` cuando una textura no llega o el contexto WebGL se pierde, y cuando el landing y el album vuelven a mostrar sus `<img>`. Es el ciclo de vida de `GLSurface`, una de las cuatro zonas que han roto el sitio antes.
 
