@@ -11,7 +11,7 @@ Es un proyecto personal: no se miden horas y no hay fecha de entrega. Lo que imp
 | F1 · Scaffold | Pagina vacia desplegada en Vercel, fuentes cargando | Hecha |
 | F2 · Paginas estaticas | Las 6 rutas con su composicion aprobada, sin motion | Hecha |
 | F3 · Motion | Inventario de motion del design spec completo | **En curso** |
-| F4 · Pulido | Responsive, metadatos/OG, LCP < 2,5 s, CLS ~ 0, 60 fps en movil medio | Pendiente. La version multidispositivo (movil e iPad) se adelanta por decision de Javi (2026-11-02) y es lo siguiente |
+| F4 · Pulido | Responsive, metadatos/OG, LCP < 2,5 s, CLS ~ 0, 60 fps en movil medio | Pendiente, salvo la version multidispositivo (movil e iPad), adelantada por decision de Javi (2026-11-02) y **en curso**. Hechas la spec 017 (medida y linea base) y la 018 (fotos de `GLSurface` en Safari de iOS). Quedan `landing-movil`, `entrada-movil`, `atlas-movil` y `carrusel-tactil` (`docs/ESTADO.md`, "Linea base multidispositivo") |
 
 ## F3 · Motion — detalle
 
