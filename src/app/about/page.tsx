@@ -13,13 +13,13 @@ export const metadata: Metadata = {
 };
 
 // PLACEHOLDER — bio copy needs to come from Javi. Do not invent one.
-const BIO_PLACEHOLDER = "[PLACEHOLDER BIO]";
+const BIO_PLACEHOLDER = "Soy Javi, ingeniero informático con una creciente pasión por la fotografía. Hace unos meses obtuve mi primera cámara, lo que me motivó para empezar con la fotografía de forma más profesional. Todavía me considero un principiante, en esta web trato de mostrar algunas de mis mejores fotografías junto con un layout muy artístico.";
 
 // PLACEHOLDER — real email pending.
-const EMAIL = "hello@example.com";
+const EMAIL = "jsuquia26@gmail.com";
 
 // PLACEHOLDER — Instagram handle pending.
-const INSTAGRAM_HANDLE = "[PLACEHOLDER]";
+const INSTAGRAM_HANDLE = "IN PROGRESS";
 const INSTAGRAM_HREF = "#";
 
 export default function AboutPage() {
