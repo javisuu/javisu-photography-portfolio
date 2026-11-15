@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { Album, Photo } from "@/data/photos";
 // Slide geometry (SLIDE_HEIGHT, GAP, S, the grain panel, the counter-scale
 // transforms) lives in carouselGeometry.ts since spec 019, shared with the
@@ -20,8 +20,14 @@ import {
   S,
   SLIDE_HEIGHT,
 } from "./carouselGeometry";
-import { preloadFirstPhoto, snapshotCarousel, startAlbumOpen } from "./albumTransition/flight";
-import { prefersReducedMotion, type FirstPhoto } from "./albumTransition/store";
+import {
+  preloadFirstPhoto,
+  snapshotCarousel,
+  startAlbumOpen,
+  startAlbumReturn,
+  type CarouselElements,
+} from "./albumTransition/flight";
+import { getState, prefersReducedMotion, type FirstPhoto } from "./albumTransition/store";
 
 const DRIFT_TARGET_PX_AT_MAX_DISTANCE = 14;
 const DRIFT_MAX_DISTANCE = 3;
@@ -410,7 +416,14 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // change rarely (only at a step commit). Everything continuous (offsetPx, openness,
   // position, width, drift) lives in refs and is written straight to the
   // DOM by the physics loop.
-  const [activeIdx, setActiveIdx] = useState(0);
+  // Spec 019 (Javi's answer 6): opens on the album last opened from here,
+  // not on 0. null on a fresh load, so server and client agree.
+  const [initialActiveIndex] = useState(() => {
+    const saved = getState().savedSlug;
+    const i = saved ? albums.findIndex((a) => a.slug === saved) : -1;
+    return i < 0 ? 0 : i;
+  });
+  const [activeIdx, setActiveIdx] = useState(initialActiveIndex);
   const [isDragging, setIsDragging] = useState(false);
   // Mirrors travelDirRef so render has a non-ref value (reading refs
   // during render trips react-hooks/refs) to pick a newly-mounted slide's
@@ -513,10 +526,8 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // sliver's drift can't keep drifting just because activeIdx (and hence
   // its distance-from-active) keeps changing after it already settled.
   const driftRef = useRef(new Map<number, number>());
-  // The absolute index open on mount — the ONLY slide ever marked
-  // priority (a lazy-initialized state, since reading a ref's `.current`
-  // during render is disallowed).
-  const [initialActiveIndex] = useState(0);
+  // initialActiveIndex (declared with activeIdx above) is the absolute
+  // index open on mount — the ONLY slide ever marked priority.
 
   const slotsPerSide = computeSlotsPerSide(viewportWidth);
   const lo = activeIdx - slotsPerSide;
@@ -877,6 +888,54 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     pendingNavHrefRef.current = null;
   }
 
+  // Spec 019: the carousel's live nodes, as the flight layer reads them.
+  const carouselElements = useCallback((): CarouselElements | null => {
+    const title = titleRef.current;
+    const description = descriptionRef.current;
+    if (!title || !description) return null;
+    return {
+      frames: frameRefs.current as Map<number, HTMLElement>,
+      title,
+      description,
+      extras: [counterRef.current, ruleRef.current].filter((e): e is HTMLElement => !!e),
+    };
+  }, []);
+
+  // Spec 019, T7: mounted by the browser's back button from an album, with
+  // that album open. Hidden before the first paint (the layer is still
+  // showing the frozen album), then handed to the layer once the strip has
+  // laid out at the real viewport width (the resize effect's re-render).
+  useLayoutEffect(() => {
+    if (getState().phase !== "vuelta") return;
+    const root = rootRef.current;
+    if (!root) return;
+    root.style.visibility = "hidden";
+    // A fresh mount springs the open slide from closed to open (openness
+    // starts empty). Coming back, it must already be open: the layer reads
+    // the strip at rest two frames from now, and a half-open slide there
+    // is what the clones fold into — then the real one finishes opening
+    // after the handover, a visible jump (Javi, 2026-11-15).
+    opennessRef.current.set(activeIdxRef.current, 1);
+    let raf2 = 0;
+    const raf1 = requestAnimationFrame(() => {
+      raf2 = requestAnimationFrame(() => {
+        const els = carouselElements();
+        const activeAbs = activeIdxRef.current;
+        const album = albums[mod(activeAbs, albums.length)];
+        const started =
+          !!els &&
+          startAlbumReturn(root, els, activeAbs, album.slug, album.cover.src, album.firstPhoto, (absIndex) =>
+            naturalWidthFor(albums[mod(absIndex, albums.length)].cover)
+          );
+        if (!started) root.style.visibility = "";
+      });
+    });
+    return () => {
+      cancelAnimationFrame(raf1);
+      cancelAnimationFrame(raf2);
+    };
+  }, [albums, carouselElements]);
+
   // Spec 019: hands the carousel, as it is right now, to the flight layer,
   // then hides itself in the same task — the clones are already painted in
   // its place, so no frame shows neither. If the flight can't be built (no
@@ -885,17 +944,10 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   function startFlight() {
     if (prefersReducedMotion()) return; // T8
     const root = rootRef.current;
-    const title = titleRef.current;
-    const description = descriptionRef.current;
-    if (!root || !title || !description) return;
+    const els = carouselElements();
+    if (!root || !els) return;
     const activeAbs = activeIdxRef.current;
     const album = albums[mod(activeAbs, albums.length)];
-    const els = {
-      frames: frameRefs.current as Map<number, HTMLElement>,
-      title,
-      description,
-      extras: [counterRef.current, ruleRef.current].filter((e): e is HTMLElement => !!e),
-    };
     const snapshot = snapshotCarousel(els, activeAbs, album.slug, album.cover.src, album.firstPhoto, (absIndex) =>
       naturalWidthFor(albums[mod(absIndex, albums.length)].cover)
     );

@@ -19,6 +19,7 @@ import {
   getState,
   getTarget,
   mark,
+  prefersReducedMotion,
   setState,
   subscribeTargets,
   type FirstPhoto,
@@ -254,10 +255,24 @@ function cloneBox(source: HTMLElement, role: string) {
   return { el, r };
 }
 
-function cloneText(source: HTMLElement, snap: TextSnapshot, role: string) {
+type TextClone = {
+  el: HTMLElement;
+  /** Offset of the text box inside the element, at scale 1. */
+  ox: number;
+  oy: number;
+  w: number;
+  h: number;
+  /** The text box on screen, where the source sits. */
+  box: { x: number; y: number; width: number; height: number };
+};
+
+/** A frozen copy of a text element plus where its text box sits inside it
+ * (a Range over its text, see TextSnapshot in store.ts): morphs move text
+ * boxes, not element boxes, so line-heights never matter. */
+function cloneText(source: HTMLElement, role: string): TextClone {
+  const box = textBox(source);
   const { el, r } = cloneBox(source, role);
-  // Offset of the text box inside the element, at scale 1.
-  return { el, left: r.left, top: r.top, ox: snap.x - r.left, oy: snap.y - r.top, w: snap.width, h: snap.height };
+  return { el, ox: box.x - r.left, oy: box.y - r.top, w: box.width, h: box.height, box };
 }
 
 // --- Text morphs (Javi, 2026-11-15) -----------------------------------------
@@ -297,6 +312,72 @@ const smooth = (p: number, a: number, b: number) => {
   const x = Math.min(1, Math.max(0, (p - a) / (b - a)));
   return x * x * (3 - 2 * x);
 };
+
+/** Flies text clone `a` (already in the layer, at its own box) to where `b`
+ * sits, handing over from a to b on the way. b is appended here. */
+function morphText(me: Live, a: TextClone, b: TextClone, delay: number, duration: number, mode: "fundido" | "scramble") {
+  const ease = gsap.parseEase("power3.inOut");
+  const from = a.box;
+  const to = b.box;
+  b.el.style.opacity = "0";
+  container?.appendChild(b.el);
+  const finalA = a.el.textContent ?? "";
+  const finalB = b.el.textContent ?? "";
+  const nA = [...finalA].length;
+  const nB = [...finalB].length;
+  const cacheA = { tick: -1, out: [] as string[] };
+  const cacheB = { tick: -1, out: [] as string[] };
+  const place = (c: TextClone, X: number, Y: number, W: number, H: number, stretch: boolean) => {
+    const sy = H / c.h;
+    const sx = stretch ? W / c.w : sy;
+    c.el.style.transform = `translate(${X - sx * c.ox}px, ${Y - sy * c.oy}px) scale(${sx}, ${sy})`;
+  };
+  const q = { p: 0 };
+  let startedAt = 0;
+  me.tweens.push(
+    gsap.to(q, {
+      p: 1,
+      duration,
+      delay,
+      ease: "none",
+      onStart: () => {
+        startedAt = performance.now();
+      },
+      onUpdate: () => {
+        const p = q.p;
+        const u = ease(p);
+        const X = from.x + (to.x - from.x) * u;
+        const Y = from.y + (to.y - from.y) * u;
+        const W = from.width + (to.width - from.width) * u;
+        const H = from.height + (to.height - from.height) * u;
+        if (mode === "fundido") {
+          const f = smooth(p, TITLE_FADE[0], TITLE_FADE[1]);
+          place(a, X, Y, W, H, true);
+          place(b, X, Y, W, H, true);
+          a.el.style.opacity = String(1 - f);
+          b.el.style.opacity = String(f);
+          return;
+        }
+        const tick = Math.floor((performance.now() - startedAt) / SCRAMBLE_TICK_MS);
+        if (p < SCRAMBLE_SWAP) {
+          place(a, X, Y, W, H, false);
+          // Letters go random left to right, so none is left final at the swap.
+          const randomUpTo = Math.ceil(nA * smooth(p, SCRAMBLE_START, SCRAMBLE_SWAP - 0.05));
+          const s = [...scrambled(finalA, 0, cacheA, tick)];
+          a.el.textContent = [...finalA].map((c, i) => (i < randomUpTo ? s[i] : c)).join("");
+          a.el.style.opacity = "1";
+          b.el.style.opacity = "0";
+        } else {
+          place(b, X, Y, W, H, false);
+          const resolved = Math.floor(nB * smooth(p, SCRAMBLE_RESOLVE[0], SCRAMBLE_RESOLVE[1]));
+          b.el.textContent = p >= 1 ? finalB : scrambled(finalB, resolved, cacheB, tick);
+          a.el.style.opacity = "0";
+          b.el.style.opacity = "1";
+        }
+      },
+    })
+  );
+}
 
 // --- Scroll lock (Javi's answer 8) -------------------------------------------
 function lockScroll() {
@@ -384,7 +465,7 @@ export function startAlbumOpen(snapshot: OpenSnapshot, els: CarouselElements) {
   container.replaceChildren();
 
   const t0 = performance.now();
-  setState({ phase: "ida", arrival: "transicion", snapshot, savedSlug: snapshot.slug, t0, events: [] });
+  setState({ phase: "ida", arrival: "transicion", snapshot, savedSlug: snapshot.slug, fromCarousel: snapshot.slug, t0, events: [] });
   mark("clic");
 
   // Build clones: exits first, rising last so it paints on top.
@@ -403,8 +484,8 @@ export function startAlbumOpen(snapshot: OpenSnapshot, els: CarouselElements) {
   const rising = clones.find((c) => c.snap.role === "sube")!;
   if (!snapshot.coverIsFirst) swapToFirstPhoto(rising, snapshot.firstPhoto);
 
-  const title = cloneText(els.title, snapshot.title, "titulo");
-  const description = cloneText(els.description, snapshot.description, "descripcion");
+  const title = cloneText(els.title, "titulo");
+  const description = cloneText(els.description, "descripcion");
   container.appendChild(title.el);
   container.appendChild(description.el);
   const extras = els.extras
@@ -489,8 +570,8 @@ export function startAlbumOpen(snapshot: OpenSnapshot, els: CarouselElements) {
 function rise(
   me: Live,
   rising: SlideClone,
-  title: ReturnType<typeof cloneText>,
-  description: ReturnType<typeof cloneText>,
+  title: TextClone,
+  description: TextClone,
   t0: number
 ) {
   const img = albumPhoto1()!;
@@ -531,89 +612,20 @@ function rise(
 
   // Texts: each on its own, as a pair of clones sharing one text box (see
   // "Text morphs" above).
-  const ease = gsap.parseEase("power3.inOut");
-  const flyText = (
-    a: ReturnType<typeof cloneText>,
-    targetName: "title" | "description",
-    role: string,
-    delay: number,
-    mode: "fundido" | "scramble"
-  ) => {
-    const target = getTarget(targetName)?.firstElementChild as HTMLElement | null;
-    if (!target) return;
-    const tb = textBox(target);
-    const { el: bEl, r: bR } = cloneBox(target, role);
-    bEl.style.opacity = "0";
-    container?.appendChild(bEl);
-    const b = { el: bEl, ox: tb.x - bR.left, oy: tb.y - bR.top, w: tb.width, h: tb.height };
-    const from = { x: a.left + a.ox, y: a.top + a.oy, w: a.w, h: a.h };
-    const finalA = a.el.textContent ?? "";
-    const finalB = bEl.textContent ?? "";
-    const nA = [...finalA].length;
-    const nB = [...finalB].length;
-    const cacheA = { tick: -1, out: [] as string[] };
-    const cacheB = { tick: -1, out: [] as string[] };
-    const place = (
-      c: { el: HTMLElement; ox: number; oy: number; w: number; h: number },
-      X: number,
-      Y: number,
-      W: number,
-      H: number,
-      stretch: boolean
-    ) => {
-      const sy = H / c.h;
-      const sx = stretch ? W / c.w : sy;
-      c.el.style.transform = `translate(${X - sx * c.ox}px, ${Y - sy * c.oy}px) scale(${sx}, ${sy})`;
-    };
-    const ta = { el: a.el, ox: a.ox, oy: a.oy, w: a.w, h: a.h };
-    const q = { p: 0 };
-    const startedAt = { ms: 0 };
-    me.tweens.push(
-      gsap.to(q, {
-        p: 1,
-        duration: Math.max(0.3, duration - delay),
-        delay,
-        ease: "none",
-        onStart: () => {
-          startedAt.ms = performance.now();
-        },
-        onUpdate: () => {
-          const p = q.p;
-          const u = ease(p);
-          const X = from.x + (tb.x - from.x) * u;
-          const Y = from.y + (tb.y - from.y) * u;
-          const W = from.w + (tb.width - from.w) * u;
-          const H = from.h + (tb.height - from.h) * u;
-          if (mode === "fundido") {
-            const f = smooth(p, TITLE_FADE[0], TITLE_FADE[1]);
-            place(ta, X, Y, W, H, true);
-            place(b, X, Y, W, H, true);
-            a.el.style.opacity = String(1 - f);
-            b.el.style.opacity = String(f);
-            return;
-          }
-          const tick = Math.floor((performance.now() - startedAt.ms) / SCRAMBLE_TICK_MS);
-          if (p < SCRAMBLE_SWAP) {
-            place(ta, X, Y, W, H, false);
-            // Letters go random left to right, so none is left final at the swap.
-            const randomUpTo = Math.ceil(nA * smooth(p, SCRAMBLE_START, SCRAMBLE_SWAP - 0.05));
-            const s = scrambled(finalA, 0, cacheA, tick);
-            a.el.textContent = [...finalA].map((c, i) => (i < randomUpTo ? [...s][i] : c)).join("");
-            a.el.style.opacity = "1";
-            b.el.style.opacity = "0";
-          } else {
-            place(b, X, Y, W, H, false);
-            const resolved = Math.floor(nB * smooth(p, SCRAMBLE_RESOLVE[0], SCRAMBLE_RESOLVE[1]));
-            b.el.textContent = p >= 1 ? finalB : scrambled(finalB, resolved, cacheB, tick);
-            a.el.style.opacity = "0";
-            b.el.style.opacity = "1";
-          }
-        },
-      })
+  const textDuration = (delay: number) => Math.max(0.3, duration - delay);
+  const titleTarget = getTarget("title")?.firstElementChild as HTMLElement | null;
+  if (titleTarget) morphText(me, title, cloneText(titleTarget, "titulo"), 0, textDuration(0), "fundido");
+  const descriptionTarget = getTarget("description")?.firstElementChild as HTMLElement | null;
+  if (descriptionTarget) {
+    morphText(
+      me,
+      description,
+      cloneText(descriptionTarget, "descripcion"),
+      DESCRIPTION_DELAY_S,
+      textDuration(DESCRIPTION_DELAY_S),
+      "scramble"
     );
-  };
-  flyText(title, "title", "titulo", 0, "fundido");
-  flyText(description, "description", "descripcion", DESCRIPTION_DELAY_S, "scramble");
+  }
 
   // Label and photo nav: a plain fade, ending with the landing.
   const fades = (["label", "nav"] as const).map((n) => getTarget(n)).filter((n): n is HTMLElement => !!n);
@@ -627,6 +639,295 @@ function rise(
       })
     );
   }
+}
+
+// --- The way back (T7, Javi's answer 6) --------------------------------------
+// Browser back from an album to /albums. Two steps, because the album page
+// and the carousel are never mounted at the same time:
+//   1. prepareReturn(), from the layer's popstate listener, BEFORE Next swaps
+//      the route: freezes the album's photo 1, title, place line, label and
+//      photo nav as clones in the layer, so the unmount shows no blank frame.
+//   2. startAlbumReturn(), from the carousel once it has mounted (hidden) on
+//      the same album: the outbound choreography in reverse. If the album
+//      had been scrolled, only a fade, with the title still travelling
+//      (spec: "La asimetria es deliberada").
+const RETURN_FADE_S = 0.3; // scrolled album: the carousel fades in
+const RETURN_IMG_WAIT_MS = 400; // the open slide's photo, at most, before flying
+
+type ReturnPrep = {
+  slug: string;
+  scrolled: boolean;
+  photo: { el: HTMLImageElement; rect: DOMRect } | null;
+  title: TextClone | null;
+  description: TextClone | null;
+  fades: HTMLElement[];
+  timeout: number;
+};
+let back: ReturnPrep | null = null;
+
+function clearAll() {
+  if (live) {
+    for (const t of live.tweens) t.kill();
+    window.clearTimeout(live.timeout);
+    live.unsubTargets?.();
+    live.unlockScroll();
+    live = null;
+  }
+  if (back) {
+    window.clearTimeout(back.timeout);
+    back = null;
+  }
+  container?.replaceChildren();
+}
+
+export function prepareReturn(slug: string) {
+  if (!container) return;
+  clearAll();
+  if (prefersReducedMotion()) return; // T8
+  const scrolled = window.scrollY > 1;
+  const childOf = (name: "title" | "description" | "label" | "nav") =>
+    getTarget(name)?.firstElementChild as HTMLElement | null;
+
+  let photo: ReturnPrep["photo"] = null;
+  let description: TextClone | null = null;
+  const fades: HTMLElement[] = [];
+  if (!scrolled) {
+    const img = albumPhoto1();
+    if (img) {
+      const rect = img.getBoundingClientRect();
+      // Same URL as the album's <img>, which is decoded: paints at once.
+      const el = img.cloneNode(false) as HTMLImageElement;
+      el.removeAttribute("srcset");
+      el.src = img.currentSrc || img.src;
+      Object.assign(el.style, {
+        position: "absolute",
+        left: "0px",
+        top: "0px",
+        margin: "0px",
+        maxWidth: "none",
+        width: `${rect.width}px`,
+        height: `${rect.height}px`,
+        transform: `translate(${rect.left}px, ${rect.top}px)`,
+        visibility: "visible",
+        opacity: "1",
+      });
+      el.dataset.transicionRol = "foto";
+      container.appendChild(el);
+      photo = { el, rect };
+    }
+    for (const name of ["label", "nav"] as const) {
+      const source = childOf(name);
+      if (!source || source.getBoundingClientRect().width === 0) continue;
+      const { el } = cloneBox(source, "extra");
+      container.appendChild(el);
+      fades.push(el);
+    }
+    const d = childOf("description");
+    if (d) {
+      description = cloneText(d, "descripcion");
+      description.el.style.transform = `translate(${description.box.x - description.ox}px, ${description.box.y - description.oy}px)`;
+      container.appendChild(description.el);
+    }
+  }
+  // The title travels both ways, scrolled or not.
+  const t = childOf("title");
+  let title: TextClone | null = null;
+  if (t) {
+    title = cloneText(t, "titulo");
+    title.el.style.transform = `translate(${title.box.x - title.ox}px, ${title.box.y - title.oy}px)`;
+    container.appendChild(title.el);
+  }
+
+  setState({ phase: "vuelta", arrival: "normal", savedSlug: slug, fromCarousel: null, t0: performance.now(), events: [] });
+  mark(scrolled ? "vuelta-fundido" : "vuelta");
+  const me: ReturnPrep = { slug, scrolled, photo, title, description, fades, timeout: 0 };
+  me.timeout = window.setTimeout(() => {
+    // The carousel never picked it up: fade the clones away.
+    if (back !== me) return;
+    mark("tope-vuelta");
+    back = null;
+    const els = container ? [...container.children] : [];
+    gsap.to(els, {
+      opacity: 0,
+      duration: FADE_IN_S,
+      onComplete: () => {
+        if (back || live) return;
+        container?.replaceChildren();
+        setState({ phase: "reposo" });
+      },
+    });
+  }, MOUNT_TIMEOUT_MS);
+  back = me;
+}
+
+/** Leaving /albums again before the way back has finished. */
+export function abortReturn(reason: string) {
+  if (getState().phase !== "vuelta") return;
+  mark(`abortado:${reason}`);
+  clearAll();
+  setState({ phase: "reposo" });
+}
+
+export function isReturnPending(slug: string) {
+  return getState().phase === "vuelta" && back?.slug === slug;
+}
+
+/** Called by the carousel, mounted and hidden on the saved album. Returns
+ * false when there's nothing to pick up; the caller then just shows itself. */
+export function startAlbumReturn(
+  root: HTMLElement,
+  els: CarouselElements,
+  activeAbs: number,
+  slug: string,
+  coverSrc: string,
+  firstPhoto: FirstPhoto,
+  naturalWidthOf: (absIndex: number) => number
+) {
+  const prep = back;
+  if (!prep || !container || prep.slug !== slug) return false;
+  window.clearTimeout(prep.timeout);
+  back = null;
+
+  const tweens: gsap.core.Animation[] = [];
+  const me: Live = { tweens, timeout: 0, unsubTargets: null, unlockScroll: lockScroll(), landed: false, exitsDone: true };
+  live = me;
+  const done = () => {
+    if (live !== me) return;
+    me.unlockScroll();
+    // Same task: real carousel on, clones off.
+    root.style.visibility = "";
+    root.style.opacity = "";
+    els.title.style.visibility = "";
+    container?.replaceChildren();
+    live = null;
+    setState({ phase: "reposo" });
+    mark("reposo");
+  };
+
+  const snapshot = prep.scrolled || !prep.photo ? null : snapshotCarousel(els, activeAbs, slug, coverSrc, firstPhoto, naturalWidthOf);
+
+  if (!snapshot) {
+    // Scrolled (or the slot can't be read): the carousel fades in and only
+    // the title travels.
+    for (const n of [...container.children]) if (n !== prep.title?.el) n.remove();
+    els.title.style.visibility = "hidden";
+    root.style.opacity = "0";
+    root.style.visibility = "";
+    tweens.push(gsap.to(root, { opacity: 1, duration: RETURN_FADE_S, ease: "none" }));
+    if (prep.title) morphText(me, prep.title, cloneText(els.title, "titulo"), 0, RETURN_FADE_S, "fundido");
+    tweens.push(gsap.delayedCall(RETURN_FADE_S + 0.02, done));
+    return true;
+  }
+
+  // Slide clones, built from the carousel at rest on the saved album.
+  const clones: SlideClone[] = [];
+  for (const snap of snapshot.slides) {
+    const source = els.frames.get(snap.absIndex);
+    if (!source) continue;
+    const c = cloneSlide(source, snap);
+    if (c) clones.push(c);
+  }
+  clones.sort((a, b) => Number(a.snap.role === "sube") - Number(b.snap.role === "sube"));
+  const rising = clones.find((c) => c.snap.role === "sube")!;
+  // The rising lámina carries the album's own photo 1 file, already decoded
+  // (the album page showed it); the carousel's cover candidate may not be.
+  swapToFirstPhoto(rising, firstPhoto);
+  const vh = window.innerHeight;
+  const offY = (c: SlideClone) =>
+    c.snap.role === "baja" ? vh - c.snap.y + EXIT_MARGIN_PX : -(c.snap.y + SLIDE_HEIGHT) - EXIT_MARGIN_PX;
+  for (const c of clones) {
+    c.wrapper.dataset.transicionEnvoltorio = "";
+    if (c !== rising) gsap.set(c.wrapper, { y: offY(c) });
+  }
+  const T = prep.photo!.rect;
+  const p = { x: T.left, y: T.top, k: T.height / SLIDE_HEIGHT, w: rising.naturalWidth, drift: 0, panel: 0 };
+  const paintRising = () => {
+    writeFrame(rising, p.x, p.y, p.k, p.w);
+    rising.img.style.transform = `translateX(${p.drift}px)`;
+    rising.panel.style.opacity = String(p.panel);
+  };
+  paintRising();
+  // Insert under the frozen texts and fades, swapping out the frozen photo
+  // in the same task.
+  const firstText = container.firstChild;
+  for (const c of clones) container.insertBefore(c.wrapper, prep.photo?.el ?? firstText);
+  prep.photo?.el.remove();
+  const extras = els.extras
+    .filter((e) => e.getBoundingClientRect().width > 0)
+    .map((e) => {
+      const { el, r } = cloneBox(e, "extra");
+      el.style.transform = `translate(${r.left}px, ${vh + EXIT_MARGIN_PX}px)`;
+      container!.appendChild(el);
+      return { el, r };
+    });
+  root.style.visibility = "hidden";
+
+  const fly = () => {
+    if (live !== me) return;
+    mark("vuelo-vuelta");
+    const s = rising.snap;
+    tweens.push(
+      gsap.to(p, {
+        x: s.x,
+        y: s.y,
+        k: 1,
+        w: s.width,
+        drift: s.driftPx,
+        panel: s.panelOpacity,
+        duration: RISE_S,
+        ease: "power3.inOut",
+        onUpdate: paintRising,
+      })
+    );
+    // What left last comes back first; arriving, so easing out.
+    const down = clones.filter((c) => c.snap.role === "baja").sort((a, b) => b.snap.x - a.snap.x);
+    const up = clones.filter((c) => c.snap.role === "arriba").sort((a, b) => a.snap.x - b.snap.x);
+    const stagger = (n: number) => (n > 1 ? Math.min(EXIT_STAGGER_S, (EXIT_TOTAL_MAX_S - EXIT_S) / (n - 1)) : 0);
+    const cascade = (list: SlideClone[]) => {
+      const st = stagger(list.length);
+      list.forEach((c, i) => {
+        tweens.push(
+          gsap.to(c.wrapper, { y: 0, duration: EXIT_S, ease: "power2.out", delay: EXIT_TOTAL_MAX_S - EXIT_S - (list.length - 1 - i) * st })
+        );
+      });
+    };
+    cascade(down);
+    cascade(up);
+    for (const { el, r } of extras) {
+      const q = { y: vh + EXIT_MARGIN_PX };
+      tweens.push(
+        gsap.to(q, {
+          y: r.top,
+          duration: EXIT_S,
+          ease: "power2.out",
+          delay: EXIT_TOTAL_MAX_S - EXIT_S,
+          onUpdate: () => {
+            el.style.transform = `translate(${r.left}px, ${q.y}px)`;
+          },
+        })
+      );
+    }
+    if (prep.fades.length) tweens.push(gsap.to(prep.fades, { opacity: 0, duration: FADE_IN_S, ease: "none" }));
+    if (prep.title) morphText(me, prep.title, cloneText(els.title, "titulo"), 0, RISE_S, "fundido");
+    if (prep.description) {
+      morphText(
+        me,
+        prep.description,
+        cloneText(els.description, "descripcion"),
+        DESCRIPTION_DELAY_S,
+        RISE_S - DESCRIPTION_DELAY_S,
+        "scramble"
+      );
+    }
+    tweens.push(gsap.delayedCall(Math.max(RISE_S, EXIT_TOTAL_MAX_S) + 0.02, done));
+  };
+
+  // The open slide's photo (the cover) arrives in plain sight: wait for it,
+  // briefly; the frozen album holds the screen meanwhile.
+  const openImg = clones.find((c) => c.snap.absIndex === activeAbs)?.img;
+  const wait = openImg && !openImg.complete ? openImg.decode().catch(() => undefined) : Promise.resolve();
+  Promise.race([wait, new Promise((r) => window.setTimeout(r, RETURN_IMG_WAIT_MS))]).then(fly);
+  return true;
 }
 
 export function isFlying() {

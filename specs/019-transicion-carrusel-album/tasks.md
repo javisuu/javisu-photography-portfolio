@@ -86,7 +86,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 
     En los demas modos no cambia nada. Si hiciera falta tocar `GLSurface.tsx`, se para y se consulta a Javi.
   - Comprobacion: `node scripts/diagnostico.mjs --skip-build` con `llegada al album` (CA16) igual que en T0. En `?diag`, el album llega a texturas > 0 sin `fallback`.
-- [ ] **T7** · Vuelta y album guardado
+- [x] **T7** · Vuelta y album guardado. **Aprobada por Javi el 2026-11-15** ("está genial"), con el arreglo del salto y el boton "← ALBUMS".
   - Fichero(s): `src/motion/AlbumsCarousel.tsx`, `AlbumTransitionLayer.tsx`, `store.ts`, `src/motion/AlbumPhotos.tsx`
   - Que:
     - El carrusel arranca en el album guardado, no en 0 (`src/motion/AlbumsCarousel.tsx:563`).
@@ -94,6 +94,40 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - Al volver a `/albums` con `scrollY` 0: coreografia al reves, y en america y sol se recupera la portada bajo el panel.
     - Con `scrollY` > 0: fundido de 300 ms, con el titulo viajando.
   - Comprobacion: Javi lo ve en `npm run dev`. CA14 sigue identica con el album 0 abierto.
+  - **Implementada el 2026-11-15, pendiente del vistazo de Javi.** Funciona en dos pasos:
+    1. `AlbumTransitionLayer` escucha `popstate` en fase de captura, que en `window` corre antes que el listener de Next. Ahi `prepareReturn` congela en la capa la foto 1, el titulo, la descripcion, la etiqueta y la navegacion, antes de que React cambie de ruta.
+    2. El carrusel monta oculto en el album guardado, y dos frames despues llama a `startAlbumReturn`. Este reconstruye las laminas desde el carrusel en reposo y hace la coreografia al reves.
+
+    En america y sol, la lamina que vuelve lleva la foto 1, y la portada reaparece al relevar al carrusel real, bajo su panel al 90 %. Con scroll, el carrusel entra con un fundido de 300 ms y el titulo viaja.
+
+    **Desviaciones del plan:**
+    - El `scrollY` se lee en el `popstate` en vez de apuntarse en cada scroll: es el mismo valor, y `AlbumPhotos.tsx` no se toca.
+    - La portada no se recupera "cuando el panel vuelve a >= 0,9", sino en el relevo final al carrusel real, que es el mismo momento.
+
+    **Medido en build de produccion** (`vuelta019.mjs` y `reabrir019.mjs` del scratchpad, salida `2026-11-15_019-t7.txt`):
+    - **Sin scroll, en los cuatro albumes:**
+      - 0 frames en blanco;
+      - el album activo es el que se abrio;
+      - las laminas en reposo quedan a 0,0 px de las de antes del clic (CA12);
+      - de `vuelta` a `reposo`, 949-956 ms;
+      - 0 errores.
+    - **Con scroll de 900 px** (america y norte): solo cambia la opacidad, 351-357 ms, 0 frames en blanco y 0 errores.
+    - **Ciclos y navegacion a mitad:**
+      - 3 ciclos seguidos de abrir y volver, todos ok;
+      - adelante a mitad de la vuelta: `abortado:ruta`, capa vacia y album normal;
+      - atras a mitad de la ida: vuelve al carrusel visible y la capa queda vacia.
+  - **Vistazo de Javi, 2026-11-15.** "La foto vuelve a subir, y se pliega, pero no hace animación de desplegarse, pega un salto y de repente aparece desplegada."
+    - **Causa:** al montar, el carrusel abre la diapositiva activa con su muelle desde cerrada (`opennessRef` empieza vacio, `src/motion/AlbumsCarousel.tsx:725`), y la capa lo leia dos frames despues, a medio abrir. Los clones se plegaban a ese estado y el carrusel real terminaba de abrirse tras el relevo.
+    - **Arreglo:** en la vuelta, la activa se siembra abierta antes del primer frame.
+    - **Medido** (`2026-11-15_019-t7-relevo.txt`): relevo clones → carrusel a 0 px en los cuatro albumes, y 0 px de movimiento en los ~76 frames siguientes. El estado previo no se midio con esta sonda: la causa se dedujo del codigo.
+  - **Boton "← ALBUMS"** (Javi, 2026-11-15: sustituye a "← SUQUIA" en la pagina de album; `src/motion/albumTransition/BackToAlbums.tsx`).
+    - Si el album se abrio desde el carrusel (`fromCarousel` en el store), hace `router.back()`, que es la misma vuelta que el boton del navegador y no añade entradas al historial.
+    - Si no, congela el album con `prepareReturn` y hace `router.push("/albums")`.
+    - Medido:
+      - desde el carrusel: 0 px en el relevo, 0 frames en blanco y `history.length` igual que con atras;
+      - carga directa de norte y sol: coreografia completa, 982 ms, y una entrada nueva en el historial;
+      - 0 errores.
+    - **Efecto en el diagnostico, para T9:** el album ya no tiene enlace a `/`, y el CA4 de la spec 018 en `scripts/diagnostico.mjs:2032` lo buscaba ("no hay enlace a / en el album"). Hay que adaptarlo.
 - [ ] **T8** · `prefers-reduced-motion`
   - Fichero(s): `AlbumTransitionLayer.tsx`, `TransitionTarget.tsx`
   - Que: sin clones. Fundido de 300 ms, solo de opacidad, a la ida y a la vuelta.

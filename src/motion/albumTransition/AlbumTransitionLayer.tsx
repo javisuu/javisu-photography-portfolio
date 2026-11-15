@@ -10,22 +10,41 @@
 // blended <h1>.
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
-import { abortFlight, setContainer } from "./flight";
+import { useEffect, useRef } from "react";
+import { abortFlight, abortReturn, prepareReturn, setContainer } from "./flight";
 import { getState } from "./store";
+
+const ALBUM_PATH = /^\/album\/([^/]+)$/;
 
 export default function AlbumTransitionLayer() {
   const pathname = usePathname();
+  const pathRef = useRef(pathname);
 
-  // Leaving for anywhere but the album being opened (e.g. the browser's
-  // back button mid-flight) cancels the flight: nothing may keep flying
-  // over a page it wasn't meant for.
+  // Leaving for anywhere but the album being opened cancels the outbound
+  // flight, and leaving /albums cancels the way back: nothing may keep
+  // flying over a page it wasn't meant for.
   useEffect(() => {
+    pathRef.current = pathname;
     const { phase, snapshot } = getState();
     if (phase === "ida" && snapshot && pathname !== `/album/${snapshot.slug}` && pathname !== "/albums") {
       abortFlight("ruta");
     }
+    if (phase === "vuelta" && pathname !== "/albums") abortReturn("ruta");
   }, [pathname]);
+
+  // Browser back from an album to /albums (T7). Capture phase: at the
+  // window, capture listeners run before Next's own popstate listener, so
+  // the album page is still in the DOM here and can be frozen into the
+  // layer before React swaps the route (popstate updates commit
+  // synchronously).
+  useEffect(() => {
+    function onPopState() {
+      const from = ALBUM_PATH.exec(pathRef.current ?? "");
+      if (from && window.location.pathname === "/albums") prepareReturn(decodeURIComponent(from[1]));
+    }
+    window.addEventListener("popstate", onPopState, { capture: true });
+    return () => window.removeEventListener("popstate", onPopState, { capture: true });
+  }, []);
 
   return <div ref={setContainer} aria-hidden className="pointer-events-none fixed inset-0 z-50" data-transicion-capa="" />;
 }

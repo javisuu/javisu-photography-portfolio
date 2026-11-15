@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import AlbumPhotoNav from "@/components/AlbumPhotoNav";
 import Footer from "@/components/Footer";
 import AlbumPhotos from "@/motion/AlbumPhotos";
+import BackToAlbums from "@/motion/albumTransition/BackToAlbums";
 import TransitionTarget from "@/motion/albumTransition/TransitionTarget";
 import {
   albums,
@@ -33,12 +34,10 @@ export default async function AlbumPage({
   return (
     <main className="relative">
       <div className="absolute inset-x-0 top-0 z-20 p-6 md:p-10">
-        <Link
-          href="/"
+        <BackToAlbums
+          slug={album.slug}
           className="text-[13px] uppercase tracking-[0.18em] text-[#666] hover:text-[#111]"
-        >
-          ← Suquia
-        </Link>
+        />
       </div>
 
       <TransitionTarget name="nav">

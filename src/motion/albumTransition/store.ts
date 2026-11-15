@@ -83,6 +83,9 @@ type State = {
   snapshot: OpenSnapshot | null;
   /** Album the carousel opens on when it next mounts (respuesta 6). */
   savedSlug: string | null;
+  /** Album opened from the carousel, so the history entry behind it is
+   * /albums: "← ALBUMS" can go back instead of pushing a new entry. */
+  fromCarousel: string | null;
   t0: number;
   events: Event[];
 };
@@ -92,6 +95,7 @@ let state: State = {
   arrival: "normal",
   snapshot: null,
   savedSlug: null,
+  fromCarousel: null,
   t0: 0,
   events: [],
 };
