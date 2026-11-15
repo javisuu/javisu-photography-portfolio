@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import AlbumPhotoNav from "@/components/AlbumPhotoNav";
 import Footer from "@/components/Footer";
 import AlbumPhotos from "@/motion/AlbumPhotos";
+import TransitionTarget from "@/motion/albumTransition/TransitionTarget";
 import {
   albums,
   getAlbumBySlug,
@@ -40,24 +41,33 @@ export default async function AlbumPage({
         </Link>
       </div>
 
-      <AlbumPhotoNav total={albumPhotos.length} />
+      <TransitionTarget name="nav">
+        <AlbumPhotoNav total={albumPhotos.length} />
+      </TransitionTarget>
 
-      {/* No hero — the carousel's jump-into transition is the entrance
-          (not built yet, see CLAUDE.md). The page opens directly on this
+      {/* No hero — the carousel→album transition (spec 019) is the
+          entrance: the title and the location line fly in from the
+          carousel, the label fades in. The page opens directly on this
           typographic title block. */}
       <div className="px-6 pb-16 pt-28 md:px-16 md:pt-40">
-        <p className="text-[13px] uppercase tracking-[0.18em] text-[#666]">
-          Album {String(album.order).padStart(2, "0")} — {albumPhotos.length} Photos
-        </p>
-        <h1
-          className="mt-4 font-medium leading-none text-[#111]"
-          style={{ fontSize: "clamp(48px, 10vw, 110px)" }}
-        >
-          {album.title}
-        </h1>
-        <p className="mt-4 text-[14px] text-[#666]">
-          {album.location} — {album.year}
-        </p>
+        <TransitionTarget name="label">
+          <p className="text-[13px] uppercase tracking-[0.18em] text-[#666]">
+            Album {String(album.order).padStart(2, "0")} — {albumPhotos.length} Photos
+          </p>
+        </TransitionTarget>
+        <TransitionTarget name="title">
+          <h1
+            className="mt-4 font-medium leading-none text-[#111]"
+            style={{ fontSize: "clamp(48px, 10vw, 110px)" }}
+          >
+            {album.title}
+          </h1>
+        </TransitionTarget>
+        <TransitionTarget name="description">
+          <p className="mt-4 text-[14px] text-[#666]">
+            {album.location} — {album.year}
+          </p>
+        </TransitionTarget>
       </div>
 
       <AlbumPhotos photos={albumPhotos} albumText={album.text} />

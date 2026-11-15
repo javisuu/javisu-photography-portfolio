@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { getOrderedAlbums, photos } from "@/data/photos";
+import { getOrderedAlbums, getPhotosByAlbum, photos } from "@/data/photos";
 import AlbumsCarousel from "@/motion/AlbumsCarousel";
 
 // Carousel opened only via the "Albums" nav link — not reached by scrolling
@@ -12,10 +12,16 @@ import AlbumsCarousel from "@/motion/AlbumsCarousel";
 // the classic 100vw-includes-scrollbar-gutter mismatch that would
 // otherwise leave a few px of horizontal overflow.
 export default function AlbumsPage() {
-  const albums = getOrderedAlbums().map((album) => ({
-    ...album,
-    cover: photos.find((p) => p.src === album.cover)!,
-  }));
+  const albums = getOrderedAlbums().map((album) => {
+    // Spec 019: the carousel→album flight lands on photo 1, which is the
+    // cover only in some albums (norte, ny), not in others (america, sol).
+    const first = getPhotosByAlbum(album.slug)[0];
+    return {
+      ...album,
+      cover: photos.find((p) => p.src === album.cover)!,
+      firstPhoto: { src: first.src, width: first.width, height: first.height, title: first.title },
+    };
+  });
 
   return (
     <main className="relative h-screen w-full overflow-hidden">

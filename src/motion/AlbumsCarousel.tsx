@@ -5,28 +5,23 @@ import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { memo, useEffect, useRef, useState } from "react";
 import type { Album, Photo } from "@/data/photos";
-
-// SLIDE_HEIGHT is the one dimension that is NEVER conditional on distance,
-// openness, or animation state — every frame in the strip, and every
-// image inside it, is exactly this tall, always.
-const SLIDE_HEIGHT = 500;
-const GAP = 32;
-// Every FOLDED slide is exactly this wide — no distance-based compression.
-// Uniform width is what lets every slide other than the (at most two)
-// actively opening/closing ones behave as one rigid, non-deforming block.
-const S = 110;
-
-// Depth (spec 011, decision 3): a folded slide is covered by a black panel
-// with film grain (public/textures/grano.png, from scripts/
-// generate-grain.mjs), whose opacity follows that slide's own openness:
-// PANEL_OPACITY * (1 - openness). It replaced a distance-based blur() and
-// grey veil, both CSS transitions on React state: a blur filter is
-// expensive to animate, and opacity is compositing only. Written by the
-// physics loop like everything else continuous.
-// 90%, not fully opaque: Javi compared both on his own screen (spec 011,
-// T11) — a trace of the photo shows through each sliver.
-const PANEL_OPACITY = 0.9;
-const GRAIN_TEXTURE = "/textures/grano.png";
+// Slide geometry (SLIDE_HEIGHT, GAP, S, the grain panel, the counter-scale
+// transforms) lives in carouselGeometry.ts since spec 019, shared with the
+// carousel→album flight layer. See that file for the comments.
+import {
+  counterScaleFor,
+  driftTransformFor,
+  frameTransformFor,
+  GAP,
+  GRAIN_TEXTURE,
+  naturalWidthFor,
+  PANEL_OPACITY,
+  pinnedOriginFor,
+  S,
+  SLIDE_HEIGHT,
+} from "./carouselGeometry";
+import { preloadFirstPhoto, snapshotCarousel, startAlbumOpen } from "./albumTransition/flight";
+import { prefersReducedMotion, type FirstPhoto } from "./albumTransition/store";
 
 const DRIFT_TARGET_PX_AT_MAX_DISTANCE = 14;
 const DRIFT_MAX_DISTANCE = 3;
@@ -151,10 +146,6 @@ function mod(n: number, m: number) {
   return ((n % m) + m) % m;
 }
 
-function naturalWidthFor(cover: Photo) {
-  return Math.round(SLIDE_HEIGHT * (cover.width / cover.height));
-}
-
 // Every folded slide is exactly S wide, so the slot count needed to
 // overflow both viewport edges is a closed form, independent of which
 // album is open or how far mid-transition it is (openness only ever makes
@@ -163,7 +154,8 @@ function computeSlotsPerSide(viewportWidth: number) {
   return Math.ceil((viewportWidth + 2 * S) / (S + GAP)) + 2;
 }
 
-type AlbumWithCover = Omit<Album, "cover"> & { cover: Photo };
+// firstPhoto (spec 019): where the carousel→album flight lands.
+type AlbumWithCover = Omit<Album, "cover"> & { cover: Photo; firstPhoto: FirstPhoto };
 type SlideFrame = { width: number; x: number };
 
 // Every slide's centre is a function of the strip position and of how open
@@ -231,49 +223,8 @@ function driftPxFor(absIndex: number, activeIdx: number, naturalWidth: number, f
   return clamp(raw, -maxSafe, maxSafe);
 }
 
-// The <img> inside a slide must reveal/hide from the SAME edge the layout
-// itself is hinged from (see computeFrame) — otherwise the layout grows
-// one way while the image crops the other, which reads as two facing
-// curtains. Forward hinges RIGHT (image pinned to the frame's right edge,
-// reveal/hide on the left); backward hinges LEFT (pinned left, reveal/hide
-// on the right).
-//
-// There is no third, centre-anchored state: a folded sliver is pinned
-// exactly the same way an open slide is, just at width S instead of its
-// natural width. Centring a folded sliver was the earlier (wrong) design
-// — the instant a fold finished, the anchor would flip from its edge to
-// 50%, and since those two formulas expose a different slice of the same
-// wide image, the crop visibly jumped even though the slide had stopped
-// moving. Every slide always has exactly one pinned edge, decided once
-// when it starts folding/unfolding (or when it first mounts, for a slide
-// that's never opened) and held FROZEN from then on — not recomputed on
-// settle, not on translation, not when the global scroll direction later
-// reverses for some other slide's transition. See imageAnchorDirRef in
-// the physics loop for where that per-slide freeze lives; travelDir here
-// is whatever direction was frozen for THIS slide, not necessarily the
-// live global one.
-//
-// Counter-scale (spec 011): the fold never changes a width, so it never
-// triggers layout. The frame is always laid out at the cover's NATURAL
-// width and shown at `width` by scaleX(width / natural) from its left
-// edge; its child carries the inverse scaleX(natural / width), so the two
-// cancel and the image paints at its real size, clipped by the frame's
-// (scaled) overflow box to exactly `width`. The child's transform-origin
-// is the pinned edge: about the right edge, the image's right edge lands
-// on the frame's visible right edge; about the left, left on left — the
-// same crop the old right:0 / left:0 positioning gave.
-function frameTransformFor(x: number, width: number, naturalWidth: number) {
-  return `translateX(${x}px) scaleX(${width / naturalWidth})`;
-}
-function counterScaleFor(width: number, naturalWidth: number) {
-  return `scaleX(${naturalWidth / width})`;
-}
-function pinnedOriginFor(travelDir: number) {
-  return travelDir > 0 ? "100% 0" : "0 0";
-}
-function driftTransformFor(driftPx: number) {
-  return `translateX(${driftPx}px)`;
-}
+// Image anchoring and the counter-scale transforms (frameTransformFor,
+// counterScaleFor, pinnedOriginFor, driftTransformFor): carouselGeometry.ts.
 
 type WrittenStyle = Partial<Record<"transform" | "counterScale" | "pinnedOrigin" | "drift" | "panel", string>>;
 
@@ -533,6 +484,11 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   const counterRefs = useRef(new Map<number, HTMLDivElement>());
   const imageRefs = useRef(new Map<number, HTMLImageElement>());
   const panelRefs = useRef(new Map<number, HTMLDivElement>());
+  // Spec 019: what the carousel→album flight clones besides the slides.
+  const titleRef = useRef<HTMLParagraphElement | null>(null);
+  const ruleRef = useRef<HTMLSpanElement | null>(null);
+  const descriptionRef = useRef<HTMLParagraphElement | null>(null);
+  const counterRef = useRef<HTMLDivElement | null>(null);
   // The last value the physics loop wrote to each slide, so a slide whose
   // geometry didn't change this frame isn't written (and restyled) again.
   const writtenRef = useRef(new Map<number, WrittenStyle>());
@@ -915,10 +871,48 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
     // value — releasing naturally continues that as momentum, no separate
     // "fling" calculation needed.
     if (pendingNavHrefRef.current && dragDistanceRef.current <= CLICK_DRAG_TOLERANCE_PX) {
+      startFlight();
       router.push(pendingNavHrefRef.current);
     }
     pendingNavHrefRef.current = null;
   }
+
+  // Spec 019: hands the carousel, as it is right now, to the flight layer,
+  // then hides itself in the same task — the clones are already painted in
+  // its place, so no frame shows neither. If the flight can't be built (no
+  // layer, the lámina that should rise off-screen mid-fling), nothing is
+  // hidden and the click is a plain navigation, as before.
+  function startFlight() {
+    if (prefersReducedMotion()) return; // T8
+    const root = rootRef.current;
+    const title = titleRef.current;
+    const description = descriptionRef.current;
+    if (!root || !title || !description) return;
+    const activeAbs = activeIdxRef.current;
+    const album = albums[mod(activeAbs, albums.length)];
+    const els = {
+      frames: frameRefs.current as Map<number, HTMLElement>,
+      title,
+      description,
+      extras: [counterRef.current, ruleRef.current].filter((e): e is HTMLElement => !!e),
+    };
+    const snapshot = snapshotCarousel(els, activeAbs, album.slug, album.cover.src, album.firstPhoto, (absIndex) =>
+      naturalWidthFor(albums[mod(absIndex, albums.length)].cover)
+    );
+    if (!snapshot || !startAlbumOpen(snapshot, els)) return;
+    velocityRef.current = 0;
+    root.style.visibility = "hidden";
+  }
+
+  // Spec 019: warm the cache with the open album's photo 1 at the album
+  // page's size, so a click finds it ready (the rising lámina in america
+  // and sol shows it, and the album's own <img> reuses it).
+  useEffect(() => {
+    const id = window.setTimeout(() => {
+      void preloadFirstPhoto(albums[mod(activeIdx, albums.length)].firstPhoto);
+    }, 300);
+    return () => window.clearTimeout(id);
+  }, [activeIdx, albums]);
 
   const slideIndices = Array.from({ length: hi - lo + 1 }, (_, k) => lo + k);
 
@@ -979,16 +973,18 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
             the prefers-reduced-motion override (rule still appears
             instantly; the title never moves). */}
         <p
+          ref={titleRef}
           className="album-title font-serif text-[30px] text-[#111]"
           style={{ "--album-title-shift": isActiveHovered ? "4px" : "0px" } as React.CSSProperties}
         >
           {activeAlbum.title}
         </p>
         <span
+          ref={ruleRef}
           className="album-rule mt-2 block h-px bg-[#666]"
           style={{ "--album-rule-width": isActiveHovered ? "40px" : "0px" } as React.CSSProperties}
         />
-        <p className="text-[13px] uppercase tracking-[0.16em]">
+        <p ref={descriptionRef} className="text-[13px] uppercase tracking-[0.16em]">
           {activeAlbum.location} — {activeAlbum.year}
         </p>
       </div>
@@ -1000,7 +996,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
         className="pointer-events-none fixed inset-x-0 z-20 flex justify-end px-6 text-[14px] tabular-nums text-[#666] md:px-10"
         style={{ bottom: 60 }}
       >
-        <div className="flex items-center gap-3">
+        <div ref={counterRef} className="flex items-center gap-3">
           <span>{String(mod(activeIdx, albums.length) + 1).padStart(2, "0")}</span>
           <span className="h-px w-16 bg-[#CCC]" />
           <span>{String(albums.length).padStart(2, "0")}</span>

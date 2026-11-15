@@ -7,9 +7,12 @@
 // only the painting changes, exactly like the landing's own integration.
 
 import Image from "next/image";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { flushSync } from "react-dom";
 import { Interlude, Quote, SideNote } from "@/components/AlbumTexts";
 import type { AlbumText, Photo } from "@/data/photos";
+import { ALBUM_PHOTO_SIZES } from "./albumTransition/flight";
+import { getState, subscribe } from "./albumTransition/store";
 import GLSurface from "./GLSurface";
 import { useLenis } from "./useLenis";
 
@@ -46,6 +49,19 @@ const ALBUM_LENIS_OPTIONS = { lerp: 0.2, stopInertiaOnNavigate: true };
 // GLSurface's load listener, so onTexturesReady would never come.
 const ARRIVAL_MAX_WAIT_MS = 1500;
 
+// Arrival by the carousel→album transition (spec 019) works differently,
+// and only then — every other arrival keeps the spec 013 path above:
+// - The whole flight is DOM: GLSurface mounts inactive (no frames, no
+//   uploads) and Lenis is stopped until the flight lands ("asentado").
+// - Photo 1's row is revealed by the flight layer at landing, not here.
+// - After landing GL becomes active but its canvas stays at opacity 0 and
+//   every <img> stays visible until the first TWO textures are uploaded;
+//   then, in one render, the <img>s hide and the canvas shows. Canvas and
+//   DOM are never both showing the same photo, and the slot is never empty.
+// The mode is fixed at mount: readyNodeCount is a dependency of
+// GLSurface's setup effect, and changing it later would rebuild the scene.
+const TRANSITION_READY_NODES = 2;
+
 // Alternating placement per the design spec's vertical top-down flow:
 // centered / offset-left / offset-right, repeating every three photos.
 function placementClass(index: number) {
@@ -71,6 +87,11 @@ export default function AlbumPhotos({
   const [glActive, setGlActive] = useState(false);
   const firstRowRef = useRef<HTMLDivElement>(null);
   const revealedRef = useRef(false);
+  // Spec 019: fixed at mount (see TRANSITION_READY_NODES).
+  const [byTransition] = useState(() => getState().arrival === "transicion");
+  const phase = useSyncExternalStore(subscribe, () => getState().phase, () => "reposo" as const);
+  const flying = byTransition && phase === "ida";
+  const [texturesShown, setTexturesShown] = useState(false);
 
   // Stable on purpose: it reaches GLSurface (directly and through
   // handleAvailability), whose setup effect depends on its callbacks'
@@ -80,18 +101,40 @@ export default function AlbumPhotos({
     revealedRef.current = true;
     firstRowRef.current.style.opacity = "1";
   }, []);
+  // Spec 019: on a transition arrival the flight layer reveals photo 1, so
+  // here texture-ready only swaps <img> for canvas — in one synchronous
+  // render, so no frame shows both or neither.
+  const onTexturesReady = useCallback(() => {
+    if (!byTransition) return reveal();
+    flushSync(() => setTexturesShown(true));
+  }, [byTransition, reveal]);
   // No WebGL: the <img> stays visible, so there's nothing to wait for.
   const handleAvailability = useCallback(
     (available: boolean) => {
       setGlActive(available);
-      if (!available) reveal();
+      if (!available && !byTransition) reveal();
     },
-    [reveal]
+    [reveal, byTransition]
   );
   useEffect(() => {
+    if (byTransition) return;
     const id = setTimeout(reveal, ARRIVAL_MAX_WAIT_MS);
     return () => clearTimeout(id);
-  }, [reveal]);
+  }, [reveal, byTransition]);
+
+  // Spec 019: no scrolling while the flight is in the air (Javi's answer 8).
+  // The flight layer also blocks wheel/touch/keys; this keeps Lenis from
+  // picking up anything that slips through.
+  useEffect(() => {
+    if (!byTransition) return;
+    const lenis = lenisRef.current;
+    if (!lenis) return;
+    if (flying) lenis.stop();
+    else lenis.start();
+  }, [byTransition, flying, lenisRef]);
+
+  const hideImgs = glActive && (!byTransition || texturesShown);
+  const canvasHidden = byTransition && !texturesShown;
 
   // Each row's <Image> is w-auto/h-auto, constrained only by max-h-[85vh]
   // — its rendered height depends on the browser resolving that against
@@ -130,19 +173,23 @@ export default function AlbumPhotos({
             width={photo.width}
             height={photo.height}
             className="h-auto w-auto max-h-[85vh] max-w-full"
-            sizes="(max-width: 768px) 90vw, 70vw"
+            // Shared with the flight layer (spec 019), which preloads photo
+            // 1 at exactly this size so this <img> finds it in the cache.
+            sizes={ALBUM_PHOTO_SIZES}
             // Photo 1 is the only one on screen at arrival: fetch it first.
             // Not `preload` (Next 16's replacement for `priority`): its
             // <link rel="preload"> held photo 1 back ~2 s under next dev
-            // (spec 013, T4).
-            loading={index === 0 ? "eager" : "lazy"}
+            // (spec 013, T4). On a transition arrival photo 2 too: GL
+            // waits for both textures (spec 019), and a lazy photo 2 below
+            // the fold would never load.
+            loading={index === 0 || (byTransition && index < TRANSITION_READY_NODES) ? "eager" : "lazy"}
             fetchPriority={index === 0 ? "high" : undefined}
             onLoad={handleImageLoad}
             // MANDATORY FALLBACK, same rule as the landing: only hidden
             // once GLSurface confirms a working WebGL context. If that
             // never fires, this stays visible and the page renders
             // exactly as the plain CSS album page always has.
-            style={{ visibility: glActive ? "hidden" : "visible" }}
+            style={{ visibility: hideImgs ? "hidden" : "visible" }}
           />
         );
         // Place outranks technical data: number/title/place share one
@@ -236,17 +283,25 @@ export default function AlbumPhotos({
         );
       })}
 
-      <GLSurface
+      {/* Spec 019: not mounted at all during the flight, not just
+          inactive. GLSurface decodes every photo as soon as it loads
+          (createImageBitmap(<img>), on the main thread) whatever `active`
+          says, and its setup effect creates the context and compiles the
+          shaders: mounted, both landed in the first frames of the rise
+          (50-100 ms frames in 8 of 12 flights). Mounted at landing, they
+          fall on a still scene. Measured 2026-11-15, see tasks.md. */}
+      {!flying && <GLSurface
         nodes={imgRefs}
         lenisRef={lenisRef}
         bendDepth={ALBUM_BEND_DEPTH}
         bendRadiusMultiplier={ALBUM_BEND_RADIUS_MULTIPLIER}
         onAvailabilityChange={handleAvailability}
         diagName="album"
-        readyNodeCount={1}
-        onTexturesReady={reveal}
-        className="pointer-events-none fixed inset-0 z-0"
-      />
+        readyNodeCount={byTransition ? TRANSITION_READY_NODES : 1}
+        onTexturesReady={onTexturesReady}
+        active={!flying}
+        className={`pointer-events-none fixed inset-0 z-0${canvasHidden ? " opacity-0" : ""}`}
+      />}
     </>
   );
 }

@@ -3,6 +3,7 @@ import { EB_Garamond } from "next/font/google";
 import "./globals.css";
 import LandingComposition from "@/motion/LandingComposition";
 import GLDiagPanel from "@/components/GLDiagPanel";
+import AlbumTransitionLayer from "@/motion/albumTransition/AlbumTransitionLayer";
 import { getFeaturedPhotos } from "@/data/photos";
 
 const ebGaramond = EB_Garamond({
@@ -46,6 +47,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
       <body className="min-h-full flex flex-col">
         <LandingComposition photos={landingPhotos} />
         {children}
+        {/* Spec 019: the carousel→album flight. Persistent for the same
+            reason as the landing: it has to outlive the route change. */}
+        <AlbumTransitionLayer />
         {/* Spec 018: renders nothing unless the first load had ?diag. */}
         <GLDiagPanel />
       </body>
