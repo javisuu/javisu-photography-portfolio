@@ -18,6 +18,7 @@ import { spawn, execSync } from "node:child_process";
 import { readFileSync, existsSync } from "node:fs";
 import { parseDeviceArgs, contextFor, deviceLabel, CTX_ESCRITORIO, touchSwipe, touchPinch, applyCpu, frameRecorder, frameStats } from "./lib/dispositivo.mjs";
 import { parseCapturasArgs, guardarPng, guardarJson, leerJson, compararPng } from "./lib/capturas.mjs";
+import { seccionTransicion } from "./lib/transicion.mjs";
 import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG, CREATE_IMAGE_BITMAP_VACIO_SIEMPRE, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
 
 const PORT = 3100;
@@ -295,7 +296,7 @@ if (deviceMode) {
   addInv("dispositivo", "dpr = perfil", Math.abs(hd.dpr - CTX.deviceScaleFactor) < 0.01, `${hd.dpr} vs ${CTX.deviceScaleFactor}`);
   addInv("dispositivo", "tactil (ontouchstart)", hd.touch === true, `ontouchstart ${hd.touch}`);
   addInv("dispositivo", "sin hover: hover", hd.hover === false, `hover: hover ${hd.hover}`);
-  log("  secciones de escritorio omitidas: barra de scroll, llegada al album, scroll del album, textos del album, descifrado del wordmark, atlas");
+  log("  secciones de escritorio omitidas: barra de scroll, llegada al album, transicion, scroll del album, textos del album, descifrado del wordmark, atlas");
 }
 
 for (const route of routes) {
@@ -911,11 +912,13 @@ if (!deviceMode && (!only || only.startsWith("/album/"))) {
     v.sort((a, b) => a - b);
     log(`  foto entera, ${kind}: mediana ${Math.round(v[Math.floor((v.length - 1) / 2)])} · max ${Math.round(v[v.length - 1])} ms`);
   }
-  // Reduced motion: igual que sin el, de 0 a 1 en un frame.
+  // Reduced motion desde el carrusel: desde la spec 019 (T8) la foto 1 entra
+  // con el fundido de 300 ms de la transicion, sin hueco en blanco. Antes
+  // era de 0 a 1 en un frame. La seccion `transicion` mide el resto (CA11).
   const rm = await arrivalRun({ kind: "carrusel", reduced: true });
   report("reduced motion, carrusel → album", rm, "llegada (reduced motion)");
   const mid = rm.samples.filter((s) => s.op > 0 && s.op < 1);
-  addInv("llegada (reduced motion)", "sin fundido", mid.length === 0, `${mid.length} muestras con opacity entre 0 y 1`);
+  addInv("llegada (reduced motion)", "fundido de la transicion (spec 019)", mid.length >= 3, `${mid.length} muestras con opacity entre 0 y 1`);
   // Sin WebGL: la foto se muestra en cuanto la pagina sabe que no hay GL, de
   // golpe. Un fundido aqui querria decir que llego por el tiempo maximo de
   // espera, no por la salida sin GL. (Antes de hidratar, la fila esta a 0
@@ -944,6 +947,19 @@ if (!deviceMode && (!only || only.startsWith("/album/"))) {
   }
   await ap.close();
   await decoder.close();
+}
+
+// ---------- transicion ----------
+// Spec 019, T9: la transicion carrusel → album y su vuelta (CA3-CA13), en
+// scripts/lib/transicion.mjs. Escritorio, como "llegada al album".
+// --transicion-vuelos N: vuelos por album para CA10 (10 por defecto).
+const trArg = args.includes("--transicion-vuelos") ? args[args.indexOf("--transicion-vuelos") + 1] ?? "" : "10";
+const trReps = /^\d+$/.test(trArg) && Number(trArg) > 0 ? Number(trArg) : 10;
+if (!deviceMode && !only) {
+  const trSlugs = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
+  await seccionTransicion({ browser, BASE, CTX, log, rule, addInv, slugs: trSlugs, reps: trReps });
+} else if (deviceMode) {
+  omitida("transicion");
 }
 
 // ---------- scroll del album ----------
@@ -2028,9 +2044,21 @@ if (!only) {
     // tambien perdio su contexto y tiene que verse en DOM.
     if (route === album) {
       await p.evaluate(() => window.scrollTo(0, 0)).catch(() => {});
-      // El primer enlace a / que se ve: el landing oculto tiene los suyos.
-      const link = (await p.evaluateHandle(() => [...document.querySelectorAll('a[href="/"]')]
-        .find((a) => a.offsetParent !== null && a.getBoundingClientRect().width > 0) ?? null).catch(() => null))?.asElement() ?? null;
+      // El primer enlace visible a una ruta: el landing oculto tiene los suyos.
+      const visibleLink = async (href) => (await p.evaluateHandle((href) => [...document.querySelectorAll(`a[href="${href}"]`)]
+        .find((a) => a.offsetParent !== null && a.getBoundingClientRect().width > 0) ?? null, href).catch(() => null))?.asElement() ?? null;
+      // Desde la spec 019 el album no enlaza a /: "← ALBUMS" lleva al
+      // carrusel, y de ahi el enlace a /. Las dos navegaciones son blandas.
+      let link = await visibleLink("/");
+      if (!link) {
+        const albumsLink = await visibleLink("/albums");
+        if (albumsLink) {
+          await albumsLink.click().catch(() => {});
+          await p.waitForURL((u) => new URL(u).pathname === "/albums", { timeout: 10000 }).catch(() => {});
+          await p.waitForTimeout(SETTLE_MS);
+          link = await visibleLink("/");
+        }
+      }
       if (link) {
         await link.click().catch(() => {});
         await p.waitForURL((u) => new URL(u).pathname === "/", { timeout: 10000 }).catch(() => {});

@@ -142,7 +142,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **Vuelta:** 1 cambio de `transform`, puntual, no animado; queda para el MutationObserver de T9 identificar de quien es. 353 ms. Vuelve al album abierto.
     - 0 errores.
     - El vuelo completo sigue igual (sol: relevo a 0 px y 0 frames en blanco).
-- [ ] **T9** · Seccion `transicion` del diagnostico
+- [x] **T9** · Seccion `transicion` del diagnostico
   - Fichero(s): `scripts/diagnostico.mjs`
   - Que:
     - CA3, CA3b, CA4, CA5, CA5b, CA6, CA7, CA8 y CA8b, CA9, CA10 (10 repeticiones por album), CA11, CA12 y CA13;
@@ -152,6 +152,25 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 
     Se omite en modo dispositivo, como las demas secciones de escritorio.
   - Comprobacion: la seccion corre entera y devuelve una linea por criterio y album. Ademas, debe fallar en el caso forzado: con un relevo retrasado a proposito (bandera temporal, que se quita en la misma tarea), CA10 lo detecta.
+  - **Hecha el 2026-11-15.** El codigo va en `scripts/lib/transicion.mjs`, y `scripts/diagnostico.mjs` lo llama despues de `llegada al album`. Se omite en modo dispositivo. `--transicion-vuelos N` cambia los vuelos por album de CA10 (10 por defecto).
+    - **Como mide:**
+      - un muestreador por rAF que vive en el documento de `/albums` y sobrevive a la navegacion cliente;
+      - un `MutationObserver` sobre `style` en la capa, los destinos, la fila 0 y el carrusel;
+      - un screencast de CDP para el pixel central del hueco de la foto 1 (CA10).
+    - **Resultado con 10 vuelos por album, en build de produccion** (`2026-11-15_019-t9.txt` del scratchpad): **340 de 340**.
+      - Ida: mediana 897 ms (882-912).
+      - 0 fotogramas en blanco en 40 vuelos.
+      - Vuelta: ~955 ms sin scroll y ~353 ms con scroll.
+      - CA5b: el clic llego con la rendija a ~0,36 de apertura.
+      - CA8b: `scrollY` 0 durante el vuelo.
+      - Reduced: ida en 337-350 ms y vuelta en ~355 ms.
+    - **Caso forzado** (`2026-11-15_019-t9-forzado.txt`): con `revealAlbum` retrasado 200 ms (bandera temporal en `flight.ts`, ya quitada; `git diff src/` vacio), **CA10 falla en los cuatro albumes** (5-7 fotogramas en blanco cada uno), y tambien "CA3 nunca ninguno". 148 de 160.
+    - **Criterio de CA7:** cuenta como animada una propiedad que cambia dos o mas veces en el mismo elemento. `translate`, `rotate` y `scale` cuentan como transform, porque GSAP las pone a `none`. El carrusel queda fuera de CA7: oculto desde el clic, sus cambios son su propio estado de React (cursor de arrastre, variables del hover).
+    - **El `transform` de la vuelta con movimiento reducido** (T8) es del carrusel (`carrusel:div`), no de la capa: lo escribe su propio bucle al montar, mientras entra con el fundido. Las laminas quedan a 0 px de su reposo (T7).
+    - **Otros cambios en el diagnostico:**
+      - `llegada (reduced motion)`: pasa de "sin fundido" a "fundido de la transicion (spec 019)", con al menos 3 muestras a medio fundido.
+      - CA4 de la spec 018 (vuelta a `/` tras perder el contexto): si el album no enlaza a `/`, pasa por "← ALBUMS" y el enlace a `/` del carrusel, con navegaciones blandas.
+    - **Visto de paso, sin tocar:** en "fotos enteras" (`scripts/diagnostico.mjs:402`), la regex es `/^s*slug…/` en vez de `/^\s*slug…/`, desde `de7abfc` (spec 017). No casa ninguna linea, asi que esa seccion solo mide `/` y no los albumes. Para la spec del harness.
 - [ ] **T10** · Ajuste a ojo (CA17)
   - Fichero(s): constantes de la coreografia en `AlbumTransitionLayer.tsx`
   - Que: Javi ajusta las duraciones, curvas y escalonados en `npm run dev` y despues en la preview de Vercel. Cada ajuste vuelve a pasar la seccion `transicion`.
