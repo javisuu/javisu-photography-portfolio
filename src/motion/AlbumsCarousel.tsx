@@ -24,6 +24,7 @@ import {
   preloadFirstPhoto,
   snapshotCarousel,
   startAlbumOpen,
+  startAlbumOpenReduced,
   startAlbumReturn,
   type CarouselElements,
 } from "./albumTransition/flight";
@@ -942,12 +943,16 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
   // layer, the lámina that should rise off-screen mid-fling), nothing is
   // hidden and the click is a plain navigation, as before.
   function startFlight() {
-    if (prefersReducedMotion()) return; // T8
     const root = rootRef.current;
     const els = carouselElements();
     if (!root || !els) return;
     const activeAbs = activeIdxRef.current;
     const album = albums[mod(activeAbs, albums.length)];
+    if (prefersReducedMotion()) {
+      // T8: a cross-fade, nothing moves.
+      if (startAlbumOpenReduced(album.slug, album.firstPhoto, root)) root.style.visibility = "hidden";
+      return;
+    }
     const snapshot = snapshotCarousel(els, activeAbs, album.slug, album.cover.src, album.firstPhoto, (absIndex) =>
       naturalWidthFor(albums[mod(absIndex, albums.length)].cover)
     );

@@ -25,8 +25,10 @@ export default function AlbumTransitionLayer() {
   // flying over a page it wasn't meant for.
   useEffect(() => {
     pathRef.current = pathname;
-    const { phase, snapshot } = getState();
-    if (phase === "ida" && snapshot && pathname !== `/album/${snapshot.slug}` && pathname !== "/albums") {
+    const { phase, snapshot, savedSlug } = getState();
+    // The reduced-motion flight carries no snapshot, only the saved slug.
+    const opening = snapshot?.slug ?? savedSlug;
+    if (phase === "ida" && opening && pathname !== `/album/${opening}` && pathname !== "/albums") {
       abortFlight("ruta");
     }
     if (phase === "vuelta" && pathname !== "/albums") abortReturn("ruta");

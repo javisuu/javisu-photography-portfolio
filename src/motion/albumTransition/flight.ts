@@ -444,7 +444,7 @@ function finish(clearAll: boolean) {
       for (const t of live.tweens) t.kill();
       container.replaceChildren();
     } else {
-      container.querySelectorAll('[data-transicion-rol="sube"], [data-transicion-rol="titulo"], [data-transicion-rol="descripcion"]').forEach((n) => {
+      container.querySelectorAll('[data-transicion-rol="sube"], [data-transicion-rol="titulo"], [data-transicion-rol="descripcion"], [data-transicion-rol="carrusel"]').forEach((n) => {
         (n.closest("[data-transicion-envoltorio]") ?? n).remove();
       });
     }
@@ -641,6 +641,76 @@ function rise(
   }
 }
 
+// --- prefers-reduced-motion (T8) --------------------------------------------
+// No clones fly: a frozen copy of the carousel fades out while the album's
+// title block, label, nav and photo 1 fade in, all at once. Opacity only
+// (spec CA11). The DOM → GL handover is the same as the full flight's.
+const REDUCED_FADE_S = 0.3;
+
+export function startAlbumOpenReduced(slug: string, firstPhoto: FirstPhoto, root: HTMLElement) {
+  if (!container) return false;
+  clearAll();
+  const t0 = performance.now();
+  setState({ phase: "ida", arrival: "transicion", snapshot: null, savedSlug: slug, fromCarousel: slug, t0, events: [] });
+  mark("clic-reducido");
+
+  const r = root.getBoundingClientRect();
+  const ghost = root.cloneNode(true) as HTMLElement;
+  ghost.querySelectorAll("a").forEach((a) => a.remove());
+  ghost.querySelectorAll("[data-carousel-slide]").forEach((n) => n.removeAttribute("data-carousel-slide"));
+  Object.assign(ghost.style, {
+    position: "absolute",
+    left: "0px",
+    top: "0px",
+    margin: "0px",
+    width: `${r.width}px`,
+    height: `${r.height}px`,
+    transform: `translate(${r.left}px, ${r.top}px)`,
+    visibility: "visible",
+  });
+  ghost.dataset.transicionRol = "carrusel";
+  container.appendChild(ghost);
+
+  const tweens: gsap.core.Animation[] = [];
+  const me: Live = { tweens, timeout: 0, unsubTargets: null, unlockScroll: lockScroll(), landed: false, exitsDone: true };
+  live = me;
+
+  let started = false;
+  const tryStart = () => {
+    if (started || live !== me || !targetsReady()) return;
+    started = true;
+    me.unsubTargets?.();
+    me.unsubTargets = null;
+    Promise.all([preloadFirstPhoto(firstPhoto), albumPhoto1()?.decode().catch(() => undefined)]).then(() => {
+      if (live !== me) return;
+      mark("fundido");
+      const row = document.querySelector<HTMLElement>('[data-photo-index="0"]');
+      const ins = [...(["title", "description", "label", "nav"] as const).map((n) => getTarget(n)), row].filter(
+        (n): n is HTMLElement => !!n
+      );
+      tweens.push(gsap.to(ins, { opacity: 1, duration: REDUCED_FADE_S, ease: "none" }));
+      tweens.push(
+        gsap.to(ghost, {
+          opacity: 0,
+          duration: REDUCED_FADE_S,
+          ease: "none",
+          onComplete: () => {
+            if (live === me) finish(false);
+          },
+        })
+      );
+    });
+  };
+  me.unsubTargets = subscribeTargets(tryStart);
+  tryStart();
+  me.timeout = window.setTimeout(() => {
+    if (live !== me || started) return;
+    mark("tope-montaje");
+    finish(true);
+  }, MOUNT_TIMEOUT_MS);
+  return true;
+}
+
 // --- The way back (T7, Javi's answer 6) --------------------------------------
 // Browser back from an album to /albums. Two steps, because the album page
 // and the carousel are never mounted at the same time:
@@ -657,6 +727,8 @@ const RETURN_IMG_WAIT_MS = 400; // the open slide's photo, at most, before flyin
 type ReturnPrep = {
   slug: string;
   scrolled: boolean;
+  /** prefers-reduced-motion: a cross-fade, nothing moves (T8). */
+  reduced: boolean;
   photo: { el: HTMLImageElement; rect: DOMRect } | null;
   title: TextClone | null;
   description: TextClone | null;
@@ -683,7 +755,7 @@ function clearAll() {
 export function prepareReturn(slug: string) {
   if (!container) return;
   clearAll();
-  if (prefersReducedMotion()) return; // T8
+  const reduced = prefersReducedMotion();
   const scrolled = window.scrollY > 1;
   const childOf = (name: "title" | "description" | "label" | "nav") =>
     getTarget(name)?.firstElementChild as HTMLElement | null;
@@ -740,7 +812,7 @@ export function prepareReturn(slug: string) {
 
   setState({ phase: "vuelta", arrival: "normal", savedSlug: slug, fromCarousel: null, t0: performance.now(), events: [] });
   mark(scrolled ? "vuelta-fundido" : "vuelta");
-  const me: ReturnPrep = { slug, scrolled, photo, title, description, fades, timeout: 0 };
+  const me: ReturnPrep = { slug, scrolled, reduced, photo, title, description, fades, timeout: 0 };
   me.timeout = window.setTimeout(() => {
     // The carousel never picked it up: fade the clones away.
     if (back !== me) return;
@@ -803,6 +875,17 @@ export function startAlbumReturn(
     setState({ phase: "reposo" });
     mark("reposo");
   };
+
+  if (prep.reduced) {
+    // T8: the frozen album fades out while the carousel fades in. Opacity
+    // only; the title doesn't travel.
+    root.style.opacity = "0";
+    root.style.visibility = "";
+    tweens.push(gsap.to(root, { opacity: 1, duration: REDUCED_FADE_S, ease: "none" }));
+    tweens.push(gsap.to([...container.children], { opacity: 0, duration: REDUCED_FADE_S, ease: "none" }));
+    tweens.push(gsap.delayedCall(REDUCED_FADE_S + 0.02, done));
+    return true;
+  }
 
   const snapshot = prep.scrolled || !prep.photo ? null : snapshotCarousel(els, activeAbs, slug, coverSrc, firstPhoto, naturalWidthOf);
 

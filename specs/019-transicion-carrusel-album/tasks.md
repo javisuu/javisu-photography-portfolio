@@ -128,10 +128,20 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - carga directa de norte y sol: coreografia completa, 982 ms, y una entrada nueva en el historial;
       - 0 errores.
     - **Efecto en el diagnostico, para T9:** el album ya no tiene enlace a `/`, y el CA4 de la spec 018 en `scripts/diagnostico.mjs:2032` lo buscaba ("no hay enlace a / en el album"). Hay que adaptarlo.
-- [ ] **T8** · `prefers-reduced-motion`
+- [x] **T8** · `prefers-reduced-motion`. **Aprobada por Javi el 2026-11-15** ("muy bien").
   - Fichero(s): `AlbumTransitionLayer.tsx`, `TransitionTarget.tsx`
   - Que: sin clones. Fundido de 300 ms, solo de opacidad, a la ida y a la vuelta.
   - Comprobacion: en `npm run dev`, con movimiento reducido emulado (DevTools), ninguna lamina se mueve y el album entra con un fundido.
+  - **Implementada el 2026-11-15, pendiente del vistazo de Javi.**
+    - **Ida** (`startAlbumOpenReduced`): una copia congelada del carrusel se funde a 0 mientras el titulo, la descripcion, la etiqueta, la navegacion y la fila de la foto 1 se funden a 1, en 300 ms. Arranca cuando el album ha montado y la foto 1 esta decodificada.
+    - **Vuelta:** el album congelado (las mismas piezas que en T7) se funde a 0 mientras el carrusel se funde a 1. El titulo no viaja.
+    - El relevo DOM → GL es el mismo de T6.
+
+    **Medido** en build de produccion con `reducedMotion: "reduce"` (`reducido019.mjs` del scratchpad, salida `2026-11-15_019-t8.txt`), en america y norte:
+    - **Ida:** 0 cambios de `transform` en todo el documento, solo `opacity` en el fundido. Los 3 cambios de `width` y 4 de `height` son del montaje de la pagina, no animaciones. De clic a `asentado`, 336-339 ms. GL sube 9 de 9 texturas sin fallo.
+    - **Vuelta:** 1 cambio de `transform`, puntual, no animado; queda para el MutationObserver de T9 identificar de quien es. 353 ms. Vuelve al album abierto.
+    - 0 errores.
+    - El vuelo completo sigue igual (sol: relevo a 0 px y 0 frames en blanco).
 - [ ] **T9** · Seccion `transicion` del diagnostico
   - Fichero(s): `scripts/diagnostico.mjs`
   - Que:
