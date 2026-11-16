@@ -178,10 +178,14 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` en verde, salvo B11 y B12, salida guardada en `evidencia/` (CA1, CA2, CA3–CA13, CA16)
-- [ ] `--dispositivo iphone` e `ipad` sin fallos nuevos frente a T0 (CA15)
-- [ ] CA14 identica a la referencia
-- [ ] Criterios de aceptacion de la spec ejecutados
-- [ ] `CLAUDE.md` (build order, stack, arquitectura de la capa) y `docs/design-spec-v2.md` (§2 "Navigation", §3, inventario de motion #4) actualizados
-- [ ] `docs/ESTADO.md`: B13 anotado como tapado en el camino carrusel→album, no cerrado
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` en verde, salvo B11 y B12, salida guardada en `evidencia/` (CA1, CA2, CA3–CA13, CA16). **2026-11-16, sobre `d42bfb4`** (`2026-11-16_019-diagnostico-cierre.txt`, scratchpad, pendiente de copiar): tsc, lint y build ok, 0 errores de consola en 6 rutas, **527 de 542**. `llegada al album` (CA16) pasa entera. Los 15 fallos:
+  - 4 son B11 (B10 con `—` a los 500 ms, maximo 0).
+  - 1 es B12 (atlas CA15, 1 frame largo, ya en T0).
+  - 10 son duraciones de la seccion `transicion` (CA8b 1144-1160 ms, CA13 447-478 ms, CA11 522-1150 ms). El diagnostico mide sobre `next dev` (:3100) y la maquina iba lenta (reposo del landing 2085 ms, frente a 1609 en T0). **Repetida la seccion sobre la build de produccion** (`solo-transicion.mjs`, `next start`): 10 vuelos por album, **338 de 340** (`2026-11-16_019-transicion-produccion.txt`); los dos fallos son la ida reducida de `america` (476 ms) y `norte` (403 ms), con el fundido empezando a 151 y 93 ms del clic por el montaje de la ruta (ayer, 34 ms). Repetida con 3 vuelos: **200 de 200**, fundido a 35 y 38 ms (`2026-11-16_019-transicion-produccion-2.txt`). Intermitente, de la carga de la maquina; sin cambios de codigo desde T9.
+  - Las duraciones de la seccion solo son fiables en produccion. Para la spec del harness: que `transicion` corra sobre `next start`, o que sus umbrales de tiempo se apliquen solo con `--url`.
+- [x] `--dispositivo iphone` e `ipad` sin fallos nuevos frente a T0 (CA15). 2026-11-16: iPhone **77 de 77** (T0: 77 de 77); iPad **75 de 77** (T0: 72 de 77), los dos fallos ("deslizar cambia de album", normal y reducido) ya estaban en T0 (`2026-11-16_019-dispositivo-iphone.txt`, `-ipad.txt`, scratchpad)
+- [x] CA14 identica a la referencia: 0 px en llegada, ArrowRight ×2 y ArrowLeft ×2 (`2026-11-16_019-geometria-cierre.txt`, contra `2026-11-14_019-geometria-base.json`, los dos en el scratchpad)
+- [x] Criterios de aceptacion de la spec ejecutados, salvo CA17 en la preview de Vercel y en dispositivos reales (T10)
+- [x] `CLAUDE.md` (build order, stack, arquitectura de la capa) y `docs/design-spec-v2.md` (§2 "Navigation", §3, inventario de motion #4, changelog) actualizados
+- [x] `docs/ESTADO.md`: B13 anotado como tapado en el camino carrusel→album, no cerrado; B14 nuevo
+- [x] Estado de `spec.md` → Implementada (pendiente CA17 en la preview y en dispositivos reales)

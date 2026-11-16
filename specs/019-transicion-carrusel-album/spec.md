@@ -1,6 +1,6 @@
 # Spec 019 · Transicion carrusel → album
 
-- **Estado:** Aprobada (Javi, 2026-11-14)
+- **Estado:** Implementada (2026-11-16). Pendiente CA17 en la preview de Vercel y en dispositivos reales (T10). Aprobada por Javi el 2026-11-14
 - **Fecha:** 2026-11-14
 - **Requiere decision de Javi:** Si (motivo: GLSurface, porque cambia su ciclo de vida en la pagina de album: inactivo durante el vuelo y `readyNodeCount` de 1 a 2. Ademas toca el carrusel, dado por cerrado en `CLAUDE.md`, y se aparta del design spec §3 y del inventario de motion #4, ver "Choca con el spec")
 
