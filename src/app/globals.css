@@ -11,6 +11,22 @@
   --font-serif: var(--font-eb-garamond);
 }
 
+/* Mobile design (specs/020-navegacion-movil): phones in portrait and
+   landscape, tablets in portrait, never a desktop window however narrow
+   (no coarse pointer there). Every mobile-only rule hangs off `movil:`, so
+   outside this query no effective CSS changes. `movil-h:` is the phone in
+   landscape only. Keep both conditions in sync with the spec. */
+@custom-variant movil {
+  @media (pointer: coarse) and (orientation: portrait) and (max-width: 1024px), (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
+    @slot;
+  }
+}
+@custom-variant movil-h {
+  @media (pointer: coarse) and (orientation: landscape) and (max-height: 500px) {
+    @slot;
+  }
+}
+
 /* No page scrollbar (specs/009-ocultar-barra-scroll): it only hides how
    the document's scrollbar is painted — overflow is untouched, so wheel,
    keyboard, touch and Lenis all keep scrolling the real page. Scoped to
