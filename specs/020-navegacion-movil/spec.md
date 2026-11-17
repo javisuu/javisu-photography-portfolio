@@ -101,6 +101,10 @@ Perfiles: `iphone`, `iphone-max`, `ipad-mini` e `ipad` de `--dispositivo`, en ve
 6. El panel al acabar la primera vuelta va en `landing-movil`: «Landing movil».
 7. Basta con el boton de cerrar: «Basta con boton cerrar».
 
+## Enmienda 1 (2026-11-17): vuelta al landing en movil (B15)
+
+T6 encontro que en movil ningun enlace llevaba a `/` salvo en `/credits`: la invariante «CA4 vuelta a / tras perder el contexto en un album» (spec 018) fallaba en todos los perfiles. Decision de Javi: «al landing se vuelve desde albums con una etiqueta que te envie de vuelta». `← Suquia` se vuelve a ver en movil en `/albums` (y sigue en `/credits`); en `/about` y `/atlas` sigue oculto, y desde ahi se llega por `ALBUMS` en la barra. CA3 pasa a exigir `← Suquia` visible en `/albums` y `/credits`, y ausente en las demas rutas. El escritorio no cambia: solo se quita la variante `movil:hidden`.
+
 ## Preguntas abiertas
 
 - Ninguna de diseño. Queda por medir en T0 que la emulacion informe `pointer: coarse` (si no, el plan propone como emularlo).

@@ -182,7 +182,7 @@ export async function seccionNavegacion({ browser, BASE, CTX, log, rule, addInv,
     addInv(ruta, `navegacion · CA3/CA11 alto de la barra ${alto} px`, !!b && Math.abs(b.h - alto) <= 0.5, `${b?.h}`);
     addInv(ruta, "navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar", m.enlaces.length === 3 && m.enlaces.every((l) => l.h >= 43.5 && l.l >= 0 && l.r <= m.vw && l.t >= 0 && l.b <= m.vh && l.hit), JSON.stringify(m.enlaces.map((l) => [l.txt, Math.round(l.h), l.hit])));
     addInv(ruta, "navegacion · CA3 sin EN/ES", !!b && !b.enes, "EN/ES visible");
-    addInv(ruta, "navegacion · CA3 sin nav de escritorio", m.navEscritorio === 0 && (ruta === "/credits" ? m.suquia === 1 : m.suquia === 0), `nav ${m.navEscritorio}, ← Suquia ${m.suquia}`);
+    addInv(ruta, "navegacion · CA3 sin nav de escritorio", m.navEscritorio === 0 && (ruta === "/credits" || ruta === "/albums" ? m.suquia === 1 : m.suquia === 0), `nav ${m.navEscritorio}, ← Suquia ${m.suquia}`);
     const activoEsperado = DESTINOS[ruta.startsWith("/album/") ? "/albums" : ruta];
     addInv(ruta, "navegacion · CA4 colores activo/resto", m.enlaces.every((l) => l.color === (l.txt === activoEsperado ? ACTIVO : RESTO)), JSON.stringify(m.enlaces.map((l) => [l.txt, l.color])));
     if (horizontal) addInv(ruta, `navegacion · CA11 margen lateral >= ${MARGEN_H} px`, m.enlaces[0] && m.enlaces[0].l + 8 >= MARGEN_H - 0.5, `${m.enlaces[0]?.l + 8}`);
