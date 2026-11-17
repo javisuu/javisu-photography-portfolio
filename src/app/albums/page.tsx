@@ -24,8 +24,8 @@ export default function AlbumsPage() {
   });
 
   return (
-    <main className="relative h-screen w-full overflow-hidden">
-      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 p-6 md:p-10">
+    <main className="relative h-screen w-full overflow-hidden movil:pb-[78px] movil-h:pb-[57px]">
+      <div className="pointer-events-none absolute inset-x-0 top-0 z-20 p-6 md:p-10 movil:hidden">
         <Link
           href="/"
           className="pointer-events-auto text-[13px] uppercase tracking-[0.18em] text-[#666] hover:text-[#111]"

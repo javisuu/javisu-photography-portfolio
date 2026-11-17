@@ -16,7 +16,7 @@ const GITHUB_URL = "https://github.com/javisuu/javisu-photography-portfolio";
 // A footnote, not a page — five lines, no heading shouting "Credits".
 export default function CreditsPage() {
   return (
-    <main className="relative min-h-screen">
+    <main className="relative min-h-screen movil:pb-[78px] movil-h:pb-[57px]">
       <div className="absolute inset-x-0 top-0 z-20 p-6 md:p-10">
         <Link
           href="/"

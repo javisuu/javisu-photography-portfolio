@@ -24,8 +24,8 @@ const INSTAGRAM_HREF = "#";
 
 export default function AboutPage() {
   return (
-    <main className="relative min-h-screen">
-      <div className="absolute inset-x-0 top-0 z-20 p-6 md:p-10">
+    <main className="relative min-h-screen movil:pb-[78px] movil-h:pb-[57px]">
+      <div className="absolute inset-x-0 top-0 z-20 p-6 md:p-10 movil:hidden">
         <Link
           href="/"
           className="text-[13px] uppercase tracking-[0.18em] text-[#666] hover:text-[#111]"

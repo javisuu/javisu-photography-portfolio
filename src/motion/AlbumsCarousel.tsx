@@ -1050,8 +1050,7 @@ export default function AlbumsCarousel({ albums }: { albums: AlbumWithCover[] })
           height) — z-20 keeps it above the slides, matching the landing
           page's chrome convention. */}
       <div
-        className="pointer-events-none fixed inset-x-0 z-20 flex justify-end px-6 text-[14px] tabular-nums text-[#666] md:px-10"
-        style={{ bottom: 60 }}
+        className="pointer-events-none fixed inset-x-0 bottom-[60px] z-20 flex justify-end px-6 text-[14px] tabular-nums text-[#666] md:px-10 movil:bottom-[94px] movil-h:bottom-[73px]"
       >
         <div ref={counterRef} className="flex items-center gap-3">
           <span>{String(mod(activeIdx, albums.length) + 1).padStart(2, "0")}</span>

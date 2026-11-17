@@ -32,7 +32,7 @@ export default async function AlbumPage({
   const nextCover = photos.find((p) => p.src === nextAlbum.cover)!;
 
   return (
-    <main className="relative">
+    <main className="relative movil:pb-[78px] movil-h:pb-[57px]">
       <div className="absolute inset-x-0 top-0 z-20 p-6 md:p-10">
         <BackToAlbums
           slug={album.slug}

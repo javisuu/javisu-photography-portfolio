@@ -955,7 +955,8 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           — {year}" was removed from here — non-interactive text sitting
           among interactive links invited clicks that went nowhere, and
           the descriptor below the name now does that labeling job. */}
-      <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between p-6 text-[13px] uppercase tracking-[0.22em] text-[#111111] md:p-10">
+      {/* Spec 020: on mobile the bottom bar (BarraMovil) replaces this. */}
+      <div className="pointer-events-none fixed inset-x-0 top-0 z-20 flex items-start justify-between p-6 text-[13px] uppercase tracking-[0.22em] text-[#111111] md:p-10 movil:hidden">
         <nav className="pointer-events-auto flex gap-6">
           <Link href="/about" className="hover:text-[#666]">
             <ScrambleText text="About Me" />
@@ -974,14 +975,21 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           asymmetry, not a leftover: don't add a matching label on the
           right to "balance" it. Fixed + no ancestor transform of its own,
           so it doesn't touch the wordmark's blend stacking context. */}
+      {/* Spec 020, mobile (design Nav-A / Landing-horizontal): a 40 × 120 px
+          touch zone. The link box is 120 × 40 before the -90° rotation, so
+          its visual box is 40 wide; left -40px puts that box flush with the
+          edge. Portrait: lower third, bottom of the zone 134 px above the
+          viewport bottom (bottom 174 = 134 + the 40 px the rotation adds
+          below). Phone landscape: vertically centred, 47 px safe margin. */}
       <Link
         href="/credits"
-        className="fixed left-4 top-1/2 z-20 -translate-y-1/2 -rotate-90 text-[12px] uppercase tracking-[0.2em] text-[#B0B0B0] hover:text-[#666] md:left-6"
+        className="fixed left-4 top-1/2 z-20 -translate-y-1/2 -rotate-90 text-[12px] uppercase tracking-[0.2em] text-[#B0B0B0] hover:text-[#666] md:left-6 movil:left-[-40px] movil:top-auto movil:bottom-[174px] movil:flex movil:h-10 movil:w-[120px] movil:translate-y-0 movil:items-center movil:justify-center movil:tracking-[0.18em] movil:text-[#666] movil-h:left-[7px] movil-h:top-1/2 movil-h:bottom-auto movil-h:-translate-y-1/2"
       >
         <ScrambleText text="Credits" />
       </Link>
 
-      <div className="pointer-events-none fixed inset-x-0 bottom-8 z-20 flex justify-end px-6 text-[12px] uppercase tracking-[0.18em] text-[#888] md:px-10">
+      {/* Spec 020: on mobile it rises above the bottom bar (78 / 57 px). */}
+      <div className="pointer-events-none fixed inset-x-0 bottom-8 z-20 flex justify-end px-6 text-[12px] uppercase tracking-[0.18em] text-[#888] md:px-10 movil:bottom-[94px] movil-h:bottom-[73px] movil-h:px-[47px]">
         <span className="tabular-nums">
           {String(focalIndex + 1).padStart(2, "0")} / {String(photos.length).padStart(2, "0")}
         </span>
