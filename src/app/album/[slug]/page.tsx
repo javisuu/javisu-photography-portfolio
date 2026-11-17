@@ -48,7 +48,9 @@ export default async function AlbumPage({
           entrance: the title and the location line fly in from the
           carousel, the label fades in. The page opens directly on this
           typographic title block. */}
-      <div className="px-6 pb-16 pt-28 md:px-16 md:pt-40">
+      {/* data-album-cabecera: once this block has scrolled out above the
+          viewport, the mobile bar turns into the album bar (spec 020). */}
+      <div data-album-cabecera="" className="px-6 pb-16 pt-28 md:px-16 md:pt-40">
         <TransitionTarget name="label">
           <p className="text-[13px] uppercase tracking-[0.18em] text-[#666]">
             Album {String(album.order).padStart(2, "0")} — {albumPhotos.length} Photos

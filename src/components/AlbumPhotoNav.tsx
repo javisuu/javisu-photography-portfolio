@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { publicarAlbum } from "@/components/movil/estadoAlbum";
 
 // Tracks which photo row is nearest the viewport's vertical center via
 // IntersectionObserver (rows are marked with data-photo-index by the album
@@ -64,6 +65,16 @@ export default function AlbumPhotoNav({ total }: { total: number }) {
     target?.scrollIntoView({ behavior: prefersReducedMotion ? "auto" : "smooth", block: "center" });
   }
 
+  // Spec 020: the mobile album bar (BarraMovil, in the root layout) shows
+  // this same counter and arrows; on mobile this component is
+  // `display: none` but still mounted, and publishes its state for the bar.
+  useEffect(() => {
+    publicarAlbum({ actual: current, total, irA: goTo });
+    // goTo only closes over `total`.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [current, total]);
+  useEffect(() => () => publicarAlbum(null), []);
+
   // Deep-link support for the atlas: clicking a mark there navigates to
   // /album/[slug]#photo-N, and this is what actually lands on that photo.
   // Waits for the window 'load' event (same reasoning as the Lenis-resize
@@ -86,7 +97,7 @@ export default function AlbumPhotoNav({ total }: { total: number }) {
   }, []);
 
   return (
-    <div className="fixed right-4 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-4 text-[#666] md:right-8 md:flex">
+    <div className="fixed right-4 top-1/2 z-20 hidden -translate-y-1/2 flex-col items-center gap-4 text-[#666] md:right-8 md:flex movil:hidden">
       <button type="button" aria-label="Previous photo" onClick={() => goTo(current - 1)} className="cursor-pointer hover:text-[#111]">
         <svg width="14" height="9" viewBox="0 0 14 9" fill="none" aria-hidden>
           <path d="M1 8L7 1L13 8" stroke="currentColor" strokeWidth="1.5" />
