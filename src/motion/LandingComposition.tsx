@@ -17,6 +17,7 @@ import { useLenis } from "./useLenis";
 import GLSurface from "./GLSurface";
 import DecipherWordmark from "./DecipherWordmark";
 import ScrambleText from "./ScrambleText";
+import { PANEL_ID, fijarPanel, panelAbierto, suscribirPanel } from "@/components/movil/panel";
 
 // Rendered once from the root layout (not per-route from app/page.tsx) so
 // it survives navigating away and back — see the `active` plumbing below.
@@ -312,6 +313,10 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
     getReducedMotionSnapshot,
     getReducedMotionServerSnapshot
   );
+
+  // Spec 020: the mobile panel's state, for the SUQUIA trigger's
+  // aria-expanded.
+  const panelOpen = useSyncExternalStore(suscribirPanel, panelAbierto, () => false);
 
   // Lenis can't simply be "paused" while inactive — its own .stop()
   // keeps calling preventDefault() on every wheel/touch event, which
@@ -1051,6 +1056,31 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           reducedMotion={reducedMotion}
         />
       </h1>
+
+      {/* Spec 020: on mobile, tapping SUQUIA opens the full-screen panel
+          (PanelMovil, in the root layout). A transparent SIBLING of the
+          blended <h1> above — never a parent or child of it, and with no
+          transform/opacity/filter of its own — so the wordmark and its
+          blend are untouched (CA8; Javi's answer 3). An 80 px band over
+          the name, as wide as the name: 16vw clamped like the <h1>, times
+          ~3.9 em for "SUQUIA" in EB Garamond 500. Positioned with calc,
+          not translate, so it carries no transform. `display: none`
+          outside `movil:`. */}
+      <button
+        type="button"
+        data-panel-disparador=""
+        aria-label="Menu"
+        aria-haspopup="dialog"
+        aria-expanded={panelOpen}
+        aria-controls={PANEL_ID}
+        onClick={() => fijarPanel(true)}
+        className="fixed z-30 hidden h-20 bg-transparent movil:block"
+        style={{
+          width: "calc(clamp(64px, 16vw, 158px) * 3.9)",
+          left: "calc(50% - clamp(64px, 16vw, 158px) * 1.95)",
+          top: "calc(50% - 40px)",
+        }}
+      />
 
       {/* Descriptor — deliberately NOT nested with the h1 above (see its
           comment for why): an independent fixed element, manually

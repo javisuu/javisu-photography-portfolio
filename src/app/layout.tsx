@@ -4,6 +4,7 @@ import "./globals.css";
 import LandingComposition from "@/motion/LandingComposition";
 import GLDiagPanel from "@/components/GLDiagPanel";
 import BarraMovil from "@/components/movil/BarraMovil";
+import PanelMovil from "@/components/movil/PanelMovil";
 import AlbumTransitionLayer from "@/motion/albumTransition/AlbumTransitionLayer";
 import { getFeaturedPhotos } from "@/data/photos";
 
@@ -53,6 +54,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
         <AlbumTransitionLayer />
         {/* Spec 020: mobile bottom bar, `display: none` outside `movil:`. */}
         <BarraMovil />
+        {/* Spec 020: the panel SUQUIA opens on mobile; above the bar and
+            the transition layer (z-[60]). */}
+        <PanelMovil />
         {/* Spec 018: renders nothing unless the first load had ?diag. */}
         <GLDiagPanel />
       </body>
