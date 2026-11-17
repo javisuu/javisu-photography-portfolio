@@ -20,7 +20,11 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - Fichero(s): `src/app/globals.css`
   - Que: `@custom-variant movil` y `movil-h`.
   - Comprobacion: una clase de prueba en un elemento se aplica en `iphone`, `ipad` (vertical) e `iphone --horizontal`, y no en escritorio ni en `ipad --horizontal`; se quita la clase de prueba. Capturas de escritorio a 0 px.
-- [ ] **T2** · Barra general
+- [x] **T2** · Barra general
+  - Hecho (2026-11-17). Medidas del lienzo (`docs/referencias/movil/Nav-A.dc.html`, `Landing-horizontal.dc.html`): vertical 78 px con `0 9px 34px` y enlaces de 44 px con 7 px de padding; horizontal 57 px (fila de 36 + 21 de indicador) con `0 39px 21px` y 8 px por enlace, texto a 47 px del borde. En horizontal la fila visible es de 36 px pero cada enlace conserva 44 px de zona tactil (`items-center` lo desborda 4 px por lado), asi CA3 y CA11 se cumplen a la vez. `ALBUMS` activo tambien en `/album/[slug]`.
+  - Sonda `barra020.mjs` sobre `next start` (`2026-11-17_020-t2-barra.txt`): **1440 ok, 0 fallos** en chromium y webkit, seis rutas, perfiles iphone, iphone-max, ipad-mini, ipad (vertical) e iphone, iphone-max (horizontal): una barra visible, `fixed`, borde inferior = alto del viewport, 78/57 px, enlaces ≥ 44 px dentro del viewport y no tapados (`elementFromPoint`), sin EN/ES, colores activo/resto, y toque real desde `/album/america` a cada destino. En ipad horizontal y escritorio 1440 × 900, ninguna barra visible.
+  - Escritorio (`--skip-build` sobre esta build): capturas 0 px en las 3 rutas y `currentSrc` igual; consola 0. 528 de 546: los 18 fallos son de tiempo (duraciones de `transicion` en `next dev`, B10 con `—` en los 4 albumes = B11, 2 frames largos del atlas = B12) con la maquina cargada. La seccion `transicion` sobre `next start`: 197 de 200, igual que en el cierre de la 019 (fundidos reducidos de `america` y `norte` a 438 y 421 ms; CA5b, la medida) (`2026-11-17_020-t2-escritorio.txt`, `-t2-transicion-produccion.txt`).
+  - Visto en captura (`t2-iphone-*.png`): en el landing siguen la nav de arriba y el contador bajo la barra, y en horizontal la barra tapa el titulo del carrusel: es T3.
   - Fichero(s): `src/components/movil/BarraMovil.tsx`, `src/app/layout.tsx`
   - Que: barra de 78 px (36 + 21 en `movil-h`), `ABOUT ME`/`ALBUMS`/`ATLAS`, activo por ruta, `z-40`.
   - Comprobacion: seccion `navegacion` (primera version): CA3 sin la parte de «escritorio no visible», CA4, CA11. Escritorio: capturas a 0 px.
