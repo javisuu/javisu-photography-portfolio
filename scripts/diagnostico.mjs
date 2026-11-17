@@ -19,6 +19,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { parseDeviceArgs, contextFor, deviceLabel, CTX_ESCRITORIO, touchSwipe, touchPinch, applyCpu, frameRecorder, frameStats } from "./lib/dispositivo.mjs";
 import { parseCapturasArgs, guardarPng, guardarJson, leerJson, compararPng } from "./lib/capturas.mjs";
 import { seccionTransicion } from "./lib/transicion.mjs";
+import { seccionNavegacion } from "./lib/navegacion.mjs";
 import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG, CREATE_IMAGE_BITMAP_VACIO_SIEMPRE, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
 
 const PORT = 3100;
@@ -788,6 +789,14 @@ function arrivalSampler() {
   };
   requestAnimationFrame(tick);
 }
+// ---------- navegacion ----------
+// Spec 020: barra inferior, panel de SUQUIA y barra del album en movil
+// (scripts/lib/navegacion.mjs). En escritorio, o con un perfil que no es
+// movil (iPad en horizontal), comprueba que nada de eso aparece.
+if (!only) {
+  await seccionNavegacion({ browser, BASE, CTX, log, rule, addInv, rutas: routes, motor: DEV.motor, noMedible: (results.noMedible ??= []) });
+}
+
 if (!deviceMode && (!only || only.startsWith("/album/"))) {
   rule("llegada al album");
   const slugs = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
