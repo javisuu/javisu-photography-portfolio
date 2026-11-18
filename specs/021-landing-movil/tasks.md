@@ -37,9 +37,10 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - CA8 se mide dentro de un solo toque, pasado el umbral del dedo (~15 px en Chromium emulado, la misma diferencia en T0 con Lenis que en T3 sin el).
       - En un perfil movil, `/` ya no espera instancia GL en los fallos forzados ni en `?diag`: comprueba que no la hay y que se ven las mismas fotos. El album las sigue midiendo todas.
     - Fallos restantes: CA11-CA13 (T4 y T5); `ipad-mini` Close con reduced motion en 262 ms frente a 260 (tiempo de `next dev`); E1 del album en `iphone --horizontal`, ya en T0.
-- [ ] **T4** · Disparador del panel al final
+- [x] **T4** · Disparador del panel al final
   - Fichero(s): `src/motion/LandingComposition.tsx`
   - Comprobacion: CA9 y CA13.
+  - Resultado (2026-11-18, `next dev`; `2026-11-18_021-t4-*.txt`): CA9 y CA13 (salta al final, quieto abierto, Close al mismo `scrollY`, una vez por visita, otra vez al recargar) en `iphone`, `iphone --horizontal` e `ipad-mini`. Hasta el final: 15 fotos, `scrollY` 2112 de 2112 en `iphone`. Frames del recorrido: `iphone` 4 de mas de 50 ms (max 66,6), horizontal 0, `ipad-mini` 19 (max 183,3), sin CPU limitada; se miden en T6. Unico fallo fuera de CA11-CA12: E1 del album en horizontal, ya en T0.
 - [ ] **T5** · Wordmark y descriptor a su tamaño movil
   - Fichero(s): `src/motion/LandingComposition.tsx`, `src/app/globals.css`
   - Comprobacion: CA11, CA12 y CA15; blend y «wordmark dice SUQUIA» ok; escritorio a 0 px.

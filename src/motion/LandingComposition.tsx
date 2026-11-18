@@ -206,6 +206,10 @@ function itemHeightVh(item: LayoutItem, viewportW: number, viewportH: number): n
   return ((widthPx / ratio) / viewportH) * 100;
 }
 
+// Spec 021: whether the mobile landing already opened the panel at its end
+// in this visit (page load). Module-level on purpose: one per load.
+let panelFinalAbierto = false;
+
 // Hand-authored layout — reference viewport 1440x900. All 15 verified
 // non-overlapping at rest at that reference. Six photos are pinned
 // (depth: 0) because their margin to a neighbor is too thin to survive
@@ -849,7 +853,10 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
     const lenis = lenisRef.current;
     if (esMovil === true) {
       if (!activoMovil) return;
-      const onWindowScroll = () => focalFrom(window.scrollY);
+      const onWindowScroll = () => {
+        focalFrom(window.scrollY);
+        panelAlFinal(window.scrollY);
+      };
       onWindowScroll();
       window.addEventListener("scroll", onWindowScroll, { passive: true });
       return () => window.removeEventListener("scroll", onWindowScroll);
@@ -860,6 +867,24 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       const sequenceHeightPx = (SEQUENCE_HEIGHT_VH / 100) * window.innerHeight;
       const wrapped = ((instance.scroll % sequenceHeightPx) + sequenceHeightPx) % sequenceHeightPx;
       focalFrom(wrapped);
+    }
+
+    // Spec 021 (CA13): the second trigger of the mobile panel. When the
+    // last photo's centre crosses the viewport centre, the panel opens —
+    // once per visit (module flag: survives soft navigation, not a reload).
+    function panelAlFinal(scrollPx: number) {
+      if (panelFinalAbierto) return;
+      const modo = modoComposicion();
+      if (modo === "escritorio") return;
+      let ultimo = -Infinity;
+      for (const item of layout) {
+        const g = geometriaPx(item, modo, window.innerWidth, window.innerHeight);
+        ultimo = Math.max(ultimo, g.y + g.alto / 2);
+      }
+      if (scrollPx + window.innerHeight / 2 >= ultimo) {
+        panelFinalAbierto = true;
+        fijarPanel(true);
+      }
     }
 
     function focalFrom(scrollPx: number) {
