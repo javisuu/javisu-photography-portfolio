@@ -80,6 +80,35 @@ body {
   }
 }
 
+/* Landing on mobile (specs/021-landing-movil): one finite pass of the 15
+   photos, placed by src/motion/landingLayoutMovil.ts through per-photo custom
+   properties. Portrait in vw (a tablet is the same composition scaled to its
+   width); landscape phone with x across the free track between the 47 px
+   margins, y in vh and the width in px. The desktop `top`/`left`/height stay
+   inline on the same elements, hence `!important` here: it only exists inside
+   these two variants, so desktop computes exactly what it did. `movil-h`
+   comes after `movil` because the landscape phone matches both. */
+.landing-photo {
+  @variant movil {
+    top: calc(var(--my) * 1vw) !important;
+    left: calc(var(--mx) * 1vw) !important;
+    width: calc(var(--mw) * 1vw);
+  }
+  @variant movil-h {
+    top: calc(var(--hy) * 1vh) !important;
+    left: calc(47px + var(--hx) * (100vw - 94px - var(--hw) * 1px) / 100) !important;
+    width: calc(var(--hw) * 1px);
+  }
+}
+.landing-secuencia {
+  @variant movil {
+    height: var(--movil-alto) !important;
+  }
+  @variant movil-h {
+    height: var(--movil-alto-h) !important;
+  }
+}
+
 /* /albums info-block hover cue (src/motion/AlbumsCarousel.tsx): hovering
    the open slide nudges the title right and grows a rule under it — set
    via the --album-title-shift/--album-rule-width custom properties

@@ -18,6 +18,17 @@ import GLSurface from "./GLSurface";
 import DecipherWordmark from "./DecipherWordmark";
 import ScrambleText from "./ScrambleText";
 import { PANEL_ID, fijarPanel, panelAbierto, suscribirPanel } from "@/components/movil/panel";
+import {
+  COLOCACION_MOVIL_RESERVA,
+  LANDING_LAYOUT_MOVIL,
+  altosMovil,
+  geometriaMovilPx,
+  modoComposicion,
+  propiedadesMovil,
+  sizesMovil,
+  type ColocacionMovil,
+  type ModoComposicion,
+} from "./landingLayoutMovil";
 
 // Rendered once from the root layout (not per-route from app/page.tsx) so
 // it survives navigating away and back — see the `active` plumbing below.
@@ -235,6 +246,8 @@ const LANDING_LAYOUT: Record<string, Placement> = {
 type LayoutItem = {
   photo: Photo;
   placement: Placement;
+  /** Spec 021: the mobile composition (applied by CSS under movil:). */
+  movil: ColocacionMovil;
 };
 
 function buildLayout(photos: Photo[]): LayoutItem[] {
@@ -245,8 +258,24 @@ function buildLayout(photos: Photo[]): LayoutItem[] {
       w: 20,
       depth: 0.3,
     };
-    return { photo, placement };
+    const movil = (photo.id && LANDING_LAYOUT_MOVIL[photo.id]) || COLOCACION_MOVIL_RESERVA;
+    return { photo, placement, movil };
   });
+}
+
+// Spec 021: rest geometry in px (document coordinates, copy 0) of one photo
+// in the composition the CSS is showing (`modoComposicion()`). On desktop it
+// is exactly the old actualWidthVw/itemHeightVh arithmetic.
+function geometriaPx(
+  item: LayoutItem,
+  modo: ModoComposicion,
+  vw: number,
+  vh: number
+): { x: number; y: number; ancho: number; alto: number } {
+  const ratio = item.photo.width / item.photo.height;
+  if (modo !== "escritorio") return geometriaMovilPx(item.movil, ratio, modo, vw, vh);
+  const ancho = (actualWidthVw(item.placement.w, vw) / 100) * vw;
+  return { x: (item.placement.x / 100) * vw, y: (item.placement.y / 100) * vh, ancho, alto: ancho / ratio };
 }
 
 // An item participates in the gather-and-release entrance only if its
@@ -257,6 +286,13 @@ function buildLayout(photos: Photo[]): LayoutItem[] {
 // dimensions, same as the gather point itself.
 const ENTRANCE_PARTICIPATION_EXPAND_VH = 15;
 function participatesInEntrance(item: LayoutItem, viewportW: number, viewportH: number): boolean {
+  const modo = modoComposicion();
+  if (modo !== "escritorio") {
+    // Spec 021: the same rule, in px, from the mobile composition.
+    const g = geometriaPx(item, modo, viewportW, viewportH);
+    const expand = (ENTRANCE_PARTICIPATION_EXPAND_VH / 100) * viewportH;
+    return g.y + g.alto >= -expand && g.y <= viewportH + expand;
+  }
   const heightVh = itemHeightVh(item, viewportW, viewportH);
   const top = item.placement.y;
   const bottom = top + heightVh;
@@ -337,6 +373,10 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
   }, [active]);
 
   const layout = useMemo(() => buildLayout(photos), [photos]);
+  const altoMovil = useMemo(
+    () => altosMovil(layout.map((item) => ({ ratio: item.photo.width / item.photo.height, c: item.movil }))),
+    [layout]
+  );
   // Two nested refs per rendered (possibly duplicated) photo instance —
   // NOT one. `itemRefs` is the positioned (top/left/width) OUTER wrapper,
   // written ONLY by the ongoing scroll-parallax loop, from frame one,
@@ -801,14 +841,21 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       const sequenceHeightPx = (SEQUENCE_HEIGHT_VH / 100) * window.innerHeight;
       const wrapped = ((instance.scroll % sequenceHeightPx) + sequenceHeightPx) % sequenceHeightPx;
       const focalPageY = wrapped + window.innerHeight / 2;
+      const modo = modoComposicion();
 
       let bestIndex = 0;
       let bestDistance = Infinity;
       layout.forEach((item, i) => {
-        const heightVh = itemHeightVh(item, window.innerWidth, window.innerHeight);
-        const centerYPx =
-          (item.placement.y / 100) * window.innerHeight +
-          ((heightVh / 100) * window.innerHeight) / 2;
+        let centerYPx: number;
+        if (modo === "escritorio") {
+          const heightVh = itemHeightVh(item, window.innerWidth, window.innerHeight);
+          centerYPx =
+            (item.placement.y / 100) * window.innerHeight +
+            ((heightVh / 100) * window.innerHeight) / 2;
+        } else {
+          const g = geometriaPx(item, modo, window.innerWidth, window.innerHeight);
+          centerYPx = g.y + g.alto / 2;
+        }
         const distance = Math.abs(centerYPx - focalPageY);
         if (distance < bestDistance) {
           bestDistance = distance;
@@ -838,11 +885,14 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           layout.tsx; z-10 keeps this layer explicitly below the chrome's
           z-20/z-30. */}
       <div
-        className="relative z-10 w-screen"
+        className="landing-secuencia relative z-10 w-screen"
         style={{
           height: `calc(${SEQUENCE_HEIGHT_VH}vh + 100vh)`,
           overflowX: "clip",
           overflowY: "clip",
+          // Spec 021: finite height on mobile, applied by globals.css.
+          ["--movil-alto" as string]: altoMovil.vertical,
+          ["--movil-alto-h" as string]: altoMovil.horizontal,
         }}
       >
         {Array.from({ length: COPIES }).map((_, copy) =>
@@ -853,11 +903,14 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
               ref={(el) => {
                 itemRefs.current[copy * layout.length + i] = el;
               }}
-              className="absolute landing-photo"
+              // Spec 021: the infinite-scroll copy doesn't exist on mobile
+              // (finite landing, Javi's answer 4).
+              className={copy === 0 ? "absolute landing-photo" : "absolute landing-photo movil:hidden"}
               style={{
                 top: `${item.placement.y + copy * SEQUENCE_HEIGHT_VH}vh`,
                 left: `${item.placement.x}%`,
                 ["--landing-photo-w" as string]: `${item.placement.w}vw`,
+                ...propiedadesMovil(item.movil),
               }}
             >
               {/* Entrance-owned wrapper, nested inside the parallax-owned
@@ -902,7 +955,9 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
                   // min(w * 2.4, 85)vw, so ask for that width there — asking
                   // for w vw fetched an image ~2.4x too narrow on phones.
                   // At 900px and up the value is exactly the old one.
-                  sizes={`(max-width: 899px) ${+Math.min(item.placement.w * 2.4, 85).toFixed(2)}vw, ${item.placement.w}vw`}
+                  // Spec 021: the two mobile compositions go first; with a
+                  // fine pointer neither matches, so desktop is unchanged.
+                  sizes={`${sizesMovil(item.movil)}, (max-width: 899px) ${+Math.min(item.placement.w * 2.4, 85).toFixed(2)}vw, ${item.placement.w}vw`}
                   // Every copy-0 photo needs to actually be fetching from
                   // the start for its own decode (see whenImageReady) to
                   // ever resolve — next/image lazy-loads everything but

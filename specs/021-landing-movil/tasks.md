@@ -20,6 +20,12 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
 - [ ] **T2** · Composicion movil: las 15 fotos en vertical y en horizontal, sin la copia, con alto finito, `sizes` y `geometriaPx`
   - Fichero(s): `src/motion/landingLayoutMovil.ts`, `src/motion/LandingComposition.tsx`, `src/app/globals.css`
   - Comprobacion: CA3, CA4, CA5 y CA6 en los cinco perfiles; escritorio a 0 px y `currentSrc` igual. **Parada:** capturas de `iphone` (0, 1, 2 y 3 alturas), `iphone --horizontal` e `ipad-mini` para el visto bueno de Javi (respuesta 3).
+  - Resultado (2026-11-18, `next dev`; salidas `2026-11-18_021-t2-*.txt`):
+    - **Escritorio:** capturas de landing, album y atlas iguales a T0 y `currentSrc` del landing 0 distintos de 30. 541 de 557, los mismos fallos de tiempo que T0.
+    - **CA3, CA4 y «fotos enteras» (CA6)** en los cinco perfiles; **CA5** en `iphone --horizontal`. En T0, «fotos enteras» daba 12 de 30 fuera en vertical y 28 de 30 en horizontal.
+    - Otros fallos: E2 en `iphone-max` y en `ipad` (una decodificacion de GL que pasa de 1,5 s; GL sale del movil en T3). En `ipad`, 6 rutas con `page.goto` sin cargar en 30 s: el equipo iba corto de memoria (la primera corrida la paro Claude Code por eso); que sea solo el entorno: SIN VERIFICAR. En `iphone --horizontal`, el Close intermitente de `navegacion` y E1, los dos ya en T0 o en la spec 020.
+    - Capturas sin WebGL (como queda el movil tras T3) en el scratchpad, `021-t2-capturas/`. Horizontal: una primera version con unas 7 fotos por pantalla se espacio a 3-4, como el lienzo; la foto 15 se redujo a 165 px para que quepa entera encima de la barra al final.
+    - **Pendiente: visto bueno de Javi a las capturas.**
 - [ ] **T3** · Sin `GLSurface` ni Lenis en movil; contador por `window.scroll`; `depth` movil
   - Fichero(s): `src/motion/LandingComposition.tsx`
   - Comprobacion: CA7, CA8 y CA10; la entrada sigue funcionando (sin `.landing-photo` a `opacity: 0` en reposo); escritorio a 0 px y la entrada de escritorio frente a T0.
