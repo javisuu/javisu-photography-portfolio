@@ -57,15 +57,21 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - Otros fallos fuera de la seccion, frente a T0: iphone horizontal, «wordmark dice SUQUIA» leyo `""` una vez (la lectura cae durante el descifrado: el texto vivo es `aria-hidden` y la invariante lo quita); repetido con `--medir /`, 1 de 2 pasa. Intermitente, sin tocar el wordmark. El resto son los de la linea base (ipad «deslizar cambia de album»; iphone horizontal «fotos enteras» y E1; webkit sin linea base propia en T0).
   - Fichero(s): `scripts/lib/navegacion.mjs`, `scripts/diagnostico.mjs`
   - Comprobacion: pasa en los cinco perfiles; un fallo forzado (barra a 60 px de alto, o el contador del landing sin subir) la hace fallar.
-- [ ] **T7** · Ojo de Javi (CA12)
+- [x] **T7** · Ojo de Javi (CA12)
   - Que: Javi en `npm run dev` desde el movil por la red local o en la preview de Vercel, en el iPhone 13 (vertical y horizontal) y el iPad mini en vertical.
   - Comprobacion: visto bueno anotado aqui con fecha.
+  - Hecho (2026-11-18), sobre la preview de `8680796`. Javi: «el unico cambio que veo a primeras es la etiqueta de vuelta no?» y, tras la lista de lo que cubre T7, «seguimos». Se toma como visto bueno; no detallo que dispositivos y orientaciones miro: SIN VERIFICAR.
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` sin fallos nuevos frente a T0 (CA1), salida guardada
-- [ ] Capturas de escritorio a 0 px (CA2)
-- [ ] Seccion `navegacion` en los cinco perfiles (CA3-CA11, CA13)
-- [ ] `CLAUDE.md` (build order §2: la navegacion movil; arquitectura: la variante `movil:`) y `docs/design-spec-v2.md` (navegacion en movil) actualizados
+- [x] `node scripts/diagnostico.mjs` sin fallos nuevos frente a T0 (CA1), salida guardada
+  - 2026-11-18 sobre `8680796` (con `CLAUDE.md`, `docs/design-spec-v2.md` y `tasks.md` sin commit, nada de `src/`): tsc ok · lint ok · build ok · consola 0 errores en 6 rutas · **540 de 557**, igual que en T6. Los 17: 11 duraciones de `transicion`, 2 de CA5b (`america`, «es la medida, no el sitio») y 4 de B11 (B10 con `—`). Sin B12 esta vez. Scratchpad: `2026-11-18_020-cierre-escritorio.txt`.
+- [x] Capturas de escritorio a 0 px (CA2)
+  - Misma pasada, `--capturas-comparar` contra `020-capturas-base` de T0: landing, `/album/america` y `/atlas` a 0 px con cualquier diferencia; `currentSrc` del landing 0 distintos de 30.
+- [x] Seccion `navegacion` en los cinco perfiles (CA3-CA11, CA13)
+  - Sin fallos en los cinco, sobre `next dev`: iphone (`2026-11-17_020-b15-iphone-2.txt`, 152 de 152), iphone horizontal (`2026-11-17_020-b15-iphone-h.txt`, 155 de 158, los tres de la linea base), iphone-max (`2026-11-18_020-cierre-iphone-max.txt`, 152 de 152), ipad-mini (`-ipad-mini.txt`, 151 de 152) e ipad (`-ipad.txt`, 149 de 153). «CA4 vuelta a /» pasa en todos (B15). Fuera de la seccion: ipad «deslizar cambia de album» (M8, linea base) y E1 sin muestra de pintado; y en ipad-mini e ipad, E2 «rescatado sin caer al DOM» cae por la decodificacion de la foto rescatada pasado el tope de 1,5 s. No salio en T6 y la spec no toca `GLSurface`; que sea solo la lentitud de `next dev`: SIN VERIFICAR.
+- [x] `CLAUDE.md` (build order §2: la navegacion movil; arquitectura: la variante `movil:`) y `docs/design-spec-v2.md` (navegacion en movil) actualizados
+  - `CLAUDE.md`: regla de la variante `movil:` en "Architecture rules" y la navegacion movil en el build order §2. `docs/design-spec-v2.md`: §6 nueva y entrada del changelog.
 - [ ] `docs/ESTADO.md`: spec 020 y lo que pasa a `landing-movil` (el segundo disparador del panel)
-- [ ] Estado de `spec.md` → Implementada
+  - Lo hace `/cerrar-sesion`.
+- [x] Estado de `spec.md` → Implementada

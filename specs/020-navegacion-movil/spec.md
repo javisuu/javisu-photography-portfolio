@@ -1,6 +1,6 @@
 # Spec 020 · Navegacion movil
 
-- **Estado:** Aprobada (Javi, 2026-11-16)
+- **Estado:** Implementada (2026-11-18). Aprobada por Javi el 2026-11-16
 - **Fecha:** 2026-11-16
 - **Requiere decision de Javi:** Si (motivo: **wordmark**, porque tocar SUQUIA abre el panel. Decidido por Javi en la respuesta 3: zona tactil hermana del `<h1>`, sin tocar el `<h1>`. El scroll infinito ya no se toca aqui: el disparador por scroll pasa a `landing-movil`, respuesta 6)
 
