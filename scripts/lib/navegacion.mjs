@@ -1,3 +1,5 @@
+import { readFileSync } from "node:fs";
+
 // Seccion `navegacion` del diagnostico (spec 020): la barra inferior, el
 // panel de SUQUIA y la barra del album en movil, y que nada de eso exista
 // fuera de movil. Corre con el contexto de la ejecucion (CTX): en escritorio
@@ -14,8 +16,23 @@
 // WebKit (como iOS) reasigna un clic hasta ~15 px al boton mas cercano: los
 // toques de CA6 van a >= 30 px de la banda de SUQUIA (tasks.md, T4).
 
-export const MOVIL = "(pointer: coarse) and (orientation: portrait) and (max-width: 1024px), (pointer: coarse) and (orientation: landscape) and (max-height: 500px)";
-export const MOVIL_H = "(pointer: coarse) and (orientation: landscape) and (max-height: 500px)";
+// Las dos media queries viven en un solo sitio, src/lib/movil.ts (spec 021,
+// T1). Se leen de alli como texto, y si globals.css no las contiene tal cual,
+// el diagnostico se para: las variantes CSS y el camino JS irian por separado.
+function leerQuery(nombre) {
+  const ts = readFileSync(new URL("../../src/lib/movil.ts", import.meta.url), "utf8");
+  const m = ts.match(new RegExp(`export const ${nombre} =\\s*"([^"]+)";`));
+  if (!m) throw new Error(`navegacion.mjs: ${nombre} no esta en src/lib/movil.ts`);
+  return m[1];
+}
+export const MOVIL = leerQuery("MOVIL_QUERY");
+export const MOVIL_H = leerQuery("MOVIL_H_QUERY");
+{
+  const css = readFileSync(new URL("../../src/app/globals.css", import.meta.url), "utf8");
+  for (const q of [MOVIL, MOVIL_H]) {
+    if (!css.includes(`@media ${q} {`)) throw new Error(`navegacion.mjs: globals.css no tiene @media ${q}`);
+  }
+}
 
 const ALTO_BARRA = 78, ALTO_BARRA_H = 57, MARGEN_H = 47;
 const DESTINOS = { "/about": "ABOUT ME", "/albums": "ALBUMS", "/atlas": "ATLAS" };
