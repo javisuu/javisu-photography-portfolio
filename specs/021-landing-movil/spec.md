@@ -1,6 +1,6 @@
 # Spec 021 · Landing movil
 
-- **Estado:** Borrador
+- **Estado:** Aprobada (Javi, 2026-11-18)
 - **Fecha:** 2026-11-18
 - **Requiere decision de Javi:** Si, y Javi la dio el 2026-11-18 (respuesta 7, «vale»; ver "Respuestas de Javi"). Toca las cuatro zonas protegidas:
   - **Scroll infinito:** en movil el landing pasa a ser finito, con scroll nativo y sin Lenis (respuesta 4). Hoy Lenis lo crea con `infinite: true` (`src/motion/LandingComposition.tsx:327`), pero sin `syncTouch`, que vale `false` por defecto (`node_modules/lenis/dist/lenis.mjs:434`). Segun la documentacion de Lenis 1.3.26, `infinite` necesita `syncTouch: true` en tactil (`node_modules/lenis/README.md:199`). Por eso en el telefono el landing ya tiene un final, que es lo que Javi ve: «el scroll en movil tiene un limite hasta abajo». Que hoy no haga la vuelta en el iPhone: SIN VERIFICAR con medida (T0).
