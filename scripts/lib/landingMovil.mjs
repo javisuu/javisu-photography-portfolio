@@ -39,6 +39,29 @@ async function arrastre(cdp, x, y0, y1, pasos = 14) {
   await wait(120);
 }
 
+// CA8 dentro de un solo toque: el navegador no empieza a desplazar hasta que
+// el dedo pasa su umbral de arrastre (~15 px en Chromium emulado; T0 y T3
+// dieron 14,6-15,8 px de diferencia con y sin Lenis). El dedo baja primero
+// 30 px, se mide scrollY, y solo entonces se arrastran los N px que cuentan.
+const UMBRAL_DEDO = 30;
+async function arrastreMedido(cdp, p, x, y0, dy, pasos = 14) {
+  const pt = (y) => [{ x: Math.round(x), y: Math.round(y), id: 1 }];
+  const mover = async (y) => { await wait(16); await cdp.send("Input.dispatchTouchEvent", { type: "touchMove", touchPoints: pt(y) }); };
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchStart", touchPoints: pt(y0) });
+  for (let i = 1; i <= 4; i++) await mover(y0 - (UMBRAL_DEDO * i) / 4);
+  for (let i = 0; i < 4; i++) await mover(y0 - UMBRAL_DEDO);
+  await wait(60);
+  const antes = await p.evaluate(() => window.scrollY);
+  const yA = y0 - UMBRAL_DEDO;
+  for (let i = 1; i <= pasos; i++) await mover(yA - (dy * i) / pasos);
+  for (let i = 0; i < 10; i++) await mover(yA - dy);
+  await wait(60);
+  const despues = await p.evaluate(() => window.scrollY);
+  await cdp.send("Input.dispatchTouchEvent", { type: "touchEnd", touchPoints: [] });
+  await wait(120);
+  return despues - antes;
+}
+
 // En la pagina: las fotos del landing, el wordmark, el descriptor, el panel.
 function medirLanding() {
   const main = [...document.querySelectorAll("main")].find((m) => getComputedStyle(m).display !== "none");
@@ -150,10 +173,9 @@ export async function seccionLandingMovil({ browser, BASE, CTX, log, rule, addIn
     await p.evaluate(frameRecorder);
 
     // CA8: un arrastre sin inercia mueve scrollY lo mismo que el dedo.
-    const antes = m.y;
-    await arrastre(cdp, x, y0, y1);
+    const movido = await arrastreMedido(cdp, p, x, y0, dy);
     m = await p.evaluate(medirLanding);
-    addInv("/", "landing-movil · CA8 arrastre de N px mueve scrollY N ± 2 px", Math.abs(m.y - antes - dy) <= 2, `dedo ${r1(dy)}, scroll ${r1(m.y - antes)}`);
+    addInv("/", "landing-movil · CA8 arrastre de N px mueve scrollY N ± 2 px (pasado el umbral del dedo)", Math.abs(movido - dy) <= 2, `dedo ${r1(dy)}, scroll ${r1(movido)}`);
     revisar(m);
 
     // Hacia abajo hasta el final: geometria en cada paso, panel, monotonia.

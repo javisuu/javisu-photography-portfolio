@@ -19,7 +19,7 @@ import { readFileSync, existsSync } from "node:fs";
 import { parseDeviceArgs, contextFor, deviceLabel, CTX_ESCRITORIO, touchSwipe, touchPinch, applyCpu, frameRecorder, frameStats } from "./lib/dispositivo.mjs";
 import { parseCapturasArgs, guardarPng, guardarJson, leerJson, compararPng } from "./lib/capturas.mjs";
 import { seccionTransicion } from "./lib/transicion.mjs";
-import { seccionNavegacion } from "./lib/navegacion.mjs";
+import { seccionNavegacion, MOVIL } from "./lib/navegacion.mjs";
 import { seccionLandingMovil } from "./lib/landingMovil.mjs";
 import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG, CREATE_IMAGE_BITMAP_VACIO_SIEMPRE, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
 
@@ -1968,6 +1968,18 @@ if (!deviceMode && (!only || only === "/atlas")) {
 if (!only) {
   const album = routes.find((r) => r.startsWith("/album/"));
   const decoder = await browser.newPage();
+  // Spec 021: en un perfil movil el landing no monta GLSurface. En / solo
+  // cuenta que se vean las mismas fotos y que no haya instancia GL; las
+  // comprobaciones de la instancia (rescate, caida, ?diag) siguen en el album.
+  const landingSinGL = await (async () => {
+    const ctx = await browser.newContext({ ...CTX });
+    const p = await ctx.newPage();
+    const r = await p.evaluate((q) => matchMedia(q).matches, MOVIL).catch(() => false);
+    await ctx.close();
+    return r;
+  })();
+  const sinGL = (route) => route === "/" && landingSinGL;
+  if (landingSinGL) log("  perfil movil: el landing va sin GL (spec 021); en / se mide solo lo que se ve");
   // Errores de consola de un contexto, sin los [GLSurface] que el fallo
   // forzado provoca a proposito.
   function consola(p) {
@@ -2036,7 +2048,8 @@ if (!only) {
       const peor = forz.map((st, j) => normal[route][j].seen - st.seen);
       addInv(route, `E2 bitmap vacio ${modo}: se ven las mismas fotos`, normal[route].some((s) => s.seen > 0) && peor.every((d) => d <= 0),
         `se ven ${forz.map((s) => s.seen).join("/")} frente a ${normal[route].map((s) => s.seen).join("/")} sin fallo`);
-      addInv(route, rescate ? `E2 bitmap vacio ${modo}: rescatado sin caer al DOM` : `E2 bitmap vacio ${modo}: cae al DOM`,
+      if (sinGL(route)) addInv(route, `E2 bitmap vacio ${modo}: landing movil sin instancia GL`, !inst, "hay instancia landing");
+      else addInv(route, rescate ? `E2 bitmap vacio ${modo}: rescatado sin caer al DOM` : `E2 bitmap vacio ${modo}: cae al DOM`,
         rescate ? !!inst && inst.rescatados > 0 && !inst.fallo : !!inst?.fallo,
         inst ? `rescatados ${inst.rescatados} · caida ${inst.fallo ?? "no"}` : "sin __glDiag");
       const ajenos = errs.filter((e) => !e.includes("[GLSurface]"));
@@ -2056,7 +2069,7 @@ if (!only) {
     const perd = await vistasPorAltura(p, scope, alturas);
     perd.forEach((st, j) => log(`  ${route} · ${n} contextos perdidos · ${alturas[j]} alturas · sin fallo se ven ${normal[route][j].seen} · tras perderlo: ${lineaVistas(st)}`));
     const peor = perd.map((st, j) => normal[route][j].seen - st.seen);
-    addInv(route, "CA4 con el contexto perdido se ven las mismas fotos", n > 0 && normal[route].some((s) => s.seen > 0) && peor.every((d) => d <= 0),
+    addInv(route, "CA4 con el contexto perdido se ven las mismas fotos", (n > 0 || sinGL(route)) && normal[route].some((s) => s.seen > 0) && peor.every((d) => d <= 0),
       `${n} contextos perdidos · se ven ${perd.map((s) => s.seen).join("/")} frente a ${normal[route].map((s) => s.seen).join("/")} sin fallo`);
     // Desde el album, vuelta a / en navegacion blanda: el landing persistente
     // tambien perdio su contexto y tiene que verse en DOM.
@@ -2113,6 +2126,10 @@ if (!only) {
     log(`  ${route}?diag · panel ${d.vis ? "visible" : "no visible"}${d.evalError ? ` · ${d.evalError}` : ""}`);
     if (d.text) d.text.split("\n").forEach((l) => log(`    ${l}`));
     const campos = ["contexto", "perdido", "texturas", "fallos", "error"].filter((c) => !d.text.toLowerCase().includes(c));
+    if (sinGL(route)) {
+      addInv(route, "CA5 ?diag en el landing movil: sin instancia GL", !d.reg?.landing, "hay instancia landing");
+      continue;
+    }
     addInv(route, "CA5 panel ?diag visible con sus campos", d.vis && campos.length === 0, d.vis ? `faltan: ${campos.join(", ")}` : "no hay [data-gl-diag] visible");
     // Enmienda 1: las muestras de ?diag. En emulacion todo pinta, asi que
     // aqui tienen que salir limpias; en el iPhone de Javi dicen la causa.

@@ -17,7 +17,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - Fichero(s): `src/lib/movil.ts`, `scripts/lib/navegacion.mjs`
   - Comprobacion: tsc y lint limpios; seccion `navegacion` sin fallos en `iphone`; escritorio a 0 px.
   - Resultado (2026-11-18): las dos cadenas viven en `src/lib/movil.ts`; `navegacion.mjs` las lee de alli como texto y para el diagnostico si `globals.css` no tiene esas mismas `@media`. tsc y lint limpios. Escritorio: capturas de landing, album y atlas iguales a T0 (`2026-11-18_021-t1-escritorio.txt`). `iphone`: la primera corrida dio 2 fallos en el Close con reduced motion de `navegacion` (el intermitente ya visto en la spec 020); la segunda, `navegacion` sin fallos, 159 de 171 (`2026-11-18_021-t1-iphone-2.txt`).
-- [ ] **T2** · Composicion movil: las 15 fotos en vertical y en horizontal, sin la copia, con alto finito, `sizes` y `geometriaPx`
+- [x] **T2** · Composicion movil: las 15 fotos en vertical y en horizontal, sin la copia, con alto finito, `sizes` y `geometriaPx`
   - Fichero(s): `src/motion/landingLayoutMovil.ts`, `src/motion/LandingComposition.tsx`, `src/app/globals.css`
   - Comprobacion: CA3, CA4, CA5 y CA6 en los cinco perfiles; escritorio a 0 px y `currentSrc` igual. **Parada:** capturas de `iphone` (0, 1, 2 y 3 alturas), `iphone --horizontal` e `ipad-mini` para el visto bueno de Javi (respuesta 3).
   - Resultado (2026-11-18, `next dev`; salidas `2026-11-18_021-t2-*.txt`):
@@ -25,10 +25,18 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **CA3, CA4 y «fotos enteras» (CA6)** en los cinco perfiles; **CA5** en `iphone --horizontal`. En T0, «fotos enteras» daba 12 de 30 fuera en vertical y 28 de 30 en horizontal.
     - Otros fallos: E2 en `iphone-max` y en `ipad` (una decodificacion de GL que pasa de 1,5 s; GL sale del movil en T3). En `ipad`, 6 rutas con `page.goto` sin cargar en 30 s: el equipo iba corto de memoria (la primera corrida la paro Claude Code por eso); que sea solo el entorno: SIN VERIFICAR. En `iphone --horizontal`, el Close intermitente de `navegacion` y E1, los dos ya en T0 o en la spec 020.
     - Capturas sin WebGL (como queda el movil tras T3) en el scratchpad, `021-t2-capturas/`. Horizontal: una primera version con unas 7 fotos por pantalla se espacio a 3-4, como el lienzo; la foto 15 se redujo a 165 px para que quepa entera encima de la barra al final.
-    - **Pendiente: visto bueno de Javi a las capturas.**
-- [ ] **T3** · Sin `GLSurface` ni Lenis en movil; contador por `window.scroll`; `depth` movil
+    - **Visto bueno de Javi (2026-11-18):** «yes».
+- [x] **T3** · Sin `GLSurface` ni Lenis en movil; contador por `window.scroll`; `depth` movil
   - Fichero(s): `src/motion/LandingComposition.tsx`
   - Comprobacion: CA7, CA8 y CA10; la entrada sigue funcionando (sin `.landing-photo` a `opacity: 0` en reposo); escritorio a 0 px y la entrada de escritorio frente a T0.
+  - Resultado (2026-11-18, `next dev`; salidas `2026-11-18_021-t3-*.txt` y `2026-11-18_021-t3b-*.txt`):
+    - **Escritorio:** capturas y `currentSrc` iguales a T0; entrada con `[entrance] start x1`, arranque 500 ms. 542 de 557.
+    - **CA7, CA8 y CA10** en `iphone`, `ipad-mini` (tambien CA7 tras girar) e `iphone --horizontal`; ninguna `.landing-photo` invisible en reposo.
+    - **Desvio del plan: `src/components/movil/PanelMovil.tsx`.** Sin Lenis, un arrastre sobre el panel abierto dejaba abierto el gesto tactil de Chromium y el toque siguiente en Close salia sin `click` (medido: `pointerup` y `touchend`, sin `click`; un segundo toque si cerraba; esperar 2,5 s no cambiaba nada). Con un `touchmove` no pasivo que cancela, en el panel, cierra al primer toque; un oyente vacio en `window` no lo arreglaba. Si pasa tambien en Safari real: SIN VERIFICAR (T7).
+    - **Diagnostico:**
+      - CA8 se mide dentro de un solo toque, pasado el umbral del dedo (~15 px en Chromium emulado, la misma diferencia en T0 con Lenis que en T3 sin el).
+      - En un perfil movil, `/` ya no espera instancia GL en los fallos forzados ni en `?diag`: comprueba que no la hay y que se ven las mismas fotos. El album las sigue midiendo todas.
+    - Fallos restantes: CA11-CA13 (T4 y T5); `ipad-mini` Close con reduced motion en 262 ms frente a 260 (tiempo de `next dev`); E1 del album en `iphone --horizontal`, ya en T0.
 - [ ] **T4** · Disparador del panel al final
   - Fichero(s): `src/motion/LandingComposition.tsx`
   - Comprobacion: CA9 y CA13.

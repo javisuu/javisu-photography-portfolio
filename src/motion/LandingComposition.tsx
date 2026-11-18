@@ -29,6 +29,7 @@ import {
   type ColocacionMovil,
   type ModoComposicion,
 } from "./landingLayoutMovil";
+import { useEsMovil } from "@/lib/movil";
 
 // Rendered once from the root layout (not per-route from app/page.tsx) so
 // it survives navigating away and back — see the `active` plumbing below.
@@ -360,7 +361,12 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
   // than release it back to native scroll or that page's own Lenis
   // instance (album pages have one). So the instance itself is
   // constructed/destroyed in step with `active` — see useLenis.
-  const lenisRef = useLenis({ infinite: true }, active);
+  //
+  // Spec 021: on mobile (decided once at load, src/lib/movil.ts) there is no
+  // Lenis at all — native, finite scroll (Javi's answer 4). `esMovil` is
+  // null during hydration, so on desktop Lenis starts one render later.
+  const esMovil = useEsMovil();
+  const lenisRef = useLenis({ infinite: true }, active && esMovil === false);
 
   // Reset to the top of the composition before Lenis (re)initializes on
   // activation, so a fresh arrival always starts from the same, correct
@@ -740,9 +746,12 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
       // Parallax — outer wrapper, every frame, unconditionally. Pinned
       // (depth: 0) items are the one exception: never touched, at all,
       // by this loop — same rule as always.
+      // Spec 021: the mobile composition has its own depths.
+      const enMovil = modoComposicion() !== "escritorio";
       itemRefs.current.forEach((el, flatIndex) => {
         if (!el) return;
-        const depth = layout[flatIndex % layout.length].placement.depth;
+        const item = layout[flatIndex % layout.length];
+        const depth = enMovil ? item.movil.depth : item.placement.depth;
         if (depth === 0) return;
         const rect = el.getBoundingClientRect();
         const elementCenter = rect.top + rect.height / 2;
@@ -833,14 +842,28 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
 
   // Counter: which photo is closest to viewport-center right now, within
   // one SEQUENCE_HEIGHT_VH cycle (so it cycles 01..14..01.. with the loop).
+  // Spec 021: on mobile there is no Lenis; the same search runs from the
+  // native scroll, with no wrap (the mobile landing is finite).
+  const activoMovil = esMovil === true && active;
   useEffect(() => {
     const lenis = lenisRef.current;
+    if (esMovil === true) {
+      if (!activoMovil) return;
+      const onWindowScroll = () => focalFrom(window.scrollY);
+      onWindowScroll();
+      window.addEventListener("scroll", onWindowScroll, { passive: true });
+      return () => window.removeEventListener("scroll", onWindowScroll);
+    }
     if (!lenis) return;
 
     function onScroll(instance: Lenis) {
       const sequenceHeightPx = (SEQUENCE_HEIGHT_VH / 100) * window.innerHeight;
       const wrapped = ((instance.scroll % sequenceHeightPx) + sequenceHeightPx) % sequenceHeightPx;
-      const focalPageY = wrapped + window.innerHeight / 2;
+      focalFrom(wrapped);
+    }
+
+    function focalFrom(scrollPx: number) {
+      const focalPageY = scrollPx + window.innerHeight / 2;
       const modo = modoComposicion();
 
       let bestIndex = 0;
@@ -867,7 +890,10 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
 
     lenis.on("scroll", onScroll);
     return () => lenis.off("scroll", onScroll);
-  }, [lenisRef, layout]);
+    // `esMovil` changes once (null -> its value after hydration); on desktop
+    // that is when Lenis exists for the first time. `activoMovil` is always
+    // false on desktop, so desktop re-subscribes exactly when it did before.
+  }, [lenisRef, layout, esMovil, activoMovil]);
 
   return (
     <main style={{ display: active ? undefined : "none" }}>
@@ -995,6 +1021,10 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           layer it replaces visually. `active` pauses its paint loop
           (without tearing down the renderer/textures) whenever we're not
           on "/" — see GLSurface's own comment for why that matters. */}
+      {/* Spec 021: not mounted on mobile (decided at load): no GL context,
+          no texture decode, glStatus stays null and the <img>s stay
+          visible — the existing no-WebGL path. */}
+      {esMovil === false && (
       <GLSurface
         nodes={imgRefs}
         lenisRef={lenisRef}
@@ -1006,6 +1036,7 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         diagName="landing"
         className="pointer-events-none fixed inset-0 z-10"
       />
+      )}
 
       {/* Fixed chrome — never moves, and z-20/z-30 keep it above the
           photo layer (z-10) regardless of where any photo lands.

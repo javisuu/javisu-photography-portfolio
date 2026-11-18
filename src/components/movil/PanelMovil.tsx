@@ -34,6 +34,21 @@ const ENLACES = [
 export default function PanelMovil() {
   const abierto = useSyncExternalStore(suscribirPanel, panelAbierto, () => false);
   const primerEnlace = useRef<HTMLAnchorElement>(null);
+  const capa = useRef<HTMLDivElement>(null);
+
+  // Spec 021 (T3): with no Lenis on the mobile landing, a drag on the open
+  // panel left Chromium's touch gesture open, and the next tap (on Close)
+  // came out without a click (measured in emulation: pointerup and
+  // touchend, no click; a second tap did close). Cancelling touchmove here
+  // ends that gesture. Non-passive, so it can't be a JSX prop. The panel
+  // never scrolls (touch-none), so nothing is lost.
+  useEffect(() => {
+    const el = capa.current;
+    if (!el) return;
+    const sinGesto = (e: TouchEvent) => e.preventDefault();
+    el.addEventListener("touchmove", sinGesto, { passive: false });
+    return () => el.removeEventListener("touchmove", sinGesto);
+  }, []);
 
   // Focus moves into the panel on open and back to the trigger on close;
   // Escape closes it (a keyboard on a tablet).
@@ -49,6 +64,7 @@ export default function PanelMovil() {
 
   return (
     <div
+      ref={capa}
       id={PANEL_ID}
       role="dialog"
       aria-modal="true"
