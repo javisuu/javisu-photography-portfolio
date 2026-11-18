@@ -100,6 +100,46 @@ body {
     width: calc(var(--hw) * 1px);
   }
 }
+/* Wordmark and its spec 020 tap zone share one size. Desktop: the same
+   clamp the <h1> carried inline until spec 021. Mobile (canvas, Landing-A
+   and Landing-horizontal): 78 px; 96 px in landscape, where the name sits
+   29 px above centre (its centre at y = 166 of 390) through padding on the
+   <h1> itself — no transform, so the blend chain is untouched. The
+   descriptor follows: 109 px below centre on desktop, 52 px on mobile,
+   29 px in landscape. */
+.landing-wordmark,
+.landing-wordmark-zona,
+.landing-descriptor {
+  --wordmark-tam: clamp(64px, 16vw, 158px);
+  --wordmark-sube: 0px;
+  @variant movil {
+    --wordmark-tam: 78px;
+  }
+  @variant movil-h {
+    --wordmark-tam: 96px;
+    --wordmark-sube: 29px;
+  }
+}
+.landing-wordmark {
+  font-size: var(--wordmark-tam);
+  @variant movil-h {
+    padding-bottom: calc(var(--wordmark-sube) * 2);
+  }
+}
+.landing-wordmark-zona {
+  width: calc(var(--wordmark-tam) * 3.9);
+  left: calc(50% - var(--wordmark-tam) * 1.95);
+  top: calc(50% - 40px - var(--wordmark-sube));
+}
+.landing-descriptor {
+  top: calc(50% + 109px);
+  @variant movil {
+    top: calc(50% + 52px);
+  }
+  @variant movil-h {
+    top: calc(50% + 29px);
+  }
+}
 .landing-secuencia {
   @variant movil {
     height: var(--movil-alto) !important;

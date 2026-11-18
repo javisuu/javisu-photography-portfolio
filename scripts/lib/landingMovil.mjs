@@ -79,10 +79,25 @@ function medirLanding() {
   const h1 = [...document.querySelectorAll("h1")].find((h) => getComputedStyle(h).mixBlendMode === "difference");
   let texto = null;
   if (h1) {
-    const rg = document.createRange();
-    rg.selectNodeContents(h1);
-    const b = rg.getBoundingClientRect();
-    texto = { l: b.left, t: b.top, r: b.right, b: b.bottom, w: b.width, h: b.height };
+    // La tinta del nombre, no la caja del texto: un Range sobre el <h1> mete
+    // el pie "JAVIER SUAREZ SUQUIA" (absoluto, mas ancho) y el area de
+    // contenido de la fuente (125 px para 78 px). Ancho: la caja inline-block
+    // de las letras (la raiz de DecipherWordmark). Alto: measureText de las
+    // letras desde su linea base, que da un span de 0x0 metido un instante.
+    const raiz = h1.firstElementChild ?? h1;
+    const rr = raiz.getBoundingClientRect();
+    const cs = getComputedStyle(h1);
+    const base = document.createElement("span");
+    base.style.cssText = "display:inline-block;width:0;height:0;vertical-align:baseline";
+    raiz.appendChild(base);
+    const yBase = base.getBoundingClientRect().top;
+    base.remove();
+    const ctx = document.createElement("canvas").getContext("2d");
+    ctx.font = `${cs.fontWeight} ${cs.fontSize} ${cs.fontFamily}`;
+    if ("fontKerning" in ctx) ctx.fontKerning = "none";
+    const mt = ctx.measureText((raiz.textContent || "SUQUIA").trim().slice(0, 6));
+    texto = { l: rr.left, r: rr.right, t: yBase - mt.actualBoundingBoxAscent, b: yBase + mt.actualBoundingBoxDescent, w: rr.width };
+    texto.h = texto.b - texto.t;
   }
   const desc = [...document.querySelectorAll("p")].find((p) => /selected photographs/i.test(p.textContent) && getComputedStyle(p).position === "fixed");
   const db = desc?.getBoundingClientRect();

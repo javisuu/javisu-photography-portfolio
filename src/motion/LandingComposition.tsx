@@ -1156,8 +1156,11 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           computed-from-content would otherwise expose whatever noise a
           decipher is passing through at that instant. */}
       <h1
-        className="pointer-events-none fixed inset-0 z-30 flex select-none items-center justify-center text-center font-medium leading-none text-white mix-blend-difference"
-        style={{ fontSize: "clamp(64px, 16vw, 158px)", fontKerning: "none" }}
+        // Spec 021: the size lives in .landing-wordmark (globals.css) —
+        // clamp(64px, 16vw, 158px) on desktop, as before; 78/96 px on
+        // mobile — so the tap zone below can share it.
+        className="landing-wordmark pointer-events-none fixed inset-0 z-30 flex select-none items-center justify-center text-center font-medium leading-none text-white mix-blend-difference"
+        style={{ fontKerning: "none" }}
         aria-label="Suquia"
       >
         <DecipherWordmark
@@ -1185,12 +1188,7 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         aria-expanded={panelOpen}
         aria-controls={PANEL_ID}
         onClick={() => fijarPanel(true)}
-        className="fixed z-30 hidden h-20 bg-transparent movil:block"
-        style={{
-          width: "calc(clamp(64px, 16vw, 158px) * 3.9)",
-          left: "calc(50% - clamp(64px, 16vw, 158px) * 1.95)",
-          top: "calc(50% - 40px)",
-        }}
+        className="landing-wordmark-zona fixed z-30 hidden h-20 bg-transparent movil:block"
       />
 
       {/* Descriptor — deliberately NOT nested with the h1 above (see its
@@ -1204,9 +1202,13 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
           position — a z-index guarantee, not a blend one, so no
           LANDING_LAYOUT exclusion is needed the way the name's blend
           band needs one. */}
+      {/* Spec 021: on portrait mobile 12 px in two balanced lines, which
+          breaks after PHOTOGRAPHS as the canvas does (a <br> split the text
+          node and moved desktop glyphs by a level, so it wraps by width
+          instead); one line in landscape. The `top` lives in
+          .landing-descriptor. */}
       <p
-        className="pointer-events-none fixed left-1/2 z-30 -translate-x-1/2 select-none text-center text-[13px] uppercase tracking-[0.34em] text-[#888888]"
-        style={{ top: "calc(50% + 109px)" }}
+        className="landing-descriptor pointer-events-none fixed left-1/2 z-30 -translate-x-1/2 select-none text-center text-[13px] uppercase tracking-[0.34em] text-[#888888] movil:w-[260px] movil:text-[12px] movil:leading-[18px] movil:tracking-[0.18em] movil:[text-wrap:balance] movil-h:w-auto movil-h:whitespace-nowrap movil-h:leading-[16px]"
       >
         Selected Photographs Through the Years
       </p>

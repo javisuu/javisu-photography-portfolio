@@ -41,9 +41,17 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - Fichero(s): `src/motion/LandingComposition.tsx`
   - Comprobacion: CA9 y CA13.
   - Resultado (2026-11-18, `next dev`; `2026-11-18_021-t4-*.txt`): CA9 y CA13 (salta al final, quieto abierto, Close al mismo `scrollY`, una vez por visita, otra vez al recargar) en `iphone`, `iphone --horizontal` e `ipad-mini`. Hasta el final: 15 fotos, `scrollY` 2112 de 2112 en `iphone`. Frames del recorrido: `iphone` 4 de mas de 50 ms (max 66,6), horizontal 0, `ipad-mini` 19 (max 183,3), sin CPU limitada; se miden en T6. Unico fallo fuera de CA11-CA12: E1 del album en horizontal, ya en T0.
-- [ ] **T5** · Wordmark y descriptor a su tamaño movil
+- [x] **T5** · Wordmark y descriptor a su tamaño movil
   - Fichero(s): `src/motion/LandingComposition.tsx`, `src/app/globals.css`
   - Comprobacion: CA11, CA12 y CA15; blend y «wordmark dice SUQUIA» ok; escritorio a 0 px.
+  - Resultado (2026-11-18, `next dev`; `2026-11-18_021-t5b-*.txt`):
+    - **Escritorio:** capturas y `currentSrc` iguales a T0; 549 de 557.
+    - **Movil:** `iphone` 170 de 170, `ipad-mini` 170 de 170, `iphone --horizontal` 172 de 173 (E1 del album, ya en T0). CA11, CA12, `navegacion` (CA15), blend y «wordmark dice SUQUIA» en los tres.
+    - **Cambios por el camino:**
+      - Un primer intento partia el descriptor con un `<br>` oculto en escritorio. Eso partia el nodo de texto y movia 150 px del descriptor de escritorio (diferencia maxima de 33 niveles). Ahora parte por ancho, con 260 px y `text-wrap: balance`, y en escritorio el marcado es el de antes.
+      - El diagnostico media el nombre con un Range sobre el `<h1>`, que incluia el pie «JAVIER SUAREZ SUQUIA» (absoluto) y el area de contenido de la fuente. Ahora mide la tinta: el ancho de la caja de las letras y el alto con `measureText` desde la linea base.
+      - Un run de escritorio murio en `transicion` (timeout esperando un enlace a album) y dejo su `next dev` en :3100; se cerro ese proceso (no el de Javi en :3000) y la repeticion paso. Por que fallo esa vez: SIN VERIFICAR.
+    - Capturas: `021-t5-capturas/` en el scratchpad. El descriptor parte tras PHOTOGRAPHS, como el lienzo.
 - [ ] **T6** · Fluidez con CPU x4
   - Comprobacion: CA14 (`--dispositivo iphone --cpu 4`).
 - [ ] **T7** · Ojo de Javi (CA16)
