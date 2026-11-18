@@ -20,6 +20,7 @@ import { parseDeviceArgs, contextFor, deviceLabel, CTX_ESCRITORIO, touchSwipe, t
 import { parseCapturasArgs, guardarPng, guardarJson, leerJson, compararPng } from "./lib/capturas.mjs";
 import { seccionTransicion } from "./lib/transicion.mjs";
 import { seccionNavegacion } from "./lib/navegacion.mjs";
+import { seccionLandingMovil } from "./lib/landingMovil.mjs";
 import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG, CREATE_IMAGE_BITMAP_VACIO_SIEMPRE, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
 
 const PORT = 3100;
@@ -400,7 +401,7 @@ if (deviceMode) {
   rule("fotos enteras");
   // La lista sale de src/data/photos.ts, la fuente unica: el carrusel solo
   // enlaza el album abierto.
-  let albumRoutes = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^s*slug: "([^"]+)",$/gm)].map((x) => `/album/${x[1]}`);
+  let albumRoutes = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => `/album/${x[1]}`);
   if (only) albumRoutes = only.startsWith("/album/") ? [only] : [];
   const fitRoutes = [...(!only || only === "/" ? ["/"] : []), ...albumRoutes];
   for (const route of fitRoutes) {
@@ -426,7 +427,9 @@ if (deviceMode) {
         // alto 1 px ya es un 1 %. Deformada solo si pasa del 1 % Y el alto
         // difiere en mas de 1 px del que daria su ancho.
         const pxErr = Math.abs(b.height - b.width * nh / nw);
-        const fits = b.width <= innerWidth + 1 && b.height <= innerHeight + 1;
+        // Spec 021: tambien a lo ancho. Sin esto, una foto que se sale por
+        // la derecha (M13) pasaba: su caja cabia, pero no estaba dentro.
+        const fits = b.width <= innerWidth + 1 && b.height <= innerHeight + 1 && b.left >= -1 && b.right <= innerWidth + 1;
         if (!fits || (dev >= 0.01 && pxErr > 1)) out.bad.push({ src: (img.currentSrc || img.src).split("url=").pop().split("&")[0].split("%2F").slice(-2).join("/").slice(0, 60),
           box: [Math.round(b.width), Math.round(b.height)], dev: +dev.toFixed(4), pxErr: +pxErr.toFixed(2), fits });
       }
@@ -795,6 +798,12 @@ function arrivalSampler() {
 // movil (iPad en horizontal), comprueba que nada de eso aparece.
 if (!only) {
   await seccionNavegacion({ browser, BASE, CTX, log, rule, addInv, rutas: routes, motor: DEV.motor, noMedible: (results.noMedible ??= []) });
+}
+// ---------- landing-movil ----------
+// Spec 021: el landing en movil (scripts/lib/landingMovil.mjs). Solo con
+// --dispositivo; si el perfil no es movil (iPad en horizontal), se omite.
+if (deviceMode && (!only || only === "/")) {
+  await seccionLandingMovil({ browser, BASE, CTX, log, rule, addInv, motor: DEV.motor, cpu: DEV.cpu, noMedible: (results.noMedible ??= []) });
 }
 
 if (!deviceMode && (!only || only.startsWith("/album/"))) {
