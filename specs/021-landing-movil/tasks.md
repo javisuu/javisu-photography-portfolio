@@ -52,8 +52,13 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - El diagnostico media el nombre con un Range sobre el `<h1>`, que incluia el pie «JAVIER SUAREZ SUQUIA» (absoluto) y el area de contenido de la fuente. Ahora mide la tinta: el ancho de la caja de las letras y el alto con `measureText` desde la linea base.
       - Un run de escritorio murio en `transicion` (timeout esperando un enlace a album) y dejo su `next dev` en :3100; se cerro ese proceso (no el de Javi en :3000) y la repeticion paso. Por que fallo esa vez: SIN VERIFICAR.
     - Capturas: `021-t5-capturas/` en el scratchpad. El descriptor parte tras PHOTOGRAPHS, como el lienzo.
-- [ ] **T6** · Fluidez con CPU x4
+- [x] **T6** · Fluidez con CPU x4
   - Comprobacion: CA14 (`--dispositivo iphone --cpu 4`).
+  - Resultado (2026-11-18/19):
+    - **En `next dev`** (`2026-11-18_021-t6-iphone-cpu4.txt`): CA14 falla, 30 frames de mas de 50 ms, maximo 449,9 ms. React en modo desarrollo.
+    - **En produccion local** (`next build` + `next start -p 3102`, medido con `--url`; `2026-11-18_021-t6-iphone-cpu4-prod.txt`): **CA14 ok**, recorrido hasta el final con 0 frames de mas de 50 ms (mediana 16,7, maximo 50). La seccion `landing-movil` entera sin fallos.
+    - En esa misma corrida, 6 rutas con `page.goto` sin cargar en 30 s y `navegacion` midiendo paginas a medio cargar (alto 1669 px, sin barra). En la corrida de `next dev` con CPU x4 esa seccion pasa. Por que el `next start` local carga tan lento con CPU x4: SIN VERIFICAR.
+    - **El build fallaba** (`next/font/google queries have exactly one entry`, 42 errores de Turbopack) con la cache de `.next` llena de corridas de `next dev`. Con la red bien, tambien fuera del sandbox. Con `.next` apartada a `.next-antes-021` (no borrada), el build pasa.
 - [ ] **T7** · Ojo de Javi (CA16)
   - Que: Javi en la preview de Vercel, en el iPhone 13 (vertical y horizontal) y el iPad mini en vertical, con `?diag` si hace falta.
   - Comprobacion: visto bueno anotado aqui con fecha.
