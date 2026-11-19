@@ -887,7 +887,13 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         if (centro <= ultimo - window.innerHeight / 2) panelFinalArmado = true;
         return;
       }
-      if (centro >= ultimo) {
+      // The document is sized so that, at its very bottom, the last photo's
+      // centre sits exactly on the viewport centre (altosMovil). scrollY is
+      // whole pixels and that height isn't, so at some widths (430, 834) the
+      // bottom stays a fraction short: 1 px of slack, and the bottom itself
+      // always counts.
+      const fondo = document.documentElement.scrollHeight - window.innerHeight;
+      if (centro >= ultimo - 1 || scrollPx >= fondo - 1) {
         panelFinalArmado = false;
         fijarPanel(true);
       }

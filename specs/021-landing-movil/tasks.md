@@ -59,7 +59,7 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - **En produccion local** (`next build` + `next start -p 3102`, medido con `--url`; `2026-11-18_021-t6-iphone-cpu4-prod.txt`): **CA14 ok**, recorrido hasta el final con 0 frames de mas de 50 ms (mediana 16,7, maximo 50). La seccion `landing-movil` entera sin fallos.
     - En esa misma corrida, 6 rutas con `page.goto` sin cargar en 30 s y `navegacion` midiendo paginas a medio cargar (alto 1669 px, sin barra). En la corrida de `next dev` con CPU x4 esa seccion pasa. Por que el `next start` local carga tan lento con CPU x4: SIN VERIFICAR.
     - **El build fallaba** (`next/font/google queries have exactly one entry`, 42 errores de Turbopack) con la cache de `.next` llena de corridas de `next dev`. Con la red bien, tambien fuera del sandbox. Con `.next` apartada a `.next-antes-021` (no borrada), el build pasa.
-- [ ] **T7** · Ojo de Javi (CA16)
+- [x] **T7** · Ojo de Javi (CA16)
   - Que: Javi en la preview de Vercel, en el iPhone 13 (vertical y horizontal) y el iPad mini en vertical, con `?diag` si hace falta.
   - Comprobacion: visto bueno anotado aqui con fecha.
 
@@ -77,11 +77,16 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - E2 del album: una decodificacion de mas de 1,5 s.
       - La cache de `next dev` estaba vacia tras apartar `.next`. Que esa sea la causa: SIN VERIFICAR.
     - Dos corridas de escritorio murieron en `transicion` (`/albums` sin cargar en 30 s) y dejaron su `next dev` en :3100. Se cerraron esos procesos, nunca el :3000 de Javi.
+- **T7, segunda vuelta (2026-11-19).** Javi, en la preview con la enmienda 1 (`2a844bd`): «perfect, next». Visto bueno de CA16.
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` con build: sin fallos nuevos frente a T0 (CA1) y capturas a 0 px (CA2), salida guardada
-- [ ] Seccion `landing-movil` y `navegacion` en los cinco perfiles
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md`: el landing en movil (finito, nativo, sin GL) y los choques de la spec
-- [ ] `docs/ESTADO.md`: M1, M4 y M13 cerrados si CA3-CA6 pasan
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` con build: sin fallos nuevos frente a T0 (CA1) y capturas a 0 px (CA2), salida guardada
+  - `2026-11-19_021-cierre2-escritorio.txt` (sobre el arreglo de abajo): build ok, 555 de 557. Los 2 fallos son duraciones de fundido de `transicion` en `next dev`, ya en T0 (538 de 553, 15 fallos). Capturas de landing, `/album/america` y `/atlas` iguales a T0, y `currentSrc` del landing igual (0 distintos de 30).
+- [x] Seccion `landing-movil` y `navegacion` en los cinco perfiles
+  - **Arreglo encontrado en el cierre.** La primera pasada (`2026-11-19_021-cierre-*.txt`) dio CA13 «no salto» en `iphone-max` (430 px) e `ipad` (834 px), perfiles que E1 no midio. `altosMovil` hace que, al fondo, el centro de la ultima foto caiga justo en el centro del viewport; `scrollY` es entero y ese alto no, asi que en esos anchos el fondo se queda a una fraccion de pixel. `panelAlFinal` (`src/motion/LandingComposition.tsx`) acepta ahora 1 px de holgura y cuenta siempre el fondo del documento.
+  - Tras el arreglo (`2026-11-19_021-cierre2-<perfil>.txt`): `landing-movil` y `navegacion` sin fallos en los cinco perfiles, CA13 con sus cuatro comprobaciones incluido. «Fotos enteras» ok en `/` y los cuatro albumes en los cinco.
+  - Fallos que quedan, todos de la linea base: `ipad` «deslizar cambia de album» 01 -> 01 (M8, ya en T0); `iphone --horizontal` E1 del album (ya en T0); `iphone-max` 6 rutas con `page.goto` sin cargar en 30 s (el cuelgue de `next dev` en frio de la spec 020, T0).
+- [x] `CLAUDE.md` y `docs/design-spec-v2.md`: el landing en movil (finito, nativo, sin GL) y los choques de la spec
+- [x] `docs/ESTADO.md`: M1, M4 y M13 cerrados si CA3-CA6 pasan
+- [x] Estado de `spec.md` → Implementada
