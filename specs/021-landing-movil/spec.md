@@ -93,9 +93,9 @@ Las cuatro son decisiones de Javi: la de diseño del 2026-11-16 (nota «A · Dis
 | CA8 | Seccion `landing-movil`, los cinco perfiles | Sin Lenis en `/`: `<html>` sin la clase `lenis`. Un arrastre por toque de N px mueve `scrollY` N ± 2 px cuando no hay inercia |
 | CA9 | Seccion `landing-movil`: toques hasta el final del documento | Hay final: `scrollY` llega a `scrollHeight − innerHeight` y no salta hacia atras (sin vuelta). Solo hay 15 `.landing-photo` visibles, sin la copia. Al final, la ultima foto queda entera en pantalla y por encima de la barra |
 | CA10 | Seccion `landing-movil`: `top` de cada foto con parallax frente a `scrollY`, en dos puntos separados por 200 px | Desplazamiento de cada foto entre 0,9 y 1,1 veces el del scroll; las fotos sin parallax, 1,0 ± 0,01. Con reduced motion, todas 1,0 ± 0,01 |
-| CA11 | Seccion `landing-movil` y las invariantes de siempre | `<h1>` a 78 px en vertical (iphone, iphone-max) y a 96 px en horizontal (computed `font-size`). Su caja con ≥ 40 px de margen a cada lado en vertical. Las invariantes de «wordmark dice SUQUIA» y del blend sin ancestros que lo rompan, ok |
+| CA11 | Seccion `landing-movil` y las invariantes de siempre | `<h1>` a 20vw en vertical (78 px a 390 de ancho; escalado al ancho en iphone-max y en las tablets, enmienda 1) y a 96 px en horizontal (computed `font-size`). Su caja con ≥ 40 px de margen a cada lado en vertical. Las invariantes de «wordmark dice SUQUIA» y del blend sin ancestros que lo rompan, ok |
 | CA12 | Seccion `landing-movil` | Descriptor a 12 px: en vertical, en dos lineas (alto 36 ± 1 px); en horizontal, en una (alto ≤ 17 px). Sin cortar la caja del `<h1>` y por encima de la barra |
-| CA13 | Seccion `landing-movil`, toques hasta que la ultima foto cruza el centro | El panel se abre una vez (`aria-expanded` true) y el scroll se queda quieto mientras esta abierto (arrastre de 1000 px: `scrollY` igual). Tras `Close`, `scrollY` igual que antes de abrirse. Subir y volver a bajar hasta el final no lo vuelve a abrir. En una carga nueva de la pagina, salta otra vez. Con reduced motion, el panel entra en un fundido de 200 ms, sin escalonado |
+| CA13 | Seccion `landing-movil`, toques hasta que la ultima foto cruza el centro | El panel se abre una vez (`aria-expanded` true) y el scroll se queda quieto mientras esta abierto (arrastre de 1000 px: `scrollY` igual). Tras `Close`, `scrollY` igual que antes de abrirse. Un vaiven corto al final (menos de media pantalla) no lo vuelve a abrir; subir al menos media pantalla y volver a bajar hasta el final, si (enmienda 1). En una carga nueva de la pagina, salta otra vez. Con reduced motion, el panel entra en un fundido de 200 ms, sin escalonado |
 | CA14 | `--dispositivo iphone --cpu 4`, seccion `landing-movil`: arrastre por toque de 3 s | 0 frames > 50 ms durante el scroll |
 | CA15 | Invariantes de la seccion `navegacion` (spec 020) en los cinco perfiles | Sin fallos nuevos |
 | CA16 | Javi, en su iPhone 13 (vertical y horizontal) y su iPad mini en vertical, sobre la preview de Vercel | Visto bueno a ojo. Es el unico criterio a ojo y no sustituye a ninguno de los anteriores |
@@ -109,6 +109,13 @@ Las cuatro son decisiones de Javi: la de diseño del 2026-11-16 (nota «A · Dis
 5. **Al girar el dispositivo:** «creo que sera mejor movil». El camino movil se decide al cargar la pagina y se mantiene hasta recargar, aunque un iPad gire a horizontal.
 6. **Las ventanas de escritorio estrechas** se quedan como hoy: «si».
 7. **Permiso** para tocar `useLenis` y el montaje de `GLSurface` en el landing, solo en movil y con el escritorio identico al pixel: «vale».
+
+## Enmienda 1 (2026-11-19): el panel en cada llegada al final, y SUQUIA escalado al ancho
+
+Javi, tras verlo en la preview del iPhone y el iPad (T7): «It's alright. 2 bugs: 1. After descending on mobile phone to the bottom only the first time the menu pops. The suquia box seeems to hace a fixed size, on ipad it is very small.»
+
+- **El panel salta cada vez que se llega al final**, no una vez por visita. Se rearma cuando la ultima foto vuelve a quedar al menos media pantalla por debajo del centro (al subir), para que el rebote o un vaiven corto al final no lo abra otra vez. Cambia la respuesta 4 y la nota «2 · Dos disparadores, un panel» en eso: antes, «solo una vez por visita».
+- **SUQUIA en vertical mide 20vw**: los 78 px del lienzo a 390 de ancho, escalados al ancho como el resto de la composicion (respuesta 2). En el iPad mini, 154 px. La zona tactil del panel y la distancia al descriptor (52 px a 390 de ancho) escalan con el. En horizontal, 96 px, como estaba.
 
 ## Preguntas abiertas
 

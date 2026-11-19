@@ -206,9 +206,11 @@ function itemHeightVh(item: LayoutItem, viewportW: number, viewportH: number): n
   return ((widthPx / ratio) / viewportH) * 100;
 }
 
-// Spec 021: whether the mobile landing already opened the panel at its end
-// in this visit (page load). Module-level on purpose: one per load.
-let panelFinalAbierto = false;
+// Spec 021: whether reaching the end of the mobile landing will open the
+// panel. Disarmed when it fires; re-armed once the reader has gone back up at
+// least half a screen (amendment 1: every arrival at the end, but not the
+// bounce or a short back-and-forth there).
+let panelFinalArmado = true;
 
 // Hand-authored layout — reference viewport 1440x900. All 15 verified
 // non-overlapping at rest at that reference. Six photos are pinned
@@ -870,10 +872,9 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
     }
 
     // Spec 021 (CA13): the second trigger of the mobile panel. When the
-    // last photo's centre crosses the viewport centre, the panel opens —
-    // once per visit (module flag: survives soft navigation, not a reload).
+    // last photo's centre crosses the viewport centre, the panel opens; it
+    // opens again only after going back up half a screen (amendment 1).
     function panelAlFinal(scrollPx: number) {
-      if (panelFinalAbierto) return;
       const modo = modoComposicion();
       if (modo === "escritorio") return;
       let ultimo = -Infinity;
@@ -881,8 +882,13 @@ export default function LandingComposition({ photos }: { photos: Photo[] }) {
         const g = geometriaPx(item, modo, window.innerWidth, window.innerHeight);
         ultimo = Math.max(ultimo, g.y + g.alto / 2);
       }
-      if (scrollPx + window.innerHeight / 2 >= ultimo) {
-        panelFinalAbierto = true;
+      const centro = scrollPx + window.innerHeight / 2;
+      if (!panelFinalArmado) {
+        if (centro <= ultimo - window.innerHeight / 2) panelFinalArmado = true;
+        return;
+      }
+      if (centro >= ultimo) {
+        panelFinalArmado = false;
         fijarPanel(true);
       }
     }

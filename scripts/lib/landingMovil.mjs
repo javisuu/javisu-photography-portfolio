@@ -148,8 +148,9 @@ export async function seccionLandingMovil({ browser, BASE, CTX, log, rule, addIn
   log(`  reposo · fotos visibles ${m.fotos.length} · lienzos ${m.lienzos} · lenis ${m.lenis} · h1 ${m.h1?.fs} px · descriptor ${m.desc?.fs} px, alto ${r1(m.desc?.h)}`);
   addInv("/", "landing-movil · CA7 sin canvas GL ni <img> ocultas", m.lienzos === 0 && m.fotos.every((f) => !f.oculta), `lienzos ${m.lienzos}, ocultas ${m.fotos.filter((f) => f.oculta).length}`);
   addInv("/", "landing-movil · CA8 sin Lenis (html sin .lenis)", !m.lenis, `lenis ${m.lenis}`);
-  const fsEsperado = horizontal ? 96 : telefono ? 78 : null;
-  if (fsEsperado) addInv("/", `landing-movil · CA11 wordmark a ${fsEsperado} px`, m.h1 && Math.abs(m.h1.fs - fsEsperado) <= 0.5, `${m.h1?.fs}`);
+  // Enmienda 1: en vertical, 20vw (78 px a 390 de ancho), tambien en tablet.
+  const fsEsperado = horizontal ? 96 : 0.2 * m.vw;
+  if (fsEsperado) addInv("/", `landing-movil · CA11 wordmark a ${r1(fsEsperado)} px`, m.h1 && Math.abs(m.h1.fs - fsEsperado) <= 0.5, `${m.h1?.fs}`);
   if (!horizontal && m.h1?.texto) addInv("/", "landing-movil · CA11 wordmark con >= 40 px de margen a cada lado", m.h1.texto.l >= 40 && m.vw - m.h1.texto.r >= 40, `${r1(m.h1.texto.l)} / ${r1(m.vw - m.h1.texto.r)}`);
   if (m.desc) {
     const lineas = horizontal ? m.desc.h <= 17 : Math.abs(m.desc.h - 36) <= 1;
@@ -231,11 +232,20 @@ export async function seccionLandingMovil({ browser, BASE, CTX, log, rule, addIn
     addInv("/", "landing-movil · CA13 el panel salta al llegar al final, quieto mientras esta abierto, y Close vuelve al mismo sitio",
       !!panel && panel.centro !== null && panel.centro <= 0.5 && Math.abs(panel.yQuieto - panel.y) <= 1 && Math.abs(panel.yTras - panel.y) <= 1 && panel.cerrado,
       panel ? `paso ${panel.paso}, centro de la ultima ${r1(panel.centro)} px del centro, scrollY ${r1(panel.y)} → quieto ${r1(panel.yQuieto)} → tras Close ${r1(panel.yTras)}, cerrado ${panel.cerrado}` : "no salto");
-    // Subir y volver a bajar: no vuelve a saltar.
+    // Enmienda 1. Un vaiven corto al final (un tercio de pantalla): no vuelve
+    // a saltar. Subir 1,6 pantallas y volver a bajar: salta otra vez.
+    const corto = m.vh / 3;
+    await arrastre(cdp, x, y1, y1 + corto);
+    await arrastre(cdp, x, y1 + corto, y1);
+    await arrastre(cdp, x, y0, y1);
+    const vaiven = (await p.evaluate(medirLanding)).panel;
+    addInv("/", "landing-movil · CA13 un vaiven corto al final no lo vuelve a abrir", !vaiven, "salto en el vaiven");
+    if (vaiven) await p.evaluate(() => document.querySelector("[data-panel-cerrar]")?.click());
     for (let i = 0; i < 4; i++) await arrastre(cdp, x, y1, y0);
     let otraVez = false;
     for (let i = 0; i < 8; i++) { await arrastre(cdp, x, y0, y1); if ((await p.evaluate(medirLanding)).panel) { otraVez = true; break; } }
-    addInv("/", "landing-movil · CA13 una sola vez por visita", !otraVez, otraVez ? "salto otra vez" : "");
+    addInv("/", "landing-movil · CA13 tras subir y volver a bajar, salta otra vez", otraVez, "no salto");
+    if (otraVez) { await p.evaluate(() => document.querySelector("[data-panel-cerrar]")?.click()); await wait(400); }
 
     if (cpu > 1) {
       if (cpuOk) addInv("/", `landing-movil · CA14 scroll sin frames > 50 ms (cpu x${cpu})`, fps && fps.long === 0, JSON.stringify(fps));

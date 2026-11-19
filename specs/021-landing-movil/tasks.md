@@ -63,6 +63,21 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
   - Que: Javi en la preview de Vercel, en el iPhone 13 (vertical y horizontal) y el iPad mini en vertical, con `?diag` si hace falta.
   - Comprobacion: visto bueno anotado aqui con fecha.
 
+- **T7, primera vuelta (2026-11-19).** Javi, en la preview (rama empujada): «It's alright. 2 bugs: 1. After descending on mobile phone to the bottom only the first time the menu pops. The suquia box seeems to hace a fixed size, on ipad it is very small. 2. On ipad, probably on mobile phone, on the vertical layaout of the single album page, the lateral notes are very narrowed.»
+  - El bug 1 entra como enmienda 1 de `spec.md` (abajo, E1).
+  - El bug 2 es la pagina de album, fuera de esta spec: spec propia (022).
+- [x] **E1** · Enmienda 1: el panel en cada llegada al final y SUQUIA a 20vw en vertical
+  - Fichero(s): `src/motion/LandingComposition.tsx`, `src/app/globals.css`, `scripts/lib/landingMovil.mjs`
+  - Comprobacion: CA11 (20vw en vertical, 96 px en horizontal) y CA13 (vaiven corto no reabre; subir y bajar, si); escritorio a 0 px.
+  - Resultado (2026-11-19, `next dev`; `2026-11-19_021-e1-*.txt`):
+    - CA11, CA12 y los cuatro CA13 en `iphone` (78 px), `ipad-mini` (153,6 px) e `iphone --horizontal` (96 px).
+    - Escritorio: capturas y `currentSrc` iguales a T0, 555 de 557.
+    - Otros fallos, de la carga y no del landing:
+      - En cada perfil, 6 rutas con `page.goto` sin cargar en 30 s, que el diagnostico cuenta como error de consola.
+      - E2 del album: una decodificacion de mas de 1,5 s.
+      - La cache de `next dev` estaba vacia tras apartar `.next`. Que esa sea la causa: SIN VERIFICAR.
+    - Dos corridas de escritorio murieron en `transicion` (`/albums` sin cargar en 30 s) y dejaron su `next dev` en :3100. Se cerraron esos procesos, nunca el :3000 de Javi.
+
 ## Cierre
 
 - [ ] `node scripts/diagnostico.mjs` con build: sin fallos nuevos frente a T0 (CA1) y capturas a 0 px (CA2), salida guardada
