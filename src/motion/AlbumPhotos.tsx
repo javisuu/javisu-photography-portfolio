@@ -251,14 +251,20 @@ export default function AlbumPhotos({
               // the other, row 1 only — so it aligns against the <img>
               // itself, not image-plus-caption. Below md it all stacks,
               // the text after the caption.
+              // Mobile (spec 022, `movil:`, iPad mini in portrait included):
+              // the grid is `contents`, so photo, caption and text become
+              // flex items of the row and the photo is placed and sized
+              // exactly as in a row without text. The text goes under the
+              // caption, at the row's left edge even in offset rows, 48 px
+              // below it (the row's 16 px gap + 32 px).
               <div
                 data-photo-index={index}
-                className={`flex flex-col px-6 py-16 md:px-16 ${placementClass(index)}`}
+                className={`flex flex-col px-6 py-16 md:px-16 movil:gap-4 ${placementClass(index)}`}
               >
-                <div className={`grid gap-y-4 ${gridCols}`}>
-                  <div className={`md:row-start-1 ${photoCol}`}>{image}</div>
+                <div className={`grid gap-y-4 ${gridCols} movil:contents`}>
+                  <div className={`md:row-start-1 ${photoCol} movil:max-w-full`}>{image}</div>
                   <div className={`md:row-start-2 ${photoCol}`}>{caption}</div>
-                  <div className={`flex flex-col gap-10 md:row-start-1 ${textCol}`}>
+                  <div className={`flex flex-col gap-10 md:row-start-1 ${textCol} movil:self-start movil:mt-8`}>
                     {sideNote && <SideNote body={sideNote.body} lang={sideNote.lang} />}
                     {photo.quote && <Quote text={photo.quote.text} lang={photo.quote.lang} />}
                   </div>

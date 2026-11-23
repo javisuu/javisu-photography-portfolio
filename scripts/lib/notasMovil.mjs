@@ -45,7 +45,10 @@ async function medirPagina(p) {
       const izq = br.left + parseFloat(cs.paddingLeft);
       const util = br.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       const ratio = (+img.getAttribute("width")) / (+img.getAttribute("height"));
-      const esperado = Math.min(util, 0.85 * innerHeight * ratio, +img.getAttribute("width"));
+      // Ancho intrinseco: `naturalWidth` ya viene corregido por la densidad
+      // del srcset, que sale de `sizes` (70vw por encima de 768 px). Asi lo
+      // mide tambien una fila sin texto; el atributo `width` no.
+      const esperado = Math.min(util, 0.85 * innerHeight * ratio, img.naturalWidth);
       const pEl = el.querySelector("p");
       const ps = getComputedStyle(pEl);
       return {
