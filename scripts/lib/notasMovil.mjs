@@ -63,7 +63,9 @@ async function medirPagina(p) {
         imgAncho: bi.width, imgAlto: bi.height, imgEsperado: esperado,
         sobreFoto: bt.top < bi.bottom - 0.5 && bt.bottom > bi.top + 0.5 && bt.left < bi.right - 0.5 && bt.right > bi.left + 0.5,
         bajoPie: bc.top >= bp.bottom - 0.5,
-        aire: bc.top - bp.bottom,
+        // Hasta la caja del propio texto (la raya de la cita incluida), no
+        // la de su celda: asi cuenta tambien un margen del texto.
+        aire: bt.top - bp.bottom,
         fs: ps.fontSize, lh: ps.lineHeight, estilo: ps.fontStyle, color: ps.color,
       };
     }, i));

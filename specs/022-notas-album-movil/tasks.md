@@ -30,12 +30,19 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - `ipad-mini` 178 de 179, `iphone` 177 de 178, `iphone --horizontal` 179 de 181 (E1, de partida), `iphone-max` 171 de 178 (los `goto` en frio), `ipad` 176 de 179 (M8, de partida).
     - **Arreglo del harness:** en el `ipad` (834 px) CA6 fallaba con la foto a 583,8 px frente a 706. No era la maqueta: `sizes` es `(max-width: 768px) 90vw, 70vw` (`src/motion/albumTransition/flight.ts:46`), asi que toda foto, con texto o sin el, mide como mucho 70vw. El ancho esperado usa ahora `naturalWidth`, que ya viene corregido por la densidad del srcset, en vez del atributo `width`.
     - Escritorio: capturas a 0 px en las tres rutas y `notas: 0 diferencias en 6 cajas` (CA2, CA3). Los fallos de `transicion` (lamina, titulo y descripcion a 1-3 px, duraciones) oscilan entre ejecuciones y ya salieron antes en esta rama.
-- [ ] **T2** · Estilo de la cita y aire en movil
+- [x] **T2** · Estilo de la cita y aire en movil
   - Fichero(s): `src/components/AlbumTexts.tsx`, `src/motion/AlbumPhotos.tsx`
   - Comprobacion:
     - CA7 en los cinco perfiles;
     - escritorio: CA2 y CA3;
     - capturas de `/album/norte` y `/album/sol` en el iPhone y el iPad mini para Javi, incluida la raya de encima de la cita.
+  - **Hecho el 2026-11-23.** Salidas `2026-11-23_022-t2-<perfil>.txt` y capturas `022-t2-capturas/` en el scratchpad.
+    - CA4 a CA7 ok en los cinco perfiles: citas a 300 px, 22px/28px, italica, `rgb(17, 17, 17)`; aire de 48 px y texto en el margen izquierdo en los seis textos.
+    - El aire se mide ahora hasta la caja del propio texto (con la raya de la cita), no hasta su celda, para que cuente tambien un margen del texto como el `md:mt-20` de la nota.
+    - `ipad-mini` 179 de 179, `iphone` 178 de 178, `iphone --horizontal` 180 de 181 (E1), `iphone-max` 172 de 178 (`goto` en frio), `ipad` 177 de 179 (M8). Sin fallos nuevos frente a T0.
+    - Escritorio 556 de 558: capturas a 0 px y `notas: 0 diferencias en 6 cajas`. Los 2 fallos son CA11 de `transicion`, que oscila.
+    - Capturas: viewport con la emulacion movil (`matchMedia` comprobado en cada una), WebGL desactivado para que pinten las `<img>`. El aviso «2 Issues» de `next dev` que sale en ellas es ese WebGL desactivado (`unable to create webgl context`, `GLSurface` se queda en el DOM), no un error del sitio. Una captura de pagina entera perdia la emulacion movil en Chromium y salia la maqueta de escritorio.
+    - **Para Javi:** en el telefono, en las filas desplazadas a la derecha (`sol` 3 y 6), el pie queda alineado a la derecha de la foto, como ya pasa en las filas sin texto (centrado en las centradas). Antes, dentro de la rejilla, iba a la izquierda. Es consecuencia de CA6 (la fila con texto igual que una sin texto); el pie movil es de la spec `album-movil`.
 - [ ] **T3** · Ojo de Javi (CA9)
   - Que: Javi, en la preview de Vercel, en el iPad mini en vertical y el iPhone 13.
   - Comprobacion: visto bueno anotado aqui con fecha.

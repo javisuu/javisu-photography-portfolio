@@ -15,22 +15,25 @@ function Signature() {
   );
 }
 
-/** Long text in the free side of a photo's row, top-aligned with the photo. */
+/** Long text in the free side of a photo's row, top-aligned with the photo.
+ *  On mobile (spec 022) it goes under the caption, so no top offset. */
 export function SideNote({ body, lang }: { body: string; lang?: string }) {
   return (
-    <div data-album-text data-text-kind="beside" lang={lang} className="max-w-[440px] md:mt-20">
+    <div data-album-text data-text-kind="beside" lang={lang} className="max-w-[440px] md:mt-20 movil:mt-0">
       <p className="font-serif text-[18px] leading-[1.65] text-[#666666]">{body}</p>
       <Signature />
     </div>
   );
 }
 
-/** Short line beside a photo, vertically centred on it, unsigned. */
+/** Short line beside a photo, vertically centred on it, unsigned. On mobile
+ *  (spec 022) it sits under the caption in the style of Javi's Album A
+ *  canvas: 22/28 px, #111111, 300 px wide. */
 export function Quote({ text, lang }: { text: string; lang?: string }) {
   return (
-    <div data-photo-quote lang={lang} className="max-w-[280px]">
+    <div data-photo-quote lang={lang} className="max-w-[280px] movil:max-w-[300px]">
       <span aria-hidden className="mb-4 block h-px w-6 bg-[#BBBBBB]" />
-      <p className="font-serif text-[16px] italic leading-[1.5] text-[#888888]">{text}</p>
+      <p className="font-serif text-[16px] italic leading-[1.5] text-[#888888] movil:text-[22px] movil:leading-[28px] movil:text-[#111111]">{text}</p>
     </div>
   );
 }
