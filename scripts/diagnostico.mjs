@@ -21,6 +21,7 @@ import { parseCapturasArgs, guardarPng, guardarJson, leerJson, compararPng } fro
 import { seccionTransicion } from "./lib/transicion.mjs";
 import { seccionNavegacion, MOVIL } from "./lib/navegacion.mjs";
 import { seccionLandingMovil } from "./lib/landingMovil.mjs";
+import { seccionNotasMovil, medirCajasNotas, compararCajasNotas } from "./lib/notasMovil.mjs";
 import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG, CREATE_IMAGE_BITMAP_VACIO_SIEMPRE, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
 
 const PORT = 3100;
@@ -804,6 +805,13 @@ if (!only) {
 // --dispositivo; si el perfil no es movil (iPad en horizontal), se omite.
 if (deviceMode && (!only || only === "/")) {
   await seccionLandingMovil({ browser, BASE, CTX, log, rule, addInv, motor: DEV.motor, cpu: DEV.cpu, noMedible: (results.noMedible ??= []) });
+}
+// ---------- notas-movil ----------
+// Spec 022: notas y citas del album en movil (scripts/lib/notasMovil.mjs).
+// Solo con --dispositivo; si el perfil no es movil, se omite.
+if (deviceMode && (!only || only.startsWith("/album/"))) {
+  const notasSlugs = only ? [only.slice("/album/".length)] : [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
+  await seccionNotasMovil({ browser, BASE, CTX, log, rule, addInv, slugs: notasSlugs });
 }
 
 if (!deviceMode && (!only || only.startsWith("/album/"))) {
@@ -2207,6 +2215,18 @@ if (CAP && !deviceMode && !only) {
     guardarPng(CAP.dir, `${name}-actual`, shot);
     log(`  ${name} (${route}): ${r.real} px distintos en mas de 1 nivel · ${r.diff} con cualquier diferencia · diferencia maxima ${r.maxDelta} · de ${r.total}${r.bbox ? ` · caja ${r.bbox.join(",")}` : ""}`);
     addInv("escritorio", `captura de ${name} igual a la referencia (ruido de 1 nivel aparte)`, r.real === 0, `${r.real} px distintos en mas de 1 nivel, diferencia maxima ${r.maxDelta}, caja ${r.bbox?.join(",")}`);
+  }
+  // Spec 022 (CA3): cajas de las notas y citas de los cuatro albumes,
+  // relativas a su foto, guardadas y comparadas junto a las capturas.
+  const notasSlugs = [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
+  const cajas = await medirCajasNotas({ browser, BASE, CTX, slugs: notasSlugs });
+  const nCajas = Object.values(cajas).reduce((a, m) => a + (m?.length ?? 0), 0);
+  if (CAP.modo === "guardar") { guardarJson(CAP.dir, "notas-cajas", cajas); log(`  notas: ${nCajas} cajas guardadas`); }
+  else {
+    const ref = leerJson(CAP.dir, "notas-cajas");
+    const dif = ref ? compararCajasNotas(ref, cajas) : null;
+    log(`  notas: ${dif === null ? "sin referencia" : `${dif.length} diferencias en ${nCajas} cajas`}${dif?.length ? ` · ${dif.join("; ")}` : ""}`);
+    addInv("escritorio", "cajas de las notas del album iguales a la referencia", dif !== null && dif.length === 0, dif === null ? "sin referencia" : dif.join("; "));
   }
 }
 
