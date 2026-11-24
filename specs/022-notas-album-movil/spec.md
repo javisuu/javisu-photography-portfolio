@@ -8,7 +8,7 @@
 
 Javi, el 2026-11-19, en la preview de la spec 021: «On ipad, probably on mobile phone, on the vertical layaout of the single album page, the lateral notes are very narrowed.»
 
-**Medido el 2026-11-20** en emulacion de Chromium, con `next dev` en `main` (`117116d`). La salida esta en `evidencia/2026-11-20_022-t0-notas.txt` (en el scratchpad, pendiente de copiar).
+**Medido el 2026-11-20** en emulacion de Chromium, con `next dev` en `main` (`117116d`). La salida esta en `evidencia/2026-11-20_022-t0-notas.txt`.
 
 | Perfil | Texto | Ancho | Lineas |
 |---|---|---|---|

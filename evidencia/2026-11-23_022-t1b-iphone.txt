@@ -1,0 +1,93 @@
+DIAGNOSTICO 2026-11-23 · feat/022-notas-album-movil · 26bbd76 · 6 ficheros sin commit
+
+dispositivo: iphone (iPhone 13) · chromium
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  iphone (iPhone 13) · chromium
+  medido: 390x664 · dpr 3 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 390x664 · dpr 3 · hasTouch true
+  user agent: Mozilla/5.0 (iPhone; CPU iPhone OS 15_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, transicion, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta /album/america ===
+{
+  "vw": 390,
+  "vh": 664,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 390,
+  "clientWidth": 390,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      780,
+      1328
+    ],
+    "css": [
+      390,
+      664
+    ],
+    "expected": [
+      780,
+      1328
+    ]
+  }
+}
+  consola:
+    [warning] Image with src "/photos/america/03.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading · http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js
+    [warning] Image with src "/photos/america/05.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading · http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js
+    [warning] [.WebGL-0x165c00b6e000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x165c00b6e000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x165c00b6e000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x165c00b6e000]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/album/america
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /album/america: 10 fotos medidas a 390x664
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+
+=== notas-movil ===
+  america cita foto 6 · 280x65 en x 24 (fila 24, util 342) · rejilla contents · aire 48 · foto 342 de 342 · 16px/24px italic rgb(136, 136, 136)
+  ok   CA4 cada texto debajo del pie de su foto, sin tocar la foto
+  ok   CA5 ningun texto sale del viewport
+  ok   CA5 cada cita de >= 260 px (o el ancho util)
+  ok   CA6 la foto de una fila con texto mide lo que sin texto (± 1 px)
+  FALLA CA7 cita a 22/28 px, italica, #111111, <= 300 px · america 6: 16px/24px italic rgb(136, 136, 136) 280 px
+  ok   CA7 aire de 48 ± 1 px entre el pie y el texto
+  ok   CA7 texto en el margen izquierdo de la fila (± 1 px)
+
+=== transicion ===
+omitido (--dispositivo)
+
+=== RESUMEN ===
+tsc          omitido
+lint         omitido
+build        omitido
+dispositivo  iphone (iPhone 13) · chromium
+consola      0 errores en 1 rutas
+invariantes  16 de 17
+
+FALLOS
+- notas-movil · CA7 cita a 22/28 px, italica, #111111, <= 300 px · america 6: 16px/24px italic rgb(136, 136, 136) 280 px
+

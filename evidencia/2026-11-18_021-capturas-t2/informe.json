@@ -1,0 +1,584 @@
+{
+ "iphone": {
+  "errores": [
+   "unable to create webgl context",
+   "[GLSurface] WebGL unavailable, staying on CSS: TypeError: Cannot set properties of null (setting 'renderer')\n    at new Renderer (http://localhost:3101/_next/static/chunks/node_modules_11xp6wh._.js:12248:26)\n    at GLSurface.useEffect (http://localhost:3101/_next/static/chunks/src_1683ex0._.js:1342:34)\n    at Object.react_stack_bottom_frame (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:14944:22)\n    at runWithFiberInDEV (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:761:74)\n    at commitHookEffectListMount (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7082:167)\n    at commitHookPassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7117:60)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8519:33)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)",
+   "unable to create webgl context",
+   "[GLSurface] WebGL unavailable, staying on CSS: TypeError: Cannot set properties of null (setting 'renderer')\n    at new Renderer (http://localhost:3101/_next/static/chunks/node_modules_11xp6wh._.js:12248:26)\n    at GLSurface.useEffect (http://localhost:3101/_next/static/chunks/src_1683ex0._.js:1342:34)\n    at Object.react_stack_bottom_frame (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:14944:22)\n    at runWithFiberInDEV (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:761:74)\n    at commitHookEffectListMount (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7082:167)\n    at commitHookPassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7117:60)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8609:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)"
+  ],
+  "alturas": {
+   "0": {
+    "y": 0,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=3840&q=75",
+      "l": 191.1,
+      "r": 374.4,
+      "t": 26.3,
+      "b": 163.8,
+      "w": 47
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=3840&q=75",
+      "l": 15.6,
+      "r": 226.2,
+      "t": 138.1,
+      "b": 296,
+      "w": 54
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+      "l": 101.4,
+      "r": 351,
+      "t": 336.5,
+      "b": 523.5,
+      "w": 64
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 42.9,
+      "r": 198.9,
+      "t": 569.5,
+      "b": 715.2,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 214.5,
+      "r": 374.4,
+      "t": 597.5,
+      "b": 731.7,
+      "w": 41
+     }
+    ]
+   },
+   "1": {
+    "y": 664,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 42.9,
+      "r": 198.9,
+      "t": -64.1,
+      "b": 81.6,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 214.5,
+      "r": 374.4,
+      "t": -32.5,
+      "b": 101.7,
+      "w": 41
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=3840&q=75",
+      "l": 117,
+      "r": 319.8,
+      "t": 131.6,
+      "b": 283.7,
+      "w": 52
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 15.6,
+      "r": 187.2,
+      "t": 311.1,
+      "b": 539.8,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 210.6,
+      "r": 374.4,
+      "t": 389,
+      "b": 640.6,
+      "w": 42
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 31.2,
+      "r": 280.8,
+      "t": 661.7,
+      "b": 732.9,
+      "w": 64
+     }
+    ]
+   },
+   "2": {
+    "y": 1328,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 31.2,
+      "r": 280.8,
+      "t": 24.5,
+      "b": 95.7,
+      "w": 64
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=3840&q=75",
+      "l": 171.6,
+      "r": 366.6,
+      "t": 129.8,
+      "b": 276,
+      "w": 50
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+      "l": 23.4,
+      "r": 210.6,
+      "t": 247.7,
+      "b": 388.1,
+      "w": 48
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=3840&q=75",
+      "l": 202.8,
+      "r": 366.6,
+      "t": 388,
+      "b": 606.3,
+      "w": 42
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=3840&q=75",
+      "l": 39,
+      "r": 195,
+      "t": 505,
+      "b": 712.9,
+      "w": 40
+     }
+    ]
+   },
+   "3": {
+    "y": 1992,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=3840&q=75",
+      "l": 39,
+      "r": 195,
+      "t": -159,
+      "b": 48.9,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=3840&q=75",
+      "l": 179.4,
+      "r": 351,
+      "t": 61.1,
+      "b": 289.8,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+      "l": 78,
+      "r": 257.4,
+      "t": 332.4,
+      "b": 571.5,
+      "w": 46
+     }
+    ]
+   },
+   "fin": {
+    "y": 2112,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=3840&q=75",
+      "l": 179.4,
+      "r": 351,
+      "t": -51.5,
+      "b": 177.2,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+      "l": 78,
+      "r": 257.4,
+      "t": 212.4,
+      "b": 451.5,
+      "w": 46
+     }
+    ]
+   }
+  }
+ },
+ "iphone-h": {
+  "errores": [
+   "unable to create webgl context",
+   "[GLSurface] WebGL unavailable, staying on CSS: TypeError: Cannot set properties of null (setting 'renderer')\n    at new Renderer (http://localhost:3101/_next/static/chunks/node_modules_11xp6wh._.js:12248:26)\n    at GLSurface.useEffect (http://localhost:3101/_next/static/chunks/src_1683ex0._.js:1342:34)\n    at Object.react_stack_bottom_frame (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:14944:22)\n    at runWithFiberInDEV (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:761:74)\n    at commitHookEffectListMount (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7082:167)\n    at commitHookPassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7117:60)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8519:33)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)",
+   "unable to create webgl context",
+   "[GLSurface] WebGL unavailable, staying on CSS: TypeError: Cannot set properties of null (setting 'renderer')\n    at new Renderer (http://localhost:3101/_next/static/chunks/node_modules_11xp6wh._.js:12248:26)\n    at GLSurface.useEffect (http://localhost:3101/_next/static/chunks/src_1683ex0._.js:1342:34)\n    at Object.react_stack_bottom_frame (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:14944:22)\n    at runWithFiberInDEV (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:761:74)\n    at commitHookEffectListMount (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7082:167)\n    at commitHookPassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7117:60)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8609:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)"
+  ],
+  "alturas": {
+   "0": {
+    "y": 0,
+    "fin": 1209,
+    "vw": 750,
+    "vh": 342,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=3840&q=75",
+      "l": 74.4,
+      "r": 274.4,
+      "t": 29.9,
+      "b": 179.9,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=3840&q=75",
+      "l": 275.2,
+      "r": 435.2,
+      "t": 11.5,
+      "b": 131.5,
+      "w": 21.3
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+      "l": 457.3,
+      "r": 667.3,
+      "t": 69,
+      "b": 226.5,
+      "w": 28
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 183.8,
+      "r": 383.8,
+      "t": 205.3,
+      "b": 392.2,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 386,
+      "r": 596,
+      "t": 263.2,
+      "b": 439.4,
+      "w": 28
+     }
+    ]
+   },
+   "1": {
+    "y": 342,
+    "fin": 1209,
+    "vw": 750,
+    "vh": 342,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 183.8,
+      "r": 383.8,
+      "t": -121.1,
+      "b": 65.8,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 386,
+      "r": 596,
+      "t": -61.3,
+      "b": 114.9,
+      "w": 28
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=3840&q=75",
+      "l": 56.1,
+      "r": 256.1,
+      "t": 41,
+      "b": 191,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 294.5,
+      "r": 474.5,
+      "t": 91.9,
+      "b": 331.8,
+      "w": 24
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 533.1,
+      "r": 693.1,
+      "t": 205.2,
+      "b": 450.9,
+      "w": 21.3
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 75.5,
+      "r": 375.5,
+      "t": 286.9,
+      "b": 372.4,
+      "w": 40
+     }
+    ]
+   },
+   "2": {
+    "y": 684,
+    "fin": 1209,
+    "vw": 750,
+    "vh": 342,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 294.5,
+      "r": 474.5,
+      "t": -227.2,
+      "b": 12.8,
+      "w": 24
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 533.1,
+      "r": 693.1,
+      "t": -136.8,
+      "b": 108.9,
+      "w": 21.3
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 75.5,
+      "r": 375.5,
+      "t": -41.3,
+      "b": 44.2,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=3840&q=75",
+      "l": 314.6,
+      "r": 524.6,
+      "t": 81.9,
+      "b": 239.4,
+      "w": 28
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+      "l": 129.1,
+      "r": 329.1,
+      "t": 165.1,
+      "b": 315.1,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=3840&q=75",
+      "l": 484.9,
+      "r": 664.9,
+      "t": 232.5,
+      "b": 472.5,
+      "w": 24
+     }
+    ]
+   },
+   "fin": {
+    "y": 1209,
+    "fin": 1209,
+    "vw": 750,
+    "vh": 342,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=3840&q=75",
+      "l": 260.8,
+      "r": 430.8,
+      "t": -183,
+      "b": 43.6,
+      "w": 22.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=3840&q=75",
+      "l": 66,
+      "r": 246,
+      "t": -53.8,
+      "b": 186.1,
+      "w": 24
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+      "l": 390.7,
+      "r": 555.7,
+      "t": 29,
+      "b": 248.9,
+      "w": 22
+     }
+    ]
+   }
+  }
+ },
+ "ipad-mini": {
+  "errores": [
+   "unable to create webgl context",
+   "[GLSurface] WebGL unavailable, staying on CSS: TypeError: Cannot set properties of null (setting 'renderer')\n    at new Renderer (http://localhost:3101/_next/static/chunks/node_modules_11xp6wh._.js:12248:26)\n    at GLSurface.useEffect (http://localhost:3101/_next/static/chunks/src_1683ex0._.js:1342:34)\n    at Object.react_stack_bottom_frame (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:14944:22)\n    at runWithFiberInDEV (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:761:74)\n    at commitHookEffectListMount (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7082:167)\n    at commitHookPassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7117:60)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8519:33)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8523:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8518:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)\n    at commitPassiveMountOnFiber (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8580:17)\n    at recursivelyTraversePassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8506:316)",
+   "unable to create webgl context",
+   "[GLSurface] WebGL unavailable, staying on CSS: TypeError: Cannot set properties of null (setting 'renderer')\n    at new Renderer (http://localhost:3101/_next/static/chunks/node_modules_11xp6wh._.js:12248:26)\n    at GLSurface.useEffect (http://localhost:3101/_next/static/chunks/src_1683ex0._.js:1342:34)\n    at Object.react_stack_bottom_frame (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:14944:22)\n    at runWithFiberInDEV (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:761:74)\n    at commitHookEffectListMount (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7082:167)\n    at commitHookPassiveMountEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:7117:60)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8609:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8608:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)\n    at reconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8623:17)\n    at recursivelyTraverseReconnectPassiveEffects (http://localhost:3101/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:8596:13)"
+  ],
+  "alturas": {
+   "0": {
+    "y": 0,
+    "fin": 4301,
+    "vw": 768,
+    "vh": 1024,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=3840&q=75",
+      "l": 376.3,
+      "r": 737.3,
+      "t": 46,
+      "b": 316.4,
+      "w": 47
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=3840&q=75",
+      "l": 30.7,
+      "r": 445.4,
+      "t": 265.3,
+      "b": 576.4,
+      "w": 54
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+      "l": 199.7,
+      "r": 691.2,
+      "t": 655.4,
+      "b": 1024,
+      "w": 64
+     }
+    ]
+   },
+   "1": {
+    "y": 1024,
+    "fin": 4301,
+    "vw": 768,
+    "vh": 1024,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+      "l": 199.7,
+      "r": 691.2,
+      "t": -310.7,
+      "b": 58,
+      "w": 64
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 84.5,
+      "r": 391.7,
+      "t": 138.4,
+      "b": 425.4,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 422.4,
+      "r": 737.3,
+      "t": 198.5,
+      "b": 462.7,
+      "w": 41
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=3840&q=75",
+      "l": 230.4,
+      "r": 629.8,
+      "t": 542.7,
+      "b": 842.2,
+      "w": 52
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 30.7,
+      "r": 368.6,
+      "t": 868.5,
+      "b": 1319.1,
+      "w": 44
+     }
+    ]
+   },
+   "2": {
+    "y": 2048,
+    "fin": 4301,
+    "vw": 768,
+    "vh": 1024,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 30.7,
+      "r": 368.6,
+      "t": -86.7,
+      "b": 363.8,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 414.7,
+      "r": 737.3,
+      "t": 25.6,
+      "b": 521,
+      "w": 42
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 61.4,
+      "r": 553,
+      "t": 587.3,
+      "b": 727.4,
+      "w": 64
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=3840&q=75",
+      "l": 337.9,
+      "r": 721.9,
+      "t": 783.3,
+      "b": 1071.3,
+      "w": 50
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+      "l": 46.1,
+      "r": 414.7,
+      "t": 1008.1,
+      "b": 1284.8,
+      "w": 48
+     }
+    ]
+   },
+   "fin": {
+    "y": 4301,
+    "fin": 4301,
+    "vw": 768,
+    "vh": 1024,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=3840&q=75",
+      "l": 353.3,
+      "r": 691.2,
+      "t": -242.6,
+      "b": 207.9,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+      "l": 153.6,
+      "r": 506.9,
+      "t": 276.3,
+      "b": 747.3,
+      "w": 46
+     }
+    ]
+   }
+  }
+ }
+}

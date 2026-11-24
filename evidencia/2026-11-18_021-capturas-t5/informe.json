@@ -1,0 +1,593 @@
+{
+ "iphone": {
+  "errores": [],
+  "alturas": {
+   "0": {
+    "y": 0,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=3840&q=75",
+      "l": 191.1,
+      "r": 374.4,
+      "t": 26.3,
+      "b": 163.8,
+      "w": 47
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=3840&q=75",
+      "l": 15.6,
+      "r": 226.2,
+      "t": 138.7,
+      "b": 296.6,
+      "w": 54
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+      "l": 101.4,
+      "r": 351,
+      "t": 339.1,
+      "b": 526.1,
+      "w": 64
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 42.9,
+      "r": 198.9,
+      "t": 565.8,
+      "b": 711.6,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 214.5,
+      "r": 374.4,
+      "t": 601.5,
+      "b": 735.7,
+      "w": 41
+     }
+    ]
+   },
+   "1": {
+    "y": 664,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 42.9,
+      "r": 198.9,
+      "t": -60.6,
+      "b": 85.2,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 214.5,
+      "r": 374.4,
+      "t": -35.7,
+      "b": 98.4,
+      "w": 41
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=3840&q=75",
+      "l": 117,
+      "r": 319.8,
+      "t": 137.3,
+      "b": 289.4,
+      "w": 52
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 15.6,
+      "r": 187.2,
+      "t": 314.8,
+      "b": 543.5,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 210.6,
+      "r": 374.4,
+      "t": 377.9,
+      "b": 629.5,
+      "w": 42
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 31.2,
+      "r": 280.8,
+      "t": 659.5,
+      "b": 730.7,
+      "w": 64
+     }
+    ]
+   },
+   "2": {
+    "y": 1328,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 210.6,
+      "r": 374.4,
+      "t": -248.5,
+      "b": 3.1,
+      "w": 42
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 31.2,
+      "r": 280.8,
+      "t": 26,
+      "b": 97.2,
+      "w": 64
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=3840&q=75",
+      "l": 171.6,
+      "r": 366.6,
+      "t": 127.1,
+      "b": 273.3,
+      "w": 50
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+      "l": 23.4,
+      "r": 210.6,
+      "t": 247.7,
+      "b": 388.1,
+      "w": 48
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=3840&q=75",
+      "l": 202.8,
+      "r": 366.6,
+      "t": 380.8,
+      "b": 599.1,
+      "w": 42
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=3840&q=75",
+      "l": 39,
+      "r": 195,
+      "t": 490.1,
+      "b": 698.1,
+      "w": 40
+     }
+    ]
+   },
+   "3": {
+    "y": 1992,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=3840&q=75",
+      "l": 39,
+      "r": 195,
+      "t": -139.8,
+      "b": 68.1,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=3840&q=75",
+      "l": 179.4,
+      "r": 351,
+      "t": 56.9,
+      "b": 285.6,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+      "l": 78,
+      "r": 257.4,
+      "t": 326.3,
+      "b": 565.4,
+      "w": 46
+     }
+    ]
+   },
+   "fin": {
+    "y": 2112,
+    "fin": 2112,
+    "vw": 390,
+    "vh": 664,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=3840&q=75",
+      "l": 179.4,
+      "r": 351,
+      "t": -58.9,
+      "b": 169.8,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+      "l": 78,
+      "r": 257.4,
+      "t": 211.8,
+      "b": 450.9,
+      "w": 46
+     }
+    ]
+   }
+  }
+ },
+ "iphone-h": {
+  "errores": [],
+  "alturas": {
+   "0": {
+    "y": 0,
+    "fin": 1209,
+    "vw": 750,
+    "vh": 342,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=3840&q=75",
+      "l": 74.4,
+      "r": 274.4,
+      "t": 29.9,
+      "b": 179.9,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=3840&q=75",
+      "l": 275.2,
+      "r": 435.2,
+      "t": 12,
+      "b": 132,
+      "w": 21.3
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+      "l": 457.3,
+      "r": 667.3,
+      "t": 68.8,
+      "b": 226.3,
+      "w": 28
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 183.8,
+      "r": 383.8,
+      "t": 203.7,
+      "b": 390.6,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 386,
+      "r": 596,
+      "t": 265.4,
+      "b": 441.6,
+      "w": 28
+     }
+    ]
+   },
+   "1": {
+    "y": 342,
+    "fin": 1209,
+    "vw": 750,
+    "vh": 342,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 183.8,
+      "r": 383.8,
+      "t": -119,
+      "b": 67.9,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 386,
+      "r": 596,
+      "t": -62.8,
+      "b": 113.4,
+      "w": 28
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=3840&q=75",
+      "l": 56.1,
+      "r": 256.1,
+      "t": 43.2,
+      "b": 193.2,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 294.5,
+      "r": 474.5,
+      "t": 93.7,
+      "b": 333.7,
+      "w": 24
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 533.1,
+      "r": 693.1,
+      "t": 195.6,
+      "b": 441.3,
+      "w": 21.3
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 75.5,
+      "r": 375.5,
+      "t": 285.9,
+      "b": 371.5,
+      "w": 40
+     }
+    ]
+   },
+   "2": {
+    "y": 684,
+    "fin": 1209,
+    "vw": 750,
+    "vh": 342,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 294.5,
+      "r": 474.5,
+      "t": -236.4,
+      "b": 3.5,
+      "w": 24
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 533.1,
+      "r": 693.1,
+      "t": -127.1,
+      "b": 118.7,
+      "w": 21.3
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 75.5,
+      "r": 375.5,
+      "t": -40.4,
+      "b": 45.1,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=3840&q=75",
+      "l": 314.6,
+      "r": 524.6,
+      "t": 82,
+      "b": 239.5,
+      "w": 28
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+      "l": 129.1,
+      "r": 329.1,
+      "t": 166,
+      "b": 316,
+      "w": 26.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F02.jpg&w=3840&q=75",
+      "l": 484.9,
+      "r": 664.9,
+      "t": 224.7,
+      "b": 464.6,
+      "w": 24
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=3840&q=75",
+      "l": 260.8,
+      "r": 430.8,
+      "t": 326.8,
+      "b": 553.3,
+      "w": 22.7
+     }
+    ]
+   },
+   "fin": {
+    "y": 1209,
+    "fin": 1209,
+    "vw": 750,
+    "vh": 342,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F03.jpg&w=3840&q=75",
+      "l": 260.8,
+      "r": 430.8,
+      "t": -171.3,
+      "b": 55.2,
+      "w": 22.7
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=3840&q=75",
+      "l": 66,
+      "r": 246,
+      "t": -56.5,
+      "b": 183.4,
+      "w": 24
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+      "l": 390.7,
+      "r": 555.7,
+      "t": 29.9,
+      "b": 249.8,
+      "w": 22
+     }
+    ]
+   }
+  }
+ },
+ "ipad-mini": {
+  "errores": [],
+  "alturas": {
+   "0": {
+    "y": 0,
+    "fin": 4301,
+    "vw": 768,
+    "vh": 1024,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F01.jpg&w=3840&q=75",
+      "l": 376.3,
+      "r": 737.3,
+      "t": 46,
+      "b": 316.4,
+      "w": 47
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F03.jpg&w=3840&q=75",
+      "l": 30.7,
+      "r": 445.4,
+      "t": 265.8,
+      "b": 576.8,
+      "w": 54
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+      "l": 199.7,
+      "r": 691.2,
+      "t": 663.3,
+      "b": 1031.9,
+      "w": 64
+     }
+    ]
+   },
+   "1": {
+    "y": 1024,
+    "fin": 4301,
+    "vw": 768,
+    "vh": 1024,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F05.jpg&w=3840&q=75",
+      "l": 199.7,
+      "r": 691.2,
+      "t": -325.1,
+      "b": 43.5,
+      "w": 64
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F06.jpg&w=3840&q=75",
+      "l": 84.5,
+      "r": 391.7,
+      "t": 140.9,
+      "b": 427.9,
+      "w": 40
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F08.jpg&w=3840&q=75",
+      "l": 422.4,
+      "r": 737.3,
+      "t": 196.6,
+      "b": 460.8,
+      "w": 41
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Famerica%2F09.jpg&w=3840&q=75",
+      "l": 230.4,
+      "r": 629.8,
+      "t": 532.8,
+      "b": 832.3,
+      "w": 52
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 30.7,
+      "r": 368.6,
+      "t": 889.2,
+      "b": 1339.7,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 414.7,
+      "r": 737.3,
+      "t": 1004.4,
+      "b": 1499.8,
+      "w": 42
+     }
+    ]
+   },
+   "2": {
+    "y": 2048,
+    "fin": 4301,
+    "vw": 768,
+    "vh": 1024,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=3840&q=75",
+      "l": 30.7,
+      "r": 368.6,
+      "t": -99.2,
+      "b": 351.3,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=3840&q=75",
+      "l": 414.7,
+      "r": 737.3,
+      "t": 38.4,
+      "b": 533.8,
+      "w": 42
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=3840&q=75",
+      "l": 61.4,
+      "r": 553,
+      "t": 586.3,
+      "b": 726.5,
+      "w": 64
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=3840&q=75",
+      "l": 337.9,
+      "r": 721.9,
+      "t": 793.2,
+      "b": 1081.2,
+      "w": 50
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fny%2F01.jpg&w=3840&q=75",
+      "l": 46.1,
+      "r": 414.7,
+      "t": 1015.4,
+      "b": 1292.1,
+      "w": 48
+     }
+    ]
+   },
+   "fin": {
+    "y": 4301,
+    "fin": 4301,
+    "vw": 768,
+    "vh": 1024,
+    "fotos": [
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F05.jpg&w=3840&q=75",
+      "l": 353.3,
+      "r": 691.2,
+      "t": -257.6,
+      "b": 193,
+      "w": 44
+     },
+     {
+      "src": "/_next/image?url=%2Fphotos%2Fsol%2F07.jpg&w=3840&q=75",
+      "l": 153.6,
+      "r": 506.9,
+      "t": 275.7,
+      "b": 746.7,
+      "w": 46
+     }
+    ]
+   }
+  }
+ }
+}

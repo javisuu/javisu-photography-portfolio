@@ -1,0 +1,69 @@
+{
+  "america": [
+    {
+      "tipo": "cita",
+      "foto": 6,
+      "ancho": 280,
+      "alto": 65,
+      "dx": -386.6,
+      "dy": 350,
+      "imgAncho": 818.8,
+      "imgAlto": 765
+    }
+  ],
+  "norte": [
+    {
+      "tipo": "cita",
+      "foto": 5,
+      "ancho": 280,
+      "alto": 89,
+      "dx": 802.9,
+      "dy": 338,
+      "imgAncho": 573.8,
+      "imgAlto": 765
+    },
+    {
+      "tipo": "cita",
+      "foto": 8,
+      "ancho": 280,
+      "alto": 89,
+      "dx": 731.2,
+      "dy": 338,
+      "imgAncho": 430.3,
+      "imgAlto": 765
+    }
+  ],
+  "sol": [
+    {
+      "tipo": "nota",
+      "foto": 2,
+      "ancho": 440,
+      "alto": 160.8,
+      "dx": 669.8,
+      "dy": 80,
+      "imgAncho": 573.8,
+      "imgAlto": 765
+    },
+    {
+      "tipo": "cita",
+      "foto": 3,
+      "ancho": 280,
+      "alto": 65,
+      "dx": -509.1,
+      "dy": 350,
+      "imgAncho": 573.8,
+      "imgAlto": 765
+    },
+    {
+      "tipo": "cita",
+      "foto": 6,
+      "ancho": 280,
+      "alto": 113,
+      "dx": -509.1,
+      "dy": 326,
+      "imgAncho": 573.8,
+      "imgAlto": 765
+    }
+  ],
+  "ny": []
+}

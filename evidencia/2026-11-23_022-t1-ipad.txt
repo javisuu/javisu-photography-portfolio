@@ -1,0 +1,484 @@
+DIAGNOSTICO 2026-11-23 · feat/022-notas-album-movil · 26bbd76 · 5 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+omitido (--skip-build)
+
+dispositivo: ipad (iPad Pro 11) · chromium
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  ipad (iPad Pro 11) · chromium
+  medido: 834x1194 · dpr 2 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 834x1194 · dpr 2 · hasTouch true
+  user agent: Mozilla/5.0 (iPad; CPU OS 12_2 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, transicion, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0
+}
+  consola:
+    [warning] Image with src "/photos/america/03.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading · http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js
+    [warning] Image with src "/photos/america/05.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading · http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+
+=== ruta /albums ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1668,
+      2388
+    ],
+    "css": [
+      834,
+      1194
+    ],
+    "expected": [
+      1668,
+      2388
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x69c400424a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x69c400424a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x69c400424a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x69c400424a00]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/album/america
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 834,
+  "vh": 1194,
+  "dpr": 2,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 834,
+  "clientWidth": 834,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1668,
+      1660
+    ],
+    "css": [
+      834,
+      830
+    ],
+    "expected": [
+      1668,
+      1660
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 15 fotos medidas a 834x1194
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+  /album/america: 10 fotos medidas a 834x1194
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+  /album/norte: 9 fotos medidas a 834x1194
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+  /album/sol: 8 fotos medidas a 834x1194
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+  /album/ny: 8 fotos medidas a 834x1194
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 834x1194 · <img> ocultas por GL 0 · intersecan 3 · se ven 3
+    #0 america/01.jpg · caja 409,52,392,294 · opacity 1 · pintada 0.97
+    #1 america/03.jpg · caja 33,291,450,338 · opacity 1 · pintada 0.94
+    #2 america/05.jpg · caja 217,722,534,400 · opacity 1 · pintada 1.00
+  1 alturas · scrollY 1194 · 834x1194 · <img> ocultas por GL 0 · intersecan 5 · se ven 5
+    #3 america/06.jpg · caja 92,78,334,312 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 459,136,342,287 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 250,503,434,325 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 33,888,367,489 · opacity 1 · pintada 0.77
+    #7 norte/02.jpg · caja 450,1016,350,538 · opacity 1 · pintada 0.57
+  2 alturas · scrollY 2388 · 834x1194 · <img> ocultas por GL 0 · intersecan 5 · se ven 5
+    #6 norte/01.jpg · caja 33,-265,367,489 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 450,-111,350,538 · opacity 1 · pintada 1.00
+    #8 norte/03.jpg · caja 67,482,534,152 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 367,705,417,313 · opacity 1 · pintada 1.00
+    #10 ny/01.jpg · caja 50,950,400,300 · opacity 1 · pintada 0.70
+  3 alturas · scrollY 3582 · 834x1194 · <img> ocultas por GL 0 · intersecan 4 · se ven 4
+    #10 ny/01.jpg · caja 50,-176,400,300 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 434,98,350,467 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 83,339,334,445 · opacity 1 · pintada 0.98
+    #13 sol/05.jpg · caja 384,773,367,489 · opacity 1 · pintada 0.83
+  fotos que se ven por altura (0, 1, 2, 3): 3, 5, 5, 4
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== visor del atlas ===
+  toque 1: grupo de 7 (/photos/ny/01.jpg, ...) en 293,599
+  toque 2: marca sola (/photos/ny/07.jpg) en 402,723
+  visor: caja 500,0,334,1194 (x, y, ancho, alto) · viewport 834x1194 · scrollWidth 834 / clientWidth 834
+  ok   tocar una marca abre el visor
+  ok   visor dentro del viewport
+  ok   visor sin scroll horizontal
+
+=== gestos ===
+  / deslizar hacia arriba: scrollY 0 -> 582
+  ok   scroll tactil
+  /album/america deslizar hacia arriba: scrollY 0 -> 582
+  ok   scroll tactil
+  /albums deslizar a la izquierda: album abierto 01 -> 01
+  FALLA deslizar cambia de album · 01 -> 01
+  /atlas arrastrar 120 px: lambda0 -0.803 -> -2.849 (esperado ~-1.082, sin inercia)
+  ok   arrastre tactil
+  /atlas pellizcar 80 -> 220 px: R 349 -> 958 (min 266, max 4563)
+  ok   pellizco tactil
+  / deslizar hacia arriba (reduced motion): scrollY 0 -> 582
+  ok   scroll tactil (reduced motion)
+  /album/america deslizar hacia arriba (reduced motion): scrollY 0 -> 582
+  ok   scroll tactil (reduced motion)
+  /albums deslizar a la izquierda (reduced motion): album abierto 01 -> 01
+  FALLA deslizar cambia de album (reduced motion) · 01 -> 01
+  /atlas arrastrar 120 px (reduced motion): lambda0 -0.803 -> -2.986 (esperado ~-1.082, sin inercia)
+  ok   arrastre tactil (reduced motion)
+  /atlas pellizcar 80 -> 220 px (reduced motion): R 349 -> 958 (min 266, max 4563)
+  ok   pellizco tactil (reduced motion)
+
+=== navegacion ===
+  834x1194 · movil true · horizontal false
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA9 contador encima de la barra
+  ok   navegacion · CA9 CREDITS 40 x 120, sin tapar, en su sitio
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA13 titulo, descripcion y contador del carrusel encima de la barra
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA10 sin control del borde derecho
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA13 credito OSM encima de la barra
+  ok   navegacion · CA13 controles del atlas encima de la barra y sin tapar
+  ok   navegacion · CA4 toque en ABOUT ME
+  ok   navegacion · CA4 toque en ALBUMS
+  ok   navegacion · CA4 toque en ATLAS
+  ok   navegacion · CA10 arriba: barra general y ← Albums en el bloque de titulo
+  ok   navegacion · CA10 tras el bloque: barra del album con ← ALBUMS y flechas de 44 px
+  ok   navegacion · CA10 contador = foto en el centro
+  ok   navegacion · CA10 flecha siguiente lleva a la foto siguiente
+  ok   navegacion · CA8 disparador hermano del <h1>, 80 px, sin transform ni opacity
+  ok   navegacion · CA8 blend sin ancestros, panel cerrado
+  ok   navegacion · CA6 tocar una foto no abre el panel
+  ok   navegacion · CA6 tocar el centro bajo la banda no abre el panel
+  ok   navegacion · CA6 tocar el centro sobre la banda no abre el panel
+  ok   navegacion · CA5 apertura <= 300 ms
+  ok   navegacion · CA5 aria-expanded true y un solo <main>
+  ok   navegacion · CA8 blend sin ancestros, panel abierto
+  ok   navegacion · CA5 cuatro enlaces en la mitad inferior, sin tapar
+  ok   navegacion · CA5 arrastre de 1000 px con el panel abierto no mueve el landing
+  ok   navegacion · CA5 Close cierra en <= 260 ms
+  ok   navegacion · CA5 tras cerrar, scrollY igual y aria-expanded false
+  ok   navegacion · CA8 blend sin ancestros, panel cerrado de nuevo
+  ok   navegacion · CA8 disparador hermano del <h1>, 80 px, sin transform ni opacity (reduced motion)
+  ok   navegacion · CA8 blend sin ancestros, panel cerrado (reduced motion)
+  ok   navegacion · CA6 tocar una foto no abre el panel (reduced motion)
+  ok   navegacion · CA6 tocar el centro bajo la banda no abre el panel (reduced motion)
+  ok   navegacion · CA6 tocar el centro sobre la banda no abre el panel (reduced motion)
+  ok   navegacion · CA5 apertura <= 260 ms (reduced motion)
+  ok   navegacion · CA5 aria-expanded true y un solo <main> (reduced motion)
+  ok   navegacion · CA8 blend sin ancestros, panel abierto (reduced motion)
+  ok   navegacion · CA5 cuatro enlaces en la mitad inferior, sin tapar (reduced motion)
+  ok   navegacion · CA7 los enlaces no se mueven al abrir
+  ok   navegacion · CA5 arrastre de 1000 px con el panel abierto no mueve el landing (reduced motion)
+  ok   navegacion · CA5 Close cierra en <= 260 ms (reduced motion)
+  ok   navegacion · CA5 tras cerrar, scrollY igual y aria-expanded false (reduced motion)
+  ok   navegacion · CA7 los enlaces no se mueven al cerrar
+  ok   navegacion · CA8 blend sin ancestros, panel cerrado de nuevo (reduced motion)
+
+=== landing-movil ===
+  834x1194 · movil true · horizontal false
+  reposo · fotos visibles 15 · lienzos 0 · lenis false · h1 166.8 px · descriptor 12 px, alto 36
+  ok   landing-movil · CA7 sin canvas GL ni <img> ocultas
+  ok   landing-movil · CA8 sin Lenis (html sin .lenis)
+  ok   landing-movil · CA11 wordmark a 166.8 px
+  ok   landing-movil · CA11 wordmark con >= 40 px de margen a cada lado
+  ok   landing-movil · CA12 descriptor a 12 px en dos lineas, sin cortar el nombre, encima de la barra
+  ok   landing-movil · CA8 arrastre de N px mueve scrollY N ± 2 px (pasado el umbral del dedo)
+  hasta el final: 11 arrastres · scrollY 4629 de 4629 · fotos visibles 15 · frames {"frames":931,"median":16.7,"p95":50,"max":166.6,"long":35}
+  ok   landing-movil · CA9 final sin vuelta, 15 fotos, la ultima entera encima de la barra
+  ok   landing-movil · CA13 el panel salta al llegar al final, quieto mientras esta abierto, y Close vuelve al mismo sitio
+  ok   landing-movil · CA13 un vaiven corto al final no lo vuelve a abrir
+  ok   landing-movil · CA13 tras subir y volver a bajar, salta otra vez
+  ok   landing-movil · CA10 cada foto se mueve 0,9-1,1 veces el scroll
+  ok   landing-movil · CA10 con reduced motion, todas 1,0 ± 0,01
+  ok   landing-movil · CA13 en una carga nueva salta otra vez
+  anchos (fraccion del viewport): america/01.jpg 47.0 · america/03.jpg 54.0 · america/05.jpg 64.0 · america/06.jpg 40.0 · america/08.jpg 41.0 · america/09.jpg 52.0 · norte/01.jpg 44.0 · norte/02.jpg 42.0 · norte/03.jpg 64.0 · norte/06.jpg 50.0 · ny/01.jpg 48.0 · ny/02.jpg 42.0 · sol/03.jpg 40.0 · sol/05.jpg 44.0 · sol/07.jpg 46.0
+  ok   landing-movil · CA3 cada foto en pantalla cabe a lo alto y a lo ancho
+  ok   landing-movil · CA3 ninguna foto sale por los lados
+  ok   landing-movil · CA4 ancho de cada foto entre el 40 y el 65 % (tablet)
+  ok   landing-movil · CA7 tras girar a horizontal, sin canvas y sin errores
+
+=== notas-movil ===
+  america cita foto 6 · 280x65 en x 64 (fila 64, util 706) · rejilla contents · aire 48 · foto 583.8 de 706 · 16px/24px italic rgb(136, 136, 136)
+  norte cita foto 5 · 280x89 en x 64 (fila 64, util 706) · rejilla contents · aire 48 · foto 583.8 de 706 · 16px/24px italic rgb(136, 136, 136)
+  norte cita foto 8 · 280x89 en x 64 (fila 64, util 706) · rejilla contents · aire 48 · foto 570.7 de 570.8 · 16px/24px italic rgb(136, 136, 136)
+  sol nota foto 2 · 440x160.8 en x 64 (fila 64, util 706) · rejilla contents · aire 48 · foto 583.8 de 706 · 18px/29.7px normal rgb(102, 102, 102)
+  sol cita foto 3 · 280x65 en x 64 (fila 64, util 706) · rejilla contents · aire 48 · foto 583.8 de 706 · 16px/24px italic rgb(136, 136, 136)
+  sol cita foto 6 · 280x113 en x 64 (fila 64, util 706) · rejilla contents · aire 48 · foto 583.8 de 706 · 16px/24px italic rgb(136, 136, 136)
+  ok   CA4 cada texto debajo del pie de su foto, sin tocar la foto
+  ok   CA5 ningun texto sale del viewport
+  ok   CA5 cada cita de >= 260 px (o el ancho util)
+  FALLA CA6 la foto de una fila con texto mide lo que sin texto (± 1 px) · america cita 6, norte cita 5, sol nota 2, sol cita 3, sol cita 6
+  FALLA CA7 cita a 22/28 px, italica, #111111, <= 300 px · america 6: 16px/24px italic rgb(136, 136, 136) 280 px, norte 5: 16px/24px italic rgb(136, 136, 136) 280 px, norte 8: 16px/24px italic rgb(136, 136, 136) 280 px, sol 3: 16px/24px italic rgb(136, 136, 136) 280 px, sol 6: 16px/24px italic rgb(136, 136, 136) 280 px
+  ok   CA7 aire de 48 ± 1 px entre el pie y el texto
+  ok   CA7 texto en el margen izquierdo de la fila (± 1 px)
+
+=== transicion ===
+omitido (--dispositivo)
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 1 repeticion · cache vacia en cada una
+  1: inicio 915 · participantes 5 · fase B 1289 · rezagadas 0 · reposo 2039
+     frame del arranque 50 ms · despues: frames >50 ms 0, frame max 50 ms · long tasks 1 (104 ms) · [entrance] start x1
+     al monton: 906 1022 1072 1156 1239
+  perfil movil: el landing va sin GL (spec 021); en / se mide solo lo que se ve
+
+=== fallo de textura forzado ===
+  / · 0 alturas · sin fallo se ven 3 · con fallo: scrollY 0 · <img> ocultas 0 · intersecan 3 · se ven 3 · pintada 0.97 0.94 1.00
+  / · 1 alturas · sin fallo se ven 5 · con fallo: scrollY 1194 · <img> ocultas 0 · intersecan 5 · se ven 5 · pintada 1.00 1.00 1.00 0.77 0.57
+  ok   CA3 con createImageBitmap fallando se ven las mismas fotos
+  ok   CA3 sin errores de consola salvo [GLSurface]
+  /album/america · 0 alturas · sin fallo se ven 2 · con fallo: scrollY 0 · <img> ocultas 0 · intersecan 2 · se ven 2 · pintada 1.00 0.37
+  /album/america · 1 alturas · sin fallo se ven 1 · con fallo: scrollY 1194 · <img> ocultas 0 · intersecan 2 · se ven 1 · pintada 1.00 0.00
+  /album/america · 2 alturas · sin fallo se ven 2 · con fallo: scrollY 2388 · <img> ocultas 0 · intersecan 3 · se ven 2 · pintada 0.96 1.00 —
+  ok   CA3 con createImageBitmap fallando se ven las mismas fotos
+  ok   CA3 sin errores de consola salvo [GLSurface]
+
+=== bitmap vacio forzado ===
+  desde la <img> · / · 0 alturas · sin fallo se ven 3 · forzado: scrollY 0 · <img> ocultas 0 · intersecan 3 · se ven 3 · pintada 0.97 0.94 1.00
+  desde la <img> · / · 1 alturas · sin fallo se ven 5 · forzado: scrollY 1194 · <img> ocultas 0 · intersecan 5 · se ven 5 · pintada 1.00 1.00 1.00 0.77 0.57
+  desde la <img> · / · rescatados — · caida al DOM: no
+  ok   E2 bitmap vacio desde la <img>: se ven las mismas fotos
+  ok   E2 bitmap vacio desde la <img>: landing movil sin instancia GL
+  ok   E2 bitmap vacio desde la <img>: sin errores de consola salvo [GLSurface]
+  desde la <img> · /album/america · 0 alturas · sin fallo se ven 2 · forzado: scrollY 0 · <img> ocultas 9 · intersecan 2 · se ven 2 · pintada 1.00 0.31
+  desde la <img> · /album/america · 1 alturas · sin fallo se ven 1 · forzado: scrollY 1194 · <img> ocultas 9 · intersecan 2 · se ven 1 · pintada 0.89 0.00
+  desde la <img> · /album/america · 2 alturas · sin fallo se ven 2 · forzado: scrollY 2388 · <img> ocultas 9 · intersecan 3 · se ven 2 · pintada 0.81 1.00 —
+  desde la <img> · /album/america · rescatados 9 · caida al DOM: no
+  ok   E2 bitmap vacio desde la <img>: se ven las mismas fotos
+  ok   E2 bitmap vacio desde la <img>: rescatado sin caer al DOM
+  ok   E2 bitmap vacio desde la <img>: sin errores de consola salvo [GLSurface]
+  siempre · / · 0 alturas · sin fallo se ven 3 · forzado: scrollY 0 · <img> ocultas 0 · intersecan 3 · se ven 3 · pintada 0.97 0.94 1.00
+  siempre · / · 1 alturas · sin fallo se ven 5 · forzado: scrollY 1194 · <img> ocultas 0 · intersecan 5 · se ven 5 · pintada 1.00 1.00 1.00 0.77 0.57
+  siempre · / · rescatados — · caida al DOM: no
+  ok   E2 bitmap vacio siempre: se ven las mismas fotos
+  ok   E2 bitmap vacio siempre: landing movil sin instancia GL
+  ok   E2 bitmap vacio siempre: sin errores de consola salvo [GLSurface]
+  siempre · /album/america · 0 alturas · sin fallo se ven 2 · forzado: scrollY 0 · <img> ocultas 0 · intersecan 2 · se ven 2 · pintada 1.00 0.37
+  siempre · /album/america · 1 alturas · sin fallo se ven 1 · forzado: scrollY 1194 · <img> ocultas 0 · intersecan 2 · se ven 1 · pintada 1.00 0.00
+  siempre · /album/america · 2 alturas · sin fallo se ven 2 · forzado: scrollY 2388 · <img> ocultas 0 · intersecan 3 · se ven 2 · pintada 0.96 1.00 —
+  siempre · /album/america · rescatados 0 · caida al DOM: bitmap vacio tambien desde el fichero (foto 3)
+  ok   E2 bitmap vacio siempre: se ven las mismas fotos
+  ok   E2 bitmap vacio siempre: cae al DOM
+  ok   E2 bitmap vacio siempre: sin errores de consola salvo [GLSurface]
+
+=== contexto perdido forzado ===
+  / · 0 contextos perdidos · 0 alturas · sin fallo se ven 3 · tras perderlo: scrollY 0 · <img> ocultas 0 · intersecan 3 · se ven 3 · pintada 0.97 0.94 1.00
+  / · 0 contextos perdidos · 1 alturas · sin fallo se ven 5 · tras perderlo: scrollY 1194 · <img> ocultas 0 · intersecan 5 · se ven 5 · pintada 1.00 1.00 1.00 0.77 0.57
+  ok   CA4 con el contexto perdido se ven las mismas fotos
+  ok   CA4 sin errores de consola salvo [GLSurface]
+  /album/america · 1 contextos perdidos · 0 alturas · sin fallo se ven 2 · tras perderlo: scrollY 0 · <img> ocultas 0 · intersecan 2 · se ven 2 · pintada 1.00 0.37
+  /album/america · 1 contextos perdidos · 1 alturas · sin fallo se ven 1 · tras perderlo: scrollY 1194 · <img> ocultas 0 · intersecan 2 · se ven 1 · pintada 1.00 0.00
+  /album/america · 1 contextos perdidos · 2 alturas · sin fallo se ven 2 · tras perderlo: scrollY 2388 · <img> ocultas 0 · intersecan 3 · se ven 2 · pintada 0.96 1.00 —
+  ok   CA4 con el contexto perdido se ven las mismas fotos
+  /album/america → / en navegacion blanda tras perder el contexto: scrollY 0 · <img> ocultas 0 · intersecan 3 · se ven 3 · pintada 0.97 0.94 1.00 · sin fallo se ven 3
+  ok   CA4 vuelta a / tras perder el contexto en un album se ven las fotos
+  ok   CA4 sin errores de consola salvo [GLSurface]
+
+=== panel diag ===
+  /?diag · panel visible
+    diag · 834x1194 · dpr 2
+    GL · ninguna instancia todavia
+  ok   CA5 ?diag en el landing movil: sin instancia GL
+  /album/america?diag · panel visible
+    diag · 834x1194 · dpr 2
+    GL · album
+    contexto webgl2 · perdido no · programa ok
+    texturas 9 de 9 · mayor 1200x1844 · max GPU 8192
+    fallos de decodificacion 0 · caida al DOM: no
+    ultimo error: —
+    bitmaps vacios 0 de 9 · rescatados 0 · texturas vacias 0 de 9
+    pintados 1 de 1 visibles
+    canvas 834x1194+0,0 · buffer 1668x2388
+    ventana 834x1194 · visual 834x1194+0
+    estilo block · visible · opacidad 1 · z 0
+  ok   CA5 panel ?diag visible con sus campos
+  ok   E1 muestras ?diag: sin bitmaps ni texturas vacios y cada foto visible pintada
+  ok   CA4 sin fallo forzado GLSurface no cae al DOM
+  sin ?diag: 0 paneles en 6 rutas
+  ok   CA5 sin ?diag no hay panel
+
+=== calidad del landing ===
+  america/01.jpg · pide w=828 · caja 392 px · resolucion 1.06
+  america/03.jpg · pide w=1080 · caja 450 px · resolucion 1.2
+  america/05.jpg · pide w=1080 · caja 534 px · resolucion 1.01
+  ok   CA9 cada foto del landing pide al menos su ancho por min(dpr, 2)
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        omitido
+dispositivo  ipad (iPad Pro 11) · chromium
+consola      0 errores en 6 rutas
+invariantes  175 de 179
+entrada      arranque 50 ms · fase B 1289 ms · reposo 2039 ms · frames >50 ms: 0
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 3, 5, 5, 4
+
+FALLOS
+- /albums · deslizar cambia de album · 01 -> 01
+- /albums · deslizar cambia de album (reduced motion) · 01 -> 01
+- notas-movil · CA6 la foto de una fila con texto mide lo que sin texto (± 1 px) · america cita 6, norte cita 5, sol nota 2, sol cita 3, sol cita 6
+- notas-movil · CA7 cita a 22/28 px, italica, #111111, <= 300 px · america 6: 16px/24px italic rgb(136, 136, 136) 280 px, norte 5: 16px/24px italic rgb(136, 136, 136) 280 px, norte 8: 16px/24px italic rgb(136, 136, 136) 280 px, sol 3: 16px/24px italic rgb(136, 136, 136) 280 px, sol 6: 16px/24px italic rgb(136, 136, 136) 280 px
+

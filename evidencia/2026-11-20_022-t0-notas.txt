@@ -1,0 +1,21 @@
+== iphone
+  america vw 390 · cita foto 6 · ancho 280 px · 2 lineas · 16px · x 24 · img 24+342x320 · debajo true
+  norte vw 390 · cita foto 5 · ancho 280 px · 3 lineas · 16px · x 24 · img 24+342x456 · debajo true
+  norte vw 390 · cita foto 8 · ancho 280 px · 3 lineas · 16px · x 24 · img 24+317x564 · debajo true
+  sol vw 390 · nota foto 2 · ancho 342 px · 5 lineas · 18px · x 24 · img 24+342x456 · debajo true
+  sol vw 390 · cita foto 3 · ancho 280 px · 2 lineas · 16px · x 24 · img 24+342x456 · debajo true
+  sol vw 390 · cita foto 6 · ancho 280 px · 4 lineas · 16px · x 24 · img 24+342x456 · debajo true
+== ipad-mini
+  america vw 768 · cita foto 6 · ancho 71 px · 10 lineas · 16px · x 64 · img 135+569x531 · debajo false
+  norte vw 768 · cita foto 5 · ancho 62 px · 15 lineas · 16px · x 642 · img 64+578x771 · debajo false
+  norte vw 768 · cita foto 8 · ancho 151 px · 5 lineas · 16px · x 554 · img 64+489x870 · debajo false
+  sol vw 768 · nota foto 2 · ancho 297 px · 6 lineas · 18px · x 407 · img 64+247x330 · debajo false
+  sol vw 768 · cita foto 3 · ancho 42 px · 13 lineas · 16px · x 64 · img 106+598x797 · debajo false
+  sol vw 768 · cita foto 6 · ancho 79 px · 14 lineas · 16px · x 64 · img 143+561x748 · debajo false
+== iphone-h
+  america vw 750 · cita foto 6 · ancho 280 px · 2 lineas · 16px · x 415 · img 415+311x291 · debajo true
+  norte vw 750 · cita foto 5 · ancho 280 px · 3 lineas · 16px · x 24 · img 24+218x291 · debajo true
+  norte vw 750 · cita foto 8 · ancho 280 px · 3 lineas · 16px · x 24 · img 24+163x291 · debajo true
+  sol vw 750 · nota foto 2 · ancho 440 px · 4 lineas · 18px · x 24 · img 24+218x291 · debajo true
+  sol vw 750 · cita foto 3 · ancho 280 px · 2 lineas · 16px · x 446 · img 446+218x291 · debajo true
+  sol vw 750 · cita foto 6 · ancho 280 px · 4 lineas · 16px · x 426 · img 426+218x291 · debajo true

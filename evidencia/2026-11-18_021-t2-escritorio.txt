@@ -1,0 +1,945 @@
+DIAGNOSTICO 2026-11-18 · feat/021-landing-movil · f2c46f1 · 5 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+omitido (--skip-build)
+
+=== next dev en :3100 ===
+ok
+
+=== ruta / ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x68c400433400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x68c400433400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x68c400433400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/
+    [warning] [.WebGL-0x68c400433400]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /albums ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      1440,
+      900
+    ],
+    "css": [
+      1440,
+      900
+    ],
+    "expected": [
+      1440,
+      900
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+{
+  "vw": 1440,
+  "vh": 900,
+  "dpr": 1,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 1440,
+  "clientWidth": 1440,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1440,
+      609
+    ],
+    "css": [
+      1440,
+      609
+    ],
+    "expected": [
+      1440,
+      609
+    ]
+  }
+}
+  consola limpia
+  ok   sin errores de consola
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+  /: {"gutter":0,"scrollHeight":3780,"vh":900,"photos":30,"worst":{"src":"image?url=%2Fphotos%2Fnorte%2F03.jpg&w=640&q=75","dev":0.00651615210868306},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 600
+  ok   scroll con rueda
+  /albums: {"gutter":0,"scrollHeight":900,"vh":900,"photos":29,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F05.jpg&w=750&q=75","dev":0.0019999999999998908}}
+  ok   sin barra de scroll
+  /about: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /album/america: {"gutter":0,"scrollHeight":9663,"vh":900,"photos":10,"worst":{"src":"image?url=%2Fphotos%2Famerica%2F04.jpg&w=1080&q=75","dev":0.001400917949551439},"canvas":{"css":[1440,900],"viewport":[1440,900]}}
+  ok   sin barra de scroll
+  ok   proporcion de las fotos
+  ok   canvas GL = viewport
+    rueda: scrollY 0 -> 600
+  ok   scroll con rueda
+    teclado: scrollY 0 -> 787
+  ok   scroll con teclado
+    teclado (reduced motion): scrollY 0 -> 787
+  ok   scroll con teclado (reduced motion)
+  /credits: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas: {"gutter":0,"scrollHeight":900,"vh":900,"photos":0,"worst":null}
+  ok   sin barra de scroll
+  /atlas, tira del visor: barra 0 px · se desplaza
+  ok   tira del visor sin barra de scroll
+
+=== navegacion ===
+  1440x900 · movil false · horizontal false
+  ok   navegacion · fuera de movil: sin barra, panel ni disparador
+  ok   navegacion · fuera de movil: nav de escritorio, contador y CREDITS
+  ok   navegacion · fuera de movil: sin barra, panel ni disparador
+  ok   navegacion · fuera de movil: ← Suquia
+  ok   navegacion · fuera de movil: sin barra, panel ni disparador
+  ok   navegacion · fuera de movil: ← Suquia
+  ok   navegacion · fuera de movil: sin barra, panel ni disparador
+  ok   navegacion · fuera de movil: sin barra, panel ni disparador
+  ok   navegacion · fuera de movil: ← Suquia
+  ok   navegacion · fuera de movil: sin barra, panel ni disparador
+  ok   navegacion · fuera de movil: ← Suquia
+
+=== llegada al album ===
+ms desde el clic (carga directa: desde el inicio de la navegacion) · 1 repeticion · cache vacia en cada una
+  1: carrusel → album → /album/america · 58 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 813 · <img> oculta 2238 · primer fotograma con foto entera 2253
+     secuencia ##########################################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: NEXT ALBUM → /album/norte · 47 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 1148 · <img> oculta 1026 · primer fotograma con foto entera 1375
+     secuencia ###############################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  1: carga directa → /album/norte · 47 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 620 · <img> oculta 1303 · primer fotograma con foto entera 1419
+     secuencia ....###########################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   sin fundido
+  reduced motion, carrusel → album → /album/america · 43 fotogramas · en blanco con opacity 1: 0 · parpadeo: no
+     foto 1 cargada 538 · <img> oculta 1617 · primer fotograma con foto entera 1627
+     secuencia ###########################################
+  ok   foto 1 medible
+  ok   sin hueco en blanco
+  ok   sin parpadeo
+  ok   fundido de la transicion (spec 019)
+  sin WebGL (--disable-3d-apis, webgl no disponible), carga directa → /album/norte · opacity 1 a 650 ms · muestras a medio fundido 0 · al final opacity 1, visible
+  ok   WebGL desactivado de verdad
+  ok   foto 1 visible sin esperar a GL
+  /album/america: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/norte: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/sol: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+  /album/ny: foto 1 loading=eager fetchpriority=high · resto lazy: si
+  ok   foto 1 eager y fetchpriority high
+  ok   resto de fotos lazy
+
+=== transicion ===
+4 albumes · CA10 con 10 vuelos por album · 1440x900
+  america: 68 fotogramas · eventos clic@0 relevo-textura@6 subida@679 asentado@1267
+  ok   CA5 sube la lamina que toca
+  ok   CA5 la abierta baja
+  ok   CA5 derecha por abajo, izquierda por arriba
+  ok   CA4 lamina sobre la foto 1
+  ok   CA4 imagen entera
+  ok   CA4 panel a 0
+  ok   CA6 solo cambia la que sube, antes de 80 ms, bajo su panel
+  ok   CA6 la abierta no cambia de foto
+  ok   CA6 sin panel, solo fotos del album abierto
+     CA7 cambios sueltos (no animados): capa:sube#23:div|background-color · capa:sube#23:div|background-image
+  ok   CA7 solo transform y opacidad animados
+  ok   CA8 lo que baja empieza en orden de x
+  ok   CA8 sin fundido hasta salir
+  FALLA CA8b duracion · 1267 ms
+  ok   CA3 titulo aterriza en su sitio
+  ok   CA3 titulo: nunca los dos visibles, nunca ninguno
+  ok   CA3 descripcion aterriza en su sitio
+  ok   CA3 descripcion: nunca los dos visibles, nunca ninguno
+  ok   CA3 titulo y descripcion no van como bloque
+  ok   CA3b etiqueta quieta, con fundido
+  ok   CA9 sin canvas durante el vuelo
+  ok   CA9 <img> visibles durante el vuelo
+  ok   CA9 <img> ocultas con 2 texturas subidas
+  ok   sin errores de consola
+     CA10 vuelo 1: 13 fotogramas desde el aterrizaje · en blanco 0 · <img> y canvas a la vez 0
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+     vuelta: vuelta@0 relevo-textura@156 vuelo-vuelta@160 reposo@1080
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+     vuelta con scroll (900 px): vuelta-fundido@0 reposo@439
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA13 el carrusel solo cambia de opacidad
+  FALLA CA13 duracion del fundido · 439 ms
+  ok   CA13 titulo continuo
+  ok   sin errores de consola
+  norte: 65 fotogramas · eventos clic@0 subida@484 asentado@1105
+  ok   CA5 sube la lamina que toca
+  ok   CA5 derecha por abajo, izquierda por arriba
+  ok   CA4 lamina sobre la foto 1
+  ok   CA4 imagen entera
+  ok   CA4 panel a 0
+  ok   CA6 ninguna lamina cambia de foto
+  ok   CA6 la abierta no cambia de foto
+  ok   CA6 sin panel, solo fotos del album abierto
+  ok   CA7 solo transform y opacidad animados
+  ok   CA8 lo que baja empieza en orden de x
+  ok   CA8 sin fundido hasta salir
+  FALLA CA8b duracion · 1105 ms
+  ok   CA3 titulo aterriza en su sitio
+  ok   CA3 titulo: nunca los dos visibles, nunca ninguno
+  ok   CA3 descripcion aterriza en su sitio
+  ok   CA3 descripcion: nunca los dos visibles, nunca ninguno
+  ok   CA3 titulo y descripcion no van como bloque
+  ok   CA3b etiqueta quieta, con fundido
+  ok   CA9 sin canvas durante el vuelo
+  ok   CA9 <img> visibles durante el vuelo
+  ok   CA9 <img> ocultas con 2 texturas subidas
+  ok   sin errores de consola
+     CA10 vuelo 1: 22 fotogramas desde el aterrizaje · en blanco 0 · <img> y canvas a la vez 0
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+     vuelta: vuelta@0 relevo-textura@168 vuelo-vuelta@174 reposo@1098
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+     vuelta con scroll (900 px): vuelta-fundido@0 reposo@456
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA13 el carrusel solo cambia de opacidad
+  FALLA CA13 duracion del fundido · 456 ms
+  ok   CA13 titulo continuo
+  ok   sin errores de consola
+  sol: 72 fotogramas · eventos clic@0 relevo-textura@6 subida@447 asentado@1046
+  ok   CA5 sube la lamina que toca
+  ok   CA5 la abierta baja
+  ok   CA5 derecha por abajo, izquierda por arriba
+  ok   CA4 lamina sobre la foto 1
+  ok   CA4 imagen entera
+  ok   CA4 panel a 0
+  ok   CA6 solo cambia la que sube, antes de 80 ms, bajo su panel
+  ok   CA6 la abierta no cambia de foto
+  ok   CA6 sin panel, solo fotos del album abierto
+  ok   CA7 solo transform y opacidad animados
+  ok   CA8 lo que baja empieza en orden de x
+  ok   CA8 sin fundido hasta salir
+  ok   CA8b duracion
+  ok   CA3 titulo aterriza en su sitio
+  ok   CA3 titulo: nunca los dos visibles, nunca ninguno
+  ok   CA3 descripcion aterriza en su sitio
+  ok   CA3 descripcion: nunca los dos visibles, nunca ninguno
+  ok   CA3 titulo y descripcion no van como bloque
+  ok   CA3b etiqueta quieta, con fundido
+  ok   CA9 sin canvas durante el vuelo
+  ok   CA9 <img> visibles durante el vuelo
+  ok   CA9 <img> ocultas con 2 texturas subidas
+  ok   sin errores de consola
+     CA10 vuelo 1: 30 fotogramas desde el aterrizaje · en blanco 0 · <img> y canvas a la vez 0
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+     vuelta: vuelta@0 relevo-textura@155 vuelo-vuelta@163 reposo@1086
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+     vuelta con scroll (900 px): vuelta-fundido@0 reposo@463
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA13 el carrusel solo cambia de opacidad
+  FALLA CA13 duracion del fundido · 463 ms
+  ok   CA13 titulo continuo
+  ok   sin errores de consola
+  ny: 70 fotogramas · eventos clic@0 subida@673 asentado@1285
+  ok   CA5 sube la lamina que toca
+  ok   CA5 derecha por abajo, izquierda por arriba
+  ok   CA4 lamina sobre la foto 1
+  ok   CA4 imagen entera
+  ok   CA4 panel a 0
+  ok   CA6 ninguna lamina cambia de foto
+  ok   CA6 la abierta no cambia de foto
+  ok   CA6 sin panel, solo fotos del album abierto
+  ok   CA7 solo transform y opacidad animados
+  ok   CA8 lo que baja empieza en orden de x
+  ok   CA8 sin fundido hasta salir
+  FALLA CA8b duracion · 1285 ms
+  ok   CA3 titulo aterriza en su sitio
+  ok   CA3 titulo: nunca los dos visibles, nunca ninguno
+  ok   CA3 descripcion aterriza en su sitio
+  ok   CA3 descripcion: nunca los dos visibles, nunca ninguno
+  ok   CA3 titulo y descripcion no van como bloque
+  ok   CA3b etiqueta quieta, con fundido
+  ok   CA9 sin canvas durante el vuelo
+  ok   CA9 <img> visibles durante el vuelo
+  ok   CA9 <img> ocultas con 2 texturas subidas
+  ok   sin errores de consola
+     CA10 vuelo 1: 5 fotogramas desde el aterrizaje · en blanco 0 · <img> y canvas a la vez 0
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+     vuelta: vuelta@0 relevo-textura@162 vuelo-vuelta@168 reposo@1086
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+  ok   CA10 sin blanco ni doble composicion
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA12 vuelta completa
+  ok   CA12 laminas en su reposo
+     vuelta con scroll (900 px): vuelta-fundido@0 reposo@467
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA13 el carrusel solo cambia de opacidad
+  FALLA CA13 duracion del fundido · 467 ms
+  ok   CA13 titulo continuo
+  ok   sin errores de consola
+  duracion de la ida: mediana 1055 · min 901 · max 1974 ms · fotogramas en blanco en total 0
+  CA5b america en plena estela: abrio america · rendija al clic 252.2,192.8,212.9,500 · apertura ~0.18 · eventos clic@0 relevo-textura@4 subida@453 asentado@1069
+  ok   parte del rect del clic
+  ok   la rendija iba a medio abrir
+  ok   CA4 aterriza en la foto 1
+  ok   rueda bloqueada durante el vuelo
+  CA8b rueda de 2000 px a los 200 ms: scrollY durante el vuelo 0 · al final 0
+  ok   CA11 sin transform durante la llegada
+  FALLA CA11 duracion del fundido · 1088 ms
+  ok   CA9 sin canvas durante el fundido
+  ok   CA9 <img> ocultas con 2 texturas subidas
+  ok   CA10 sin blanco ni doble composicion
+     reduced america, vuelta: cambios de transform en carrusel:div
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA11 el carrusel solo cambia de opacidad
+  FALLA CA11 duracion del fundido · 486 ms
+  ok   CA11 nada se mueve en la capa
+  ok   sin errores de consola
+  reduced america: ida clic-reducido@0 fundido@776 asentado@1088 · vuelta vuelta@0 reposo@486
+  ok   CA11 sin transform durante la llegada
+  FALLA CA11 duracion del fundido · 723 ms
+  ok   CA9 sin canvas durante el fundido
+  ok   CA9 <img> ocultas con 2 texturas subidas
+  ok   CA10 sin blanco ni doble composicion
+     reduced norte, vuelta: cambios de transform en carrusel:div
+  ok   vuelve al album abierto
+  ok   sin fotogramas vacios
+  ok   CA11 el carrusel solo cambia de opacidad
+  FALLA CA11 duracion del fundido · 472 ms
+  ok   CA11 nada se mueve en la capa
+  ok   sin errores de consola
+  reduced norte: ida clic-reducido@0 fundido@400 asentado@723 · vuelta vuelta@0 reposo@472
+
+=== scroll del album ===
+  rafaga en /album/america: 20 x 400 px cada 16 ms, en 2935 ms
+     recorrido 8000 px · al soltar la rueda iba por 7720 px (faltaban 280) · llega 401 ms despues de soltar
+     velocidad maxima 286 px/frame · normalizada 7.15 (curva GL a tope desde 1)
+  ok   la rafaga mueve la pagina
+  B10 /album/america → /album/norte: clic con la pagina moviendose 4014 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: — y 0 · max 0
+  FALLA NEXT ALBUM empieza arriba · scrollY —/0, max 0
+  B10 /album/norte → /album/sol: clic con la pagina moviendose 3598 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: — y 0 · max 0
+  FALLA NEXT ALBUM empieza arriba · scrollY —/0, max 0
+  B10 /album/sol → /album/ny: clic con la pagina moviendose 2679 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: — y 0 · max 0
+  FALLA NEXT ALBUM empieza arriba · scrollY —/0, max 0
+  B10 /album/ny → /album/america: clic con la pagina moviendose 3907 px en 2 frames · scrollY en el nuevo a 500 y 1500 ms: — y 0 · max 0
+  FALLA NEXT ALBUM empieza arriba · scrollY —/0, max 0
+
+=== textos del album ===
+  /album/america: 2 textos, 9 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 6: hueco 106.6 px, arriba 350 px, centro 0 px
+  ok   cita foto 6: sin solaparse y en el lado libre
+  ok   cita foto 6: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 6: no es la primera foto
+      hueco libre 64-557.2 px, desvio del centro 0 px
+  ok   cita foto 6: centrada en el hueco libre
+  ok   cita foto 6: foto entera y sin deformar
+  ok   cita foto 6: alineacion vertical
+  ok   cita foto 6: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+  /album/norte: 3 textos, 8 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+    cita foto 5: hueco 229.1 px, arriba 338 px, centro 0 px
+  ok   cita foto 5: sin solaparse y en el lado libre
+  ok   cita foto 5: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 5: no es la primera foto
+      hueco libre 637.8-1376 px, desvio del centro 0 px
+  ok   cita foto 5: centrada en el hueco libre
+  ok   cita foto 5: foto entera y sin deformar
+  ok   cita foto 5: alineacion vertical
+  ok   cita foto 5: escala de grises
+    cita foto 8: hueco 300.8 px, arriba 338 px, centro 0 px
+  ok   cita foto 8: sin solaparse y en el lado libre
+  ok   cita foto 8: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 8: no es la primera foto
+      hueco libre 494.3-1376 px, desvio del centro 0 px
+  ok   cita foto 8: centrada en el hueco libre
+  ok   cita foto 8: foto entera y sin deformar
+  ok   cita foto 8: alineacion vertical
+  ok   cita foto 8: escala de grises
+  ok   #photo-2 centra la foto 3, despues del texto
+  /album/sol: 3 textos, 7 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    beside foto 2: hueco 96 px, arriba 80 px, centro -222.1 px
+  ok   beside foto 2: sin solaparse y en el lado libre
+  ok   beside foto 2: foto vertical o cuadrada en fila desplazada
+  ok   beside foto 2: no es la primera foto
+  ok   beside foto 2: foto entera y sin deformar
+  ok   beside foto 2: alineacion vertical
+  ok   beside foto 2: escala de grises
+  ok   beside foto 2: firma
+    cita foto 3: hueco 229.1 px, arriba 350 px, centro 0 px
+  ok   cita foto 3: sin solaparse y en el lado libre
+  ok   cita foto 3: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 3: no es la primera foto
+      hueco libre 64-802.3 px, desvio del centro 0 px
+  ok   cita foto 3: centrada en el hueco libre
+  ok   cita foto 3: foto entera y sin deformar
+  ok   cita foto 3: alineacion vertical
+  ok   cita foto 3: escala de grises
+    cita foto 6: hueco 229.1 px, arriba 326 px, centro 0 px
+  ok   cita foto 6: sin solaparse y en el lado libre
+  ok   cita foto 6: foto vertical o cuadrada en fila desplazada
+  ok   cita foto 6: no es la primera foto
+      hueco libre 64-802.3 px, desvio del centro 0 px
+  ok   cita foto 6: centrada en el hueco libre
+  ok   cita foto 6: foto entera y sin deformar
+  ok   cita foto 6: alineacion vertical
+  ok   cita foto 6: escala de grises
+  /album/ny: 1 textos, 7 filas de foto
+  ok   filas de foto = fotos del titulo
+  ok   como mucho un texto largo
+    between: caja 1200x171, desvio del centro 0 px
+  ok   between: centrado y entre dos fotos
+  ok   between: escala de grises
+  ok   between: firma
+  ok   #photo-2 centra la foto 3, despues del texto
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 1 repeticion · cache vacia en cada una
+  1: inicio 940 · participantes 7 · fase B 1427 · rezagadas 1 · reposo 2176
+     frame del arranque 467 ms · despues: frames >50 ms 5, frame max 67 ms · long tasks 3 (545 ms) · [entrance] start x1
+     al monton: 1226 1310 1310 1310 1310 1377 1427
+
+=== descifrado del wordmark ===
+  (a) carga directa en / · 14 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  (b) carga en /about, clic a / · 13 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (c) carga en /albums, clic a / · 12 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (d) / -> /about, resize alli, -> / · 13 muestras · reposo 595.2 px
+      columnas: 75, 117, 120, 117, 55, 111
+  ok   hubo descifrado
+  ok   ninguna columna a 0
+  ok   suma de columnas = SUQUIA en reposo (±2 px)
+  ok   columnas = carga directa (±1 px)
+  (e) reduced motion, carga en /about, clic a / · 0 muestras · h1 "SUQUIA"
+  ok   reduced motion sin descifrado
+  ok   reduced motion: wordmark dice SUQUIA
+
+=== atlas ===
+  fotos: 31 · con coordenadas: 31 · exact: 25
+  sonda: R 256 · minR 195 · maxR 4563 · caja 1440x609
+  ok   sonda window.__atlas presente
+  par exact mas cercano (coordenadas distintas): /photos/norte/05.jpg y /photos/sol/01.jpg · San Sebastián · 40 m · separarlo a 14 px pide R ≈ 2241044
+  reticula en el encuadre por defecto: 8401 puntos recorridos · 3184 pintados
+  clics en el grupo del par durante el zoom: 15 fotos a R 362 → 11 fotos a R 653 → 8 fotos a R 3461 → 7 fotos a R 36538 → 4 fotos a R 130972 → 3 fotos a R 3361566
+  rueda hasta el maximo: 9 pasos · R final 3361566 · separacion del par 21.0 px
+  frames durante la rueda (sin los clics): 49 · > 50 ms despues del primero: 0 · peor 33 ms · reticula al maximo: 14661 recorridos, 4954 pintados
+  ok   CA2 par mas cercano separado (> 14 px) al zoom maximo
+  ok   CA3 0 frames > 50 ms en la rueda hasta el maximo
+  clic en el grupo mas grande (15 fotos): R 256 → 362 · queda en 2 grupos (4+11) · media a 0.00 px del centro · frames > 50 ms: 0, peor 34 ms
+  ok   CA13 clic en un grupo: acerca hasta partirlo, centrado, sin frames > 50 ms
+  grupo elegido: R al abrirlo 2098 · 3 fotos (america/05.jpg·c, america/06.jpg·c, america/07.jpg·c)
+  visor: abierto · foto /photos/america/05.jpg · 31 miniaturas · recorrido de 31 fotos
+  ok   CA4 clic en grupo abre el visor, no la lista
+  ok   CA4 foto grande entera en el viewport, proporcion < 1 %
+  ok   CA4 se abre en la primera foto del grupo pulsado
+  ok   CA4 tira con una miniatura por foto del atlas
+  recorrido con la flecha (31 fotos): america/05.jpg → america/06.jpg → america/07.jpg → america/01.jpg → america/02.jpg → america/03.jpg → america/04.jpg → ny/01.jpg → ny/02.jpg → ny/03.jpg → ny/04.jpg → ny/05.jpg → ny/06.jpg → ny/07.jpg → norte/03.jpg → norte/04.jpg → norte/08.jpg → norte/07.jpg → sol/04.jpg → sol/06.jpg → sol/07.jpg → norte/01.jpg → norte/02.jpg → norte/05.jpg → sol/01.jpg → sol/02.jpg → sol/03.jpg → sol/05.jpg → norte/06.jpg → america/08.jpg → america/09.jpg
+  ok   CA5 la flecha pasa por todas las fotos del atlas, en el orden del recorrido, sin repetir
+  ok   CA7 sin coordenadas DMS en fotos city
+  globo con el visor abierto: tapado 36.1 % · lambda0 -0.0687 → -0.3862
+  ok   CA6 visor tapa <= 40 % del canvas
+  ok   CA6 el globo responde a un arrastre con el visor abierto
+  recorrido: San Blas → Puerto Escondido → San Miguel de Allende → Xilitla → New York City → Porto do Son → Santiago de Compostela → A Coruña → Villaquirán de la puebla → San Sebastián → Biarritz · 12152 km (en orden de albumes: 24644 km)
+  ok   CA14 recorrido: cada ciudad en un tramo, mas corto que el orden de los albumes
+  boton de entrada: visor en /photos/america/08.jpg
+  ok   CA16 el boton abre el visor en la primera foto del recorrido
+  vuelo New York City → Porto do Son (5266 km): centro a 0.00 px de la foto · R 4563 · su marca: norte/03.jpg, norte/04.jpg · frames > 50 ms: 1, peor 67 ms · visor en /photos/norte/03.jpg
+  FALLA CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms · 0.00 px, marca /photos/norte/03.jpg, /photos/norte/04.jpg, 1 frames largos, visor en /photos/norte/03.jpg
+  pin: norte/03.jpg en (460, 304) · su marca en (460, 304)
+  ok   CA17 pin sobre la marca de la foto del visor
+  reduced motion: primera muestra del visor opacity 1 · transform none
+  ok   CA8 reduced motion: visor sin fundido ni desplazamiento
+  zonas: 2 (san-sebastian, new-york-city) · excluidas: San Miguel de Allende · parejas que necesitan zona: 39 · fuera de zona: 0
+  ok   CA10 toda pareja exact sin separar a R 4563 cae en una zona (salvo ciudades excluidas)
+  fuera de zona (encuadre por defecto): 23 pasos · R final 4563
+  ok   CA11 fuera de zona el zoom se para en R <= 4563
+  ok   CA12 cita de OpenStreetMap visible
+
+=== fallo de textura forzado ===
+  / · 0 alturas · sin fallo se ven 7 · con fallo: scrollY 0 · <img> ocultas 0 · intersecan 7 · se ven 7 · pintada 0.96 1.00 1.00 1.00 1.00 1.00 1.00
+  / · 1 alturas · sin fallo se ven 7 · con fallo: scrollY 900 · <img> ocultas 0 · intersecan 7 · se ven 7 · pintada 1.00 1.00 1.00 1.00 0.98 1.00 1.00
+  ok   CA3 con createImageBitmap fallando se ven las mismas fotos
+  ok   CA3 sin errores de consola salvo [GLSurface]
+  /album/america · 0 alturas · sin fallo se ven 1 · con fallo: scrollY 0 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  /album/america · 1 alturas · sin fallo se ven 2 · con fallo: scrollY 900 · <img> ocultas 0 · intersecan 2 · se ven 2 · pintada 1.00 1.00
+  /album/america · 2 alturas · sin fallo se ven 1 · con fallo: scrollY 1800 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  ok   CA3 con createImageBitmap fallando se ven las mismas fotos
+  ok   CA3 sin errores de consola salvo [GLSurface]
+
+=== bitmap vacio forzado ===
+  desde la <img> · / · 0 alturas · sin fallo se ven 7 · forzado: scrollY 0 · <img> ocultas 30 · intersecan 7 · se ven 7 · pintada 0.96 1.00 1.00 1.00 1.00 1.00 1.00
+  desde la <img> · / · 1 alturas · sin fallo se ven 7 · forzado: scrollY 900 · <img> ocultas 30 · intersecan 7 · se ven 7 · pintada 1.00 1.00 1.00 1.00 0.98 1.00 1.00
+  desde la <img> · / · rescatados 22 · caida al DOM: no
+  ok   E2 bitmap vacio desde la <img>: se ven las mismas fotos
+  ok   E2 bitmap vacio desde la <img>: rescatado sin caer al DOM
+  ok   E2 bitmap vacio desde la <img>: sin errores de consola salvo [GLSurface]
+  desde la <img> · /album/america · 0 alturas · sin fallo se ven 1 · forzado: scrollY 0 · <img> ocultas 9 · intersecan 1 · se ven 1 · pintada 1.00
+  desde la <img> · /album/america · 1 alturas · sin fallo se ven 2 · forzado: scrollY 900 · <img> ocultas 9 · intersecan 2 · se ven 2 · pintada 1.00 1.00
+  desde la <img> · /album/america · 2 alturas · sin fallo se ven 1 · forzado: scrollY 1800 · <img> ocultas 9 · intersecan 1 · se ven 1 · pintada 1.00
+  desde la <img> · /album/america · rescatados 9 · caida al DOM: no
+  ok   E2 bitmap vacio desde la <img>: se ven las mismas fotos
+  ok   E2 bitmap vacio desde la <img>: rescatado sin caer al DOM
+  ok   E2 bitmap vacio desde la <img>: sin errores de consola salvo [GLSurface]
+  siempre · / · 0 alturas · sin fallo se ven 7 · forzado: scrollY 0 · <img> ocultas 0 · intersecan 7 · se ven 7 · pintada 0.96 1.00 1.00 1.00 1.00 1.00 1.00
+  siempre · / · 1 alturas · sin fallo se ven 7 · forzado: scrollY 900 · <img> ocultas 0 · intersecan 7 · se ven 7 · pintada 1.00 1.00 1.00 1.00 0.98 1.00 1.00
+  siempre · / · rescatados 0 · caida al DOM: bitmap vacio tambien desde el fichero (foto 3)
+  ok   E2 bitmap vacio siempre: se ven las mismas fotos
+  ok   E2 bitmap vacio siempre: cae al DOM
+  ok   E2 bitmap vacio siempre: sin errores de consola salvo [GLSurface]
+  siempre · /album/america · 0 alturas · sin fallo se ven 1 · forzado: scrollY 0 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  siempre · /album/america · 1 alturas · sin fallo se ven 2 · forzado: scrollY 900 · <img> ocultas 0 · intersecan 2 · se ven 2 · pintada 1.00 1.00
+  siempre · /album/america · 2 alturas · sin fallo se ven 1 · forzado: scrollY 1800 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  siempre · /album/america · rescatados 0 · caida al DOM: bitmap vacio tambien desde el fichero (foto 0)
+  ok   E2 bitmap vacio siempre: se ven las mismas fotos
+  ok   E2 bitmap vacio siempre: cae al DOM
+  ok   E2 bitmap vacio siempre: sin errores de consola salvo [GLSurface]
+
+=== contexto perdido forzado ===
+  / · 1 contextos perdidos · 0 alturas · sin fallo se ven 7 · tras perderlo: scrollY 0 · <img> ocultas 0 · intersecan 7 · se ven 7 · pintada 0.96 1.00 1.00 1.00 1.00 1.00 1.00
+  / · 1 contextos perdidos · 1 alturas · sin fallo se ven 7 · tras perderlo: scrollY 900 · <img> ocultas 0 · intersecan 7 · se ven 7 · pintada 1.00 1.00 1.00 1.00 0.98 1.00 1.00
+  ok   CA4 con el contexto perdido se ven las mismas fotos
+  ok   CA4 sin errores de consola salvo [GLSurface]
+  /album/america · 2 contextos perdidos · 0 alturas · sin fallo se ven 1 · tras perderlo: scrollY 0 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  /album/america · 2 contextos perdidos · 1 alturas · sin fallo se ven 2 · tras perderlo: scrollY 900 · <img> ocultas 0 · intersecan 2 · se ven 2 · pintada 1.00 1.00
+  /album/america · 2 contextos perdidos · 2 alturas · sin fallo se ven 1 · tras perderlo: scrollY 1800 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  ok   CA4 con el contexto perdido se ven las mismas fotos
+  /album/america → / en navegacion blanda tras perder el contexto: scrollY 0 · <img> ocultas 0 · intersecan 7 · se ven 7 · pintada 0.96 1.00 1.00 1.00 1.00 1.00 1.00 · sin fallo se ven 7
+  ok   CA4 vuelta a / tras perder el contexto en un album se ven las fotos
+  ok   CA4 sin errores de consola salvo [GLSurface]
+
+=== panel diag ===
+  /?diag · panel visible
+    diag · 1440x900 · dpr 1
+    GL · landing
+    contexto webgl2 · perdido no · programa ok
+    texturas 22 de 30 · mayor 640x480 · max GPU 8192
+    fallos de decodificacion 0 · caida al DOM: no
+    ultimo error: —
+    bitmaps vacios 0 de 22 · rescatados 0 · texturas vacias 0 de 22
+    pintados 5 de 5 visibles
+    canvas 1440x900+0,0 · buffer 1440x900
+    ventana 1440x900 · visual 1440x900+0
+    estilo block · visible · opacidad 1 · z 10
+  ok   CA5 panel ?diag visible con sus campos
+  ok   E1 muestras ?diag: sin bitmaps ni texturas vacios y cada foto visible pintada
+  ok   CA4 sin fallo forzado GLSurface no cae al DOM
+  /album/america?diag · panel visible
+    diag · 1440x900 · dpr 1
+    GL · landing
+    contexto webgl2 · perdido no · programa ok
+    texturas 0 de 30 · mayor — · max GPU 8192
+    fallos de decodificacion 0 · caida al DOM: no
+    ultimo error: —
+    bitmaps vacios 0 de 15 · rescatados 0 · texturas vacias 0 de 0
+    pintados —
+    canvas —
+    
+    GL · album
+    contexto webgl2 · perdido no · programa ok
+    texturas 9 de 9 · mayor 1080x1659 · max GPU 8192
+    fallos de decodificacion 0 · caida al DOM: no
+    ultimo error: —
+    bitmaps vacios 0 de 9 · rescatados 0 · texturas vacias 0 de 9
+    pintados 1 de 1 visibles
+    canvas 1440x900+0,0 · buffer 1440x900
+    ventana 1440x900 · visual 1440x900+0
+    estilo block · visible · opacidad 1 · z 0
+  ok   CA5 panel ?diag visible con sus campos
+  ok   E1 muestras ?diag: sin bitmaps ni texturas vacios y cada foto visible pintada
+  ok   CA4 sin fallo forzado GLSurface no cae al DOM
+  sin ?diag: 0 paneles en 6 rutas
+  ok   CA5 sin ?diag no hay panel
+
+=== capturas de escritorio (comparar) ===
+  landing: currentSrc 0 distintos de 30
+  ok   currentSrc del landing igual a la referencia
+  landing (/): 0 px distintos en mas de 1 nivel · 0 con cualquier diferencia · diferencia maxima 0 · de 1296000
+  ok   captura de landing igual a la referencia (ruido de 1 nivel aparte)
+  album (/album/america): 0 px distintos en mas de 1 nivel · 0 con cualquier diferencia · diferencia maxima 0 · de 1296000
+  ok   captura de album igual a la referencia (ruido de 1 nivel aparte)
+  atlas (/atlas): 0 px distintos en mas de 1 nivel · 0 con cualquier diferencia · diferencia maxima 0 · de 1296000
+  ok   captura de atlas igual a la referencia (ruido de 1 nivel aparte)
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        omitido
+consola      0 errores en 6 rutas
+invariantes  541 de 557
+entrada      arranque 467 ms · fase B 1427 ms · reposo 2176 ms · frames >50 ms: 5
+
+FALLOS
+- transicion america · CA8b duracion · 1267 ms
+- transicion america · vuelta con scroll · CA13 duracion del fundido · 439 ms
+- transicion norte · CA8b duracion · 1105 ms
+- transicion norte · vuelta con scroll · CA13 duracion del fundido · 456 ms
+- transicion sol · vuelta con scroll · CA13 duracion del fundido · 463 ms
+- transicion ny · CA8b duracion · 1285 ms
+- transicion ny · vuelta con scroll · CA13 duracion del fundido · 467 ms
+- transicion reduced america · CA11 duracion del fundido · 1088 ms
+- transicion reduced america · vuelta · CA11 duracion del fundido · 486 ms
+- transicion reduced norte · CA11 duracion del fundido · 723 ms
+- transicion reduced norte · vuelta · CA11 duracion del fundido · 472 ms
+- B10 /album/america · NEXT ALBUM empieza arriba · scrollY —/0, max 0
+- B10 /album/norte · NEXT ALBUM empieza arriba · scrollY —/0, max 0
+- B10 /album/sol · NEXT ALBUM empieza arriba · scrollY —/0, max 0
+- B10 /album/ny · NEXT ALBUM empieza arriba · scrollY —/0, max 0
+- atlas · CA15 vuelo al lugar siguiente: centrado, con la foto sola en su marca, sin frames > 50 ms · 0.00 px, marca /photos/norte/03.jpg, /photos/norte/04.jpg, 1 frames largos, visor en /photos/norte/03.jpg
+

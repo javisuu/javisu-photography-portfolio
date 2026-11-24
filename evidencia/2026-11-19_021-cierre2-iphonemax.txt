@@ -1,0 +1,578 @@
+DIAGNOSTICO 2026-11-19 · feat/021-landing-movil · 2a844bd · 6 ficheros sin commit
+
+=== tsc --noEmit ===
+ok
+
+=== eslint ===
+ok
+
+=== next build ===
+omitido (--skip-build)
+
+dispositivo: iphone-max (iPhone 15 Pro Max) · chromium
+
+=== next dev en :3100 ===
+ok
+
+=== cabecera dispositivo ===
+  iphone-max (iPhone 15 Pro Max) · chromium
+  medido: 430x739 · dpr 3 · ontouchstart true · pointer: coarse true · hover: hover false
+  pedido: 430x739 · dpr 3 · hasTouch true
+  user agent: Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/27.2 Mobile/15E148 Safari/604.1
+  ok   viewport = perfil
+  ok   dpr = perfil
+  ok   tactil (ontouchstart)
+  ok   sin hover: hover
+  secciones de escritorio omitidas: barra de scroll, llegada al album, transicion, scroll del album, textos del album, descifrado del wordmark, atlas
+
+=== ruta / ===
+  peticiones pendientes: 26
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=640&q=75 · hace 60177 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=640&q=75 · hace 60177 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=828&q=75 · hace 60177 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=750&q=75 · hace 60177 ms
+    GET http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js · hace 60177 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jm.js · hace 60177 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js · hace 60177 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js · hace 60177 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js · hace 60177 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_client_0_90u2t._.js · hace 60177 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js · hace 60177 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqw._.js · hace 60177 ms
+{
+  "vw": 430,
+  "vh": 739,
+  "dpr": 3,
+  "mains": 1,
+  "visibleMains": 1,
+  "scrollWidth": 430,
+  "clientWidth": 430,
+  "blendAncestorsBad": [],
+  "h1Text": "SUQUIA",
+  "landingPhotos": 30,
+  "landingHidden": 0
+}
+  consola:
+    [warning] Image with src "/photos/america/03.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading · http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js
+    [warning] Image with src "/photos/america/05.jpg" was detected as the Largest Contentful Paint (LCP). Please add the `loading="eager"` property if this image is above the fold.
+Read more: https://nextjs.org/docs/app/api-reference/components/image#loading · http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js
+    [error] goto: page.goto: Timeout 30000ms exceeded.
+Call log:
+[2m  - navigating to "http://localhost:3100/", waiting until "load"[22m
+
+  FALLA sin errores de consola · 1 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   wordmark dice SUQUIA
+  ok   ninguna landing-photo invisible en reposo
+
+=== ruta /albums ===
+  peticiones pendientes: 27
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=640&q=75 · hace 93717 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=640&q=75 · hace 93717 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=828&q=75 · hace 93717 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=750&q=75 · hace 93717 ms
+    GET http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js · hace 93717 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jm.js · hace 93717 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js · hace 93717 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js · hace 93717 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js · hace 93717 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_client_0_90u2t._.js · hace 93717 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js · hace 93717 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqw._.js · hace 93717 ms
+{
+  "vw": 430,
+  "vh": 739,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 430,
+  "clientWidth": 430,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [error] goto: page.goto: Timeout 30000ms exceeded.
+Call log:
+[2m  - navigating to "http://localhost:3100/albums", waiting until "load"[22m
+
+  FALLA sin errores de consola · 1 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /about ===
+  peticiones pendientes: 28
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=640&q=75 · hace 127245 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=640&q=75 · hace 127245 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=828&q=75 · hace 127245 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=750&q=75 · hace 127245 ms
+    GET http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js · hace 127245 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jm.js · hace 127245 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js · hace 127245 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js · hace 127245 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js · hace 127245 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_client_0_90u2t._.js · hace 127245 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js · hace 127245 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqw._.js · hace 127245 ms
+{
+  "vw": 430,
+  "vh": 739,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 430,
+  "clientWidth": 430,
+  "blendAncestorsBad": [],
+  "h1Text": "About",
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [error] goto: page.goto: Timeout 30000ms exceeded.
+Call log:
+[2m  - navigating to "http://localhost:3100/about", waiting until "load"[22m
+
+  FALLA sin errores de consola · 1 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /album/america ===
+  peticiones pendientes: 29
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=640&q=75 · hace 160796 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=640&q=75 · hace 160796 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=828&q=75 · hace 160796 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=750&q=75 · hace 160796 ms
+    GET http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js · hace 160796 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jm.js · hace 160796 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js · hace 160796 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js · hace 160796 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js · hace 160796 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_client_0_90u2t._.js · hace 160796 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js · hace 160796 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqw._.js · hace 160796 ms
+{
+  "vw": 430,
+  "vh": 739,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 430,
+  "clientWidth": 430,
+  "blendAncestorsBad": [],
+  "h1Text": "América",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": true,
+    "buffer": [
+      860,
+      1478
+    ],
+    "css": [
+      430,
+      739
+    ],
+    "expected": [
+      860,
+      1478
+    ]
+  }
+}
+  consola:
+    [warning] [.WebGL-0x307c00a9b600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x307c00a9b600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x307c00a9b600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels · http://localhost:3100/album/america
+    [warning] [.WebGL-0x307c00a9b600]GL Driver Message (OpenGL, Performance, GL_CLOSE_PATH_NV, High): GPU stall due to ReadPixels (this message will no longer repeat) · http://localhost:3100/album/america
+    [error] goto: page.goto: Timeout 30000ms exceeded.
+Call log:
+[2m  - navigating to "http://localhost:3100/album/america", waiting until "load"[22m
+
+  FALLA sin errores de consola · 1 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== ruta /credits ===
+  peticiones pendientes: 30
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=640&q=75 · hace 194339 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=640&q=75 · hace 194339 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=828&q=75 · hace 194339 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=750&q=75 · hace 194339 ms
+    GET http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js · hace 194339 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jm.js · hace 194339 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js · hace 194339 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js · hace 194339 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js · hace 194339 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_client_0_90u2t._.js · hace 194339 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js · hace 194339 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqw._.js · hace 194339 ms
+{
+  "vw": 430,
+  "vh": 739,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 430,
+  "clientWidth": 430,
+  "blendAncestorsBad": [],
+  "h1Text": null,
+  "landingPhotos": 30,
+  "landingHidden": 15
+}
+  consola:
+    [error] goto: page.goto: Timeout 30000ms exceeded.
+Call log:
+[2m  - navigating to "http://localhost:3100/credits", waiting until "load"[22m
+
+  FALLA sin errores de consola · 1 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+
+=== ruta /atlas ===
+  peticiones pendientes: 31
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F01.jpg&w=640&q=75 · hace 227851 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F02.jpg&w=640&q=75 · hace 227851 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F03.jpg&w=828&q=75 · hace 227851 ms
+    GET http://localhost:3100/_next/image?url=%2Fphotos%2Fnorte%2F06.jpg&w=750&q=75 · hace 227851 ms
+    GET http://localhost:3100/_next/static/chunks/%5Bturbopack%5D_browser_dev_hmr-client_hmr-client_ts_1di75ot._.js · hace 227851 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_next-devtools_index_090k2jm.js · hace 227851 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js · hace 227851 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_react-server-dom-turbopack_164kp-6._.js · hace 227851 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js · hace 227851 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_client_0_90u2t._.js · hace 227851 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_next_dist_1e8vcs8._.js · hace 227851 ms
+    GET http://localhost:3100/_next/static/chunks/node_modules_%40swc_helpers_cjs_1r9vbqw._.js · hace 227851 ms
+{
+  "vw": 430,
+  "vh": 739,
+  "dpr": 3,
+  "mains": 2,
+  "visibleMains": 1,
+  "scrollWidth": 430,
+  "clientWidth": 430,
+  "blendAncestorsBad": [],
+  "h1Text": "Atlas",
+  "landingPhotos": 30,
+  "landingHidden": 15,
+  "canvas": {
+    "fixed": false,
+    "buffer": [
+      1290,
+      1349
+    ],
+    "css": [
+      430,
+      450
+    ],
+    "expected": [
+      1290,
+      1350
+    ]
+  }
+}
+  consola:
+    [error] goto: page.goto: Timeout 30000ms exceeded.
+Call log:
+[2m  - navigating to "http://localhost:3100/atlas", waiting until "load"[22m
+
+  FALLA sin errores de consola · 1 errores
+  ok   un solo <main> visible
+  ok   sin scroll horizontal
+  ok   blend difference sin ancestros que lo rompan
+  ok   buffer del canvas = caja * dpr
+
+=== barra de scroll ===
+omitido (--dispositivo)
+
+=== fotos enteras ===
+  /: 15 fotos medidas a 430x739
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+  /album/america: 10 fotos medidas a 430x739
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+  /album/norte: 9 fotos medidas a 430x739
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+  /album/sol: 8 fotos medidas a 430x739
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+  /album/ny: 8 fotos medidas a 430x739
+  ok   fotos enteras en el viewport, proporcion < 1 % o <= 1 px
+
+=== fotos del landing ===
+  0 alturas · scrollY 0 · 430x739 · <img> ocultas por GL 0 · intersecan 5 · se ven 4
+    #0 america/01.jpg · caja 211,29,202,152 · opacity 1 · pintada 0.98
+    #1 america/03.jpg · caja 17,153,232,174 · opacity 1 · pintada 0.95
+    #2 america/05.jpg · caja 112,374,275,206 · opacity 1 · pintada 1.00
+    #3 america/06.jpg · caja 47,624,172,161 · opacity 1 · pintada 0.34
+    #4 america/08.jpg · caja 237,663,176,148 · opacity 1 · pintada 0.00
+  1 alturas · scrollY 739 · 430x739 · <img> ocultas por GL 0 · intersecan 6 · se ven 5
+    #3 america/06.jpg · caja 47,-73,172,161 · opacity 1 · pintada 1.00
+    #4 america/08.jpg · caja 237,-46,176,148 · opacity 1 · pintada 1.00
+    #5 america/09.jpg · caja 129,145,224,168 · opacity 1 · pintada 1.00
+    #6 norte/01.jpg · caja 17,341,189,252 · opacity 1 · pintada 1.00
+    #7 norte/02.jpg · caja 232,410,181,277 · opacity 1 · pintada 0.93
+    #8 norte/03.jpg · caja 34,721,275,78 · opacity 1 · pintada 0.08
+  2 alturas · scrollY 1478 · 430x739 · <img> ocultas por GL 0 · intersecan 5 · se ven 4
+    #8 norte/03.jpg · caja 34,16,275,78 · opacity 1 · pintada 1.00
+    #9 norte/06.jpg · caja 189,127,215,161 · opacity 1 · pintada 0.02
+    #10 ny/01.jpg · caja 26,260,206,155 · opacity 1 · pintada 1.00
+    #11 ny/02.jpg · caja 224,407,181,241 · opacity 1 · pintada 1.00
+    #12 sol/03.jpg · caja 43,528,172,229 · opacity 1 · pintada 0.65
+  3 alturas · scrollY 2217 · 430x739 · <img> ocultas por GL 0 · intersecan 3 · se ven 3
+    #12 sol/03.jpg · caja 43,-174,172,229 · opacity 1 · pintada 1.00
+    #13 sol/05.jpg · caja 198,43,189,252 · opacity 1 · pintada 1.00
+    #14 sol/07.jpg · caja 86,340,198,264 · opacity 1 · pintada 1.00
+  fotos que se ven por altura (0, 1, 2, 3): 4, 5, 4, 3
+  ok   se ve al menos una foto del landing en el primer viewport
+
+=== visor del atlas ===
+  toque 1: grupo de 15 (/photos/norte/03.jpg, ...) en 211,383
+  toque 2: grupo de 11 (/photos/sol/04.jpg, ...) en 223,436
+  toque 3: grupo de 8 (/photos/norte/01.jpg, ...) en 220,433
+  toque 4: marca sola (/photos/norte/06.jpg) en 232,428
+  visor: caja 150,0,280,739 (x, y, ancho, alto) · viewport 430x739 · scrollWidth 430 / clientWidth 430
+  ok   tocar una marca abre el visor
+  ok   visor dentro del viewport
+  ok   visor sin scroll horizontal
+
+=== gestos ===
+  / deslizar hacia arriba: scrollY 0 -> 354
+  ok   scroll tactil
+  /album/america deslizar hacia arriba: scrollY 0 -> 354
+  ok   scroll tactil
+  /albums deslizar a la izquierda: album abierto 01 -> 03
+  ok   deslizar cambia de album
+  /atlas arrastrar 120 px: lambda0 -0.038 -> -4.102 (esperado ~-2.087, sin inercia)
+  ok   arrastre tactil
+  /atlas pellizcar 80 -> 220 px: R 181 -> 497 (min 138, max 4563)
+  ok   pellizco tactil
+  / deslizar hacia arriba (reduced motion): scrollY 0 -> 354
+  ok   scroll tactil (reduced motion)
+  /album/america deslizar hacia arriba (reduced motion): scrollY 0 -> 354
+  ok   scroll tactil (reduced motion)
+  /albums deslizar a la izquierda (reduced motion): album abierto 01 -> 03
+  ok   deslizar cambia de album (reduced motion)
+  /atlas arrastrar 120 px (reduced motion): lambda0 -0.803 -> -4.867 (esperado ~-2.087, sin inercia)
+  ok   arrastre tactil (reduced motion)
+  /atlas pellizcar 80 -> 220 px (reduced motion): R 181 -> 497 (min 138, max 4563)
+  ok   pellizco tactil (reduced motion)
+
+=== navegacion ===
+  430x739 · movil true · horizontal false
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA9 contador encima de la barra
+  ok   navegacion · CA9 CREDITS 40 x 120, sin tapar, en su sitio
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA13 titulo, descripcion y contador del carrusel encima de la barra
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA10 sin control del borde derecho
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA3 una barra fija abajo
+  ok   navegacion · CA3/CA11 alto de la barra 78 px
+  ok   navegacion · CA3 tres enlaces de >= 44 px, dentro y sin tapar
+  ok   navegacion · CA3 sin EN/ES
+  ok   navegacion · CA3 sin nav de escritorio
+  ok   navegacion · CA4 colores activo/resto
+  ok   navegacion · CA13 credito OSM encima de la barra
+  ok   navegacion · CA13 controles del atlas encima de la barra y sin tapar
+  ok   navegacion · CA4 toque en ABOUT ME
+  ok   navegacion · CA4 toque en ALBUMS
+  ok   navegacion · CA4 toque en ATLAS
+  ok   navegacion · CA10 arriba: barra general y ← Albums en el bloque de titulo
+  ok   navegacion · CA10 tras el bloque: barra del album con ← ALBUMS y flechas de 44 px
+  ok   navegacion · CA10 contador = foto en el centro
+  ok   navegacion · CA10 flecha siguiente lleva a la foto siguiente
+  ok   navegacion · CA8 disparador hermano del <h1>, 80 px, sin transform ni opacity
+  ok   navegacion · CA8 blend sin ancestros, panel cerrado
+  ok   navegacion · CA6 tocar una foto no abre el panel
+  ok   navegacion · CA6 tocar el centro bajo la banda no abre el panel
+  ok   navegacion · CA6 tocar el centro sobre la banda no abre el panel
+  ok   navegacion · CA5 apertura <= 300 ms
+  ok   navegacion · CA5 aria-expanded true y un solo <main>
+  ok   navegacion · CA8 blend sin ancestros, panel abierto
+  ok   navegacion · CA5 cuatro enlaces en la mitad inferior, sin tapar
+  ok   navegacion · CA5 arrastre de 1000 px con el panel abierto no mueve el landing
+  ok   navegacion · CA5 Close cierra en <= 260 ms
+  ok   navegacion · CA5 tras cerrar, scrollY igual y aria-expanded false
+  ok   navegacion · CA8 blend sin ancestros, panel cerrado de nuevo
+  ok   navegacion · CA8 disparador hermano del <h1>, 80 px, sin transform ni opacity (reduced motion)
+  ok   navegacion · CA8 blend sin ancestros, panel cerrado (reduced motion)
+  ok   navegacion · CA6 tocar una foto no abre el panel (reduced motion)
+  ok   navegacion · CA6 tocar el centro bajo la banda no abre el panel (reduced motion)
+  ok   navegacion · CA6 tocar el centro sobre la banda no abre el panel (reduced motion)
+  ok   navegacion · CA5 apertura <= 260 ms (reduced motion)
+  ok   navegacion · CA5 aria-expanded true y un solo <main> (reduced motion)
+  ok   navegacion · CA8 blend sin ancestros, panel abierto (reduced motion)
+  ok   navegacion · CA5 cuatro enlaces en la mitad inferior, sin tapar (reduced motion)
+  ok   navegacion · CA7 los enlaces no se mueven al abrir
+  ok   navegacion · CA5 arrastre de 1000 px con el panel abierto no mueve el landing (reduced motion)
+  ok   navegacion · CA5 Close cierra en <= 260 ms (reduced motion)
+  ok   navegacion · CA5 tras cerrar, scrollY igual y aria-expanded false (reduced motion)
+  ok   navegacion · CA7 los enlaces no se mueven al cerrar
+  ok   navegacion · CA8 blend sin ancestros, panel cerrado de nuevo (reduced motion)
+
+=== landing-movil ===
+  430x739 · movil true · horizontal false
+  reposo · fotos visibles 15 · lienzos 0 · lenis false · h1 86 px · descriptor 12 px, alto 36
+  ok   landing-movil · CA7 sin canvas GL ni <img> ocultas
+  ok   landing-movil · CA8 sin Lenis (html sin .lenis)
+  ok   landing-movil · CA11 wordmark a 86 px
+  ok   landing-movil · CA11 wordmark con >= 40 px de margen a cada lado
+  ok   landing-movil · CA12 descriptor a 12 px en dos lineas, sin cortar el nombre, encima de la barra
+  ok   landing-movil · CA8 arrastre de N px mueve scrollY N ± 2 px (pasado el umbral del dedo)
+  hasta el final: 10 arrastres · scrollY 2325 de 2325 · fotos visibles 15 · frames {"frames":862,"median":16.7,"p95":16.8,"max":33.4,"long":0}
+  ok   landing-movil · CA9 final sin vuelta, 15 fotos, la ultima entera encima de la barra
+  ok   landing-movil · CA13 el panel salta al llegar al final, quieto mientras esta abierto, y Close vuelve al mismo sitio
+  ok   landing-movil · CA13 un vaiven corto al final no lo vuelve a abrir
+  ok   landing-movil · CA13 tras subir y volver a bajar, salta otra vez
+  ok   landing-movil · CA10 cada foto se mueve 0,9-1,1 veces el scroll
+  ok   landing-movil · CA10 con reduced motion, todas 1,0 ± 0,01
+  ok   landing-movil · CA13 en una carga nueva salta otra vez
+  anchos (fraccion del viewport): america/01.jpg 47.0 · america/03.jpg 54.0 · america/05.jpg 64.0 · america/06.jpg 40.0 · america/08.jpg 41.0 · america/09.jpg 52.0 · norte/01.jpg 44.0 · norte/02.jpg 42.0 · norte/03.jpg 64.0 · norte/06.jpg 50.0 · ny/01.jpg 48.0 · ny/02.jpg 42.0 · sol/03.jpg 40.0 · sol/05.jpg 44.0 · sol/07.jpg 46.0
+  ok   landing-movil · CA3 cada foto en pantalla cabe a lo alto y a lo ancho
+  ok   landing-movil · CA3 ninguna foto sale por los lados
+  ok   landing-movil · CA4 ancho de cada foto entre el 40 y el 65 %
+
+=== transicion ===
+omitido (--dispositivo)
+
+=== entrada / ===
+ms desde el inicio de la navegacion · 1 repeticion · cache vacia en cada una
+  1: inicio 380 · participantes 5 · fase B 774 · rezagadas 0 · reposo 1474
+     frame del arranque 33 ms · despues: frames >50 ms 0, frame max 17 ms · long tasks 1 (65 ms) · [entrance] start x1
+     al monton: 374 491 541 624 691
+  perfil movil: el landing va sin GL (spec 021); en / se mide solo lo que se ve
+
+=== fallo de textura forzado ===
+  / · 0 alturas · sin fallo se ven 4 · con fallo: scrollY 0 · <img> ocultas 0 · intersecan 5 · se ven 4 · pintada 0.98 0.95 1.00 0.34 0.00
+  / · 1 alturas · sin fallo se ven 5 · con fallo: scrollY 739 · <img> ocultas 0 · intersecan 6 · se ven 5 · pintada 1.00 1.00 1.00 1.00 0.93 0.08
+  ok   CA3 con createImageBitmap fallando se ven las mismas fotos
+  ok   CA3 sin errores de consola salvo [GLSurface]
+  /album/america · 0 alturas · sin fallo se ven 1 · con fallo: scrollY 0 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  /album/america · 1 alturas · sin fallo se ven 1 · con fallo: scrollY 739 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  /album/america · 2 alturas · sin fallo se ven 1 · con fallo: scrollY 1478 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 0.89
+  ok   CA3 con createImageBitmap fallando se ven las mismas fotos
+  ok   CA3 sin errores de consola salvo [GLSurface]
+
+=== bitmap vacio forzado ===
+  desde la <img> · / · 0 alturas · sin fallo se ven 4 · forzado: scrollY 0 · <img> ocultas 0 · intersecan 5 · se ven 4 · pintada 0.98 0.95 1.00 0.34 0.00
+  desde la <img> · / · 1 alturas · sin fallo se ven 5 · forzado: scrollY 739 · <img> ocultas 0 · intersecan 6 · se ven 5 · pintada 1.00 1.00 1.00 1.00 0.93 0.08
+  desde la <img> · / · rescatados — · caida al DOM: no
+  ok   E2 bitmap vacio desde la <img>: se ven las mismas fotos
+  ok   E2 bitmap vacio desde la <img>: landing movil sin instancia GL
+  ok   E2 bitmap vacio desde la <img>: sin errores de consola salvo [GLSurface]
+  desde la <img> · /album/america · 0 alturas · sin fallo se ven 1 · forzado: scrollY 0 · <img> ocultas 9 · intersecan 1 · se ven 1 · pintada 1.00
+  desde la <img> · /album/america · 1 alturas · sin fallo se ven 1 · forzado: scrollY 739 · <img> ocultas 9 · intersecan 1 · se ven 1 · pintada 1.00
+  desde la <img> · /album/america · 2 alturas · sin fallo se ven 1 · forzado: scrollY 1478 · <img> ocultas 9 · intersecan 1 · se ven 1 · pintada 0.89
+  desde la <img> · /album/america · rescatados 9 · caida al DOM: no
+  ok   E2 bitmap vacio desde la <img>: se ven las mismas fotos
+  ok   E2 bitmap vacio desde la <img>: rescatado sin caer al DOM
+  ok   E2 bitmap vacio desde la <img>: sin errores de consola salvo [GLSurface]
+  siempre · / · 0 alturas · sin fallo se ven 4 · forzado: scrollY 0 · <img> ocultas 0 · intersecan 5 · se ven 4 · pintada 0.98 0.95 1.00 0.34 0.00
+  siempre · / · 1 alturas · sin fallo se ven 5 · forzado: scrollY 739 · <img> ocultas 0 · intersecan 6 · se ven 5 · pintada 1.00 1.00 1.00 1.00 0.93 0.08
+  siempre · / · rescatados — · caida al DOM: no
+  ok   E2 bitmap vacio siempre: se ven las mismas fotos
+  ok   E2 bitmap vacio siempre: landing movil sin instancia GL
+  ok   E2 bitmap vacio siempre: sin errores de consola salvo [GLSurface]
+  siempre · /album/america · 0 alturas · sin fallo se ven 1 · forzado: scrollY 0 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  siempre · /album/america · 1 alturas · sin fallo se ven 1 · forzado: scrollY 739 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  siempre · /album/america · 2 alturas · sin fallo se ven 1 · forzado: scrollY 1478 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 0.89
+  siempre · /album/america · rescatados 0 · caida al DOM: bitmap vacio tambien desde el fichero (foto 1)
+  ok   E2 bitmap vacio siempre: se ven las mismas fotos
+  ok   E2 bitmap vacio siempre: cae al DOM
+  ok   E2 bitmap vacio siempre: sin errores de consola salvo [GLSurface]
+
+=== contexto perdido forzado ===
+  / · 0 contextos perdidos · 0 alturas · sin fallo se ven 4 · tras perderlo: scrollY 0 · <img> ocultas 0 · intersecan 5 · se ven 4 · pintada 0.98 0.95 1.00 0.34 0.00
+  / · 0 contextos perdidos · 1 alturas · sin fallo se ven 5 · tras perderlo: scrollY 739 · <img> ocultas 0 · intersecan 6 · se ven 5 · pintada 1.00 1.00 1.00 1.00 0.93 0.08
+  ok   CA4 con el contexto perdido se ven las mismas fotos
+  ok   CA4 sin errores de consola salvo [GLSurface]
+  /album/america · 1 contextos perdidos · 0 alturas · sin fallo se ven 1 · tras perderlo: scrollY 0 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  /album/america · 1 contextos perdidos · 1 alturas · sin fallo se ven 1 · tras perderlo: scrollY 739 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 1.00
+  /album/america · 1 contextos perdidos · 2 alturas · sin fallo se ven 1 · tras perderlo: scrollY 1478 · <img> ocultas 0 · intersecan 1 · se ven 1 · pintada 0.89
+  ok   CA4 con el contexto perdido se ven las mismas fotos
+  /album/america → / en navegacion blanda tras perder el contexto: scrollY 0 · <img> ocultas 0 · intersecan 5 · se ven 4 · pintada 0.98 0.95 1.00 0.60 0.00 · sin fallo se ven 4
+  ok   CA4 vuelta a / tras perder el contexto en un album se ven las fotos
+  ok   CA4 sin errores de consola salvo [GLSurface]
+
+=== panel diag ===
+  /?diag · panel visible
+    diag · 430x739 · dpr 3
+    GL · ninguna instancia todavia
+  ok   CA5 ?diag en el landing movil: sin instancia GL
+  /album/america?diag · panel visible
+    diag · 430x739 · dpr 3
+    GL · album
+    contexto webgl2 · perdido no · programa ok
+    texturas 9 de 9 · mayor 1200x1844 · max GPU 8192
+    fallos de decodificacion 0 · caida al DOM: no
+    ultimo error: —
+    bitmaps vacios 0 de 9 · rescatados 0 · texturas vacias 0 de 9
+    pintados 1 de 1 visibles
+    canvas 430x739+0,0 · buffer 860x1478
+    ventana 430x739 · visual 430x739+0
+    estilo block · visible · opacidad 1 · z 0
+  ok   CA5 panel ?diag visible con sus campos
+  ok   E1 muestras ?diag: sin bitmaps ni texturas vacios y cada foto visible pintada
+  ok   CA4 sin fallo forzado GLSurface no cae al DOM
+  sin ?diag: 0 paneles en 6 rutas
+  ok   CA5 sin ?diag no hay panel
+
+=== calidad del landing ===
+  america/01.jpg · pide w=640 · caja 202 px · resolucion 1.58
+  america/03.jpg · pide w=750 · caja 232 px · resolucion 1.62
+  america/05.jpg · pide w=828 · caja 275 px · resolucion 1.5
+  america/06.jpg · pide w=640 · caja 172 px · resolucion 1.86
+  america/08.jpg · pide w=640 · caja 176 px · resolucion 1.82
+  ok   CA9 cada foto del landing pide al menos su ancho por min(dpr, 2)
+
+=== RESUMEN ===
+tsc          ok
+lint         ok
+build        omitido
+dispositivo  iphone-max (iPhone 15 Pro Max) · chromium
+consola      6 errores en 6 rutas
+invariantes  165 de 171
+entrada      arranque 33 ms · fase B 774 ms · reposo 1474 ms · frames >50 ms: 0
+landing      fotos que se ven en 0, 1, 2 y 3 alturas: 4, 5, 4, 3
+
+FALLOS
+- / · sin errores de consola · 1 errores
+- /albums · sin errores de consola · 1 errores
+- /about · sin errores de consola · 1 errores
+- /album/america · sin errores de consola · 1 errores
+- /credits · sin errores de consola · 1 errores
+- /atlas · sin errores de consola · 1 errores
+
