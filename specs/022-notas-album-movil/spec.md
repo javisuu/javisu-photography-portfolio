@@ -1,6 +1,6 @@
 # Spec 022 · Notas del album en movil
 
-- **Estado:** Aprobada (Javi, 2026-11-23: «aproved»)
+- **Estado:** Implementada (2026-11-24; aprobada por Javi el 2026-11-23, visto bueno en dispositivo el 2026-11-24: «ok»)
 - **Fecha:** 2026-11-20
 - **Requiere decision de Javi:** No. No toca ninguna de las cuatro zonas protegidas: el `GLSurface` del album sigue igual y solo lee la posicion de las `<img>`. Las decisiones de diseño las tomo Javi el 2026-11-23 ("Respuestas de Javi").
 

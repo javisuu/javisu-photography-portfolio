@@ -43,13 +43,16 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - Escritorio 556 de 558: capturas a 0 px y `notas: 0 diferencias en 6 cajas`. Los 2 fallos son CA11 de `transicion`, que oscila.
     - Capturas: viewport con la emulacion movil (`matchMedia` comprobado en cada una), WebGL desactivado para que pinten las `<img>`. El aviso «2 Issues» de `next dev` que sale en ellas es ese WebGL desactivado (`unable to create webgl context`, `GLSurface` se queda en el DOM), no un error del sitio. Una captura de pagina entera perdia la emulacion movil en Chromium y salia la maqueta de escritorio.
     - **Para Javi:** en el telefono, en las filas desplazadas a la derecha (`sol` 3 y 6), el pie queda alineado a la derecha de la foto, como ya pasa en las filas sin texto (centrado en las centradas). Antes, dentro de la rejilla, iba a la izquierda. Es consecuencia de CA6 (la fila con texto igual que una sin texto); el pie movil es de la spec `album-movil`.
-- [ ] **T3** · Ojo de Javi (CA9)
+- [x] **T3** · Ojo de Javi (CA9)
   - Que: Javi, en la preview de Vercel, en el iPad mini en vertical y el iPhone 13.
   - Comprobacion: visto bueno anotado aqui con fecha.
+  - **Visto bueno de Javi el 2026-11-24** («ok»), sobre la preview de la rama `feat/022-notas-album-movil` (`5e23ec1`).
 
 ## Cierre
 
-- [ ] `node scripts/diagnostico.mjs` con build: sin fallos nuevos frente a T0 (CA1), con capturas a 0 px (CA2) y cajas iguales (CA3)
-- [ ] Seccion `notas-movil` y `navegacion` en los cinco perfiles (CA4 a CA8)
-- [ ] `docs/design-spec-v2.md` §3 y `CLAUDE.md` (Album texts): el texto en movil
-- [ ] Estado de `spec.md` → Implementada
+- [x] `node scripts/diagnostico.mjs` con build: sin fallos nuevos frente a T0 (CA1), con capturas a 0 px (CA2) y cajas iguales (CA3)
+  - 2026-11-24, `2026-11-24_022-cierre-escritorio.txt`: tsc, lint y build ok, 0 errores de consola en 6 rutas, 556 de 558. Los 2 fallos son CA11 de `transicion` (fundido de 430 y 514 ms), que oscila desde antes de esta spec (T0: 536 de 553). `textos del album` sin fallos. Capturas a 0 px en las tres rutas y `notas: 0 diferencias en 6 cajas`.
+- [x] Seccion `notas-movil` y `navegacion` en los cinco perfiles (CA4 a CA8)
+  - Las salidas de T2 (`2026-11-23_022-t2-<perfil>.txt`), sobre el mismo codigo que se cierra: `notas-movil` sin fallos en los cinco, `navegacion` y «fotos enteras» ok, sin fallos nuevos frente a T0.
+- [x] `docs/design-spec-v2.md` §3 y `CLAUDE.md` (Album texts): el texto en movil
+- [x] Estado de `spec.md` → Implementada
