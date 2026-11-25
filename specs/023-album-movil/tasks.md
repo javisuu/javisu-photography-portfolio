@@ -98,9 +98,35 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
     - El harness ya no exige cada hoja del pie de pagina centrada: mide el centro de cada linea, porque la linea 2 es `Instagram · Email`.
     - Captura del final para Javi: `023-capturas-t5/iphone-america.png` e `ipad-mini-america.png`.
 
+## Hallazgo: los saltos con scroll rapido (2026-11-25)
+
+**Lo que vio Javi.** El 2026-11-25, sobre lo que hay hoy en produccion: «the effect on mobile on scroll persists». Esta rama no estaba en Vercel.
+
+**La medicion.** `scratchpad/probe-saltos.mjs` carga `/album/america` con las imagenes retenidas, mide el alto de cada `<img>`, suelta las imagenes y vuelve a medir.
+
+| Version | Perfil | Alto de cada `<img>` sin fichero | Documento |
+|---|---|---|---|
+| Produccion (`main`) | iPhone 13 | 0 px en las 9 | crece de 3047 a 5889 px al llegar los ficheros |
+| Esta rama | iPhone 13 | su alto final (269, 360, 225…) | 5285 → 5285 |
+| Escritorio, las dos | 1440 | 0 px en las 9 | crece de 2971 a 9663 px |
+
+**Lectura (causa probable, SIN VERIFICAR en el dispositivo).**
+- Las fotos llevan `w-auto h-auto` (`AlbumPhotos.tsx`), asi que no reservan alto antes de cargar.
+- Con scroll lento, cada foto lazy carga antes de entrar en pantalla.
+- Con scroll rapido, se pasan fotos a 0 px y, al llegar el fichero, empujan el contenido.
+- Chrome lo compensa con scroll anchoring; Safari en iOS no lo tiene.
+- Encaja con la observacion de Javi (rapido si, lento no) y explica que no fuera el GL.
+- En esta rama, en movil, el ancho de cada foto es explicito (T3) y su alto sale de la proporcion. CA14 lo confirma o no.
+
+**Escritorio.** Tiene la misma reserva a 0 px. No se toca (fuera de alcance; `movil-no-toca-escritorio`), y alli lo tapan el scroll anchoring y Lenis. Candidato a una spec propia.
+
 ## Cierre
 
-- [ ] Javi para su `npm run dev`. `node scripts/diagnostico.mjs` con build en escritorio (CA1, CA2), mas los cinco perfiles y `ipad --horizontal` (CA12, CA13). Salidas en el scratchpad para copiar a `evidencia/`
+- [x] Javi para su `npm run dev`. `node scripts/diagnostico.mjs` con build en escritorio (CA1, CA2), mas los cinco perfiles y `ipad --horizontal` (CA12, CA13). Salidas en el scratchpad para copiar a `evidencia/`
+  - Salidas: `2026-11-25_023-cierre-<perfil>.txt` (`escritorio`, `escritorio-b`, `iphone`, `iphone-max`, `ipad-mini`, `ipad`, `iphone-h`, `ipad-h`).
+  - **Moviles (CA3 a CA13):** `iphone`, `iphone-max`, `ipad-mini` e `iphone-h`, 0 fallos. `ipad`: solo «deslizar cambia de album», igual que en T0 (carrusel, fuera de alcance). `ipad-h`: CA4 ok (GL y Lenis siguen en el album); los fallos de T0 (6 `goto` agotados de `next dev` en frio, el carrusel, CA9 del landing) se repiten, mas uno nuevo, E2 «rescatado sin caer al DOM» en el album: la foto 2 no termino de decodificarse en 1500 ms y la pagina cayo al DOM entero, que es la red de la spec 018 funcionando. El album en iPad horizontal no cambia de codigo en esta spec (`conGL` true, como antes); se toma como carga del equipo. SIN VERIFICAR que no se repita.
+  - **CA2:** capturas de landing, album, atlas, `album-america-final` y `album-sol-final` iguales a T0; 250 cajas del album y 6 de notas, 0 diferencias. En las dos corridas.
+  - **CA1:** fallos que no estaban en T0, todos de tiempo y ninguno de geometria: duraciones de `transicion` (CA8b de 1156 a 1650 ms, CA13 de 444 a 480 ms, CA11 reducido de 476 a 1171 ms), dos frames largos en `atlas`, y en la segunda corrida CA3/CA4 de `america` con el vuelo medido 1 a 2 px antes de asentarse. Y B10: el clic llega con la pagina «moviendose» 5000-7000 px en 2 frames y no hay muestra del album nuevo a los 500 ms, aunque `scrollY` es 0 siempre (max 0). Ese mismo patron sale en `main` con build antes de esta spec (`evidencia/2026-11-08_diagnostico.txt`, B10 con «—» y 2704-6127 px), asi que es del harness con el equipo cargado, no de la spec 023 (ver paso 8 de "Proximos pasos" de `docs/ESTADO.md`). Duraciones: solo se juzgan en produccion.
 - [ ] Push de la rama y preview de Vercel. CA14: Javi, en el iPhone 13 y el iPad mini, con scroll rapido y lento
-- [ ] `CLAUDE.md` y `docs/design-spec-v2.md` (§3, §6 y Motion inventory #1) actualizados; en `docs/ESTADO.md`, M11, y M3 y M12 en su parte del album
+- [x] `CLAUDE.md` y `docs/design-spec-v2.md` (§3, §6 y Motion inventory #1) actualizados; en `docs/ESTADO.md`, M11, y M3 y M12 en su parte del album
 - [ ] Estado de `spec.md` → Implementada
