@@ -75,6 +75,7 @@ export default async function AlbumPage({
 
       <Link
         href={`/album/${nextAlbum.slug}`}
+        data-album-siguiente=""
         className="flex items-center gap-6 border-t border-[#eee] px-6 py-16 md:px-16"
       >
         {/* Natural aspect ratio, fixed height only — no object-fit crop.
@@ -86,6 +87,7 @@ export default async function AlbumPage({
           width={nextCover.width}
           height={nextCover.height}
           className="h-24 w-auto shrink-0"
+          data-album-portada=""
           sizes="200px"
         />
         <div>

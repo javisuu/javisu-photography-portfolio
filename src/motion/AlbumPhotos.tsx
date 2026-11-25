@@ -199,22 +199,22 @@ export default function AlbumPhotos({
         // that level of precision is an atlas-hover thing only (see
         // Place's precision field), not a caption thing.
         const caption = (
-          <div className="flex flex-col gap-1">
+          <div data-album-pie="" className="flex flex-col gap-1">
             <div className="flex flex-wrap items-baseline gap-2">
-              <span className="text-[14px] tabular-nums text-[#BBBBBB]">
+              <span data-pie="numero" className="text-[14px] tabular-nums text-[#BBBBBB]">
                 {String(photo.order).padStart(2, "0")}
               </span>
-              <span className="font-serif text-[20px] italic text-[#111111]">
+              <span data-pie="titulo" className="font-serif text-[20px] italic text-[#111111]">
                 {photo.title}
               </span>
               <span className="text-[14px] text-[#666666]" aria-hidden>
                 ·
               </span>
-              <span className="text-[14px] text-[#666666]">
+              <span data-pie="lugar" className="text-[14px] text-[#666666]">
                 {photo.place.city}, {photo.place.country}
               </span>
             </div>
-            <span className="text-[12px] uppercase tracking-[0.14em] text-[#A8A8A8]">
+            <span data-pie="camara" className="text-[12px] uppercase tracking-[0.14em] text-[#A8A8A8]">
               {photo.capture.focalLength} — {photo.capture.aperture} — {photo.capture.iso}
             </span>
           </div>

@@ -4,13 +4,28 @@
 
 Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin errores y tiene su comprobacion. Commit por tarea verificada.
 
-- [ ] **T0** · Medicion y linea base
+- [x] **T0** · Medicion y linea base
   - Fichero(s): `scripts/lib/albumMovil.mjs` (nuevo), `scripts/diagnostico.mjs`
   - Que:
     - la seccion `album-movil` en modo dispositivo (CA3 a CA11);
     - linea base de escritorio con `--capturas-guardar`, con `/album/america` y `/album/sol` añadidas a las capturas si no estan;
     - los cinco perfiles moviles y `ipad --horizontal`.
   - Comprobacion: `album-movil` falla donde el lienzo difiere de hoy (GL y Lenis presentes, titulo a 48 px, pie en una fila, `NEXT ALBUM` en fila). El resto del diagnostico, sin fallos nuevos frente al cierre del 2026-11-24.
+  - **Hecho (2026-11-24/25).** Salidas `2026-11-24_023-t0-*.txt` y `023-capturas-base/` en el scratchpad, para copiar a `evidencia/`.
+    - `album-movil`, como se esperaba:
+      - falla CA3, CA7 y CA9 en los cinco perfiles;
+      - falla CA5, CA6, CA10 y CA11 en los cuatro en vertical;
+      - falla CA8 en `iphone --horizontal`.
+      - CA9 «foto 1 de golpe» y «NEXT ALBUM a scrollY 0» ya pasan hoy.
+      - `ipad --horizontal`: CA4 ok (GL y Lenis siguen).
+    - Escritorio: 550/553. Los 3 fallos son la duracion del fundido en `transicion reduced` (CA11 de la 019, 402–444 ms), los mismos que en `evidencia/2026-11-24_diagnostico.txt:925-926`.
+    - Ya estaban antes, no son de esta spec:
+      - `ipad` y `ipad --horizontal`: «deslizar cambia de album» (`evidencia/2026-11-23_022-t2-ipad.txt:482`);
+      - `iphone --horizontal`: E1 `?diag` (`evidencia/2026-11-23_022-t2-iphonehorizontal.txt:503`).
+    - Del entorno, no del sitio:
+      - `iphone-max` e `ipad --horizontal`: 6 «errores de consola», que son `page.goto: Timeout 30000ms` del `next dev` cargado;
+      - en `ipad --horizontal`, ademas, la landing-photo a opacity < 1 y CA9 dpr, en esa misma pasada lenta.
+    - Arreglo del harness: en horizontal la lamina abierta es mas alta que el viewport y su centro cae bajo la barra inferior. `medirVuelo` toca ahora un punto visible que este dentro del enlace (`2026-11-24_023-t0b-iphone-h.txt`: aterriza en `/album/america` y falla solo por GL).
 - [ ] **T1** · Sin GL ni Lenis en el album movil, y llegada de la foto 1 por `decode()`
   - Fichero(s): `src/motion/AlbumPhotos.tsx`, `scripts/diagnostico.mjs` (`sinGL` para el album en perfiles moviles)
   - Comprobacion: CA3, CA4 (`ipad --horizontal`), CA9 y CA13. En escritorio: CA2 a 0 px, y `llegada al album` y `transicion` sin fallos nuevos frente a T0.

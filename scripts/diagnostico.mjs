@@ -22,6 +22,7 @@ import { seccionTransicion } from "./lib/transicion.mjs";
 import { seccionNavegacion, MOVIL } from "./lib/navegacion.mjs";
 import { seccionLandingMovil } from "./lib/landingMovil.mjs";
 import { seccionNotasMovil, medirCajasNotas, compararCajasNotas } from "./lib/notasMovil.mjs";
+import { seccionAlbumMovil, medirCajasAlbum, compararCajasAlbum } from "./lib/albumMovil.mjs";
 import { fotosVistas, lineaVistas, perderContextos, calidadLanding, CREATE_IMAGE_BITMAP_RECHAZA, CREATE_IMAGE_BITMAP_VACIO_DESDE_IMG, CREATE_IMAGE_BITMAP_VACIO_SIEMPRE, ESPERA_RED_MS } from "./lib/fallos-gl.mjs";
 
 const PORT = 3100;
@@ -812,6 +813,14 @@ if (deviceMode && (!only || only === "/")) {
 if (deviceMode && (!only || only.startsWith("/album/"))) {
   const notasSlugs = only ? [only.slice("/album/".length)] : [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
   await seccionNotasMovil({ browser, BASE, CTX, log, rule, addInv, slugs: notasSlugs });
+}
+// ---------- album-movil ----------
+// Spec 023: la pagina de album en movil (scripts/lib/albumMovil.mjs). Solo
+// con --dispositivo; fuera de movil (iPad en horizontal) comprueba que el
+// album sigue con GLSurface y Lenis.
+if (deviceMode && (!only || only.startsWith("/album/"))) {
+  const amSlugs = only ? [only.slice("/album/".length)] : [...readFileSync(new URL("../src/data/photos.ts", import.meta.url), "utf8").matchAll(/^\s*slug: "([^"]+)",$/gm)].map((x) => x[1]);
+  await seccionAlbumMovil({ browser, BASE, CTX, log, rule, addInv, slugs: amSlugs, motor: DEV.motor });
 }
 
 if (!deviceMode && (!only || only.startsWith("/album/"))) {
@@ -2188,12 +2197,19 @@ const CAP_SETTLE_MS = 5000;
 if (CAP && !deviceMode && !only) {
   rule(`capturas de escritorio (${CAP.modo})`);
   const album = routes.find((r) => r.startsWith("/album/"));
-  const capRoutes = [["landing", "/", {}], ...(album ? [["album", album, {}]] : []), ["atlas", "/atlas", { reducedMotion: "reduce" }]];
-  for (const [name, route, opts] of capRoutes) {
+  // Spec 023: tambien el final de dos albumes (NEXT ALBUM y pie de pagina),
+  // con la pagina bajada hasta abajo.
+  const capRoutes = [["landing", "/", {}], ...(album ? [["album", album, {}]] : []), ["atlas", "/atlas", { reducedMotion: "reduce" }],
+    ["album-america-final", "/album/america", { final: true }], ["album-sol-final", "/album/sol", { final: true }]];
+  for (const [name, route, { final, ...opts }] of capRoutes) {
     const ctx = await browser.newContext({ ...CTX, ...opts });
     const p = await ctx.newPage();
     await p.goto(BASE + route, { waitUntil: "load" }).catch(() => {});
     await p.waitForTimeout(CAP_SETTLE_MS);
+    if (final) {
+      await p.evaluate(() => window.scrollTo(0, document.documentElement.scrollHeight)).catch(() => {});
+      await p.waitForTimeout(CAP_SETTLE_MS);
+    }
     const shot = await p.screenshot({ type: "png" }).catch(() => null);
     if (name === "landing") {
       const srcs = await p.evaluate(() => [...document.querySelectorAll(".landing-photo img")].map((img) => img.currentSrc)).catch(() => null);
@@ -2227,6 +2243,17 @@ if (CAP && !deviceMode && !only) {
     const dif = ref ? compararCajasNotas(ref, cajas) : null;
     log(`  notas: ${dif === null ? "sin referencia" : `${dif.length} diferencias en ${nCajas} cajas`}${dif?.length ? ` · ${dif.join("; ")}` : ""}`);
     addInv("escritorio", "cajas de las notas del album iguales a la referencia", dif !== null && dif.length === 0, dif === null ? "sin referencia" : dif.join("; "));
+  }
+  // Spec 023 (CA2): cajas del bloque de titulo, fotos, pies, NEXT ALBUM y
+  // pie de pagina de los cuatro albumes, en coordenadas de pagina.
+  const cajasAlbum = await medirCajasAlbum({ browser, BASE, CTX, slugs: notasSlugs });
+  const nAlbum = Object.values(cajasAlbum).reduce((a, m) => a + Object.keys(m ?? {}).length, 0);
+  if (CAP.modo === "guardar") { guardarJson(CAP.dir, "album-cajas", cajasAlbum); log(`  album: ${nAlbum} cajas guardadas`); }
+  else {
+    const ref = leerJson(CAP.dir, "album-cajas");
+    const dif = ref ? compararCajasAlbum(ref, cajasAlbum) : null;
+    log(`  album: ${dif === null ? "sin referencia" : `${dif.length} diferencias en ${nAlbum} cajas`}${dif?.length ? ` · ${dif.slice(0, 20).join("; ")}` : ""}`);
+    addInv("escritorio", "cajas de la pagina de album iguales a la referencia (± 0,5 px)", dif !== null && dif.length === 0, dif === null ? "sin referencia" : dif.slice(0, 10).join("; "));
   }
 }
 
