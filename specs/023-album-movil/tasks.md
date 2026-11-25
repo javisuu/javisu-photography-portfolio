@@ -79,9 +79,24 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - Mismo patron que T2: las dos pasadas lentas siguieron a una tanda de capturas con su propio `next dev`; las de T1 y T3, no. No hay ningun servidor escuchando en 3000/3100/3101.
       - SIN VERIFICAR hasta la pasada con build del Cierre.
     - Capturas para Javi: `023-capturas-t4/iphone-h-america.png` (centrada, izquierda, derecha y la fila 6 con su cita) e `iphone-h-sol.png` (la nota larga en la columna).
-- [ ] **T5** · Final: `NEXT ALBUM`, fundido de la portada y pie de pagina
+- [x] **T5** · Final: `NEXT ALBUM`, fundido de la portada y pie de pagina
   - Fichero(s): `src/app/album/[slug]/page.tsx`, `src/components/Footer.tsx`, `src/motion/FundidoAlEntrar.tsx` (nuevo), `src/app/globals.css`
   - Comprobacion: CA10 y CA11 en los perfiles en vertical, con y sin reduced motion; escritorio, CA2.
+  - **Hecho (2026-11-25).** Salidas `2026-11-25_023-t5*-*.txt` en el scratchpad.
+    - Perfiles moviles, todo ok:
+      - `iphone` 184/184;
+      - `ipad-mini` 185/185 (portada 393,8 = 200u);
+      - `iphone --horizontal` 183/183.
+    - CA11, con y sin reduced motion: antes 0, a 80 ms 0,3, despues 1, `transition: opacity 0.3s`.
+    - `FundidoAlEntrar` pinta la propia `<Image>`, sin envoltorio, y solo le pone estilo con `esMovil === true`.
+    - Escritorio, primera pasada: dos diferencias.
+      - **La portada:** un `sizes` con `vw` hace que Next quite del `srcset` los anchos pequeños, y el escritorio pedia otro fichero. Ahora va en px: 200 en el telefono, 540 en la tablet en vertical y 200 en el resto.
+      - **Las cajas del pie de pagina:** el harness numeraba tambien las hojas invisibles, y el `·` solo de movil desplazaba la numeracion. Ahora numera solo las visibles, como estaba la linea base de T0.
+    - Escritorio, segunda pasada:
+      - CA2 ok: capturas iguales a T0 y 0 diferencias en 250 + 6 cajas;
+      - 559/561, con los mismos 2 fallos de `transicion reduced` de T0.
+    - El harness ya no exige cada hoja del pie de pagina centrada: mide el centro de cada linea, porque la linea 2 es `Instagram · Email`.
+    - Captura del final para Javi: `023-capturas-t5/iphone-america.png` e `ipad-mini-america.png`.
 
 ## Cierre
 

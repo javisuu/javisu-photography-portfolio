@@ -3,18 +3,20 @@ export default function Footer() {
   const year = new Date().getFullYear();
 
   return (
-    <footer data-pie-pagina="" className="flex flex-wrap items-center justify-center gap-3 py-10 text-[13px] uppercase tracking-[0.18em] text-[#666]">
-      <span className="text-[#111]">Suquia</span>
-      <span aria-hidden>—</span>
+    <footer data-pie-pagina="" className="pie-pagina flex flex-wrap items-center justify-center gap-3 py-10 text-[13px] uppercase tracking-[0.18em] text-[#666]">
+      <span className="pie-pagina-linea text-[#111]">Suquia</span>
+      <span className="pie-pagina-raya" aria-hidden>—</span>
       <a href="#" className="hover:text-[#111]">
         Instagram
       </a>
-      <span aria-hidden>—</span>
+      <span className="pie-pagina-raya" aria-hidden>—</span>
+      {/* Mobile only (spec 023): Instagram · Email share line 2. */}
+      <span className="pie-pagina-punto hidden" aria-hidden>·</span>
       <a href="mailto:hello@example.com" className="hover:text-[#111]">
         Email
       </a>
-      <span aria-hidden>—</span>
-      <span>{year}</span>
+      <span className="pie-pagina-raya" aria-hidden>—</span>
+      <span className="pie-pagina-linea">{year}</span>
     </footer>
   );
 }

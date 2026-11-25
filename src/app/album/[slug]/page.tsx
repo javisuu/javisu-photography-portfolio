@@ -1,10 +1,10 @@
-import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import AlbumPhotoNav from "@/components/AlbumPhotoNav";
 import Footer from "@/components/Footer";
 import AlbumPhotos from "@/motion/AlbumPhotos";
 import BackToAlbums from "@/motion/albumTransition/BackToAlbums";
+import FundidoAlEntrar from "@/motion/FundidoAlEntrar";
 import TransitionTarget from "@/motion/albumTransition/TransitionTarget";
 import {
   albums,
@@ -76,25 +76,36 @@ export default async function AlbumPage({
       <Link
         href={`/album/${nextAlbum.slug}`}
         data-album-siguiente=""
-        className="flex items-center gap-6 border-t border-[#eee] px-6 py-16 md:px-16"
+        className="album-siguiente flex items-center gap-6 border-t border-[#eee] px-6 py-16 md:px-16"
       >
         {/* Natural aspect ratio, fixed height only — no object-fit crop.
             The hard rule ("no cropping, carousel slivers excepted")
             applies here too; only the carousel gets to cheat this. */}
-        <Image
+        {/* Mobile (spec 023, globals.css `.album-siguiente*`): one column —
+            label, cover at 200u, title at 40/44, place and year — the inner
+            div turned `contents` and the order set in CSS. The place line
+            only exists on mobile. */}
+        <FundidoAlEntrar
           src={nextCover.src}
           alt={nextAlbum.title}
           width={nextCover.width}
           height={nextCover.height}
-          className="h-24 w-auto shrink-0"
+          className="album-siguiente-portada h-24 w-auto shrink-0"
           data-album-portada=""
-          sizes="200px"
+          // Pixels, not vw: with a vw entry Next drops the small widths
+          // from the srcset and desktop would fetch a different file. On
+          // mobile the cover is 200u: 200 px on a phone, up to ~525 on a
+          // tablet in portrait.
+          sizes="(pointer: coarse) and (orientation: portrait) and (max-width: 500px) 200px, (pointer: coarse) and (orientation: portrait) and (max-width: 1024px) 540px, 200px"
         />
-        <div>
-          <p className="text-[12px] uppercase tracking-[0.18em] text-[#888]">
+        <div className="album-siguiente-textos">
+          <p className="album-siguiente-etiqueta text-[12px] uppercase tracking-[0.18em] text-[#888]">
             Next Album
           </p>
-          <p className="font-serif text-[24px] text-[#111]">{nextAlbum.title}</p>
+          <p className="album-siguiente-titulo font-serif text-[24px] text-[#111]">{nextAlbum.title}</p>
+          <p className="album-siguiente-lugar hidden">
+            {nextAlbum.location} — {nextAlbum.year}
+          </p>
         </div>
       </Link>
 

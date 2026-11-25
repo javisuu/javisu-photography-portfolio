@@ -425,3 +425,82 @@ body {
     margin-top: 48px;
   }
 }
+
+/* NEXT ALBUM on mobile (spec 023, T5): one link, one column — label, cover
+   200u wide at its natural ratio (never cropped), title 40/44 at 16u under
+   the cover, place and year 6u under it. The text wrapper turns `contents`
+   so the cover can sit between the label and the title via `order`. */
+.album-siguiente {
+  @variant movil {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0;
+    padding: calc(40 * var(--u)) calc(16 * var(--u)) calc(54 * var(--u));
+  }
+}
+.album-siguiente-textos {
+  @variant movil {
+    display: contents;
+  }
+}
+.album-siguiente-etiqueta {
+  @variant movil {
+    order: 1;
+    margin-bottom: calc(16 * var(--u));
+    color: #888888;
+  }
+}
+.album-siguiente-portada {
+  @variant movil {
+    order: 2;
+    width: calc(200 * var(--u));
+    height: auto;
+  }
+}
+.album-siguiente-titulo {
+  @variant movil {
+    order: 3;
+    margin-top: calc(16 * var(--u));
+    font-size: 40px;
+    line-height: 44px;
+    font-weight: 500;
+  }
+}
+.album-siguiente-lugar {
+  @variant movil {
+    order: 4;
+    display: block;
+    margin-top: calc(6 * var(--u));
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #888888;
+  }
+}
+
+/* Page footer on mobile (spec 023): three short centred lines — SUQUIA /
+   Instagram · Email / year — under a 1 px #E4E4E4 rule with 20 px of air. */
+.pie-pagina {
+  @variant movil {
+    border-top: 1px solid #e4e4e4;
+    padding: 20px calc(16 * var(--u)) 20px;
+    column-gap: 8px;
+    row-gap: 6px;
+  }
+}
+.pie-pagina-linea {
+  @variant movil {
+    flex-basis: 100%;
+    text-align: center;
+  }
+}
+.pie-pagina-raya {
+  @variant movil {
+    display: none;
+  }
+}
+.pie-pagina-punto {
+  @variant movil {
+    display: inline;
+  }
+}

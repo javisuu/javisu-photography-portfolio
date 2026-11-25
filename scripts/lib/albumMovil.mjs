@@ -103,7 +103,12 @@ async function medirMaqueta(p) {
       } : null,
       piePagina: pp ? {
         lineas: [...new Set(hojas.map((e) => Math.round(caja(e).t)))].length,
-        centros: hojas.map((e) => { const b = e.getBoundingClientRect(); return Math.round((b.left + b.right) / 2); }),
+        // Centro de cada linea (de su primera hoja a la ultima), no de cada
+        // hoja: la linea 2 es `Instagram · Email`.
+        centros: [...new Set(hojas.map((e) => Math.round(caja(e).t)))].map((t) => {
+          const bs = hojas.filter((e) => Math.round(caja(e).t) === t).map((e) => e.getBoundingClientRect());
+          return Math.round((Math.min(...bs.map((b) => b.left)) + Math.max(...bs.map((b) => b.right))) / 2);
+        }),
         borde: ppS.borderTopWidth, bordeColor: ppS.borderTopColor,
       } : null,
     };
@@ -417,7 +422,7 @@ export async function medirCajasAlbum({ browser, BASE, CTX, slugs }) {
       const main = [...document.querySelectorAll("main")].find((m) => getComputedStyle(m).display !== "none");
       const out = {};
       const poner = (k, e) => { if (!e) return; const b = e.getBoundingClientRect(); if (b.width < 0.5 && b.height < 0.5) return; out[k] = [b.left, b.top + scrollY, b.width, b.height].map((x) => Math.round(x * 10) / 10); };
-      const hojas = (pref, raiz) => [...(raiz?.querySelectorAll("*") ?? [])].filter((e) => !e.children.length && e.textContent.trim()).forEach((e, j) => poner(`${pref}.${j}:${e.textContent.trim().slice(0, 24)}`, e));
+      const hojas = (pref, raiz) => [...(raiz?.querySelectorAll("*") ?? [])].filter((e) => !e.children.length && e.textContent.trim() && e.getBoundingClientRect().width > 0).forEach((e, j) => poner(`${pref}.${j}:${e.textContent.trim().slice(0, 24)}`, e));
       hojas("cabecera", main.querySelector("[data-album-cabecera]"));
       main.querySelectorAll("[data-photo-index]").forEach((row, i) => { poner(`img${i}`, row.querySelector("img")); hojas(`pie${i}`, [...row.querySelectorAll("[data-album-pie]")].find((e) => e.getBoundingClientRect().height > 0)); });
       poner("siguiente", main.querySelector("[data-album-siguiente]"));
