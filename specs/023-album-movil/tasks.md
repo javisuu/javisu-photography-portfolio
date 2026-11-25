@@ -46,9 +46,22 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - 546/561, con 15 fallos de tiempo y ninguno de geometria: arranque 500 ms frente a 217, 10 frames > 50 ms, duraciones de `transicion`, B10 con scrollY `—` a 500 ms y CA15 del atlas.
       - Es la pasada siguiente al corte por falta de memoria, con el equipo cargado; T2 es solo CSS bajo `movil:` y nombres de clase.
       - SIN VERIFICAR hasta la pasada del Cierre.
-- [ ] **T3** · Filas y pie en tres lineas, en vertical
+- [x] **T3** · Filas y pie en tres lineas, en vertical
   - Fichero(s): `src/motion/AlbumPhotos.tsx`, `src/app/globals.css`, `src/motion/albumTransition/flight.ts`
   - Comprobacion: CA6 y CA7 en los perfiles en vertical; CA12 (`notas-movil` y «fotos enteras») en los cinco; escritorio, CA2. Capturas de `/album/america` y `/album/sol` en el iPhone y el iPad mini, para Javi.
+  - **Hecho (2026-11-25).** Salidas `2026-11-25_023-t3-*.txt` en el scratchpad.
+    - Como: el ancho de la foto en movil sale de su proporcion (`--r` inline en la fila; `--w` en CSS), y el pie toma el mismo ancho, asi que empieza en el borde izquierdo de la foto tambien en la fila desplazada a la derecha. Sangria de las lineas 2 y 3 por margen (no padding), para que su caja empiece donde el titulo.
+    - `iphone` e `ipad-mini`:
+      - CA5, CA6, CA7 y `notas-movil` ok;
+      - foto 1 a 50 px del bloque de titulo (top 316 en el iPhone; el lienzo dice 312);
+      - quedan CA10 y CA11, que son de T5.
+    - `notasMovil.mjs` (su CA6): el ancho esperado de la foto en movil en vertical sigue la regla nueva.
+    - Escritorio:
+      - CA2 ok: capturas iguales a T0 y 0 diferencias en las 250 cajas del album y las 6 de notas;
+      - 558/561, con los tiempos de vuelta en lo normal (arranque 217 ms, 0 frames > 50 ms), lo que apoya la lectura de carga de T2;
+      - los fallos: el fundido de `transicion reduced`, como en T0, y un vuelo de `america` de 1171 ms (CA8b), suelto, que no salio en T1. Se revisa en el Cierre.
+    - Capturas para Javi en `023-capturas-t3c/` del scratchpad, cosidas de capturas del viewport. El `fullPage` de Chromium pinta sin `pointer: coarse` (comprobado), y la barra inferior va oculta para que no se repita en las costuras.
+    - Fuera de este pase (no lo mide el harness): «fotos enteras» en los cinco perfiles; se mide en el Cierre.
 - [ ] **T4** · Horizontal
   - Fichero(s): `src/motion/AlbumPhotos.tsx`, `src/app/globals.css`
   - Comprobacion: CA7 y CA8 en `iphone --horizontal`; CA12 en ese perfil. Capturas de una fila centrada, una desplazada a la izquierda y otra a la derecha, y de la fila con nota, para Javi.

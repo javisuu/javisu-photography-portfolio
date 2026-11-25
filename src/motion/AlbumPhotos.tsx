@@ -7,7 +7,7 @@
 // only the painting changes, exactly like the landing's own integration.
 
 import Image from "next/image";
-import { Fragment, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { type CSSProperties, Fragment, useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { flushSync } from "react-dom";
 import { Interlude, Quote, SideNote } from "@/components/AlbumTexts";
 import type { AlbumText, Photo } from "@/data/photos";
@@ -74,6 +74,18 @@ function placementClass(index: number) {
     default:
       return "items-center";
   }
+}
+
+// Spec 023: on mobile the photo width is set in CSS from the photo's
+// aspect ratio (globals.css `.album-fila`), so the caption can take the same
+// width and start at the photo's left edge in every row. Unused outside
+// `movil:`.
+const FILA_CLASES = ["album-fila-centro", "album-fila-izquierda", "album-fila-derecha"];
+function filaClass(index: number) {
+  return FILA_CLASES[index % 3];
+}
+function ratioVar(photo: Photo) {
+  return { "--r": photo.width / photo.height } as CSSProperties;
 }
 
 export default function AlbumPhotos({
@@ -225,23 +237,31 @@ export default function AlbumPhotos({
         // that level of precision is an atlas-hover thing only (see
         // Place's precision field), not a caption thing.
         const caption = (
-          <div data-album-pie="" className="flex flex-col gap-1">
-            <div className="flex flex-wrap items-baseline gap-2">
-              <span data-pie="numero" className="text-[14px] tabular-nums text-[#BBBBBB]">
+          // Mobile (spec 023, globals.css `.album-pie*`): the same markup in
+          // three lines — number and title; place; camera — the `·` hidden
+          // and lines 2-3 under the title. The camera is written twice, each
+          // form hidden in the other mode: `a — b — c` in caps on desktop,
+          // `a · b · c` as is on mobile.
+          <div data-album-pie="" className="album-pie flex flex-col gap-1">
+            <div className="album-pie-fila flex flex-wrap items-baseline gap-2">
+              <span data-pie="numero" className="album-pie-numero text-[14px] tabular-nums text-[#BBBBBB]">
                 {String(photo.order).padStart(2, "0")}
               </span>
-              <span data-pie="titulo" className="font-serif text-[20px] italic text-[#111111]">
+              <span data-pie="titulo" className="album-pie-titulo font-serif text-[20px] italic text-[#111111]">
                 {photo.title}
               </span>
-              <span className="text-[14px] text-[#666666]" aria-hidden>
+              <span className="album-pie-punto text-[14px] text-[#666666]" aria-hidden>
                 ·
               </span>
-              <span data-pie="lugar" className="text-[14px] text-[#666666]">
+              <span data-pie="lugar" className="album-pie-lugar text-[14px] text-[#666666]">
                 {photo.place.city}, {photo.place.country}
               </span>
             </div>
-            <span data-pie="camara" className="text-[12px] uppercase tracking-[0.14em] text-[#A8A8A8]">
+            <span data-pie="camara" className="album-camara-escritorio text-[12px] uppercase tracking-[0.14em] text-[#A8A8A8]">
               {photo.capture.focalLength} — {photo.capture.aperture} — {photo.capture.iso}
+            </span>
+            <span data-pie="camara" className="album-camara-movil hidden">
+              {photo.capture.focalLength} · {photo.capture.aperture} · {photo.capture.iso}
             </span>
           </div>
         );
@@ -285,12 +305,13 @@ export default function AlbumPhotos({
               // below it (the row's 16 px gap + 32 px).
               <div
                 data-photo-index={index}
-                className={`flex flex-col px-6 py-16 md:px-16 movil:gap-4 ${placementClass(index)}`}
+                className={`album-fila ${filaClass(index)} flex flex-col px-6 py-16 md:px-16 ${placementClass(index)}`}
+                style={ratioVar(photo)}
               >
                 <div className={`grid gap-y-4 ${gridCols} movil:contents`}>
                   <div className={`md:row-start-1 ${photoCol} movil:max-w-full`}>{image}</div>
                   <div className={`md:row-start-2 ${photoCol}`}>{caption}</div>
-                  <div className={`flex flex-col gap-10 md:row-start-1 ${textCol} movil:self-start movil:mt-8`}>
+                  <div className={`album-nota flex flex-col gap-10 md:row-start-1 ${textCol} movil:self-start`}>
                     {sideNote && <SideNote body={sideNote.body} lang={sideNote.lang} />}
                     {photo.quote && <Quote text={photo.quote.text} lang={photo.quote.lang} />}
                   </div>
@@ -303,8 +324,8 @@ export default function AlbumPhotos({
               <div
                 ref={index === 0 ? firstRowRef : undefined}
                 data-photo-index={index}
-                className={`flex flex-col gap-4 px-6 py-16 md:px-16 ${placementClass(index)}`}
-                style={index === 0 ? { opacity: 0 } : undefined}
+                className={`album-fila ${filaClass(index)} flex flex-col gap-4 px-6 py-16 md:px-16 ${placementClass(index)}`}
+                style={index === 0 ? { opacity: 0, ...ratioVar(photo) } : ratioVar(photo)}
               >
                 {image}
                 {caption}

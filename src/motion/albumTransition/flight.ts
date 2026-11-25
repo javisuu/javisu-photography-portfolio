@@ -43,7 +43,10 @@ const MOUNT_TIMEOUT_MS = 1500; // album page not ready by then: fade instead
 // The album page's photo 1 <img> sizes (src/motion/AlbumPhotos.tsx): the
 // rising lámina loads exactly the same candidate, so the album's own <img>
 // finds it in the cache and the landing handover is the same pixels.
-export const ALBUM_PHOTO_SIZES = "(max-width: 768px) 90vw, 70vw";
+// Spec 023: the first condition is the mobile path in portrait (a desktop
+// never matches it), where a centred photo spans 358/390 of the viewport.
+export const ALBUM_PHOTO_SIZES =
+  "(pointer: coarse) and (orientation: portrait) and (max-width: 1024px) 92vw, (max-width: 768px) 90vw, 70vw";
 
 export function albumPhotoImgProps(photo: FirstPhoto) {
   return getImageProps({

@@ -48,7 +48,13 @@ async function medirPagina(p) {
       // Ancho intrinseco: `naturalWidth` ya viene corregido por la densidad
       // del srcset, que sale de `sizes` (70vw por encima de 768 px). Asi lo
       // mide tambien una fila sin texto; el atributo `width` no.
-      const esperado = Math.min(util, 0.85 * innerHeight * ratio, img.naturalWidth);
+      // Spec 023: en movil el ancho lo fija el CSS desde la proporcion; las
+      // filas desplazadas, a 300u de ancho y 360u de alto como mucho.
+      const movilV = matchMedia("(pointer: coarse) and (orientation: portrait) and (max-width: 1024px)").matches;
+      const u = innerWidth / 390;
+      const esperado = !movilV ? Math.min(util, 0.85 * innerHeight * ratio, img.naturalWidth)
+        : +row.dataset.photoIndex % 3 === 0 ? Math.min(util, 0.85 * innerHeight * ratio)
+        : Math.min(300 * u, 360 * u * ratio, 0.85 * innerHeight * ratio);
       const pEl = el.querySelector("p");
       const ps = getComputedStyle(pEl);
       return {

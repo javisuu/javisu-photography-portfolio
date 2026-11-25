@@ -264,3 +264,94 @@ body {
     color: #666666;
   }
 }
+
+/* Rows (spec 023, T3): 16u side margins, the caption 14u under its photo
+   and 54u from the caption (or the spec 022 note) to the next photo. The
+   photo's width comes from its aspect ratio (--r, inline on the row): the
+   centred row spans the usable width, the offset rows are capped at 300u
+   wide and 360u tall; 85vh stays (hard rule: a photo fits one viewport).
+   The caption takes the same width, so it starts at the photo's left edge
+   in every row. */
+.album-fila {
+  @variant movil {
+    padding: 0 calc(16 * var(--u)) calc(54 * var(--u));
+    gap: calc(14 * var(--u));
+    --w: min(calc(358 * var(--u)), calc(85vh * var(--r)));
+  }
+}
+.album-fila-izquierda,
+.album-fila-derecha {
+  @variant movil {
+    --w: min(calc(300 * var(--u)), calc(360 * var(--u) * var(--r)), calc(85vh * var(--r)));
+  }
+}
+.album-fila img {
+  @variant movil {
+    width: var(--w);
+    height: auto;
+  }
+}
+.album-fila .album-pie {
+  @variant movil {
+    width: var(--w);
+  }
+}
+/* The spec 022 note stays 48 px under the caption: the row's gap plus this. */
+.album-nota {
+  @variant movil {
+    margin-top: calc(48px - 14 * var(--u));
+  }
+}
+
+/* Caption in three lines (spec 023): number (16 px box + 10 px) and title;
+   place; camera. Lines 2 and 3 sit under the title, 26 px in, 3 px apart.
+   The camera never hides (Javi's answer 4). */
+.album-pie {
+  @variant movil {
+    gap: 3px;
+  }
+}
+.album-pie-fila {
+  @variant movil {
+    column-gap: 0;
+    row-gap: 3px;
+    flex-wrap: wrap;
+  }
+}
+.album-pie-numero {
+  @variant movil {
+    flex: none;
+    width: 16px;
+    margin-right: 10px;
+  }
+}
+.album-pie-titulo {
+  @variant movil {
+    flex: 1 1 0;
+    min-width: 0;
+    font-size: 18px;
+    line-height: 22px;
+  }
+}
+.album-pie-punto,
+.album-camara-escritorio {
+  @variant movil {
+    display: none;
+  }
+}
+.album-pie-lugar {
+  @variant movil {
+    flex-basis: calc(100% - 26px);
+    margin-left: 26px;
+    line-height: 18px;
+  }
+}
+.album-camara-movil {
+  @variant movil {
+    display: block;
+    margin-left: 26px;
+    font-size: 12px;
+    line-height: 16px;
+    color: #a8a8a8;
+  }
+}
