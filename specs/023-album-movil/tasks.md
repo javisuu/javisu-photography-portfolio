@@ -35,9 +35,17 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - pasan CA3, CA9 (foto 1 y vuelo) y CA13 (fallos GL forzados: las mismas fotos y sin instancia GL);
       - siguen fallando CA5, CA6, CA7, CA10 y CA11, que son de T2–T5.
     - La pasada se corto por falta de memoria del equipo en `ipad-mini`, y `iphone --horizontal` e `ipad --horizontal` (CA4) no llegaron a correr. Javi, 2026-11-25: «fine enough». Quedan para la pasada del Cierre.
-- [ ] **T2** · Bloque de titulo
+- [x] **T2** · Bloque de titulo
   - Fichero(s): `src/app/album/[slug]/page.tsx`, `src/app/globals.css`
   - Comprobacion: CA5 en los perfiles en vertical; escritorio, CA2.
+  - **Hecho (2026-11-25).** Salidas `2026-11-25_023-t2-*.txt` en el scratchpad.
+    - CA5 ok en `iphone` (margen 16, huecos 12 y 10) y `ipad-mini` (31,5 / 23,6 / 19,7, escalado).
+    - La foto 1 queda a 114 px del bloque, no a 50, por el padding de la fila: es T3.
+    - Escritorio:
+      - CA2 ok: capturas iguales a T0 y 0 diferencias en las 250 cajas del album.
+      - 546/561, con 15 fallos de tiempo y ninguno de geometria: arranque 500 ms frente a 217, 10 frames > 50 ms, duraciones de `transicion`, B10 con scrollY `—` a 500 ms y CA15 del atlas.
+      - Es la pasada siguiente al corte por falta de memoria, con el equipo cargado; T2 es solo CSS bajo `movil:` y nombres de clase.
+      - SIN VERIFICAR hasta la pasada del Cierre.
 - [ ] **T3** · Filas y pie en tres lineas, en vertical
   - Fichero(s): `src/motion/AlbumPhotos.tsx`, `src/app/globals.css`, `src/motion/albumTransition/flight.ts`
   - Comprobacion: CA6 y CA7 en los perfiles en vertical; CA12 (`notas-movil` y «fotos enteras») en los cinco; escritorio, CA2. Capturas de `/album/america` y `/album/sol` en el iPhone y el iPad mini, para Javi.

@@ -50,22 +50,22 @@ export default async function AlbumPage({
           typographic title block. */}
       {/* data-album-cabecera: once this block has scrolled out above the
           viewport, the mobile bar turns into the album bar (spec 020). */}
-      <div data-album-cabecera="" className="px-6 pb-16 pt-28 md:px-16 md:pt-40">
+      <div data-album-cabecera="" className="album-cabecera px-6 pb-16 pt-28 md:px-16 md:pt-40">
         <TransitionTarget name="label">
-          <p className="text-[13px] uppercase tracking-[0.18em] text-[#666]">
+          <p className="album-etiqueta text-[13px] uppercase tracking-[0.18em] text-[#666]">
             Album {String(album.order).padStart(2, "0")} — {albumPhotos.length} Photos
           </p>
         </TransitionTarget>
         <TransitionTarget name="title">
           <h1
-            className="mt-4 font-medium leading-none text-[#111]"
+            className="album-titulo mt-4 font-medium leading-none text-[#111]"
             style={{ fontSize: "clamp(48px, 10vw, 110px)" }}
           >
             {album.title}
           </h1>
         </TransitionTarget>
         <TransitionTarget name="description">
-          <p className="mt-4 text-[14px] text-[#666]">
+          <p className="album-lugar mt-4 text-[14px] text-[#666]">
             {album.location} — {album.year}
           </p>
         </TransitionTarget>

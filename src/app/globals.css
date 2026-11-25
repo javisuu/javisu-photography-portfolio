@@ -220,3 +220,47 @@ body {
     pointer-events: auto;
   }
 }
+
+/* Album page on mobile (specs/023-album-movil): Javi's «Album A · Alternada»
+   canvas, drawn at 390 px. In portrait every canvas length scales with the
+   viewport through --u (a tablet is the phone page scaled, Javi's answer 1);
+   type stays in px. In phone landscape --u is 1px. Unlayered on purpose, so
+   these beat the Tailwind utilities on the same elements; the <h1>'s inline
+   font-size needs !important. */
+:root {
+  @variant movil {
+    --u: calc(100vw / 390);
+  }
+  @variant movil-h {
+    --u: 1px;
+  }
+}
+.album-cabecera {
+  @variant movil {
+    padding: calc(140 * var(--u)) calc(16 * var(--u)) calc(50 * var(--u));
+  }
+}
+.album-etiqueta {
+  @variant movil {
+    font-size: 12px;
+    letter-spacing: 0.18em;
+    color: #888888;
+  }
+}
+.album-titulo {
+  @variant movil {
+    margin-top: calc(12 * var(--u));
+    font-size: 64px !important;
+    line-height: 68px;
+    font-weight: 500;
+  }
+}
+.album-lugar {
+  @variant movil {
+    margin-top: calc(10 * var(--u));
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.18em;
+    color: #666666;
+  }
+}
