@@ -15,6 +15,7 @@ import { ALBUM_PHOTO_SIZES } from "./albumTransition/flight";
 import { getState, subscribe } from "./albumTransition/store";
 import GLSurface from "./GLSurface";
 import { useLenis } from "./useLenis";
+import { useEsMovil } from "@/lib/movil";
 
 // Much gentler than the landing (bendDepth: 1, bendRadiusMultiplier: 1.2):
 // larger radius, lower depth — worked out to be roughly a 10x weaker
@@ -82,7 +83,14 @@ export default function AlbumPhotos({
   photos: Photo[];
   albumText?: AlbumText;
 }) {
-  const lenisRef = useLenis(ALBUM_LENIS_OPTIONS);
+  // Spec 023 (Javi, 2026-11-24: «quita el gl mejor»): on the mobile path the
+  // album has neither GLSurface nor Lenis — plain <img>s, native scroll, like
+  // the mobile landing (spec 021). `null` until hydration settles, so on a
+  // desktop first load both mount one render later; a client navigation
+  // (the carousel flight included) decides on the first render.
+  const esMovil = useEsMovil();
+  const conGL = esMovil === false;
+  const lenisRef = useLenis(ALBUM_LENIS_OPTIONS, conGL);
   const imgRefs = useRef<(HTMLImageElement | null)[]>([]);
   const [glActive, setGlActive] = useState(false);
   const firstRowRef = useRef<HTMLDivElement>(null);
@@ -122,6 +130,23 @@ export default function AlbumPhotos({
     return () => clearTimeout(id);
   }, [reveal, byTransition]);
 
+  // Spec 023: no texture to wait for on mobile, so photo 1 appears at once
+  // when its <img> is decoded (still capped at ARRIVAL_MAX_WAIT_MS above).
+  // onLoad covers a load after hydration; this covers one that finished
+  // before it (from the cache), when onLoad has already gone by.
+  const revealWhenDecoded = useCallback(
+    (img: HTMLImageElement | null) => {
+      if (!img) return;
+      img.decode().then(reveal, reveal);
+    },
+    [reveal]
+  );
+  useEffect(() => {
+    if (byTransition || esMovil !== true) return;
+    const img = imgRefs.current[0];
+    if (img?.complete && img.naturalWidth > 0) revealWhenDecoded(img);
+  }, [byTransition, esMovil, revealWhenDecoded]);
+
   // Spec 019: no scrolling while the flight is in the air (Javi's answer 8).
   // The flight layer also blocks wheel/touch/keys; this keeps Lenis from
   // picking up anything that slips through.
@@ -145,8 +170,9 @@ export default function AlbumPhotos({
   // to recompute — this is that: force a recompute the instant each
   // photo actually finishes loading, rather than trust the debounce to
   // always win the race.
-  function handleImageLoad() {
+  function handleImageLoad(index: number) {
     lenisRef.current?.resize();
+    if (index === 0 && esMovil === true && !byTransition) revealWhenDecoded(imgRefs.current[0]);
   }
 
   // Fonts (EB Garamond) can also reflow text below the fold after first
@@ -184,7 +210,7 @@ export default function AlbumPhotos({
             // the fold would never load.
             loading={index === 0 || (byTransition && index < TRANSITION_READY_NODES) ? "eager" : "lazy"}
             fetchPriority={index === 0 ? "high" : undefined}
-            onLoad={handleImageLoad}
+            onLoad={() => handleImageLoad(index)}
             // MANDATORY FALLBACK, same rule as the landing: only hidden
             // once GLSurface confirms a working WebGL context. If that
             // never fires, this stays visible and the page renders
@@ -296,7 +322,7 @@ export default function AlbumPhotos({
           shaders: mounted, both landed in the first frames of the rise
           (50-100 ms frames in 8 of 12 flights). Mounted at landing, they
           fall on a still scene. Measured 2026-11-15, see tasks.md. */}
-      {!flying && <GLSurface
+      {!flying && conGL && <GLSurface
         nodes={imgRefs}
         lenisRef={lenisRef}
         bendDepth={ALBUM_BEND_DEPTH}

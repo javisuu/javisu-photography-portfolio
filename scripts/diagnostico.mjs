@@ -1995,8 +1995,11 @@ if (!only) {
     await ctx.close();
     return r;
   })();
-  const sinGL = (route) => route === "/" && landingSinGL;
-  if (landingSinGL) log("  perfil movil: el landing va sin GL (spec 021); en / se mide solo lo que se ve");
+  // Spec 023: el album movil tampoco monta GLSurface. En un perfil movil no
+  // queda ninguna instancia GL que forzar: en las dos rutas se mide solo que
+  // se vean las mismas fotos y que no haya instancia.
+  const sinGL = (route) => landingSinGL && (route === "/" || route.startsWith("/album/"));
+  if (landingSinGL) log("  perfil movil: landing (spec 021) y album (spec 023) van sin GL; se mide solo lo que se ve");
   // Errores de consola de un contexto, sin los [GLSurface] que el fallo
   // forzado provoca a proposito.
   function consola(p) {
@@ -2065,7 +2068,7 @@ if (!only) {
       const peor = forz.map((st, j) => normal[route][j].seen - st.seen);
       addInv(route, `E2 bitmap vacio ${modo}: se ven las mismas fotos`, normal[route].some((s) => s.seen > 0) && peor.every((d) => d <= 0),
         `se ven ${forz.map((s) => s.seen).join("/")} frente a ${normal[route].map((s) => s.seen).join("/")} sin fallo`);
-      if (sinGL(route)) addInv(route, `E2 bitmap vacio ${modo}: landing movil sin instancia GL`, !inst, "hay instancia landing");
+      if (sinGL(route)) addInv(route, `E2 bitmap vacio ${modo}: movil sin instancia GL`, !inst, `hay instancia ${route === "/" ? "landing" : "album"}`);
       else addInv(route, rescate ? `E2 bitmap vacio ${modo}: rescatado sin caer al DOM` : `E2 bitmap vacio ${modo}: cae al DOM`,
         rescate ? !!inst && inst.rescatados > 0 && !inst.fallo : !!inst?.fallo,
         inst ? `rescatados ${inst.rescatados} · caida ${inst.fallo ?? "no"}` : "sin __glDiag");
@@ -2144,7 +2147,8 @@ if (!only) {
     if (d.text) d.text.split("\n").forEach((l) => log(`    ${l}`));
     const campos = ["contexto", "perdido", "texturas", "fallos", "error"].filter((c) => !d.text.toLowerCase().includes(c));
     if (sinGL(route)) {
-      addInv(route, "CA5 ?diag en el landing movil: sin instancia GL", !d.reg?.landing, "hay instancia landing");
+      const clave = route === "/" ? "landing" : "album";
+      addInv(route, "CA5 ?diag en movil: sin instancia GL", !d.reg?.[clave], `hay instancia ${clave}`);
       continue;
     }
     addInv(route, "CA5 panel ?diag visible con sus campos", d.vis && campos.length === 0, d.vis ? `faltan: ${campos.join(", ")}` : "no hay [data-gl-diag] visible");

@@ -26,9 +26,15 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - `iphone-max` e `ipad --horizontal`: 6 «errores de consola», que son `page.goto: Timeout 30000ms` del `next dev` cargado;
       - en `ipad --horizontal`, ademas, la landing-photo a opacity < 1 y CA9 dpr, en esa misma pasada lenta.
     - Arreglo del harness: en horizontal la lamina abierta es mas alta que el viewport y su centro cae bajo la barra inferior. `medirVuelo` toca ahora un punto visible que este dentro del enlace (`2026-11-24_023-t0b-iphone-h.txt`: aterriza en `/album/america` y falla solo por GL).
-- [ ] **T1** · Sin GL ni Lenis en el album movil, y llegada de la foto 1 por `decode()`
+- [x] **T1** · Sin GL ni Lenis en el album movil, y llegada de la foto 1 por `decode()`
   - Fichero(s): `src/motion/AlbumPhotos.tsx`, `scripts/diagnostico.mjs` (`sinGL` para el album en perfiles moviles)
   - Comprobacion: CA3, CA4 (`ipad --horizontal`), CA9 y CA13. En escritorio: CA2 a 0 px, y `llegada al album` y `transicion` sin fallos nuevos frente a T0.
+  - **Hecho (2026-11-25).** Salidas `2026-11-25_023-t1-*.txt` en el scratchpad.
+    - Escritorio: 558/561. Los 3 fallos son los mismos de T0, la duracion del fundido en `transicion reduced`. Las capturas, `album-america-final` y `album-sol-final` incluidas, son iguales a T0 salvo el ruido de 1 nivel (CA2).
+    - `iphone`:
+      - pasan CA3, CA9 (foto 1 y vuelo) y CA13 (fallos GL forzados: las mismas fotos y sin instancia GL);
+      - siguen fallando CA5, CA6, CA7, CA10 y CA11, que son de T2–T5.
+    - La pasada se corto por falta de memoria del equipo en `ipad-mini`, y `iphone --horizontal` e `ipad --horizontal` (CA4) no llegaron a correr. Javi, 2026-11-25: «fine enough». Quedan para la pasada del Cierre.
 - [ ] **T2** · Bloque de titulo
   - Fichero(s): `src/app/album/[slug]/page.tsx`, `src/app/globals.css`
   - Comprobacion: CA5 en los perfiles en vertical; escritorio, CA2.
