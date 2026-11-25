@@ -42,8 +42,11 @@ async function medirPagina(p) {
       const B = (e) => e.getBoundingClientRect();
       const bt = B(el), bc = B(celdaTexto), bp = B(pie), bi = B(img), br = B(row);
       const cs = getComputedStyle(row);
-      const izq = br.left + parseFloat(cs.paddingLeft);
-      const util = br.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
+      // Spec 023: en horizontal el texto va en la columna de 200 px del pie,
+      // no en el margen de la fila: su borde y su ancho util son los del pie.
+      const movilH = matchMedia("(pointer: coarse) and (orientation: landscape) and (max-height: 500px)").matches;
+      const izq = movilH ? bp.left : br.left + parseFloat(cs.paddingLeft);
+      const util = movilH ? bp.width : br.width - parseFloat(cs.paddingLeft) - parseFloat(cs.paddingRight);
       const ratio = (+img.getAttribute("width")) / (+img.getAttribute("height"));
       // Ancho intrinseco: `naturalWidth` ya viene corregido por la densidad
       // del srcset, que sale de `sizes` (70vw por encima de 768 px). Asi lo
@@ -52,7 +55,8 @@ async function medirPagina(p) {
       // filas desplazadas, a 300u de ancho y 360u de alto como mucho.
       const movilV = matchMedia("(pointer: coarse) and (orientation: portrait) and (max-width: 1024px)").matches;
       const u = innerWidth / 390;
-      const esperado = !movilV ? Math.min(util, 0.85 * innerHeight * ratio, img.naturalWidth)
+      const esperado = movilH ? Math.min(300 * ratio, 0.85 * innerHeight * ratio, innerWidth - 94 - 224)
+        : !movilV ? Math.min(util, 0.85 * innerHeight * ratio, img.naturalWidth)
         : +row.dataset.photoIndex % 3 === 0 ? Math.min(util, 0.85 * innerHeight * ratio)
         : Math.min(300 * u, 360 * u * ratio, 0.85 * innerHeight * ratio);
       const pEl = el.querySelector("p");
@@ -154,5 +158,5 @@ export async function seccionNotasMovil({ browser, BASE, CTX, log, rule, addInv,
     addInv("notas-movil", `CA7 cita a 22/28 px, italica, #111111, <= ${CITA_MAX} px`, m.length === 0, m.join(", "));
   }
   check(`CA7 aire de ${AIRE} ± 1 px entre el pie y el texto`, (o) => Math.abs(o.aire - AIRE) <= 1);
-  check("CA7 texto en el margen izquierdo de la fila (± 1 px)", (o) => Math.abs(o.izq - o.izqFila) <= 1);
+  check("CA7 texto en el margen izquierdo de la fila (en horizontal, el del pie) (± 1 px)", (o) => Math.abs(o.izq - o.izqFila) <= 1);
 }

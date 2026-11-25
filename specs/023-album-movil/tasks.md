@@ -62,9 +62,23 @@ Pasos atomicos, en orden. Cada uno deja el sitio en un estado que carga sin erro
       - los fallos: el fundido de `transicion reduced`, como en T0, y un vuelo de `america` de 1171 ms (CA8b), suelto, que no salio en T1. Se revisa en el Cierre.
     - Capturas para Javi en `023-capturas-t3c/` del scratchpad, cosidas de capturas del viewport. El `fullPage` de Chromium pinta sin `pointer: coarse` (comprobado), y la barra inferior va oculta para que no se repita en las costuras.
     - Fuera de este pase (no lo mide el harness): «fotos enteras» en los cinco perfiles; se mide en el Cierre.
-- [ ] **T4** · Horizontal
+- [x] **T4** · Horizontal
   - Fichero(s): `src/motion/AlbumPhotos.tsx`, `src/app/globals.css`
   - Comprobacion: CA7 y CA8 en `iphone --horizontal`; CA12 en ese perfil. Capturas de una fila centrada, una desplazada a la izquierda y otra a la derecha, y de la fila con nota, para Javi.
+  - **Hecho (2026-11-25).** Salidas `2026-11-25_023-t4-*.txt` en el scratchpad.
+    - `iphone --horizontal`: 183/183. CA7, CA8, `notas-movil` y «fotos enteras» ok.
+    - Fila en rejilla (foto | 24 px | columna de 200 px), pie con `align-self: end`, nota en la fila 2 de la columna a 48 px.
+    - Defecto encontrado y arreglado:
+      - en el primer intento el ancho salia solo de los 300 px, pero `max-h-[85vh]` topa la altura en 290,7 a 342 de viewport;
+      - las fotos se estiraban ~3 % («fotos enteras»: desvio 0,031, 8 de 10 fuera);
+      - `--w` lleva ahora tambien el tope de 85vh.
+    - `notasMovil.mjs`: en horizontal el borde y el ancho util del texto son los del pie, y el ancho esperado de la foto sigue la regla horizontal.
+    - Escritorio:
+      - CA2 ok: capturas iguales a T0 y 0 diferencias en 250 + 6 cajas.
+      - 548/561, con 13 fallos de tiempo y ninguno de geometria: arranque 500 ms, 4 frames > 50 ms, duraciones de `transicion`, B10, CA15 del atlas, y E2 en `/album/america` (decodificacion > 1500 ms).
+      - Mismo patron que T2: las dos pasadas lentas siguieron a una tanda de capturas con su propio `next dev`; las de T1 y T3, no. No hay ningun servidor escuchando en 3000/3100/3101.
+      - SIN VERIFICAR hasta la pasada con build del Cierre.
+    - Capturas para Javi: `023-capturas-t4/iphone-h-america.png` (centrada, izquierda, derecha y la fila 6 con su cita) e `iphone-h-sol.png` (la nota larga en la columna).
 - [ ] **T5** · Final: `NEXT ALBUM`, fundido de la portada y pie de pagina
   - Fichero(s): `src/app/album/[slug]/page.tsx`, `src/components/Footer.tsx`, `src/motion/FundidoAlEntrar.tsx` (nuevo), `src/app/globals.css`
   - Comprobacion: CA10 y CA11 en los perfiles en vertical, con y sin reduced motion; escritorio, CA2.

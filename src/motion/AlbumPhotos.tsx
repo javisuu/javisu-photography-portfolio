@@ -309,8 +309,8 @@ export default function AlbumPhotos({
                 style={ratioVar(photo)}
               >
                 <div className={`grid gap-y-4 ${gridCols} movil:contents`}>
-                  <div className={`md:row-start-1 ${photoCol} movil:max-w-full`}>{image}</div>
-                  <div className={`md:row-start-2 ${photoCol}`}>{caption}</div>
+                  <div className={`album-celda-foto md:row-start-1 ${photoCol} movil:max-w-full`}>{image}</div>
+                  <div className={`album-celda-pie md:row-start-2 ${photoCol}`}>{caption}</div>
                   <div className={`album-nota flex flex-col gap-10 md:row-start-1 ${textCol} movil:self-start`}>
                     {sideNote && <SideNote body={sideNote.body} lang={sideNote.lang} />}
                     {photo.quote && <Quote text={photo.quote.text} lang={photo.quote.lang} />}

@@ -355,3 +355,73 @@ body {
     color: #a8a8a8;
   }
 }
+
+/* Phone landscape (spec 023, T4; `movil-h` also matches `movil`, so this
+   comes after it and overrides): each row is a grid — the photo, at most
+   300 px tall and 85vh (its width carries both caps, or the 85vh max-height
+   would squash it), and 24 px to its right a 200 px column holding the caption,
+   its base on the photo's base (Javi's answer 2), and the note or quote
+   48 px under it (answers 3 and 6), so a row can grow below its photo. The
+   group sits left, centred or right by row, between 47 px margins. In rows
+   with text the inner grid is `contents`, so its three cells are the row's
+   grid items too. */
+.album-fila {
+  @variant movil-h {
+    display: grid;
+    grid-template-columns: auto 200px;
+    column-gap: 24px;
+    row-gap: 0;
+    align-items: start;
+    padding: 0 47px 54px;
+    --w: min(calc(300px * var(--r)), calc(85vh * var(--r)), calc(100vw - 94px - 224px));
+  }
+}
+.album-fila-izquierda,
+.album-fila-derecha {
+  @variant movil-h {
+    --w: min(calc(300px * var(--r)), calc(85vh * var(--r)), calc(100vw - 94px - 224px));
+  }
+}
+.album-fila-centro {
+  @variant movil-h {
+    justify-content: center;
+  }
+}
+.album-fila-izquierda {
+  @variant movil-h {
+    justify-content: start;
+  }
+}
+.album-fila-derecha {
+  @variant movil-h {
+    justify-content: end;
+  }
+}
+.album-fila > img,
+.album-celda-foto {
+  @variant movil-h {
+    grid-column: 1;
+    grid-row: 1;
+  }
+}
+.album-fila > .album-pie,
+.album-celda-pie {
+  @variant movil-h {
+    grid-column: 2;
+    grid-row: 1;
+    align-self: end;
+  }
+}
+.album-fila .album-pie {
+  @variant movil-h {
+    width: 200px;
+  }
+}
+.album-nota {
+  @variant movil-h {
+    grid-column: 2;
+    grid-row: 2;
+    width: 200px;
+    margin-top: 48px;
+  }
+}
