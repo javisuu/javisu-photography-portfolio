@@ -1,6 +1,6 @@
 # Spec 023 · Pagina de album en movil
 
-- **Estado:** Aprobada (Javi, 2026-11-24: «go»)
+- **Estado:** Implementada (Javi, 2026-11-28: «albums ok» en el iPhone 13 y el iPad mini, CA14). Aprobada el 2026-11-24: «go»
 - **Fecha:** 2026-11-24
 - **Requiere decision de Javi:** Si (motivo: GLSurface). En movil, la pagina de album deja de montar `GLSurface`. Es su ciclo de vida, una de las cuatro zonas protegidas. **Javi ya lo decidio el 2026-11-24:** «quita el gl mejor». Las respuestas de diseño estan en "Respuestas de Javi"; lo que falta, en "Preguntas abiertas".
 
